@@ -3,7 +3,6 @@ package example.shop.catalog.api
 import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableImageScale
 import io.github.samuolis.domposable.screens.DomposableDestination
-import io.github.samuolis.domposable.navigation3.DomposableNavigator
 import io.github.samuolis.domposable.ui.DomposableModifier
 
 /** Sample application scope marker; no dependency on a DI framework. */
@@ -35,8 +34,9 @@ sealed interface CatalogAction {
     data object ClearFilters : CatalogAction
 }
 data class ProductState(val product: ShopProduct?, val notice: String)
+sealed interface ProductAction { data object Add : ProductAction }
 /** The application supplies bundled artwork; features have no resource or platform dependency. */
 typealias ShopArtwork = @Composable (String, String, DomposableModifier, (() -> Unit)?, DomposableImageScale) -> Unit
 interface CatalogFeature {
-    fun entries(navigator: DomposableNavigator<ShopRoute>, artwork: ShopArtwork, onArtworkLoaded: (() -> Unit)? = null): List<DomposableDestination<*>>
+    fun entries(): List<DomposableDestination<*>>
 }

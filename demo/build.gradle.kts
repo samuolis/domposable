@@ -29,6 +29,7 @@ kotlin {
                 api(project(":checkout-api"))
                 implementation(project(":catalog-impl"))
                 implementation(project(":checkout-impl"))
+                implementation(libs.metrox.viewmodel.compose)
                 implementation(compose.components.resources)
                 api(project(":domposable-design-material"))
                 api(project(":domposable-adaptive"))
@@ -60,7 +61,10 @@ kotlin {
         iosMain.dependsOn(composeUiMain)
         jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
         wasmJsMain { dependencies { implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
-        jvmMain { dependencies { implementation(compose.desktop.currentOs) } }
+        jvmMain { dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.11.0")
+        } }
     }
 }
 

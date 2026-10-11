@@ -28,8 +28,8 @@ Your application supplies its models and dependencies. Plain Compose state, MVVM
 | `domposable-adaptive` | Content-sized breakpoints, preferences and pane recipes |
 | `domposable-screens` | Typed registration and entry-owned resources/saveables |
 | `domposable-navigation3` | Optional Navigation 3 hosts and browser history |
-| `domposable-lifecycle-viewmodel` | Optional AndroidX model/lifecycle ownership |
-| `domposable-ksp` | Optional generated screen registration |
+| `domposable-lifecycle-viewmodel` | Optional AndroidX ownership and MVI state/action helper |
+| `domposable-ksp` | Optional typed entries and feature entry lists |
 
 Coordinates: `io.github.samuolis.domposable:<artifact>:<released version>`. Choose the published version from [Releases](https://github.com/samuolis/domposable/releases). `0.1.0-alpha00` is reserved for the unpublished bootstrap baseline.
 
@@ -49,10 +49,23 @@ The fictional shop shares its catalogue, filters, cart, checkout and feature com
 
 Start with [the installation guide](docs/getting-started.md), then explore [components](docs/components.md), [responsive layouts](docs/adaptive.md), [design providers](docs/design-systems.md) and [Metro/Kobweb integration](docs/integrations.md). The [shopping walkthrough](docs/shopping.md) connects the pieces in one app. There is no mandatory ViewModel base class, MVI contract or DI container.
 
+The [modular shopping example](https://samuolis.github.io/domposable/modular-demo/) has catalog and checkout API/implementation modules. Screens receive ViewModels through MetroX's standard Compose injection, navigate through a typed composition local, and optionally use the MVI helper:
+
+```kotlin
+@Composable
+@DomposableScreen(CatalogRoute.Collection::class, viewModel = true)
+fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
+    val navigator = LocalShopNavigator.current
+    DomposableMviScreen(model) { state, onAction ->
+        CollectionContent(state, onAction, onProduct = { navigator.navigate(CatalogRoute.Product(it)) })
+    }
+}
+```
+
+KSP generates `domposableEntries()` with no factory arguments. It evaluates injection defaults under each entry's ViewModel owner. DI, the navigator and MVI are optional; [manual registry and direct Navigation 3](docs/screens.md) are supported too.
+
 For local development, tests and release maintenance, see [CONTRIBUTING.md](CONTRIBUTING.md). Current support and limitations are in the [compatibility table](docs/compatibility.md).
 
 Alpha APIs may change. HTML collections currently render keyed DOM lists rather than virtualizing; platform escape hatches remain platform-specific. See [coverage](docs/coverage.md) for current boundaries.
 
 Apache-2.0. Copyright 2026 Samuolis.
-
-The [modular shopping example](https://samuolis.github.io/domposable/modular-demo/) has catalog and checkout API/implementation modules, MVI state and effects, entry-owned ViewModels, Metro injection and KSP destination declarations. These choices stay in the example; the library accepts your application architecture.

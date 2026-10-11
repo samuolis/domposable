@@ -5,7 +5,7 @@ import io.github.samuolis.domposable.foundation.*
 import io.github.samuolis.domposable.ui.*
 import example.shop.catalog.api.*
 @Composable
-fun StorefrontScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, showHero: Boolean, onBrowse: () -> Unit, onProduct: (String) -> Unit, onArtworkLoaded: (() -> Unit)? = null) {
+internal fun StorefrontContent(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, showHero: Boolean, onBrowse: () -> Unit, onProduct: (String) -> Unit, onArtworkLoaded: (() -> Unit)? = null) {
     DomposableMeasure(DomposableModifier.fillMaxWidth().fillMaxHeight()) { size ->
         // Wait for real constraints before starting size-dependent image requests.
         if (size.width <= 0f) return@DomposableMeasure
@@ -58,7 +58,7 @@ fun StorefrontScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, art
 }
 
 @Composable
-fun ProductScreen(state: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, onBrowse: () -> Unit, onCart: () -> Unit) {
+internal fun ProductContent(state: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, onBrowse: () -> Unit, onCart: () -> Unit) {
     val product = state.product
     DomposableColumn(DomposableModifier.fillMaxWidth().fillMaxHeight().verticalScroll().padding(24.dp), gap = 16.dp) {
         DomposableButton("Back to collection", onBrowse)
@@ -77,10 +77,3 @@ fun ProductScreen(state: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, 
         }
     }
 }
-
-
-@Composable fun DiscoverScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onProduct: (String) -> Unit, onArtworkLoaded: (() -> Unit)?) =
-    StorefrontScreen(state, onAction, artwork, true, onBrowse, onProduct, onArtworkLoaded)
-
-@Composable fun CollectionScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onProduct: (String) -> Unit) =
-    StorefrontScreen(state, onAction, artwork, false, onBrowse, onProduct)

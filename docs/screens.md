@@ -6,21 +6,23 @@ Start with regular composables. A screen can accept values and callbacks, a plai
 | --- | --- | --- |
 | Plain Compose / direct Navigation 3 | Screens, back stack, entry provider, decorators and platform display selection | Shared UI components and a DOM display for ordinary `NavEntry` objects |
 | Manual registry | Route declarations, registrations, dependencies and back stack | Entry identity, portable saveables and resource ownership |
-| KSP + optional navigator | Annotated entry composables, explicit dependencies and feature composition | Typed entry factories, feature entry lists and a convenience host |
+| KSP + optional navigator | Annotated screens, injection defaults and feature composition | Typed entry factories, feature entry lists and a convenience host |
 
 ## A small app with the navigator
 
 ```kotlin
 val navigator = rememberDomposableNavigator<ShopRoute>(Home)
-val entries = remember(navigator, dependencies) {
-    domposableEntries(dependencies, navigator) // generated in your feature package
+val entries = remember { domposableEntries() } // generated in your feature package
+CompositionLocalProvider(LocalAppNavigator provides navigator) {
+    DomposableNavHost(navigator, entries)
 }
-DomposableNavHost(navigator, entries)
 
-// In an application callback:
-navigator.navigate(Product("mug"))
-navigator.goBack()
+// In a nested screen:
+val navigator = LocalAppNavigator.current
+DomposableButton("Open product", { navigator.navigate(Product("mug")) })
 ```
+
+Define `LocalAppNavigator` with `staticCompositionLocalOf<DomposableNavigator<ShopRoute>> { error("Provide app navigation") }` in your application. A typed local avoids unchecked route casts; callbacks or another router are equally valid.
 
 `navigate` avoids duplicate consecutive routes. `replace` replaces the current entry; `reset` starts a new stack. On HTML, `replace` and `reset` replace the current browser-history record; they do not erase earlier browser history. Routes are ordinary application types. Pass a `DomposableRouteCodec` and `DomposableBrowserUrls` to `rememberDomposableNavigator` to opt into HTML browser history. Without a codec, navigation stays in memory.
 
@@ -28,27 +30,31 @@ The host creates its registry internally. Entries can come from KSP, hand-writte
 
 ## KSP that removes entry wiring
 
-Annotate the composable that assembles a screen. It is free to use your model, state or DI pattern:
+Annotate the screen itself. Its ViewModel can use your DI container's Compose injection default:
 
 ```kotlin
 @Composable
 @DomposableScreen(ProductRoute::class, viewModel = true)
-fun Product(
+fun ProductScreen(
     route: ProductRoute,
-    newModel: (String) -> ProductViewModel,
-    onBack: () -> Unit,
+    model: ProductViewModel = assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> {
+        create(route.id)
+    },
 ) {
-    val model = viewModel { newModel(route.id) }
-    val state by model.state.collectAsState()
-    ProductScreen(state, model::dispatch, onBack)
+    val navigator = LocalAppNavigator.current
+    DomposableMviScreen(model) { state, onAction ->
+        ProductContent(state, onAction, onBack = { navigator.goBack() })
+    }
 }
 ```
 
-KSP generates `productEntry(newModel, onBack)` in the original package's `.generated` package. It supplies the current `route`, installs `DomposableViewModelEntry` when `viewModel = true`, and calls the annotated composable with your dependencies. A parameter of type `DomposableEntryScope<ProductRoute>` is also supplied automatically. The model factory remains yours: it may call Metro, Koin, Dagger, another container or a constructor.
+KSP generates `productScreenEntry()` and an explicit `productScreenEntry(model)` overload in the original package's `.generated` package. It supplies `route`, installs `DomposableViewModelEntry` when `viewModel = true`, and calls the original screen. Default expressions, including `metroViewModel()` or `koinViewModel()`, run **inside** that owner. A `DomposableEntryScope<ProductRoute>` parameter is also supplied automatically. KSP never chooses a DI container or creates a ViewModel factory.
 
-The processor also generates `domposableEntries(...)` for every package containing annotated screens. Its parameters combine the screens' explicit dependencies; shared dependencies with the same name and type appear once. Different types with the same name receive entry-prefixed parameter names. It returns all destinations in that package, so feature teams do not write registry calls or an entry list by hand. Different packages/modules keep their own generated lists, and the application combines them explicitly.
+The processor also generates `domposableEntries(...)` per package. The full overload combines explicit dependencies; an additional overload omits default parameters. If all non-route parameters have defaults, use `domposableEntries()` with no arguments. Shared dependencies with the same name and type appear once; conflicting types get entry-prefixed names. The app explicitly combines lists from its feature modules.
 
-The default annotation does **not** install AndroidX ViewModel ownership. `viewModel = true` requires the optional `domposable-lifecycle-viewmodel` artifact. Ordinary UI composables do not need an annotation. Prefer annotating the entry wrapper while keeping `ProductScreen(state, onAction)` reusable.
+The default annotation does **not** install AndroidX ViewModel ownership. `viewModel = true` requires `domposable-lifecycle-viewmodel`. That artifact also provides the optional `DomposableMvi<State, Action>` contract and `DomposableMviScreen(model)` state/action helper. You can collect a ViewModel's state directly, use plain Compose state or another architecture. The annotation is needed only for generated entries.
+
+For injected screens, provide your DI environment at the application root. [The modular sample](modular-demo.md) demonstrates MetroX's standard factory and composition local. With Koin, provide the Koin application and use `model: YourViewModel = koinViewModel()` instead. Manual constructors, callbacks and explicit models remain supported.
 
 Apply KSP and add the processor to `kspCommonMainMetadata`:
 
@@ -73,7 +79,7 @@ tasks.matching {
 }
 ```
 
-Supported declarations are visible, non-generic, top-level `@Composable` functions returning `Unit`, without varargs. Generated factories preserve typed callback/generic parameters and composable type aliases. An additional overload omits parameters with defaults and lets the original function apply those defaults. The original `*Destination(render)` factory remains available for custom wiring.
+Supported declarations are visible, non-generic, top-level `@Composable` functions returning `Unit`, without varargs. Generated factories preserve typed callback/generic parameters and composable type aliases. Additional entry and aggregate overloads omit parameters with defaults and lets the original function apply those defaults. The original `*Destination(render)` factory remains available for custom wiring.
 
 ## Build a registry yourself
 

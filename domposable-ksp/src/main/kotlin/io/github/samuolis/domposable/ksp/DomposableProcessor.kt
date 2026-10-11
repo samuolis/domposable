@@ -15,7 +15,7 @@ class DomposableProcessor(private val environment: SymbolProcessorEnvironment) :
     private val emitted = mutableSetOf<String>()
     // KSP symbols cannot be retained into finish(): later rounds invalidate their analysis tokens.
     private val screens = mutableListOf<ScreenGroupMember>()
-    private data class ScreenGroupMember(val packageName: String, val entryName: String, val internal: Boolean, val dependencies: List<ParameterSpec>)
+    private data class ScreenGroupMember(val packageName: String, val entryName: String, val internal: Boolean, val dependencies: List<ParameterSpec>, val required: Set<String>)
     private data class Screen(val declaration: KSFunctionDeclaration, val route: KSType, val viewModel: Boolean) {
         val packageName get() = declaration.packageName.asString() + ".generated"
         val entryName get() = declaration.simpleName.asString().replaceFirstChar(Char::lowercase) + "Entry"
@@ -105,7 +105,8 @@ class DomposableProcessor(private val environment: SymbolProcessorEnvironment) :
             .writeTo(environment.codeGenerator, Dependencies(false, screen.containingFile!!))
         val model = Screen(screen, route, viewModel)
         screens += ScreenGroupMember(model.packageName, model.entryName, Modifier.INTERNAL in screen.modifiers,
-            model.dependencies.map { ParameterSpec.builder(it.name!!.asString(), it.type.toTypeName()).build() })
+            model.dependencies.map { ParameterSpec.builder(it.name!!.asString(), it.type.toTypeName()).build() },
+            model.dependencies.filterNot { it.hasDefault }.map { it.name!!.asString() }.toSet())
         val file = FileSpec.builder(packageName, model.entryName)
         file.addFunction(entryFactory(model, model.dependencies))
         if (model.dependencies.any { it.hasDefault }) file.addFunction(entryFactory(model, model.dependencies.filterNot { it.hasDefault }))
@@ -157,18 +158,28 @@ class DomposableProcessor(private val environment: SymbolProcessorEnvironment) :
                 }
             }
             val destination = ClassName("io.github.samuolis.domposable.screens", "DomposableDestination").parameterizedBy(STAR)
-            val function = FunSpec.builder("domposableEntries").returns(LIST.parameterizedBy(destination))
-            if (group.any { it.internal }) function.addModifiers(KModifier.INTERNAL)
-            dependencies.values.forEach { function.addParameter(it) }
-            val code = CodeBlock.builder().add("return listOf(\n").indent()
-            ordered.forEach { screen ->
-                code.add("%N(\n", screen.entryName).indent()
-                screen.dependencies.forEach { parameter -> code.add("%N = %N,\n", parameter.name, dependencies.getValue(parameter.name to parameter.type).name) }
-                code.unindent().add("),\n")
+            fun aggregate(omitDefaults: Boolean): FunSpec {
+                fun ScreenGroupMember.parameters() = this.dependencies.filter { !omitDefaults || it.name in required }
+                val used = ordered.flatMap { screen -> screen.parameters().map { it.name to it.type } }.toSet()
+                val function = FunSpec.builder("domposableEntries").returns(LIST.parameterizedBy(destination))
+                if (group.any { it.internal }) function.addModifiers(KModifier.INTERNAL)
+                dependencies.filterKeys { it in used }.values.forEach { function.addParameter(it) }
+                val code = CodeBlock.builder().add("return listOf(\n").indent()
+                ordered.forEach { screen ->
+                    code.add("%N(\n", screen.entryName).indent()
+                    screen.parameters().forEach { parameter ->
+                        code.add("%N = %N,\n", parameter.name, dependencies.getValue(parameter.name to parameter.type).name)
+                    }
+                    code.unindent().add("),\n")
+                }
+                return function.addCode(code.unindent().add(")\n").build()).build()
             }
-            function.addCode(code.unindent().add(")\n").build())
-            FileSpec.builder(packageName, "DomposableEntries").addFunction(function.build()).build()
-                .writeTo(environment.codeGenerator, Dependencies.ALL_FILES)
+            val full = aggregate(omitDefaults = false)
+            val required = aggregate(omitDefaults = true)
+            val file = FileSpec.builder(packageName, "DomposableEntries").addFunction(full)
+            // Kotlin default expressions stay in the original composable, inside the entry's owners.
+            if (required.parameters.size < full.parameters.size) file.addFunction(required)
+            file.build().writeTo(environment.codeGenerator, Dependencies.ALL_FILES)
         }
     }
 }

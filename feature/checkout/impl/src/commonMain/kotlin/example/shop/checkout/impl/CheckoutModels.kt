@@ -1,6 +1,8 @@
 package example.shop.checkout.impl
 
 import androidx.lifecycle.ViewModel
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import io.github.samuolis.domposable.lifecycle.DomposableMvi
 import dev.zacsweers.metro.*
 import example.shop.catalog.api.*
 import example.shop.checkout.api.*
@@ -31,18 +33,18 @@ fun reduceCart(state: CartState, action: CheckoutAction): CartState = when (acti
     CheckoutAction.PlaceOrder -> if (!state.checkoutValid || state.count == 0) state.copy(showErrors = true) else
         CartState(state.products, lastOrder = ShopOrder(state.total, state.count), orderSequence = state.orderSequence + 1)
 }
-@Inject
-class CartViewModel(val cart: ShoppingCart) : ViewModel() {
-    val state = cart.state
-    fun dispatch(action: CheckoutAction) { cart.dispatch(action) }
+@Inject @ViewModelKey @ContributesIntoMap(ShopScope::class, binding<ViewModel>())
+class CartViewModel(val cart: ShoppingCart) : ViewModel(), DomposableMvi<CartState, CheckoutAction> {
+    override val state = cart.state
+    override fun dispatch(action: CheckoutAction) { cart.dispatch(action) }
 }
 sealed interface CheckoutEffect { data object OrderPlaced : CheckoutEffect }
-@Inject
-class CheckoutViewModel(val cart: ShoppingCart) : ViewModel() {
-    val state = cart.state
+@Inject @ViewModelKey @ContributesIntoMap(ShopScope::class, binding<ViewModel>())
+class CheckoutViewModel(val cart: ShoppingCart) : ViewModel(), DomposableMvi<CartState, CheckoutAction> {
+    override val state = cart.state
     private val events = Channel<CheckoutEffect>(Channel.BUFFERED)
     val effects = events.receiveAsFlow()
-    fun dispatch(action: CheckoutAction) {
+    override fun dispatch(action: CheckoutAction) {
         val before = state.value.orderSequence
         cart.dispatch(action)
         if (action == CheckoutAction.PlaceOrder && state.value.orderSequence != before) events.trySend(CheckoutEffect.OrderPlaced)

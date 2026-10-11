@@ -10,12 +10,14 @@ import io.github.samuolis.domposable.ui.*
 import io.github.samuolis.domposable.demo.generated.resources.Res
 
 import dev.zacsweers.metro.*
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import example.shop.catalog.api.*
 import example.shop.checkout.api.*
 
 /** Application composition root aggregates contributions from both implementation modules. */
 @DependencyGraph(ShopScope::class)
-abstract class ShopGraph {
+abstract class ShopGraph : ViewModelGraph {
     abstract val catalog: CatalogFeature
     abstract val checkout: CheckoutFeature
     abstract val cart: ShoppingCart
@@ -55,34 +57,41 @@ fun ShoppingApp(graph: ShopGraph = remember { createShopGraph() }, initialRoute:
     fun href(route: ShopRoute): String = ShopCodec.urlFor(route, browserUrls)
     val cart by graph.cart.state.collectAsState()
     val artwork: ShopArtwork = remember { { file, description, modifier, onLoaded, scale -> ShopPhoto(file, description, modifier, onLoaded, scale) } }
-    val entries = remember(navigator, graph, artwork, onArtworkLoaded) {
-        graph.catalog.entries(navigator, artwork, onArtworkLoaded) + graph.checkout.entries(navigator, artwork) +
+    val entries = remember(graph) {
+        graph.catalog.entries() + graph.checkout.entries() +
             DomposableDestination(CatalogRoute.Missing::class) { UnavailableScreen(route.path) { navigator.navigate(CatalogRoute.Home) } }
     }
-    DomposableTheme(ShopTokens, rememberDomposableMaterialComponents()) {
-        DomposableScaffold(topBar = {
-            DomposableSurface(DomposableSurfaceProps(ShopTokens.colors.primary), DomposableModifier.fillMaxWidth()) {
-                DomposableText("Everyday essentials. Free delivery over €100.", DomposableModifier.padding(8.dp), style = DomposableTextStyle.Label, color = ShopTokens.colors.onPrimary)
-            }
-            DomposableFlowRow(DomposableModifier.padding(16.dp).fillMaxWidth(), gap = 16.dp) {
-                DomposableText("FIELDWORK", style = DomposableTextStyle.Title, headingLevel = 1)
-                val selected = when (navigator.currentRoute) { CatalogRoute.Home -> 0; CheckoutRoute.Cart, CheckoutRoute.Checkout, CheckoutRoute.Confirmation -> 2; else -> 1 }
-                DomposableNavigationBar(DomposableNavigationBarProps(
-                    listOf(DomposableNavigationItem("Discover", href = href(CatalogRoute.Home)), DomposableNavigationItem("Shop all", href = href(CatalogRoute.Collection)), DomposableNavigationItem("Bag (${cart.count})", href = href(CheckoutRoute.Cart))),
-                    selected, { navigator.navigate(when (it) { 0 -> CatalogRoute.Home; 1 -> CatalogRoute.Collection; else -> CheckoutRoute.Cart }) },
-                ))
-            }
-        }, bottomBar = {
-            DomposableColumn(DomposableModifier.padding(12.dp).fillMaxWidth(), gap = 4.dp) {
-                DomposableText("Fewer things. Better days.", style = DomposableTextStyle.Label)
-                DomposableFlowRow(gap = 8.dp) {
-                    DomposableLink("About this demo", "https://samuolis.github.io/domposable/shopping/")
-                    if (onExit != null) DomposableButton("Playground", onExit) else DomposableLink("Playground", "https://samuolis.github.io/domposable/demo/")
-                    DomposableText("Fictional shop · No payments or orders sent", style = DomposableTextStyle.Label)
+    CompositionLocalProvider(
+        LocalMetroViewModelFactory provides graph.metroViewModelFactory,
+        LocalShopNavigator provides navigator,
+        LocalShopArtwork provides artwork,
+        LocalShopArtworkLoaded provides onArtworkLoaded,
+    ) {
+        DomposableTheme(ShopTokens, rememberDomposableMaterialComponents()) {
+            DomposableScaffold(topBar = {
+                DomposableSurface(DomposableSurfaceProps(ShopTokens.colors.primary), DomposableModifier.fillMaxWidth()) {
+                    DomposableText("Everyday essentials. Free delivery over €100.", DomposableModifier.padding(8.dp), style = DomposableTextStyle.Label, color = ShopTokens.colors.onPrimary)
                 }
+                DomposableFlowRow(DomposableModifier.padding(16.dp).fillMaxWidth(), gap = 16.dp) {
+                    DomposableText("FIELDWORK", style = DomposableTextStyle.Title, headingLevel = 1)
+                    val selected = when (navigator.currentRoute) { CatalogRoute.Home -> 0; CheckoutRoute.Cart, CheckoutRoute.Checkout, CheckoutRoute.Confirmation -> 2; else -> 1 }
+                    DomposableNavigationBar(DomposableNavigationBarProps(
+                        listOf(DomposableNavigationItem("Discover", href = href(CatalogRoute.Home)), DomposableNavigationItem("Shop all", href = href(CatalogRoute.Collection)), DomposableNavigationItem("Bag (${cart.count})", href = href(CheckoutRoute.Cart))),
+                        selected, { navigator.navigate(when (it) { 0 -> CatalogRoute.Home; 1 -> CatalogRoute.Collection; else -> CheckoutRoute.Cart }) },
+                    ))
+                }
+            }, bottomBar = {
+                DomposableColumn(DomposableModifier.padding(12.dp).fillMaxWidth(), gap = 4.dp) {
+                    DomposableText("Fewer things. Better days.", style = DomposableTextStyle.Label)
+                    DomposableFlowRow(gap = 8.dp) {
+                        DomposableLink("About this demo", "https://samuolis.github.io/domposable/shopping/")
+                        if (onExit != null) DomposableButton("Playground", onExit) else DomposableLink("Playground", "https://samuolis.github.io/domposable/demo/")
+                        DomposableText("Fictional shop · No payments or orders sent", style = DomposableTextStyle.Label)
+                    }
+                }
+            }) {
+                DomposableNavHost(navigator, entries, contentModifier.fillMaxWidth().fillMaxHeight())
             }
-        }) {
-            DomposableNavHost(navigator, entries, contentModifier.fillMaxWidth().fillMaxHeight())
         }
     }
 }

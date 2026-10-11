@@ -13,18 +13,21 @@ The [modular implementation](modular-demo.md) separates catalog and checkout int
 
 ```kotlin
 @Composable
-fun CollectionScreen(
-    state: CatalogState,
-    onAction: (CatalogAction) -> Unit,
-    artwork: ShopArtwork,
-    onBrowse: () -> Unit,
-    onProduct: (String) -> Unit,
-) {
-    StorefrontScreen(state, onAction, artwork, false, onBrowse, onProduct)
+@DomposableScreen(CatalogRoute.Collection::class, viewModel = true)
+fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
+    val navigator = LocalShopNavigator.current
+    val artwork = LocalShopArtwork.current
+    DomposableMviScreen(model) { state, onAction ->
+        StorefrontContent(
+            state, onAction, artwork, showHero = false,
+            onBrowse = { navigator.navigate(CatalogRoute.Collection) },
+            onProduct = { navigator.navigate(CatalogRoute.Product(it)) },
+        )
+    }
 }
 ```
 
-These are application architecture choices. The feature UI remains ordinary composable functions returning `Unit`, and Domposable does not require MVI, Metro or a ViewModel. Follow the [complete module walkthrough](modular-demo.md) for graph assembly, assisted product factories and checkout effects.
+These are application architecture choices. Screens receive ViewModels; their smaller content functions remain ordinary composable functions returning `Unit`, and Domposable does not require MVI, Metro or a ViewModel. Follow the [complete module walkthrough](modular-demo.md) for graph assembly, assisted product injection and checkout effects.
 
 ## Layout follows available space
 

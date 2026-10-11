@@ -1,6 +1,9 @@
 package example.shop.catalog.impl
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dev.zacsweers.metrox.viewmodel.*
+import io.github.samuolis.domposable.lifecycle.DomposableMvi
 import dev.zacsweers.metro.*
 import example.shop.catalog.api.*
 import example.shop.checkout.api.*
@@ -15,11 +18,13 @@ override val products = listOf(
 )
 }
 
-@Inject
-class CatalogViewModel(val catalog: ProductCatalog, val cart: ShoppingCart) : ViewModel() {
+@Inject @ViewModelKey @ContributesIntoMap(ShopScope::class, binding<ViewModel>())
+class CatalogViewModel(val catalog: ProductCatalog, val cart: ShoppingCart) : ViewModel(), DomposableMvi<CatalogState, CatalogAction> {
     private val mutableState = MutableStateFlow(CatalogState(catalog.products))
-    val state: StateFlow<CatalogState> = mutableState.asStateFlow()
-    fun dispatch(action: CatalogAction) {
+    override val state: StateFlow<CatalogState> = combine(mutableState, cart.state) { catalog, cart ->
+        catalog.copy(notice = cart.notice)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, mutableState.value.copy(notice = cart.state.value.notice))
+    override fun dispatch(action: CatalogAction) {
         when (action) {
             is CatalogAction.Add -> cart.dispatch(CheckoutAction.Add(action.id))
             else -> mutableState.update { reduceCatalog(it, action) }
@@ -34,8 +39,13 @@ fun reduceCatalog(state: CatalogState, action: CatalogAction): CatalogState = wh
     is CatalogAction.Add -> state
 }
 @AssistedInject
-class ProductViewModel(@Assisted val id: String, val catalog: ProductCatalog, val cart: ShoppingCart) : ViewModel() {
-    val product = catalog.products.firstOrNull { it.id == id }
-    fun add() { cart.dispatch(CheckoutAction.Add(id)) }
-    @AssistedFactory interface Factory { fun create(id: String): ProductViewModel }
+class ProductViewModel(@Assisted val id: String, val catalog: ProductCatalog, val cart: ShoppingCart) : ViewModel(), DomposableMvi<ProductState, ProductAction> {
+    private val product = catalog.products.firstOrNull { it.id == id }
+    override val state: StateFlow<ProductState> = cart.state.map { ProductState(product, it.notice) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, ProductState(product, cart.state.value.notice))
+    override fun dispatch(action: ProductAction) {
+        when (action) { ProductAction.Add -> cart.dispatch(CheckoutAction.Add(id)) }
+    }
+    @AssistedFactory @ManualViewModelAssistedFactoryKey @ContributesIntoMap(ShopScope::class)
+    interface Factory : ManualViewModelAssistedFactory { fun create(id: String): ProductViewModel }
 }

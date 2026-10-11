@@ -1,3 +1,8 @@
+public abstract interface class io/github/samuolis/domposable/lifecycle/DomposableMvi {
+	public abstract fun dispatch (Ljava/lang/Object;)V
+	public abstract fun getState ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
 public final class io/github/samuolis/domposable/lifecycle/DomposableViewModelOwner : androidx/lifecycle/HasDefaultViewModelProviderFactory, androidx/lifecycle/ViewModelStoreOwner, androidx/savedstate/SavedStateRegistryOwner {
 	public static final field $stable I
 	public fun getDefaultViewModelCreationExtras ()Landroidx/lifecycle/viewmodel/CreationExtras;
@@ -9,5 +14,9 @@ public final class io/github/samuolis/domposable/lifecycle/DomposableViewModelOw
 
 public final class io/github/samuolis/domposable/lifecycle/EntryViewModelKt {
 	public static final fun DomposableViewModelEntry (Lio/github/samuolis/domposable/screens/DomposableEntryScope;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/lifecycle/MviScreenKt {
+	public static final fun DomposableMviScreen (Lio/github/samuolis/domposable/lifecycle/DomposableMvi;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;I)V
 }
 

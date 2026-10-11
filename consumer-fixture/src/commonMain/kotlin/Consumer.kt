@@ -61,6 +61,28 @@ fun Product(
 fun typedGeneratedEntry(model: FeatureModel, artwork: Artwork, onSelect: (Map<String, List<Int?>>) -> Unit) =
     example.consumer.generated.productEntry(model, artwork, onSelect)
 
+object DefaultRoute
+@Composable
+@DomposableScreen(DefaultRoute::class, viewModel = true)
+fun DefaultScreen(defaultModel: FeatureModel = remember { FeatureModel() }) { Feature(defaultModel) }
+
+// Aggregate defaults stay at the original composable, under its generated entry owner.
+fun generatedRequiredEntries(model: FeatureModel, artwork: Artwork, onSelect: (Map<String, List<Int?>>) -> Unit) =
+    example.consumer.generated.domposableEntries(model = model, artwork = artwork, onSelect = onSelect)
+
+// Optional MVI is an interface, not a ViewModel inheritance requirement.
+class FeatureStore : io.github.samuolis.domposable.lifecycle.DomposableMvi<String, String> {
+    override val state = kotlinx.coroutines.flow.MutableStateFlow("Store consumer")
+    override fun dispatch(action: String) { state.value = action }
+}
+@Composable
+fun MviFeature(model: FeatureStore) {
+    io.github.samuolis.domposable.lifecycle.DomposableMviScreen(model) { label, onAction ->
+        DomposableText(label)
+        DomposableButton("Update", { onAction("Updated") })
+    }
+}
+
 // Direct Navigation 3: no registry, annotation, navigator or Domposable entry scope is required.
 @Composable
 fun DirectNavigation3() {

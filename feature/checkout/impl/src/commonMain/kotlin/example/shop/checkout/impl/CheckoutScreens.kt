@@ -19,7 +19,7 @@ private fun OrderSummary(state: CartState) {
 }
 
 @Composable
-fun CartScreen(state: CartState, onAction: (CheckoutAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onCheckout: () -> Unit) {
+internal fun CartContent(state: CartState, onAction: (CheckoutAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onCheckout: () -> Unit) {
     DomposableColumn(DomposableModifier.fillMaxWidth().fillMaxHeight().verticalScroll().padding(24.dp), gap = 16.dp) {
         DomposableText("Your bag", style = DomposableTextStyle.Title, headingLevel = 2)
         DomposableButton("Continue shopping", onBrowse)
@@ -47,7 +47,7 @@ fun CartScreen(state: CartState, onAction: (CheckoutAction) -> Unit, artwork: Sh
 }
 
 @Composable
-fun CheckoutScreen(state: CartState, onAction: (CheckoutAction) -> Unit, onCart: () -> Unit) {
+internal fun CheckoutContent(state: CartState, onAction: (CheckoutAction) -> Unit, onCart: () -> Unit) {
     DomposableColumn(DomposableModifier.fillMaxWidth().fillMaxHeight().verticalScroll().padding(24.dp), gap = 16.dp) {
         DomposableText("Checkout", style = DomposableTextStyle.Title, headingLevel = 2)
         DomposableButton("Back to bag", onCart)
@@ -64,7 +64,7 @@ fun CheckoutScreen(state: CartState, onAction: (CheckoutAction) -> Unit, onCart:
 }
 
 @Composable
-fun ConfirmationScreen(order: ShopOrder?, onBrowse: () -> Unit) {
+internal fun ConfirmationContent(order: ShopOrder?, onBrowse: () -> Unit) {
     DomposableColumn(DomposableModifier.fillMaxWidth().padding(24.dp), gap = 16.dp) {
         DomposableText(if (order == null) "No order to show" else "Thanks for exploring Fieldwork.", style = DomposableTextStyle.Title, headingLevel = 2)
         if (order != null) DomposableText("Demo order: ${order.itemCount} pieces · ${shopPrice(order.totalCents)}. Nothing was purchased or sent.")

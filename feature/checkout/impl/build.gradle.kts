@@ -14,6 +14,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":checkout-api"))
             implementation(project(":domposable-lifecycle-viewmodel"))
+            implementation(libs.metrox.viewmodel.compose)
         }
         commonTest.dependencies { implementation(kotlin("test")); implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0") }
     }
