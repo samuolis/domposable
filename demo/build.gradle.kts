@@ -85,5 +85,13 @@ tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMet
 }
 tasks.withType<Test>().configureEach {
     systemProperty("domposable.screenshots", rootProject.layout.buildDirectory.dir("screenshots").get().asFile.absolutePath)
+    val platform = when (name) {
+        "jvmTest" -> "desktop"
+        "testAndroidHostTest" -> "android"
+        else -> null
+    }
+    if (platform != null) {
+        outputs.dir(rootProject.layout.buildDirectory.dir("screenshots/$platform")).withPropertyName("visualCaptures")
+    }
     jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
 }
