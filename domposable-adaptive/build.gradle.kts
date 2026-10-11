@@ -19,6 +19,7 @@ kotlin {
     }
     jvm()
     js { browser();  }
+    wasmJs { browser(); }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
@@ -33,6 +34,7 @@ kotlin {
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
+        wasmJsMain { dependencies { implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
         jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
     }
 }

@@ -1,0 +1,32 @@
+name: PR review
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+  push:
+    branches: ['release-candidate/**']
+permissions:
+  contents: read
+concurrency:
+  group: review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  description:
+    name: PR review contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - name: Validate version-only release candidate
+        if: github.event_name == 'push'
+        run: test "$(git diff --name-only origin/main HEAD)" = version.properties
+      - name: Validate scoped review context and title
+        if: github.event_name == 'pull_request'
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+          TITLE: ${{ github.event.pull_request.title }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          printf '%s' "$BODY" > "$RUNNER_TEMP/pr-body.md"
+          python scripts/pr_review_context.py validate --body-file "$RUNNER_TEMP/pr-body.md" --title "$TITLE" --base "$BASE" --head "$HEAD"

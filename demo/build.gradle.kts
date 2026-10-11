@@ -12,22 +12,26 @@ kotlin {
         namespace = "io.github.samuolis.domposable.demo.shared"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 23
+        androidResources { enable = true }
         withHostTest { isIncludeAndroidResources = true }
     }
     jvm()
     js { browser(); binaries.executable(); }
+    wasmJs { browser(); binaries.executable(); }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
         val commonMain = getByName("commonMain") {
             dependencies {
                 api(libs.compose.runtime)
+                implementation(compose.components.resources)
                 api(project(":domposable-design-material"))
                 api(project(":domposable-adaptive"))
                 api(project(":domposable-navigation3"))
                 api(project(":domposable-lifecycle-viewmodel"))
             }
         }
+        jvmTest { dependencies { implementation("org.jetbrains.compose.ui:ui-test-junit4:1.12.1"); implementation(compose.desktop.currentOs) } }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         getByName("androidHostTest") { dependencies {
             implementation("org.robolectric:robolectric:4.17")
@@ -47,8 +51,10 @@ kotlin {
         }
         getByName("androidMain").dependsOn(composeUiMain)
         getByName("jvmMain").dependsOn(composeUiMain)
+        getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
         jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        wasmJsMain { dependencies { implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
         jvmMain { dependencies { implementation(compose.desktop.currentOs) } }
     }
 }
@@ -69,5 +75,6 @@ tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMet
     enabled = false
 }
 tasks.withType<Test>().configureEach {
+    systemProperty("domposable.screenshots", rootProject.layout.buildDirectory.dir("screenshots").get().asFile.absolutePath)
     jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
 }

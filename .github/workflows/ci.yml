@@ -4,27 +4,62 @@ on:
   push:
     branches: [main, 'release-candidate/**']
   workflow_dispatch:
+    inputs:
+      record_screenshots:
+        description: 'Export visual candidates for review; this run cannot satisfy CI passed'
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}-${{ inputs.record_screenshots || false }}
   cancel-in-progress: true
 jobs:
-  portable:
-    name: Android, shared APIs and HTML
+  hygiene:
+    name: Workflow and patch checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - name: Lint workflows with pinned actionlint
+        # GitHub's supported concurrency.queue field is newer than this linter.
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -ignore 'unexpected key "queue" for "concurrency" section'
+      - name: Check patch whitespace
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+        run: |
+          if [ "$BASE" = 0000000000000000000000000000000000000000 ]; then BASE=HEAD; fi
+          git diff --check "$BASE" HEAD
+  portable:
+    name: Android, desktop, DOM and Wasm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
       - run: python -m unittest discover -s scripts/tests -v
-      - run: ./gradlew jvmTest :demo:testAndroidHostTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack dokkaGenerate --console=plain
+      - run: xvfb-run -a ./gradlew jvmTest :demo:testAndroidHostTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs dokkaGenerate --console=plain
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: python scripts/ci/browser_preview.py
       - run: npx playwright test
-      - run: ./gradlew :demo:jsBrowserDistribution --console=plain
+      - name: Compare or export reviewed-platform visual captures
+        if: always()
+        env:
+          RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
+        run: |
+          status=0
+          for platform in android desktop dom wasm; do
+            if [ "$RECORD" = true ]; then
+              python scripts/ci/screenshots.py "$platform" --record || status=1
+            else
+              python scripts/ci/screenshots.py "$platform" || status=1
+            fi
+          done
+          exit "$status"
+      - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution --console=plain
       - run: python scripts/ci/build_site.py
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
@@ -35,24 +70,36 @@ jobs:
             test-results/
             playwright-report/
             build/site/
+            build/screenshots/
+            build/visual-report/
             **/build/reports/tests/
-          retention-days: 14
+          retention-days: 30
   native:
     name: iOS, ABI and published consumers
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx2g -Dorg.gradle.workers.max=1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
-      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 --console=plain
+      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 --console=plain
       - run: python scripts/ci/package_publications.py --unsigned
-      - name: Resolve and compile published artifacts
-        run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
+      - name: Resolve and compile published artifacts on all six targets
+        run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
       - run: python scripts/ci/generate_xcode_project.py
       - run: python scripts/ci/ios_test.py
+      - name: iOS visual regression
+        if: always()
+        env:
+          RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
+        run: |
+          if [ "$RECORD" = true ]; then
+            python scripts/ci/screenshots.py ios --record
+          else
+            python scripts/ci/screenshots.py ios
+          fi
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
@@ -60,17 +107,22 @@ jobs:
           include-hidden-files: true
           path: |
             build/ios-tests-*.xcresult
+            build/screenshots/
+            build/visual-report/
+            build/ios-tests/**/Build/Products/Debug-iphonesimulator/DomposableDemo.app
             **/build/reports/abi/
             .release/artifacts/maven-bundle.zip
-          retention-days: 14
+          retention-days: 30
   passed:
     name: CI passed
     if: always()
-    needs: [portable, native]
+    needs: [hygiene, portable, native]
     runs-on: ubuntu-24.04
     steps:
-      - name: Require every validation job
+      - name: Require validation and prevent recording from satisfying branch or release gates
         env:
+          HYGIENE: ${{ needs.hygiene.result }}
           PORTABLE: ${{ needs.portable.result }}
           NATIVE: ${{ needs.native.result }}
-        run: test "$PORTABLE" = success && test "$NATIVE" = success
+          RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
+        run: test "$HYGIENE" = success && test "$PORTABLE" = success && test "$NATIVE" = success && test "$RECORD" != true

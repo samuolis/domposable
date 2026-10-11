@@ -19,7 +19,7 @@ The factory belongs to your application and may call any DI container. Avoid res
 
 The optional lifecycle module supplies `DomposableViewModelEntry(entry)` with AndroidX LifecycleOwner, ViewModelStoreOwner and SavedStateRegistryOwner. Create ViewModels with your application factory; the library does not infer dependencies.
 
-The optional Navigation 3 host uses published AndroidX entry decoration and native `NavDisplay`. Its DOM host renders entry content directly into HTML. Use `DomposableRouteCodec` to encode your app's routes, `rememberDomposableBackStack`, `DomposableBrowserHistory`, and `DomposableNavigation3Host`; see the demo for the complete shell. The URL uses hashes so GitHub Pages project paths work without rewrite rules.
+The optional Navigation 3 host uses published AndroidX entry decoration and native `NavDisplay`. Its DOM host renders entry content directly into HTML. Use `DomposableRouteCodec` to encode your app's routes, `rememberDomposableBackStack`, `DomposableBrowserHistory`, and `DomposableNavigation3Host`; see the demo for the complete shell. Choose hash URLs for a simple static host, or path URLs with a deployment base and host fallback. The [URL recipes](recipes.md) show both; the storefront uses clean product paths on GitHub Pages.
 
 Back/forward restores entry saveables and scroll positions, then recreates app-owned resources when an entry was disposed. Pane-count changes retain the same entry IDs and resources.
 

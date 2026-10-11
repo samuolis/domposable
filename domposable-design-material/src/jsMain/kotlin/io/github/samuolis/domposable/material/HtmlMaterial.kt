@@ -21,6 +21,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
         theme = { props, _, content -> HtmlTheme(props.tokens, content) },
         column = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "flex"); property("flex-direction", "column"); property("gap", "${props.gap.value}px"); property("align-items", props.alignment.css()) } }) { content() } } },
         row = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "flex"); property("gap", "${props.gap.value}px"); property("align-items", props.alignment.css()) } }) { content() } } },
+        flowRow = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "flex"); property("flex-wrap", "wrap"); property("gap", "${props.gap.value}px") } }) { content() } } },
+        link = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { A(href = props.href, attrs = { domposableAttributes(modifier); classes("d-link") }) { Text(props.label) } } },
         box = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "grid"); property("place-items", when(props.alignment) { DomposableAlignment.Start -> "start"; DomposableAlignment.Center -> "center"; DomposableAlignment.End -> "end" }) } }) { content() } } },
         lazyColumn = { props, modifier, _ -> HtmlCollection(props.items, modifier, props.gap, "column") },
         lazyRow = { props, modifier, _ -> HtmlCollection(props.items, modifier, props.gap, "row") },
@@ -48,7 +50,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
         slider = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { Input(InputType.Range, attrs = { domposableAttributes(modifier); value(props.value.toString()); attr("aria-label", props.label); attr("min", props.range.start.toString()); attr("max", props.range.endInclusive.toString()); attr("step", if (props.steps == 0) "any" else ((props.range.endInclusive - props.range.start)/(props.steps + 1)).toString()); if (!props.enabled) disabled(); onInput { it.target.value.toFloatOrNull()?.let(props.onValueChange) } }) } },
         card = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); classes("d-card"); props.onClick?.let { click -> attr("role", "button"); attr("tabindex", "0"); onClick { click() }; onKeyDown { if (it.key == "Enter" || it.key == " ") { it.preventDefault(); click() } } } }) { content() } } },
         surface = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); classes("d-surface"); props.color?.let { style { property("background", it.css()) } } }) { content() } } },
-        image = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { Img(src = props.source, alt = props.description ?: "", attrs = { domposableAttributes(modifier); attr("loading", "lazy"); style { property("max-width", "100%") } }) } },
+        image = { props, modifier, _ -> HtmlImage(props, modifier) },
         icon = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { Span(attrs = { domposableAttributes(modifier); if (props.description == null) attr("aria-hidden", "true") else { attr("role", "img"); attr("aria-label", props.description.orEmpty()) } }) { Text(props.symbol) } } },
         divider = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { Hr(attrs = { domposableAttributes(modifier); attr("aria-orientation", props.orientation.name.lowercase()); classes("d-divider") }) } },
         spacer = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); attr("aria-hidden", "true"); style { property("width", "${props.length.value}px"); property("height", "${props.length.value}px") } }) {} } },
@@ -64,7 +66,15 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
             } }) { Text(label) }
         } } } },
         navigationBar = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { Nav(attrs = { domposableAttributes(modifier); attr("aria-label", "Application"); classes("d-navigation"); style { property("flex-direction", if(props.orientation == DomposableOrientation.Horizontal) "row" else "column") } }) { props.items.forEachIndexed { index, item ->
-            Button(attrs = { attr("type", "button"); if (index == props.selectedIndex) attr("aria-current", "page"); onClick { props.onSelect(index) } }) { Text("${item.symbol} ${item.label}") }
+            if (item.href != null) A(href = item.href, attrs = {
+                if (index == props.selectedIndex) attr("aria-current", "page")
+                onClick { event ->
+                    if (event.button.toInt() == 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+                        event.preventDefault(); props.onSelect(index)
+                    }
+                }
+            }) { Text("${item.symbol} ${item.label}") }
+            else Button(attrs = { attr("type", "button"); if (index == props.selectedIndex) attr("aria-current", "page"); onClick { props.onSelect(index) } }) { Text("${item.symbol} ${item.label}") }
         } } } },
         menu = { props, modifier, _ -> if (props.expanded) HtmlModal("Menu", props.onDismiss, modifier, sheet = false) { props.items.forEach { item -> Button(attrs = { attr("type", "button"); if (!item.enabled) disabled(); onClick { item.onClick(); props.onDismiss() } }) { Text(item.label) } } } },
         dialog = { props, modifier, content -> HtmlModal(props.title, props.onDismiss, modifier, sheet = false) { content(); props.actions() } },
@@ -83,6 +93,48 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
             props.overlays()
         } } },
     )
+}
+
+@Composable
+private fun HtmlImage(props: DomposableImageProps, modifier: DomposableModifier) {
+    val loaded by rememberUpdatedState(props.onLoaded)
+    val failed by rememberUpdatedState(props.onError)
+    // A sized leaf must fit inside the ordered layout boxes, including inner padding.
+    var imageHeight: Float? = null
+    modifier.operations.forEach { operation -> when (operation) {
+        is DomposableModifierOperation.Height -> imageHeight = operation.length.value
+        is DomposableModifierOperation.Padding -> imageHeight = imageHeight?.let { (it - operation.insets.top.value - operation.insets.bottom.value).coerceAtLeast(0f) }
+        DomposableModifierOperation.FillHeight -> imageHeight = null
+        else -> Unit
+    } }
+    DomposableHtmlModifiers(modifier) {
+        Img(src = props.source, alt = props.description ?: "", attrs = {
+            domposableAttributes(modifier)
+            attr("loading", "lazy")
+            ref { element ->
+                val load: (org.w3c.dom.events.Event) -> Unit = { loaded?.invoke() }
+                val error: (org.w3c.dom.events.Event) -> Unit = { failed?.invoke() }
+                element.addEventListener("load", load)
+                element.addEventListener("error", error)
+                if (element.complete && element.naturalWidth > 0) loaded?.invoke()
+                onDispose {
+                    element.removeEventListener("load", load)
+                    element.removeEventListener("error", error)
+                }
+            }
+            style {
+                property("max-width", "100%")
+                property("display", "block")
+                property("object-fit", when (props.scale) {
+                    DomposableImageScale.Fit -> "contain"
+                    DomposableImageScale.Crop -> "cover"
+                    DomposableImageScale.Fill -> "fill"
+                })
+                imageHeight?.let { property("height", "${it}px") }
+                if (modifier.operations.any { it is DomposableModifierOperation.Width || it == DomposableModifierOperation.FillWidth }) property("width", "100%")
+            }
+        })
+    }
 }
 
 private var nextInputId = 0
@@ -144,12 +196,12 @@ private fun HtmlTheme(tokens: DomposableTokens, content: @Composable () -> Unit)
 }
 
 private const val MATERIAL_CSS = """
-.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
+.d-theme *{box-sizing:border-box}.d-link{color:var(--d-primary);padding:8px;display:inline-flex;align-items:center;min-height:44px}.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
 .d-theme button,.d-theme input,.d-theme textarea{font:inherit;accent-color:var(--d-primary)}
 .d-theme button{cursor:pointer}.d-theme button:disabled{cursor:default;opacity:.5}
 .d-theme :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
-.d-theme h1,.d-theme h2{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
+.d-theme h1,.d-theme h2,.d-theme h3{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:var(--d-radius);min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}
 .d-icon-button{border-radius:50%;padding:10px}.d-chip{background:var(--d-variant);color:var(--d-on-surface)}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}
@@ -158,7 +210,7 @@ private const val MATERIAL_CSS = """
 .d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}
 .d-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{border-radius:12px;padding:2px 8px;background:var(--d-primary);color:var(--d-on-primary)}
 .d-divider{border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
-.d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button{padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
+.d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button,.d-navigation a{text-decoration:none;display:inline-flex;align-items:center;padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
 .d-tabs [aria-selected=true],.d-navigation [aria-current=page]{color:var(--d-primary);border-bottom:3px solid var(--d-primary)}
 .d-dialog{border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface);max-width:min(600px,90vw)}
 .d-dialog::backdrop{background:#0006}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw)}

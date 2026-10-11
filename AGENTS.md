@@ -6,3 +6,10 @@
 - Verify public API changes, renderer behavior and packaged consumers before releasing.
 - Ordinary changes use branches and PRs. Only the approved release workflow may push a version-only commit directly to main.
 - Never commit signing credentials or reuse another application's release keys.
+
+## Pull request review
+
+- Use the PR template and a concise action title describing the final behavior. Keep summary bullets concrete. Do not require conventional-commit prefixes; Ranker uses human-readable titles.
+- Public API changes need a realistic consumer code sample. Architecture, build/dependency topology, screen contracts, navigation and renderer-boundary changes need mobile-readable `Architecture at a glance` bullets and a Mermaid diagram. Gradle/CI changes need executable validation commands in `Build changes`.
+- Visual changes need descriptive inline previews. Existing scenarios show Main | Pixel difference | PR; added scenarios show the new preview. Store generated review images on an isolated `visual-review/**` ref, outside main and feature branches, and use immutable absolute HTTPS PNG URLs. Verify image bytes and rendered PR previews before declaring review ready.
+- Checked-in golden inputs belong in `screenshots/`. CI exports captures and diffs as artifacts; maintainers inspect candidates before updating goldens. Recording runs cannot satisfy `CI passed`.

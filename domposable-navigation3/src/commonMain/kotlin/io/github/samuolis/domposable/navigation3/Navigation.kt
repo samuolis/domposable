@@ -51,6 +51,17 @@ internal expect fun <R : Any> PlatformNavigation3Display(
     visibleEntries: Int, onBack: () -> Unit,
 )
 
+sealed interface DomposableBrowserUrls {
+    data object Hash : DomposableBrowserUrls
+    /** Host must serve the application entry point for every path beneath this base. */
+    data class Path(val basePath: String = "/", val trailingSlash: Boolean = false) : DomposableBrowserUrls {
+        init {
+            require(basePath.startsWith("/") && !basePath.contains("//"))
+            require(basePath.all { it.isLetterOrDigit() || it in "/_-" })
+        }
+    }
+}
+
 /** Application-owned URL codec; hash URLs support GitHub Pages project hosting. */
 @Composable
-expect fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>)
+expect fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>, urls: DomposableBrowserUrls = DomposableBrowserUrls.Hash)

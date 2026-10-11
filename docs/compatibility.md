@@ -1,0 +1,34 @@
+# Compatibility and tested boundaries
+
+Domposable is an unpublished alpha. The table describes this repository's CI coverage, not a stable compatibility promise. Both browser demos use the **same `DemoApp` feature sources**.
+
+| Target | Renderer | UI/behavior checks | Visual baselines | URL owner |
+| --- | --- | --- | --- | --- |
+| Android, API 23+ | Compose UI + Material3 | Robolectric API 36 interaction tests; APK build | Robolectric native graphics, 390 × 844 logical pixels | Application |
+| iOS arm64 | Compose UI + Material3 | Device compilation; simulator input/rotation tests | iPad mini A17 Pro, iOS 26.5, portrait/landscape | Application |
+| iOS simulator arm64 | Same native renderer | XCUITest, unsigned app artifact | Same simulator fixtures | Application |
+| JVM desktop | Compose UI + Material3 | JVM tests and compiled consumer | Compose desktop test scene on Ubuntu | Application |
+| Kotlin/JS HTML | Native DOM + CSS + browser controls | Chromium, Firefox, WebKit; axe; inputs/focus/history/URLs | Chromium on Ubuntu, phone/tablet/wide | Hash or path history; or host router |
+| Kotlin/Wasm JS | Compose UI + Material3 | Build and canvas startup/error checks | Chromium on Ubuntu, phone/wide | Initial URL selects fixture; subsequent navigation is in memory |
+
+Desktop and Wasm support are **experimental**. Browser history/saveable restoration is implemented by the HTML renderer; the Compose UI implementation of `DomposableBrowserHistory` is currently a no-op. Wasm screenshots do not establish screen-reader parity. Native platform accessibility still needs manual assistive-technology testing.
+
+## Pinned build versions
+
+| Dependency | Version |
+| --- | --- |
+| Kotlin / Compose compiler | 2.4.20 |
+| Compose Multiplatform | 1.12.1 |
+| Material3 provider | 1.12.0-alpha03 |
+| Navigation 3 runtime / Compose UI display | 1.1.7 / 1.1.2 |
+| KSP | 2.3.12 |
+| Android Gradle plugin / Gradle | 9.4.0 / 9.7.1 |
+| Metro example | 1.4.5 |
+| Kobweb page API example | 0.25.1 |
+| Playwright | 1.64.0 |
+
+These are the versions verified together. Applications adopting older/newer Compose, Kotlin or Kobweb versions must compile and test their own dependency graph. All seven runtime libraries publish six target variants; the optional KSP processor runs on JVM and generates shared declarations. CI compiles both a feature consumer and an independent provider against packaged Maven artifacts.
+
+## Rendering differences
+
+HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm uses Compose UI rendering and its accessibility layer. They share declarations and behavior intent, not pixels or browser-native text selection. HTML collections are keyed DOM lists, while Compose UI collections are lazy; HTML virtualization remains future work. Native date/time purposes currently use text fields. Hinge/fold information, rich text, drag/reorder and large-table virtualization are not bundled.
