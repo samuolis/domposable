@@ -1,5 +1,5 @@
 // Klib ABI Dump
-// Targets: [iosArm64, iosSimulatorArm64, js]
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -42,6 +42,18 @@ final enum class io.github.samuolis.domposable.foundation/DomposableButtonStyle 
 
     final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableButtonStyle // io.github.samuolis.domposable.foundation/DomposableButtonStyle.valueOf|valueOf#static(kotlin.String){}[0]
     final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableButtonStyle> // io.github.samuolis.domposable.foundation/DomposableButtonStyle.values|values#static(){}[0]
+}
+
+final enum class io.github.samuolis.domposable.foundation/DomposableImageScale : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableImageScale> { // io.github.samuolis.domposable.foundation/DomposableImageScale|null[0]
+    enum entry Crop // io.github.samuolis.domposable.foundation/DomposableImageScale.Crop|null[0]
+    enum entry Fill // io.github.samuolis.domposable.foundation/DomposableImageScale.Fill|null[0]
+    enum entry Fit // io.github.samuolis.domposable.foundation/DomposableImageScale.Fit|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableImageScale.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableImageScale> // io.github.samuolis.domposable.foundation/DomposableImageScale.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableImageScale // io.github.samuolis.domposable.foundation/DomposableImageScale.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableImageScale> // io.github.samuolis.domposable.foundation/DomposableImageScale.values|values#static(){}[0]
 }
 
 final enum class io.github.samuolis.domposable.foundation/DomposableInputPurpose : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableInputPurpose> { // io.github.samuolis.domposable.foundation/DomposableInputPurpose|null[0]

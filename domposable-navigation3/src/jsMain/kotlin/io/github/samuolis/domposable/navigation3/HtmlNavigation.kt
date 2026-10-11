@@ -53,7 +53,19 @@ private fun JsonElement.savedValue(): Any? = when (this) {
     is JsonPrimitive -> if (isString) content else booleanOrNull ?: intOrNull ?: longOrNull ?: doubleOrNull
 }
 
-private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEntryScope<R>>, var codec: DomposableRouteCodec<R>) {
+private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEntryScope<R>>, var codec: DomposableRouteCodec<R>, val urls: DomposableBrowserUrls) {
+    private fun routePath(): String = when (val mode = urls) {
+        DomposableBrowserUrls.Hash -> window.location.hash.removePrefix("#")
+        is DomposableBrowserUrls.Path -> window.location.pathname.removePrefix(mode.basePath.trimEnd('/')).ifEmpty { "/" }.trimEnd('/').ifEmpty { "/" }
+    }
+    private fun url(route: R): String {
+        val path = codec.encode(route)
+        require(path.startsWith("/") && !path.startsWith("//")) { "Encode an absolute application path" }
+        return when (val mode = urls) {
+            DomposableBrowserUrls.Hash -> "#$path"
+            is DomposableBrowserUrls.Path -> mode.basePath.trimEnd('/') + if (mode.trailingSlash) path.trimEnd('/') + "/" else path
+        }
+    }
     private val snapshots = mutableMapOf<String, String>()
     private var currentId = stack.last().id
     private var previousIds = stack.map { it.id }
@@ -81,16 +93,20 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
     } catch (_: Exception) { null }
 
     fun initialize() {
+        if (urls is DomposableBrowserUrls.Path) {
+            val base = urls.basePath.trimEnd('/')
+            require(window.location.pathname == base || window.location.pathname.startsWith("$base/")) { "URL is outside the configured application base" }
+        }
         val state = readSnapshot(window.history.state)
         if (state != null) restore(state)
-        else codec.decode(window.location.hash.removePrefix("#"))?.let { route ->
+        else codec.decode(routePath())?.let { route ->
             stack.clear(); stack.add(DomposableEntryScope(route))
         }
         currentId = stack.last().id
         previousIds = stack.map { it.id }
         val value = snapshot()
         snapshots[currentId] = value
-        window.history.replaceState(value, "", "#${codec.encode(stack.last().route)}")
+        window.history.replaceState(value, "", url(stack.last().route))
         applyingHistory = false
     }
 
@@ -132,7 +148,7 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
         if (id != currentId) {
             snapshots[currentId]?.let { window.history.replaceState(it, "") }
             val value = snapshot()
-            window.history.pushState(value, "", "#${codec.encode(stack.last().route)}")
+            window.history.pushState(value, "", url(stack.last().route))
             currentId = id
         }
         saveCurrent()
@@ -148,15 +164,15 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
         if (state != null) {
             val top = state["entries"]?.jsonArray?.lastOrNull()?.jsonObject?.get("id")?.jsonPrimitive?.content
             restore(readSnapshot(snapshots[top]) ?: state)
-        } else codec.decode(window.location.hash.removePrefix("#"))?.let { route ->
+        } else codec.decode(routePath())?.let { route ->
             applyingHistory = true; stack.clear(); stack.add(DomposableEntryScope(route)); currentId = stack.last().id
         }
     }
 }
 
 @Composable
-actual fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>) {
-    val binding = remember(backStack) { BrowserBinding(backStack, codec) }
+actual fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>, urls: DomposableBrowserUrls) {
+    val binding = remember(backStack, urls) { BrowserBinding(backStack, codec, urls) }
     binding.codec = codec
     DisposableEffect(binding) {
         binding.initialize()

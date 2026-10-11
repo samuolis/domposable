@@ -10,8 +10,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.layout.ContentScale
+import io.github.samuolis.domposable.foundation.DomposableImageScale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.input.*
@@ -53,6 +56,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
                     surface = Color(colors.surface.argb), onSurface = Color(colors.onSurface.argb),
                     surfaceVariant = Color(colors.surfaceVariant.argb), outline = Color(colors.outline.argb),
                     error = Color(colors.error.argb), background = Color(colors.surface.argb),
+                    surfaceContainer = Color(colors.surfaceVariant.argb), surfaceContainerHighest = Color(colors.surfaceVariant.argb),
+                    secondaryContainer = Color(colors.surfaceVariant.argb), onSecondaryContainer = Color(colors.onSurface.argb),
                 ),
                 typography = Typography().let { it.copy(
                     bodyLarge = it.bodyLarge.copy(fontSize = type.bodySize.sp, lineHeight = (type.bodySize * type.lineHeight).sp),
@@ -64,6 +69,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
         },
         column = { props, modifier, content -> Column(modifier.toComposeModifier(), verticalArrangement = Arrangement.spacedBy(props.gap.value.dp), horizontalAlignment = props.alignment.horizontal()) { content() } },
         row = { props, modifier, content -> Row(modifier.toComposeModifier(), horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp), verticalAlignment = props.alignment.vertical()) { content() } },
+        flowRow = { props, modifier, content -> FlowRow(modifier.toComposeModifier(), horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp), verticalArrangement = Arrangement.spacedBy(props.gap.value.dp)) { content() } },
+        link = { props, modifier, _ -> val handler = LocalUriHandler.current; TextButton({ handler.openUri(props.href) }, modifier.toComposeModifier()) { Text(props.label) } },
         box = { props, modifier, content -> Box(modifier.toComposeModifier(), contentAlignment = props.alignment.box()) { content() } },
         lazyColumn = { props, modifier, _ -> LazyColumn(modifier.toComposeModifier(), verticalArrangement = Arrangement.spacedBy(props.gap.value.dp)) { items(props.items, key = { it.key }) { it.content() } } },
         lazyRow = { props, modifier, _ -> LazyRow(modifier.toComposeModifier(), horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp)) { items(props.items, key = { it.key }) { it.content() } } },
@@ -97,7 +104,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
             else Card(modifier.toComposeModifier(), shape = shape) { content() }
         },
         surface = { props, modifier, content -> Surface(modifier.toComposeModifier(), color = props.color?.let { Color(it.argb) } ?: MaterialTheme.colorScheme.surface, content = content) },
-        image = { props, modifier, _ -> AsyncImage(model = props.source, contentDescription = props.description, modifier = modifier.toComposeModifier()) },
+        image = { props, modifier, _ -> AsyncImage(contentScale = when (props.scale) { DomposableImageScale.Fit -> ContentScale.Fit; DomposableImageScale.Crop -> ContentScale.Crop; DomposableImageScale.Fill -> ContentScale.FillBounds }, model = props.source, contentDescription = props.description, modifier = modifier.toComposeModifier(), onSuccess = { props.onLoaded?.invoke() }, onError = { props.onError?.invoke() }) },
         icon = { props, modifier, _ -> Text(props.symbol, modifier.toComposeModifier().semantics { if (props.description != null) contentDescription = props.description!! else hideFromAccessibility() }) },
         divider = { props, modifier, _ -> if (props.orientation == DomposableOrientation.Horizontal) HorizontalDivider(modifier.toComposeModifier()) else VerticalDivider(modifier.toComposeModifier()) },
         spacer = { props, modifier, _ -> Spacer(modifier.toComposeModifier().size(props.length.value.dp)) },
@@ -118,7 +125,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
         menu = { props, modifier, _ -> DropdownMenu(props.expanded, props.onDismiss, modifier.toComposeModifier()) { props.items.forEach { item -> DropdownMenuItem(text = { Text(item.label) }, onClick = { item.onClick(); props.onDismiss() }, enabled = item.enabled) } } },
         dialog = { props, modifier, content -> AlertDialog(onDismissRequest = props.onDismiss, confirmButton = props.actions, dismissButton = { TextButton(props.onDismiss) { Text("Close") } }, title = { Text(props.title) }, text = content, modifier = modifier.toComposeModifier()) },
         bottomSheet = { props, modifier, content -> ModalBottomSheet(onDismissRequest = props.onDismiss, modifier = modifier.toComposeModifier()) { Text(props.title, style = MaterialTheme.typography.titleLarge); content(); TextButton(props.onDismiss) { Text("Close") } } },
-        scaffold = { props, modifier, content -> Column(modifier.toComposeModifier().fillMaxSize()) {
+        scaffold = { props, modifier, content -> Surface(modifier.toComposeModifier().fillMaxSize(), color = MaterialTheme.colorScheme.background) { Column(Modifier.fillMaxSize()) {
             props.topBar()
             Row(Modifier.weight(1f).fillMaxWidth()) {
                 props.navigation()
@@ -131,6 +138,6 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
             }
             props.bottomBar()
             props.overlays()
-        } },
+        } } },
     )
 }

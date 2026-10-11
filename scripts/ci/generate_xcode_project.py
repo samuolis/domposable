@@ -22,6 +22,13 @@ app_file = add("app-file", {"isa":"PBXFileReference","lastKnownFileType":"source
 test_file = add("test-file", {"isa":"PBXFileReference","lastKnownFileType":"sourcecode.swift","path":"DomposableDemoUITests/SmokeTests.swift","sourceTree":"<group>"})
 app_product = add("app-product", {"isa":"PBXFileReference","explicitFileType":"wrapper.application","path":"DomposableDemo.app","sourceTree":"BUILT_PRODUCTS_DIR"})
 test_product = add("test-product", {"isa":"PBXFileReference","explicitFileType":"wrapper.cfbundle","path":"DomposableDemoUITests.xctest","sourceTree":"BUILT_PRODUCTS_DIR"})
+add("app-resources", {
+    "isa": "PBXShellScriptBuildPhase", "buildActionMask": "2147483647", "files": [],
+    "inputPaths": ["$(SRCROOT)/../demo/src/commonMain/composeResources/files"],
+    "outputPaths": ["$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/compose-resources/composeResources/io.github.samuolis.domposable.demo.generated.resources/files"],
+    "runOnlyForDeploymentPostprocessing": "0", "shellPath": "/bin/sh", "name": "Bundle shared Compose resources",
+    "shellScript": 'set -eu\nasset_dir="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/compose-resources/composeResources/io.github.samuolis.domposable.demo.generated.resources/files"\nmkdir -p "$asset_dir"\ncp -R "$SRCROOT/../demo/src/commonMain/composeResources/files/." "$asset_dir/"\n',
+})
 for name, file in [("app",app_file),("test",test_file)]:
     build_file=add(name+"-build-file", {"isa":"PBXBuildFile","fileRef":file})
     add(name+"-sources", {"isa":"PBXSourcesBuildPhase","buildActionMask":"2147483647","files":[build_file],"runOnlyForDeploymentPostprocessing":"0"})
@@ -52,7 +59,7 @@ for name, file in [("app",app_file),("test",test_file)]:
         else:settings["TEST_TARGET_NAME"]="DomposableDemo"
         configs.append(add(name+"-"+config,{"isa":"XCBuildConfiguration","name":config,"buildSettings":settings}))
     add(name+"-config-list", {"isa":"XCConfigurationList","buildConfigurations":configs,"defaultConfigurationIsVisible":"0","defaultConfigurationName":"Release"})
-    add(name+"-target", {"isa":"PBXNativeTarget","name":"DomposableDemo"+("UITests" if name=="test" else ""),"productName":"DomposableDemo"+("UITests" if name=="test" else ""),"productType":"com.apple.product-type.application" if name=="app" else "com.apple.product-type.bundle.ui-testing","productReference":app_product if name=="app" else test_product,"buildConfigurationList":ref(name+"-config-list"),"buildPhases":[ref(name+"-sources"),ref(name+"-frameworks")],"buildRules":[],"dependencies":[]})
+    add(name+"-target", {"isa":"PBXNativeTarget","name":"DomposableDemo"+("UITests" if name=="test" else ""),"productName":"DomposableDemo"+("UITests" if name=="test" else ""),"productType":"com.apple.product-type.application" if name=="app" else "com.apple.product-type.bundle.ui-testing","productReference":app_product if name=="app" else test_product,"buildConfigurationList":ref(name+"-config-list"),"buildPhases":[ref(name+"-sources"),ref(name+"-frameworks")]+([ref("app-resources")] if name=="app" else []),"buildRules":[],"dependencies":[]})
 products=add("products", {"isa":"PBXGroup","name":"Products","children":[app_product,test_product],"sourceTree":"<group>"})
 group=add("main-group", {"isa":"PBXGroup","children":[app_file,test_file,products],"sourceTree":"<group>"})
 configs=[add("project-"+name,{"isa":"XCBuildConfiguration","name":name,"buildSettings":{"CLANG_ENABLE_MODULES":"YES"}}) for name in ["Debug","Release"]]

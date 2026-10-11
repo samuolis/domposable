@@ -5,7 +5,7 @@ import io.github.samuolis.domposable.foundation.*
 
 data class DomposableLazyItem(val key: String, val content: @Composable () -> Unit)
 
-data class DomposableNavigationItem(val label: String, val symbol: String = "")
+data class DomposableNavigationItem(val label: String, val symbol: String = "", val href: String? = null)
 data class DomposableMenuItem(val label: String, val onClick: () -> Unit, val enabled: Boolean = true)
 
 @DomposableComponent("Theme")
@@ -16,6 +16,13 @@ data class DomposableColumnProps(val gap: DomposableLength = 0.dp, val alignment
 
 @DomposableComponent("Row")
 data class DomposableRowProps(val gap: DomposableLength = 0.dp, val alignment: DomposableAlignment = DomposableAlignment.Start)
+
+@DomposableComponent("FlowRow")
+data class DomposableFlowRowProps(val gap: DomposableLength = 8.dp)
+
+/** A browser anchor on HTML; opens a URI with the platform handler on Compose UI. */
+@DomposableComponent("Link")
+data class DomposableLinkProps(val label: String, val href: String)
 
 @DomposableComponent("Box")
 data class DomposableBoxProps(val alignment: DomposableAlignment = DomposableAlignment.Start)
@@ -62,7 +69,7 @@ data class DomposableCardProps(val onClick: (() -> Unit)? = null)
 data class DomposableSurfaceProps(val color: DomposableColor? = null)
 
 @DomposableComponent("Image")
-data class DomposableImageProps(val source: String, val description: String?)
+data class DomposableImageProps(val source: String, val description: String?, val onLoaded: (() -> Unit)? = null, val onError: (() -> Unit)? = null, val scale: DomposableImageScale = DomposableImageScale.Fit)
 
 @DomposableComponent("Icon")
 data class DomposableIconProps(val symbol: String, val description: String?)
@@ -128,6 +135,10 @@ fun DomposableTheme(tokens: DomposableTokens = DomposableTokens(), components: D
     DomposableColumn(DomposableColumnProps(gap, alignment), modifier, content)
 @Composable fun DomposableRow(modifier: DomposableModifier = DomposableModifier, gap: DomposableLength = 0.dp, alignment: DomposableAlignment = DomposableAlignment.Start, content: @Composable () -> Unit) =
     DomposableRow(DomposableRowProps(gap, alignment), modifier, content)
+@Composable fun DomposableFlowRow(modifier: DomposableModifier = DomposableModifier, gap: DomposableLength = 8.dp, content: @Composable () -> Unit) =
+    DomposableFlowRow(DomposableFlowRowProps(gap), modifier, content)
+@Composable fun DomposableLink(label: String, href: String, modifier: DomposableModifier = DomposableModifier) =
+    DomposableLink(DomposableLinkProps(label, href), modifier)
 @Composable fun DomposableBox(modifier: DomposableModifier = DomposableModifier, alignment: DomposableAlignment = DomposableAlignment.Start, content: @Composable () -> Unit) =
     DomposableBox(DomposableBoxProps(alignment), modifier, content)
 @Composable fun DomposableCard(modifier: DomposableModifier = DomposableModifier, onClick: (() -> Unit)? = null, content: @Composable () -> Unit) =

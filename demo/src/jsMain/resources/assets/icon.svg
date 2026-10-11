@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Domposable: one frame, adaptable panes</title>
+  <rect width="64" height="64" rx="16" fill="#5746b2"/>
+  <path d="M16 15h16c13 0 20 6 20 17s-7 17-20 17H16z" fill="#fcfaff"/>
+  <path d="M23 22h9v20h-9zm15 1c5 2 7 5 7 9s-2 7-7 9z" fill="#5746b2"/>
+  <circle cx="51" cy="14" r="7" fill="#80ead0"/>
+</svg>
