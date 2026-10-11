@@ -1,7 +1,43 @@
 {
-  "android": ["tasks", "catalog", "recipes"],
-  "desktop": ["tasks", "catalog", "recipes"],
-  "ios": ["tasks", "catalog", "recipes", "adaptive"],
-  "dom": ["tasks-phone", "tasks-tablet", "tasks-wide", "catalog-phone", "catalog-wide", "recipes-wide", "detail-wide", "dialog-phone"],
-  "wasm": ["tasks-phone", "tasks-wide", "catalog-wide", "recipes-wide"]
+  "android": [
+    "tasks",
+    "catalog",
+    "recipes",
+    "shop"
+  ],
+  "desktop": [
+    "tasks",
+    "catalog",
+    "recipes",
+    "shop"
+  ],
+  "ios": [
+    "tasks",
+    "catalog",
+    "recipes",
+    "adaptive",
+    "shop"
+  ],
+  "dom": [
+    "tasks-phone",
+    "tasks-tablet",
+    "tasks-wide",
+    "catalog-phone",
+    "catalog-wide",
+    "recipes-wide",
+    "detail-wide",
+    "dialog-phone",
+    "shop-phone",
+    "shop-wide",
+    "shop-collection-wide",
+    "shop-cart-phone"
+  ],
+  "wasm": [
+    "tasks-phone",
+    "tasks-wide",
+    "catalog-wide",
+    "recipes-wide",
+    "shop-phone",
+    "shop-wide"
+  ]
 }

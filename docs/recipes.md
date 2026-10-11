@@ -53,6 +53,8 @@ DomposableBrowserHistory(
 )
 ```
 
+`DomposableNavigationItem.href` renders a real anchor in HTML. Ordinary clicks call the application navigation callback; Ctrl/Cmd-click and opening a new tab retain normal browser link behavior. Native providers use the navigation callback.
+
 Install one binding for the application's stack. The codec must encode an absolute application path beginning with `/`; encode route parameters safely and validate them while decoding. `basePath` scopes the binding below a host path. Set `trailingSlash = true` for static directory hosting to avoid reload redirects that can discard history state. Query parameters and data loading remain application responsibilities; the current binding routes using the pathname only. Use a query-aware application adapter when queries are part of navigation identity.
 
 ### Host configuration

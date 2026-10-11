@@ -15,7 +15,7 @@ test('HTML feature supports input, adaptive panes and browser history', async ({
   await expect(page.locator('[data-entry-id]')).toHaveCount(1);
   await expect(page.getByTestId('task-notes')).toHaveValue('Preserve this draft');
   await expect(page.locator('[data-entry-id]')).toHaveAttribute('data-entry-id', detailId!);
-  await page.getByRole('button', { name: 'Components', exact: false }).click();
+  await page.getByRole('link', { name: 'Components', exact: false }).click();
   await expect(page.getByRole('heading', { name: 'Component catalog' })).toBeVisible();
   await page.goBack();
   await expect(page.getByTestId('task-notes')).toHaveValue('Preserve this draft');
@@ -53,7 +53,7 @@ test('history restores numeric saveables and reload beneath a project base path'
   await page.goto('/#/catalog');
   await page.getByRole('slider', { name: 'Progress' }).fill('0.75');
   await page.getByTestId('catalog-input').fill('Reload state');
-  await page.getByRole('button', { name: 'Tasks', exact: false }).click();
+  await page.getByRole('link', { name: 'Tasks', exact: false }).click();
   await expect(page).toHaveURL(/#\/tasks$/);
   await page.goBack();
   await expect(page.getByRole('slider', { name: 'Progress' })).toHaveValue('0.75');
@@ -108,10 +108,22 @@ test('path URLs support deep links, history and reload below a hosting base', as
   await page.getByTestId('task-notes').fill('Path URL draft');
   await page.reload();
   await expect(page.getByTestId('task-notes')).toHaveValue('Path URL draft');
-  await page.getByRole('button', { name: 'Components', exact: false }).click();
+  await page.getByRole('link', { name: 'Components', exact: false }).click();
   await expect(page).toHaveURL(/\/routes\/catalog\/$/);
   await page.goBack();
   await expect(page.getByTestId('task-notes')).toHaveValue('Path URL draft');
   await page.goForward();
   await expect(page.getByRole('heading', { name: 'Component catalog' })).toBeVisible();
+});
+
+test('dynamic path fallback and unknown routes preserve meaningful URLs', async ({ page }) => {
+  await page.goto('/routes/tasks/missing-demo-task/');
+  await expect(page.getByRole('alert')).toHaveText('This task is unavailable');
+  await expect(page).toHaveURL(/\/routes\/tasks\/missing-demo-task\/$/);
+  await page.goto('/routes/unknown-page/');
+  await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
+  await expect(page).toHaveURL(/\/routes\/unknown-page\/$/);
+  await page.getByRole('button', { name: 'Return to tasks' }).click();
+  await expect(page).toHaveURL(/\/routes\/tasks\/$/);
+  await expect(page.getByRole('link', { name: 'Components', exact: false })).toHaveAttribute('href', '/routes/catalog/');
 });

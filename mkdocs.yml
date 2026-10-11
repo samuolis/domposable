@@ -13,21 +13,27 @@ theme:
   features: [navigation.tabs, content.code.copy]
 nav:
   - Home: index.md
-  - Start: getting-started.md
-  - Architecture: architecture.md
-  - Design systems: design-systems.md
-  - Screens and navigation: screens.md
-  - Adaptive UI: adaptive.md
-  - Migration: migration.md
-  - Recipes: recipes.md
-  - Integrations: integrations.md
-  - Compatibility: compatibility.md
-  - Compare web: compare.md
-  - Coverage: coverage.md
-  - Validation: validation.md
-  - Releases: releasing.md
-  - Roadmap: roadmap.md
-  - Brand: brand.md
+  - Guides:
+      - Get started: getting-started.md
+      - Components: components.md
+      - Design systems: design-systems.md
+      - Adaptive layouts: adaptive.md
+      - Screens and navigation: screens.md
+      - Navigation recipes and URLs: recipes.md
+      - Integrations: integrations.md
+      - Architecture: architecture.md
+      - Migration: migration.md
+      - Compatibility and coverage: compatibility.md
+      - Component coverage: coverage.md
+  - Examples:
+      - Shopping app: shopping.md
+      - Compare HTML and Wasm: compare.md
+      - Playground: https://samuolis.github.io/domposable/demo/
+      - Storefront: https://samuolis.github.io/domposable/shop/
   - API: https://samuolis.github.io/domposable/api/
-  - Live demo: https://samuolis.github.io/domposable/demo/
+  - Contributing:
+      - Validation and visual review: validation.md
+      - Release maintenance: releasing.md
+      - Roadmap: roadmap.md
+      - Brand assets: brand.md
 markdown_extensions: [admonition, tables, fenced_code]

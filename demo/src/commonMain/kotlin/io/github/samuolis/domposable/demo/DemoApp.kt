@@ -15,6 +15,7 @@ sealed interface DemoRoute {
     data class Detail(val taskId: String) : DemoRoute
     data object Catalog : DemoRoute
     data object Recipes : DemoRoute
+    data class NotFound(val path: String) : DemoRoute
 }
 
 private object DemoCodec : DomposableRouteCodec<DemoRoute> {
@@ -22,6 +23,7 @@ private object DemoCodec : DomposableRouteCodec<DemoRoute> {
         DemoRoute.Tasks -> "/tasks"
         DemoRoute.Catalog -> "/catalog"
         DemoRoute.Recipes -> "/recipes"
+        is DemoRoute.NotFound -> route.path
         is DemoRoute.Detail -> "/tasks/${route.taskId}"
     }
     override fun decode(path: String): DemoRoute? = when {
@@ -29,7 +31,7 @@ private object DemoCodec : DomposableRouteCodec<DemoRoute> {
         path == "/catalog" -> DemoRoute.Catalog
         path == "/recipes" -> DemoRoute.Recipes
         path.startsWith("/tasks/") && path.removePrefix("/tasks/").matches(Regex("[a-z0-9-]+")) -> DemoRoute.Detail(path.removePrefix("/tasks/"))
-        else -> null
+        else -> DemoRoute.NotFound(path)
     }
 }
 
@@ -61,6 +63,11 @@ private fun DomposableEntryScope<DemoRoute.Detail>.rememberDetailModel(): TaskDe
 
 @Composable
 fun DemoApp(initialRoute: DemoRoute = DemoRoute.Tasks, browserUrls: DomposableBrowserUrls = DomposableBrowserUrls.Hash) {
+    var shopping by rememberSaveable { mutableStateOf(false) }
+    if (shopping) {
+        ShoppingApp(browserUrls = browserUrls, onExit = { shopping = false })
+        return
+    }
     val workspace = remember { TaskWorkspaceModel() }
     val stack = rememberDomposableBackStack<DemoRoute>(initialRoute)
     var customButtons by rememberSaveable { mutableStateOf(false) }
@@ -71,15 +78,20 @@ fun DemoApp(initialRoute: DemoRoute = DemoRoute.Tasks, browserUrls: DomposableBr
         register(taskDetailScreenDestination { TaskDetailScreen(rememberDetailModel(), workspace) { if (stack.size > 1) stack.removeLast() } })
         register(componentCatalogScreenDestination())
         register(navigationRecipesScreenDestination())
+        register(unavailableScreenDestination { UnavailableScreen(route.path) { stack.clear(); stack.add(DomposableEntryScope(DemoRoute.Tasks)) } })
     } }
     DomposableTheme(tokens = DemoTokens, components = if (customButtons) custom else defaultComponents) {
         DomposableBrowserHistory(stack, DemoCodec, browserUrls)
         DomposableMeasure { shellSize ->
             val shell = rememberDomposableAdaptiveInfo(shellSize)
-            val selected = when (stack.last().route) { DemoRoute.Catalog -> 1; DemoRoute.Recipes -> 2; else -> 0 }
+            val selected = when (stack.last().route) { DemoRoute.Catalog -> 1; DemoRoute.Recipes -> 2; is DemoRoute.NotFound -> -1; else -> 0 }
+            fun href(path: String) = when (val mode = browserUrls) {
+                DomposableBrowserUrls.Hash -> "#$path"
+                is DomposableBrowserUrls.Path -> mode.basePath.trimEnd('/') + path + if (mode.trailingSlash) "/" else ""
+            }
             val navigation: @Composable () -> Unit = {
                 DomposableNavigationBar(DomposableNavigationBarProps(
-                    listOf(DomposableNavigationItem("Tasks", "✓"), DomposableNavigationItem("Components", "◉"), DomposableNavigationItem("Recipes", "▦")),
+                    listOf(DomposableNavigationItem("Tasks", "✓", href("/tasks")), DomposableNavigationItem("Components", "◉", href("/catalog")), DomposableNavigationItem("Recipes", "▦", href("/recipes"))),
                     selected, { index -> stack.clear(); stack.add(DomposableEntryScope(when (index) { 1 -> DemoRoute.Catalog; 2 -> DemoRoute.Recipes; else -> DemoRoute.Tasks })) },
                     if (shell.widthClass == DomposableWidthClass.Compact) DomposableOrientation.Horizontal else DomposableOrientation.Vertical,
                 ))
@@ -90,6 +102,7 @@ fun DemoApp(initialRoute: DemoRoute = DemoRoute.Tasks, browserUrls: DomposableBr
                         DomposableText("◈ Domposable", style = DomposableTextStyle.Title, headingLevel = 1)
                         DomposableBadge(DomposableBadgeProps("PLAYGROUND"))
                         DomposableSwitch(DomposableSwitchProps(customButtons, { customButtons = it }, "Custom buttons"))
+                        DomposableButton("Shop demo", { openShopDemo { shopping = true } })
                     }
                 },
                 navigation = { if (shell.widthClass != DomposableWidthClass.Compact) navigation() },
@@ -233,3 +246,15 @@ fun ComponentCatalogScreen() {
 
 @Composable
 internal expect fun CustomDemoButton(props: DomposableButtonProps, modifier: DomposableModifier, content: @Composable () -> Unit)
+
+@Composable
+@DomposableScreen(route = DemoRoute.NotFound::class)
+fun UnavailableScreen(path: String, onHome: () -> Unit) {
+    DomposableColumn(DomposableModifier.padding(24.dp), gap = 16.dp) {
+        DomposableText("Page not found", style = DomposableTextStyle.Title)
+        DomposableText("No example matches $path")
+        DomposableButton("Return to tasks", onHome)
+    }
+}
+
+internal expect fun openShopDemo(onOpen: () -> Unit)

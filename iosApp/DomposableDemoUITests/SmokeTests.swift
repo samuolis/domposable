@@ -43,4 +43,20 @@ final class SmokeTests: XCTestCase {
         app.buttons["Open message"].tap()
         XCTAssertTrue(app.textViews["recipe-draft"].waitForExistence(timeout: 10))
     }
+    func testShopping() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launch()
+        ready(app, "Task workspace")
+        app.buttons["Shop demo"].tap()
+        ready(app, "FIELDWORK")
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "shop-hero.png-loaded").firstMatch.waitForExistence(timeout: 30))
+        capture(app, "shop")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Shop all")).firstMatch.tap()
+        ready(app, "Shop the collection")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Add Canvas weekender to bag")).firstMatch.tap()
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Bag (1)")).firstMatch.tap()
+        ready(app, "Your bag")
+        ready(app, "Canvas weekender")
+    }
 }

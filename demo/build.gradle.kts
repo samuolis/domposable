@@ -12,6 +12,7 @@ kotlin {
         namespace = "io.github.samuolis.domposable.demo.shared"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 23
+        androidResources { enable = true }
         withHostTest { isIncludeAndroidResources = true }
     }
     jvm()
@@ -23,6 +24,7 @@ kotlin {
         val commonMain = getByName("commonMain") {
             dependencies {
                 api(libs.compose.runtime)
+                implementation(compose.components.resources)
                 api(project(":domposable-design-material"))
                 api(project(":domposable-adaptive"))
                 api(project(":domposable-navigation3"))

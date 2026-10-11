@@ -674,16 +674,25 @@ final class io.github.samuolis.domposable.ui/DomposableIconProps { // io.github.
 }
 
 final class io.github.samuolis.domposable.ui/DomposableImageProps { // io.github.samuolis.domposable.ui/DomposableImageProps|null[0]
-    constructor <init>(kotlin/String, kotlin/String?) // io.github.samuolis.domposable.ui/DomposableImageProps.<init>|<init>(kotlin.String;kotlin.String?){}[0]
+    constructor <init>(kotlin/String, kotlin/String?, kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., io.github.samuolis.domposable.foundation/DomposableImageScale = ...) // io.github.samuolis.domposable.ui/DomposableImageProps.<init>|<init>(kotlin.String;kotlin.String?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;io.github.samuolis.domposable.foundation.DomposableImageScale){}[0]
 
     final val description // io.github.samuolis.domposable.ui/DomposableImageProps.description|{}description[0]
         final fun <get-description>(): kotlin/String? // io.github.samuolis.domposable.ui/DomposableImageProps.description.<get-description>|<get-description>(){}[0]
+    final val onError // io.github.samuolis.domposable.ui/DomposableImageProps.onError|{}onError[0]
+        final fun <get-onError>(): kotlin/Function0<kotlin/Unit>? // io.github.samuolis.domposable.ui/DomposableImageProps.onError.<get-onError>|<get-onError>(){}[0]
+    final val onLoaded // io.github.samuolis.domposable.ui/DomposableImageProps.onLoaded|{}onLoaded[0]
+        final fun <get-onLoaded>(): kotlin/Function0<kotlin/Unit>? // io.github.samuolis.domposable.ui/DomposableImageProps.onLoaded.<get-onLoaded>|<get-onLoaded>(){}[0]
+    final val scale // io.github.samuolis.domposable.ui/DomposableImageProps.scale|{}scale[0]
+        final fun <get-scale>(): io.github.samuolis.domposable.foundation/DomposableImageScale // io.github.samuolis.domposable.ui/DomposableImageProps.scale.<get-scale>|<get-scale>(){}[0]
     final val source // io.github.samuolis.domposable.ui/DomposableImageProps.source|{}source[0]
         final fun <get-source>(): kotlin/String // io.github.samuolis.domposable.ui/DomposableImageProps.source.<get-source>|<get-source>(){}[0]
 
     final fun component1(): kotlin/String // io.github.samuolis.domposable.ui/DomposableImageProps.component1|component1(){}[0]
     final fun component2(): kotlin/String? // io.github.samuolis.domposable.ui/DomposableImageProps.component2|component2(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/String? = ...): io.github.samuolis.domposable.ui/DomposableImageProps // io.github.samuolis.domposable.ui/DomposableImageProps.copy|copy(kotlin.String;kotlin.String?){}[0]
+    final fun component3(): kotlin/Function0<kotlin/Unit>? // io.github.samuolis.domposable.ui/DomposableImageProps.component3|component3(){}[0]
+    final fun component4(): kotlin/Function0<kotlin/Unit>? // io.github.samuolis.domposable.ui/DomposableImageProps.component4|component4(){}[0]
+    final fun component5(): io.github.samuolis.domposable.foundation/DomposableImageScale // io.github.samuolis.domposable.ui/DomposableImageProps.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., io.github.samuolis.domposable.foundation/DomposableImageScale = ...): io.github.samuolis.domposable.ui/DomposableImageProps // io.github.samuolis.domposable.ui/DomposableImageProps.copy|copy(kotlin.String;kotlin.String?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;io.github.samuolis.domposable.foundation.DomposableImageScale){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.ui/DomposableImageProps.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.ui/DomposableImageProps.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.samuolis.domposable.ui/DomposableImageProps.toString|toString(){}[0]
@@ -833,8 +842,10 @@ final class io.github.samuolis.domposable.ui/DomposableNavigationBarProps { // i
 }
 
 final class io.github.samuolis.domposable.ui/DomposableNavigationItem { // io.github.samuolis.domposable.ui/DomposableNavigationItem|null[0]
-    constructor <init>(kotlin/String, kotlin/String = ...) // io.github.samuolis.domposable.ui/DomposableNavigationItem.<init>|<init>(kotlin.String;kotlin.String){}[0]
+    constructor <init>(kotlin/String, kotlin/String = ..., kotlin/String? = ...) // io.github.samuolis.domposable.ui/DomposableNavigationItem.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?){}[0]
 
+    final val href // io.github.samuolis.domposable.ui/DomposableNavigationItem.href|{}href[0]
+        final fun <get-href>(): kotlin/String? // io.github.samuolis.domposable.ui/DomposableNavigationItem.href.<get-href>|<get-href>(){}[0]
     final val label // io.github.samuolis.domposable.ui/DomposableNavigationItem.label|{}label[0]
         final fun <get-label>(): kotlin/String // io.github.samuolis.domposable.ui/DomposableNavigationItem.label.<get-label>|<get-label>(){}[0]
     final val symbol // io.github.samuolis.domposable.ui/DomposableNavigationItem.symbol|{}symbol[0]
@@ -842,7 +853,8 @@ final class io.github.samuolis.domposable.ui/DomposableNavigationItem { // io.gi
 
     final fun component1(): kotlin/String // io.github.samuolis.domposable.ui/DomposableNavigationItem.component1|component1(){}[0]
     final fun component2(): kotlin/String // io.github.samuolis.domposable.ui/DomposableNavigationItem.component2|component2(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/String = ...): io.github.samuolis.domposable.ui/DomposableNavigationItem // io.github.samuolis.domposable.ui/DomposableNavigationItem.copy|copy(kotlin.String;kotlin.String){}[0]
+    final fun component3(): kotlin/String? // io.github.samuolis.domposable.ui/DomposableNavigationItem.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String? = ...): io.github.samuolis.domposable.ui/DomposableNavigationItem // io.github.samuolis.domposable.ui/DomposableNavigationItem.copy|copy(kotlin.String;kotlin.String;kotlin.String?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.ui/DomposableNavigationItem.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.ui/DomposableNavigationItem.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.samuolis.domposable.ui/DomposableNavigationItem.toString|toString(){}[0]

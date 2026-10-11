@@ -5,7 +5,7 @@ import io.github.samuolis.domposable.foundation.*
 
 data class DomposableLazyItem(val key: String, val content: @Composable () -> Unit)
 
-data class DomposableNavigationItem(val label: String, val symbol: String = "")
+data class DomposableNavigationItem(val label: String, val symbol: String = "", val href: String? = null)
 data class DomposableMenuItem(val label: String, val onClick: () -> Unit, val enabled: Boolean = true)
 
 @DomposableComponent("Theme")
@@ -69,7 +69,7 @@ data class DomposableCardProps(val onClick: (() -> Unit)? = null)
 data class DomposableSurfaceProps(val color: DomposableColor? = null)
 
 @DomposableComponent("Image")
-data class DomposableImageProps(val source: String, val description: String?)
+data class DomposableImageProps(val source: String, val description: String?, val onLoaded: (() -> Unit)? = null, val onError: (() -> Unit)? = null, val scale: DomposableImageScale = DomposableImageScale.Fit)
 
 @DomposableComponent("Icon")
 data class DomposableIconProps(val symbol: String, val description: String?)

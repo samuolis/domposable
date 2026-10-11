@@ -1,8 +1,8 @@
-<img src="docs/assets/brand/icon.svg" alt="Domposable" width="72" height="72">
+![Domposable — native apps, real DOM, responsive by design](docs/assets/brand/header.svg)
 
 # Domposable
 
-**One Compose API for apps and semantic HTML.**
+**Native apps and responsive DOM websites from the same Compose feature codebase.**
 
 Domposable gives feature teams a small shared UI vocabulary: ordinary composable screens, ordered modifiers, component renderers, theme tokens and adaptive recipes. Android and iOS use Compose UI. Kotlin/JS uses HTML elements, CSS and native browser controls. The same demo also builds for JVM desktop and Kotlin/Wasm; these targets are experimental. It is a Kotlin Multiplatform (KMP) and Compose Multiplatform (CMP) UI library with a semantic DOM renderer, responsive layouts and a replaceable design system.
 
@@ -37,23 +37,18 @@ Coordinates: `io.github.samuolis.domposable:<artifact>:<released version>`. The 
 
 [Guides](https://samuolis.github.io/domposable/) · [Demo](https://samuolis.github.io/domposable/demo/) · [HTML/Wasm comparison](https://samuolis.github.io/domposable/compare/) · [Clean URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Release downloads](https://github.com/samuolis/domposable/releases)
 
-## Development
+## See it in action
 
-Use JDK 21, Node 24, Android SDK 37.2 and macOS/Xcode 26 for iOS. Put your SDK path in ignored `local.properties`, or set `ANDROID_HOME`.
+[Fieldwork shopping app](https://samuolis.github.io/domposable/shop/) · [Component playground](https://samuolis.github.io/domposable/demo/) · [HTML and Wasm comparison](https://samuolis.github.io/domposable/compare/)
 
-```sh
-./gradlew jvmTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack
-npm ci
-npx playwright install chromium firefox webkit
-python3 scripts/ci/browser_preview.py
-npx playwright test
-```
+The fictional shop shares its catalogue, filters, cart, checkout and feature composables across native apps, semantic HTML and Wasm. HTML uses real header/main/footer landmarks, links and form controls, with product URLs such as `/domposable/shop/products/canvas-weekender/`.
 
-For iOS, build `:demo:linkDebugFrameworkIosSimulatorArm64`, then run `python3 scripts/ci/ios_test.py`. CI checks API baselines and consumers resolving actual published variants; see [CONTRIBUTING.md](CONTRIBUTING.md).
+![Fieldwork responsive storefront on the web](docs/assets/examples/shop-web.png)
+![Domposable shared components on mobile and semantic HTML](docs/assets/examples/components.png)
 
-The **Bump and release** GitHub Action owns `version.properties`, publishes Maven artifacts, attaches a signed APK, Ad Hoc IPA, simulator app and symbols, and deploys the website to GitHub Pages. [Release setup and recovery](docs/releasing.md).
+Start with [the installation guide](docs/getting-started.md), then explore [components](docs/components.md), [responsive layouts](docs/adaptive.md), [design providers](docs/design-systems.md) and [Metro/Kobweb integration](docs/integrations.md). The [shopping walkthrough](docs/shopping.md) connects the pieces in one app. There is no mandatory ViewModel base class, MVI contract or DI container.
 
-See the [compatibility table](docs/compatibility.md), [Metro/Kobweb examples](docs/integrations.md), [visual review process](docs/validation.md) and [remaining release work](docs/roadmap.md).
+For local development, tests and release maintenance, see [CONTRIBUTING.md](CONTRIBUTING.md). Current support and limitations are in the [compatibility table](docs/compatibility.md).
 
 Alpha APIs may change. HTML collections currently render keyed DOM lists rather than virtualizing; platform escape hatches remain platform-specific. See [coverage](docs/coverage.md) for current boundaries.
 

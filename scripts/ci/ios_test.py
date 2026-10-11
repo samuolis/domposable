@@ -19,7 +19,7 @@ result = root / f"build/ios-tests-{os.getpid()}.xcresult"
 try:
     subprocess.run(["xcrun", "simctl", "boot", identifier], check=True)
     subprocess.run(["xcrun", "simctl", "bootstatus", identifier, "-b"], check=True, timeout=600)
-    subprocess.run(["xcrun", "simctl", "status_bar", identifier, "override", "--time", "09:41", "--batteryState", "charged", "--batteryLevel", "100", "--wifiMode", "active", "--wifiBars", "3"], check=True)
+    subprocess.run(["xcrun", "simctl", "status_bar", identifier, "override", "--time", "2026-10-11T09:41:00.000Z", "--batteryState", "charged", "--batteryLevel", "100", "--wifiMode", "active", "--wifiBars", "3"], check=True)
     subprocess.run([
         "xcodebuild", "test", "-project", "iosApp/DomposableDemo.xcodeproj", "-scheme", "DomposableDemo",
         "-configuration", "Debug", "-destination", f"id={identifier}",
@@ -27,20 +27,22 @@ try:
         "CODE_SIGNING_ALLOWED=NO",
     ], cwd=root, check=True, timeout=1800)
 finally:
-    if result.exists():
-        exported = root / "build/ios-attachments"
-        subprocess.run(["xcrun", "xcresulttool", "export", "attachments", "--path", str(result), "--output-path", str(exported)], check=True)
-        destination = root / "build/screenshots/ios"
-        destination.mkdir(parents=True, exist_ok=True)
-        import shutil
-        for test in json.loads((exported/"manifest.json").read_text()):
-            for attachment in test["attachments"]:
-                name = attachment["suggestedHumanReadableName"]
-                if name.startswith("golden-"):
-                    name = name.removeprefix("golden-").removesuffix(".png")
-                    # Xcode can append a timestamp to human-readable names.
-                    name = name.split("_")[0]
-                    if name in {"tasks", "catalog", "recipes", "adaptive"}:
-                        shutil.copy2(exported/attachment["exportedFileName"], destination/f"{name}.png")
-    subprocess.run(["xcrun", "simctl", "shutdown", identifier], capture_output=True)
-    subprocess.run(["xcrun", "simctl", "delete", identifier], check=True)
+    try:
+        if result.exists():
+            exported = root / f"build/ios-attachments-{os.getpid()}"
+            subprocess.run(["xcrun", "xcresulttool", "export", "attachments", "--path", str(result), "--output-path", str(exported)], check=True)
+            destination = root / "build/screenshots/ios"
+            destination.mkdir(parents=True, exist_ok=True)
+            import shutil
+            for test in json.loads((exported/"manifest.json").read_text()):
+                for attachment in test["attachments"]:
+                    name = attachment["suggestedHumanReadableName"]
+                    if name.startswith("golden-"):
+                        name = name.removeprefix("golden-").removesuffix(".png")
+                        # Xcode can append a timestamp to human-readable names.
+                        name = name.split("_")[0]
+                        if name in set(json.loads((root/"screenshots/manifest.json").read_text())["ios"]):
+                            shutil.copy2(exported/attachment["exportedFileName"], destination/f"{name}.png")
+    finally:
+        subprocess.run(["xcrun", "simctl", "shutdown", identifier], capture_output=True)
+        subprocess.run(["xcrun", "simctl", "delete", identifier], check=True)

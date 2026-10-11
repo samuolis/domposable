@@ -14,7 +14,8 @@ fun main() {
         else -> DemoRoute.Tasks
     }
     ComposeViewport(document.getElementById("root")!!) {
-        DemoApp(initialRoute = route)
+        val path = window.location.hash.removePrefix("#")
+        if (path.startsWith("/shop")) ShoppingApp(initialRoute = ShopCodec.decode(path), onArtworkLoaded = { document.body!!.setAttribute("data-shop-artwork-ready", "true") }) else DemoApp(initialRoute = route)
         LaunchedEffect(Unit) {
             withFrameNanos { }; withFrameNanos { }
             document.body!!.setAttribute("data-domposable-ready", "true")

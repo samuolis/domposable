@@ -7,7 +7,7 @@ Both previews compile the same shared feature sources, theme tokens, application
 <label for="preview-width">Preview width</label>
 <select id="preview-width"><option value="390">Phone · 390 px</option><option value="768">Tablet · 768 px</option><option value="1440" selected>Wide · 1440 px</option></select>
 <label for="preview-route">Feature</label>
-<select id="preview-route"><option value="tasks">Tasks</option><option value="catalog">Components</option><option value="recipes">Navigation recipes</option></select>
+<select id="preview-route"><option value="tasks">Tasks</option><option value="catalog">Components</option><option value="recipes">Navigation recipes</option><option value="shop">Fieldwork storefront</option><option value="shop/collection">Shop collection</option></select>
 <div class="comparison">
   <section><h2>Semantic HTML · Kotlin/JS</h2><div class="preview-scroll"><iframe title="Domposable semantic HTML preview" src="../demo/#/tasks" loading="lazy"></iframe></div></section>
   <section><h2>Compose UI · Kotlin/Wasm</h2><div class="preview-scroll"><iframe title="Domposable Wasm preview" src="../wasm/#/tasks" loading="lazy"></iframe></div></section>

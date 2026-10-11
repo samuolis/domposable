@@ -32,3 +32,11 @@ Recording runs deliberately fail **CI passed**, so they cannot satisfy branch pr
 For local inspection, build both browser development bundles, run `python scripts/ci/browser_preview.py`, then `npx playwright test`. Native captures run with `:demo:testAndroidHostTest`, `:demo:jvmTest` and `python scripts/ci/ios_test.py`. Compare a platform with `python scripts/ci/screenshots.py dom`; use `--record` to inspect candidates without a comparison. On Linux, run desktop tests under `xvfb-run -a`.
 
 ABI changes require `./gradlew updateKotlinAbi` and review of the generated diff. Follow [CONTRIBUTING](https://github.com/samuolis/domposable/blob/main/CONTRIBUTING.md) for toolchain setup. Automated checks supplement manual keyboard, VoiceOver/TalkBack, touch and real-device reviews; screenshot coverage alone is not accessibility certification.
+
+## Inline PR evidence
+
+Ranker's review format is also used here: action title, scoped architecture bullets plus Mermaid, consumer API example, executable build commands, and relevant validation. For visual changes, embed PNG previews in the PR body. Main | Pixel difference | PR comparisons apply when a scenario has a main baseline; new scenarios get an added preview.
+
+Run **Publish visual review** with a completed CI run ID and the open PR number. It validates provenance against the current PR head, reads bounded PNG captures, fetches baseline images at the exact base revision, and creates an isolated `visual-review/pr-<n>/run-<id>` ref. The job summary and `visual-review-markdown` artifact contain immutable image URLs to paste into `Visual evidence`. The publisher verifies that each URL returns PNG bytes. Maintainers also inspect the rendered PR body before marking it ready.
+
+Generated comparisons stay outside main and feature branches. Approved golden inputs remain in `screenshots/`; documentation illustrations can be refreshed from them with `python scripts/ci/export_examples.py`. Recording candidates and publishing review evidence are separate from approving baseline updates.
