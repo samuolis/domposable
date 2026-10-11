@@ -8,41 +8,47 @@ plugins {
 
 kotlin {
     jvmToolchain(21)
-    androidLibrary {
+    android {
         namespace = "io.github.samuolis.domposable.demo.shared"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 23
-        withHostTest {}
+        withHostTest { isIncludeAndroidResources = true }
     }
     jvm()
-    js(IR) { browser(); binaries.executable(); }
+    js { browser(); binaries.executable(); }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain by getting {
+        val commonMain = getByName("commonMain") {
             dependencies {
-                api(compose.runtime)
+                api(libs.compose.runtime)
                 api(project(":domposable-design-material"))
                 api(project(":domposable-adaptive"))
                 api(project(":domposable-navigation3"))
                 api(project(":domposable-lifecycle-viewmodel"))
             }
         }
-        val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-        val iosMain by creating { dependsOn(commonMain) }
+        val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
+        getByName("androidHostTest") { dependencies {
+            implementation("org.robolectric:robolectric:4.17")
+            implementation("junit:junit:4.13.2")
+            implementation("androidx.compose.ui:ui-test-junit4:1.12.1")
+            implementation("androidx.compose.ui:ui-test-manifest:1.12.1")
+        } }
+        val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        val composeUiMain by creating {
+        val composeUiMain = create("composeUiMain") {
             dependsOn(commonMain)
             dependencies {
-                api(compose.ui)
-                api(compose.foundation)
+                api(libs.compose.ui)
+                api(libs.compose.foundation)
             }
         }
         getByName("androidMain").dependsOn(composeUiMain)
         getByName("jvmMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
-        jsMain { dependencies { implementation(compose.html.core); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
         jvmMain { dependencies { implementation(compose.desktop.currentOs) } }
     }
 }
@@ -61,4 +67,7 @@ tasks.matching { (it.name.startsWith("compile") || it.name.contains("sourcesJar"
 tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMetadata" }.configureEach {
     dependsOn("kspCommonMainKotlinMetadata")
     enabled = false
+}
+tasks.withType<Test>().configureEach {
+    jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
 }

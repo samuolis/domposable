@@ -62,3 +62,14 @@ test('history restores numeric saveables and reload beneath a project base path'
   await expect(page.getByTestId('catalog-input')).toHaveValue('Reload state');
   await expect(page.getByRole('slider', { name: 'Progress' })).toHaveValue('0.75');
 });
+
+test('application back traverses history and forward restores the disposed model data', async ({ page }) => {
+  await page.goto('/#/tasks');
+  await page.getByTestId('task-welcome').click();
+  await expect(page).toHaveURL(/#\/tasks\/welcome$/);
+  await page.getByTestId('task-notes').fill('Forward restores a fresh model');
+  await page.getByRole('button', { name: 'Back to tasks' }).click();
+  await expect(page).toHaveURL(/#\/tasks$/);
+  await page.goForward();
+  await expect(page.getByTestId('task-notes')).toHaveValue('Forward restores a fresh model');
+});

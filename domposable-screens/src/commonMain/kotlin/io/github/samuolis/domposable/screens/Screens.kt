@@ -3,6 +3,7 @@ package io.github.samuolis.domposable.screens
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.saveable.SaveableStateRegistry
+import androidx.compose.runtime.snapshots.SnapshotMutableState
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
@@ -85,7 +86,7 @@ private class EntrySaveableRegistry(restored: Map<String, List<Any?>>) : Saveabl
 
 /** Browser-restorable saveables: scalar values and recursively composed lists/maps. */
 fun portableSaveable(value: Any): Boolean = when (value) {
-    is MutableState<*> -> value.value.let { it == null || portableSaveable(it) }
+    is SnapshotMutableState<*> -> value.policy in listOf(structuralEqualityPolicy<Any?>(), referentialEqualityPolicy<Any?>(), neverEqualPolicy<Any?>()) && value.value.let { it == null || portableSaveable(it) }
     is String, is Boolean, is Int, is Long, is Float, is Double, is Short, is Byte -> true
     is List<*> -> value.all { it == null || portableSaveable(it) }
     is Map<*, *> -> value.all { (key, item) -> key is String && (item == null || portableSaveable(item)) }

@@ -60,6 +60,9 @@ class GitHub:
     def upload(self, release_id, path, replace=False):
         assets = self.request(f"releases/{release_id}/assets?per_page=100")
         old = next((asset for asset in assets if asset["name"] == path.name), None)
+        if old is not None and old.get("state") == "starter":
+            self.request(f"releases/assets/{old['id']}", "DELETE")
+            old = None
         if old is not None:
             if not replace:
                 digest = old.get("digest")
@@ -80,7 +83,20 @@ class GitHub:
                 (ASSETS / name).write_bytes(response.read())
 
 def read_state():
-    return json.loads(STATE.read_text())
+    state = json.loads(STATE.read_text())
+    validate_state(state)
+    return state
+
+def validate_state(state):
+    if state.get("repository") != REPOSITORY: raise RuntimeError("Release state belongs to another repository")
+    for name in ["base", "commit"]:
+        if not re.fullmatch(r"[a-f0-9]{40}", state.get(name, "")): raise RuntimeError("Invalid release commit")
+    if not re.fullmatch(r"release-candidate/[A-Za-z0-9._/-]+", state.get("branch", "")): raise RuntimeError("Invalid candidate branch")
+    Version.parse(state["version"])
+    if not isinstance(state.get("build"), int) or state["build"] < 1: raise RuntimeError("Invalid release build")
+
+def asset_names(state):
+    return [f"domposable-{state['version']}.apk", f"domposable-{state['version']}.ipa", "ios-simulator.app.zip", "ios-dsyms.zip", "website.zip", "maven-bundle.zip"]
 
 def write_state(state):
     STATE.parent.mkdir(parents=True, exist_ok=True)
@@ -125,6 +141,7 @@ def verify_assets():
     manifest = json.loads((ASSETS / "manifest.json").read_text())
     state = read_state()
     if manifest["commit"] != state["commit"] or manifest["version"] != state["version"]: raise RuntimeError("Asset manifest belongs to another release")
+    if set(manifest["sha256"]) != set(asset_names(state)): raise RuntimeError("Release asset inventory is incomplete or contains unexpected files")
     for name, checksum in manifest["sha256"].items():
         if Path(name).name != name: raise RuntimeError("Invalid manifest path")
         if hashlib.sha256((ASSETS / name).read_bytes()).hexdigest() != checksum: raise RuntimeError(f"Corrupt release asset: {name}")
@@ -143,12 +160,13 @@ def prepare(operation, channel):
     if len(pending) > 1: raise RuntimeError("Multiple unfinished releases; reconcile their states before continuing")
     if pending:
         release, state = pending[0]
+        validate_state(state)
         run("git", "fetch", "origin", state["commit"])
         run("git", "checkout", "--detach", state["commit"])
         write_state(state); validate_candidate(state)
-        github.download_assets(release)
-        try: verify_assets()
-        except (FileNotFoundError, RuntimeError):
+        try:
+            github.download_assets(release); verify_assets()
+        except (FileNotFoundError, RuntimeError, urllib.error.URLError):
             # Recover the immutable build snapshot if draft upload was interrupted.
             run("gh", "run", "download", str(state["run_id"]), "--repo", REPOSITORY, "--name", "release-assets", "--dir", str(ASSETS))
             verify_assets()
@@ -207,8 +225,10 @@ def wait_ci():
 
 def manifest():
     state = read_state(); validate_candidate(state)
-    required = [f"domposable-{state['version']}.apk", f"domposable-{state['version']}.ipa", "ios-simulator.app.zip", "ios-dsyms.zip", "website.zip", "maven-bundle.zip"]
+    required = asset_names(state)
     if any(not (ASSETS / name).is_file() for name in required): raise RuntimeError("Required signed release assets are missing")
+    unexpected = {path.name for path in ASSETS.iterdir()} - set(required) - {"manifest.json", "SHA256SUMS", "release-state.json"}
+    if unexpected: raise RuntimeError("Unexpected files in release assets; refusing to upload: " + ", ".join(sorted(unexpected)))
     checksums = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(ASSETS.iterdir()) if path.name not in ["manifest.json", "SHA256SUMS", "release-state.json"]}
     manifest = {"version": state["version"], "build": state["build"], "commit": state["commit"], "sha256": checksums}
     (ASSETS / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

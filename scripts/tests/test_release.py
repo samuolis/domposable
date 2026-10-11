@@ -43,8 +43,8 @@ class ReleaseGuardsTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'Invalid release commit'): release.validate_candidate(state)
     def test_corrupt_preserved_asset_rejected(self):
         state = self.candidate()
-        (self.assets / 'website.zip').write_bytes(b'original')
-        (self.assets / 'manifest.json').write_text(json.dumps({'commit':state['commit'], 'version':state['version'], 'sha256':{'website.zip':hashlib.sha256(b'original').hexdigest()}}))
+        for name in release.asset_names(state): (self.assets / name).write_bytes(b'original')
+        (self.assets / 'manifest.json').write_text(json.dumps({'commit':state['commit'], 'version':state['version'], 'sha256':{name:hashlib.sha256(b'original').hexdigest() for name in release.asset_names(state)}}))
         release.verify_assets()
         (self.assets / 'website.zip').write_bytes(b'changed!')
         with self.assertRaisesRegex(RuntimeError, 'Corrupt'): release.verify_assets()

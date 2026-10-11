@@ -11,20 +11,20 @@ plugins {
 kotlin {
     abiValidation()
     jvmToolchain(21)
-    androidLibrary {
+    android {
         namespace = "io.github.samuolis.domposable.lifecycle.viewmodel"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 23
         withHostTest {}
     }
     jvm()
-    js(IR) { browser();  }
+    js { browser();  }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain by getting {
+        val commonMain = getByName("commonMain") {
             dependencies {
-                api(compose.runtime)
+                api(libs.compose.runtime)
                 api(project(":domposable-screens"))
                 api(libs.lifecycle.viewmodel)
                 api(libs.lifecycle.runtime)
@@ -34,8 +34,9 @@ kotlin {
                 api("org.jetbrains.androidx.savedstate:savedstate-compose:1.4.0")
             }
         }
-        val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-        val iosMain by creating { dependsOn(commonMain) }
+        val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
+        jvmTest { dependencies { implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0") } }
+        val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
     }

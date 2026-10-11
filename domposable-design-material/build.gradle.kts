@@ -11,32 +11,32 @@ plugins {
 kotlin {
     abiValidation()
     jvmToolchain(21)
-    androidLibrary {
+    android {
         namespace = "io.github.samuolis.domposable.design.material"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 23
         withHostTest {}
     }
     jvm()
-    js(IR) { browser();  }
+    js { browser();  }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain by getting {
+        val commonMain = getByName("commonMain") {
             dependencies {
-                api(compose.runtime)
+                api(libs.compose.runtime)
                 api(project(":domposable-ui"))
             }
         }
-        val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-        val iosMain by creating { dependsOn(commonMain) }
+        val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
+        val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        val composeUiMain by creating {
+        val composeUiMain = create("composeUiMain") {
             dependsOn(commonMain)
             dependencies {
-                api(compose.ui)
-                api(compose.foundation)
+                api(libs.compose.ui)
+                api(libs.compose.foundation)
                 implementation(libs.material3)
                 implementation("io.coil-kt.coil3:coil-compose:3.6.2")
                 implementation("io.coil-kt.coil3:coil-network-ktor3:3.6.2")
@@ -48,7 +48,7 @@ kotlin {
         iosMain { dependencies { implementation("io.ktor:ktor-client-darwin:3.5.2") } }
         getByName("jvmMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
-        jsMain { dependencies { implementation(compose.html.core); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
     }
 }
 

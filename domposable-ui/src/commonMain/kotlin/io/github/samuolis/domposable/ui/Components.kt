@@ -30,7 +30,9 @@ data class DomposableLazyRowProps(val items: List<DomposableLazyItem>, val gap: 
 data class DomposableLazyGridProps(val items: List<DomposableLazyItem>, val columns: Int = 2, val gap: DomposableLength = 8.dp)
 
 @DomposableComponent("Text")
-data class DomposableTextProps(val text: String, val style: DomposableTextStyle = DomposableTextStyle.Body, val color: DomposableColor? = null, val headingLevel: Int? = null)
+data class DomposableTextProps(val text: String, val style: DomposableTextStyle = DomposableTextStyle.Body, val color: DomposableColor? = null, val headingLevel: Int? = null) {
+    init { require(headingLevel == null || headingLevel in 1..6) }
+}
 
 @DomposableComponent("Button")
 data class DomposableButtonProps(val onClick: () -> Unit, val enabled: Boolean = true, val style: DomposableButtonStyle = DomposableButtonStyle.Filled)
@@ -159,7 +161,11 @@ fun DomposableScaffold(
 ) {
     DomposableScaffold(DomposableScaffoldProps(topBar, bottomBar, navigation, contextual, floatingAction, snackbar, overlays), modifier) {
         DomposableMeasure { size ->
-            DomposableScaffoldScope(DomposableModifier.padding(insets), insets, size).content()
+            val available = DomposableSize(
+                (size.width - insets.start.value - insets.end.value).coerceAtLeast(0f),
+                (size.height - insets.top.value - insets.bottom.value).coerceAtLeast(0f),
+            )
+            DomposableScaffoldScope(DomposableModifier.padding(insets), insets, available).content()
         }
     }
 }

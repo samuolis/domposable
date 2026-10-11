@@ -33,6 +33,7 @@ jobs:
       pages: write
       id-token: write
     env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx2g -Dorg.gradle.workers.max=1
       GH_TOKEN: ${{ github.token }}
       GITHUB_REPOSITORY: ${{ github.repository }}
       CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}

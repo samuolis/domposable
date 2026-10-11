@@ -13,6 +13,10 @@ savedstate = "1.4.0"
 activity = "1.13.0"
 
 [libraries]
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose-html = { module = "org.jetbrains.compose.html:html-core", version.ref = "compose" }
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3Runtime" }

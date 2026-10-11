@@ -81,11 +81,18 @@ fun DemoApp() {
                 ))
             }
             DomposableScaffold(
-                topBar = { DomposableRow(DomposableModifier.padding(16.dp), gap = 16.dp, alignment = DomposableAlignment.Center) {
-                    DomposableText("Domposable", style = DomposableTextStyle.Title, headingLevel = 1)
-                    DomposableText("One Compose API for apps and semantic HTML", style = DomposableTextStyle.Label)
-                    DomposableSwitch(DomposableSwitchProps(customButtons, { customButtons = it }, "Custom buttons"))
-                } },
+                topBar = {
+                    if (shell.widthClass == DomposableWidthClass.Compact) {
+                        DomposableColumn(DomposableModifier.padding(16.dp), gap = 8.dp) {
+                            DomposableText("Domposable", style = DomposableTextStyle.Title, headingLevel = 1)
+                            DomposableSwitch(DomposableSwitchProps(customButtons, { customButtons = it }, "Custom buttons"))
+                        }
+                    } else DomposableRow(DomposableModifier.padding(16.dp), gap = 16.dp, alignment = DomposableAlignment.Center) {
+                        DomposableText("Domposable", style = DomposableTextStyle.Title, headingLevel = 1)
+                        if (shell.widthClass == DomposableWidthClass.Large) DomposableText("One Compose API for apps and semantic HTML", style = DomposableTextStyle.Label)
+                        DomposableSwitch(DomposableSwitchProps(customButtons, { customButtons = it }, "Custom buttons"))
+                    }
+                },
                 navigation = { if (shell.widthClass != DomposableWidthClass.Compact) navigation() },
                 bottomBar = { if (shell.widthClass == DomposableWidthClass.Compact) navigation() },
             ) {
@@ -103,16 +110,16 @@ fun DemoApp() {
 @DomposableScreen(route = DemoRoute.Tasks::class)
 fun TaskListScreen(model: TaskWorkspaceModel, onOpen: (String) -> Unit) {
     var title by rememberSaveable { mutableStateOf("") }
-    DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth(), gap = 16.dp) {
+    DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
         DomposableText("Task workspace", style = DomposableTextStyle.Title)
         DomposableText("Feature code owns its state. Resize to see list and detail together.")
         DomposableTextField(title, { title = it }, "New task", modifier = DomposableModifier.testId("new-task"))
         DomposableButton("Add task", { model.add(title); title = "" }, enabled = title.isNotBlank())
         model.tasks.forEach { task -> key(task.id) {
             DomposableCard(DomposableModifier.fillMaxWidth()) {
-                DomposableRow(gap = 12.dp, alignment = DomposableAlignment.Center) {
-                    DomposableCheckbox(task.done, { model.toggle(task.id) }, "Complete ${task.title}")
+                DomposableColumn(gap = 8.dp) {
                     DomposableButton(task.title, { onOpen(task.id) }, DomposableModifier.testId("task-${task.id}"))
+                    DomposableCheckbox(task.done, { model.toggle(task.id) }, "Completed", DomposableModifier.contentDescription("Complete ${task.title}"))
                 }
             }
         } }
@@ -123,7 +130,7 @@ fun TaskListScreen(model: TaskWorkspaceModel, onOpen: (String) -> Unit) {
 @DomposableScreen(route = DemoRoute.Detail::class)
 fun TaskDetailScreen(model: TaskDetailModel, workspace: TaskWorkspaceModel, onBack: () -> Unit) {
     val task = workspace.tasks.firstOrNull { it.id == model.taskId }
-    DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth(), gap = 16.dp) {
+    DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
         DomposableButton("Back to tasks", onBack)
         if (task == null) DomposableBanner(DomposableBannerProps("This task is unavailable", true))
         else {

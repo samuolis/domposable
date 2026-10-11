@@ -3,6 +3,14 @@ package io.github.samuolis.domposable.screens
 import kotlin.test.*
 
 class EntryTest {
+    @Test fun standardMutationPoliciesArePortableAndCustomPoliciesRequireASaver() {
+        assertTrue(portableSaveable(androidx.compose.runtime.mutableStateOf("text", androidx.compose.runtime.neverEqualPolicy())))
+        assertTrue(portableSaveable(androidx.compose.runtime.mutableStateOf(1, androidx.compose.runtime.referentialEqualityPolicy())))
+        val custom = object : androidx.compose.runtime.SnapshotMutationPolicy<Int> {
+            override fun equivalent(a: Int, b: Int): Boolean = a / 10 == b / 10
+        }
+        assertFalse(portableSaveable(androidx.compose.runtime.mutableStateOf(1, custom)))
+    }
     @Test fun retainedResourceIsDisposedOnceAndCannotBeRevived() {
         val entry = DomposableEntryScope("route")
         var creations = 0

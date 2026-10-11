@@ -18,6 +18,7 @@ nav:
   - Adaptive UI: adaptive.md
   - Migration: migration.md
   - Coverage: coverage.md
+  - Validation: validation.md
   - Releases: releasing.md
   - API: https://samuolis.github.io/domposable/api/
   - Live demo: https://samuolis.github.io/domposable/demo/

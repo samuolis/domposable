@@ -2,6 +2,7 @@ package io.github.samuolis.domposable.navigation3
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.navigation3.runtime.NavEntry
 import io.github.samuolis.domposable.screens.*
 import io.github.samuolis.domposable.ui.*
@@ -23,7 +24,10 @@ internal actual fun <R : Any> PlatformNavigation3Display(entries: List<NavEntry<
 
 private fun Any?.savedJson(): JsonElement = when (this) {
     null -> JsonNull
-    is MutableState<*> -> buildJsonObject { put("mutableState", value.savedJson()) }
+    is SnapshotMutableState<*> -> buildJsonObject {
+        put("mutableState", value.savedJson())
+        put("policy", when (policy) { structuralEqualityPolicy<Any?>() -> "structural"; referentialEqualityPolicy<Any?>() -> "referential"; neverEqualPolicy<Any?>() -> "never"; else -> error("Use a Saver for custom mutation policies") })
+    }
     is String -> JsonPrimitive(this)
     is Boolean -> JsonPrimitive(this)
     is Number -> buildJsonObject {
@@ -37,7 +41,7 @@ private fun Any?.savedJson(): JsonElement = when (this) {
 private fun JsonElement.savedValue(): Any? = when (this) {
     JsonNull -> null
     is JsonArray -> map { it.savedValue() }
-    is JsonObject -> if (size == 1 && "mutableState" in this) mutableStateOf(getValue("mutableState").savedValue())
+    is JsonObject -> if ("mutableState" in this) mutableStateOf(getValue("mutableState").savedValue(), when (get("policy")?.jsonPrimitive?.content) { "referential" -> referentialEqualityPolicy(); "never" -> neverEqualPolicy(); else -> structuralEqualityPolicy() })
     else if (size == 1 && "map" in this) getValue("map").jsonObject.mapValues { it.value.savedValue() }
     else if (size == 2 && this["numericType"] is JsonPrimitive && this["value"] is JsonPrimitive) {
         val value = getValue("value").jsonPrimitive.content
@@ -52,6 +56,7 @@ private fun JsonElement.savedValue(): Any? = when (this) {
 private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEntryScope<R>>, var codec: DomposableRouteCodec<R>) {
     private val snapshots = mutableMapOf<String, String>()
     private var currentId = stack.last().id
+    private var previousIds = stack.map { it.id }
     private var applyingHistory = false
 
     private fun snapshot(): String = buildJsonObject {
@@ -82,6 +87,7 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
             stack.clear(); stack.add(DomposableEntryScope(route))
         }
         currentId = stack.last().id
+        previousIds = stack.map { it.id }
         val value = snapshot()
         snapshots[currentId] = value
         window.history.replaceState(value, "", "#${codec.encode(stack.last().route)}")
@@ -96,7 +102,7 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
             val route = codec.decode(data.getValue("route").jsonPrimitive.content) ?: return@mapNotNull null
             val id = data.getValue("id").jsonPrimitive.content
             val saved = data["saved"]?.jsonObject?.mapValues { (_, value) -> value.jsonArray.map { it.savedValue() } }.orEmpty()
-            live[id]?.takeIf { it.lifecycle != DomposableEntryLifecycle.Destroyed } ?: DomposableEntryScope(route, id, saved)
+            live[id]?.takeIf { it.lifecycle != DomposableEntryLifecycle.Destroyed && it.route == route } ?: DomposableEntryScope(route, id, saved)
         }
         if (restored.isEmpty()) return
         applyingHistory = true
@@ -116,7 +122,13 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
     fun changed(ids: List<String>) {
         if (stack.isEmpty() || ids != stack.map { it.id }) return
         val id = stack.last().id
-        if (applyingHistory) { applyingHistory = false; currentId = id; return }
+        if (applyingHistory) { applyingHistory = false; currentId = id; previousIds = ids; return }
+        // An ordinary stack pop traverses its existing browser entry.
+        if (previousIds.size > 1 && ids == previousIds.dropLast(1)) {
+            currentId = id; previousIds = ids
+            window.history.back()
+            return
+        }
         if (id != currentId) {
             snapshots[currentId]?.let { window.history.replaceState(it, "") }
             val value = snapshot()
@@ -124,6 +136,7 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
             currentId = id
         }
         saveCurrent()
+        previousIds = ids
     }
     fun saveCurrent() {
         if (stack.isEmpty() || stack.last().id != currentId) return

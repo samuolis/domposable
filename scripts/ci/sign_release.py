@@ -49,6 +49,10 @@ def build():
         verification = run(str(signer), 'verify', '--verbose', '--print-certs', str(apk), capture=True).decode()
         expected = os.environ['ANDROID_CERT_SHA256'].replace(':','').lower()
         if not any(line.endswith(expected) for line in verification.lower().splitlines() if 'certificate sha-256 digest:' in line): raise RuntimeError("APK certificate fingerprint differs")
+        analyzer = sdk / 'cmdline-tools/latest/bin/apkanalyzer'
+        if not analyzer.is_file(): analyzer = next((sdk / 'cmdline-tools').glob('*/bin/apkanalyzer'))
+        if run(str(analyzer),'manifest','version-name',str(apk),capture=True).decode().strip() != str(version): raise RuntimeError("APK version name differs")
+        if run(str(analyzer),'manifest','version-code',str(apk),capture=True).decode().strip() != str(build_number): raise RuntimeError("APK build number differs")
         shutil.copy2(apk, ASSETS / f'domposable-{version}.apk')
         profile = plistlib.loads(run('security', 'cms', '-D', '-i', str(directory / 'ios.mobileprovision'), capture=True))
         verify_profile(profile)
@@ -87,7 +91,14 @@ def build():
             run('codesign','--verify','--deep','--strict',str(app),capture=True)
             info = plistlib.loads((app / 'Info.plist').read_bytes())
             if info['CFBundleShortVersionString'] != marketing or str(info['CFBundleVersion']) != str(build_number): raise RuntimeError("iOS version differs from version.properties")
-            ipa = next(export.glob('*.ipa')); shutil.copy2(ipa, ASSETS / f'domposable-{version}.ipa')
+            ipa = next(export.glob('*.ipa'))
+            payload = directory / 'exported-ipa'
+            run('ditto','-x','-k',str(ipa),str(payload))
+            exported_app = next((payload / 'Payload').glob('*.app'))
+            run('codesign','--verify','--deep','--strict',str(exported_app),capture=True)
+            exported_info = plistlib.loads((exported_app / 'Info.plist').read_bytes())
+            if exported_info['CFBundleShortVersionString'] != marketing or str(exported_info['CFBundleVersion']) != str(build_number): raise RuntimeError("Exported IPA version differs")
+            shutil.copy2(ipa, ASSETS / f'domposable-{version}.ipa')
             run('ditto','-c','-k','--keepParent',str(archive / 'dSYMs'),str(ASSETS / 'ios-dsyms.zip'))
             simulator = ROOT / 'build/release/simulator'
             run('xcodebuild','build',*common,'-destination','generic/platform=iOS Simulator','-derivedDataPath',str(simulator),'CODE_SIGNING_ALLOWED=NO')

@@ -11,29 +11,29 @@ plugins {
 kotlin {
     abiValidation()
     jvmToolchain(21)
-    androidLibrary {
+    android {
         namespace = "io.github.samuolis.domposable.adaptive"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 23
         withHostTest {}
     }
     jvm()
-    js(IR) { browser();  }
+    js { browser();  }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain by getting {
+        val commonMain = getByName("commonMain") {
             dependencies {
-                api(compose.runtime)
+                api(libs.compose.runtime)
                 api(project(":domposable-foundation"))
             }
         }
-        val commonTest by getting { dependencies { implementation(kotlin("test")) } }
-        androidMain { dependencies { implementation(compose.ui) } }
-        val iosMain by creating { dependsOn(commonMain) }
+        val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
+        androidMain { dependencies { implementation(libs.compose.ui) } }
+        val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        jsMain { dependencies { implementation(compose.html.core); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
     }
 }
 
