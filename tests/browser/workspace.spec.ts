@@ -50,17 +50,23 @@ test('semantic controls, focus restoration and replaceable renderer', async ({ p
 });
 
 test('history restores numeric saveables and reload beneath a project base path', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
   await page.goto('/#/catalog');
   await page.getByRole('slider', { name: 'Progress' }).fill('0.75');
+  await page.getByRole('tab', { name: 'Second', exact: true }).click();
   await page.getByTestId('catalog-input').fill('Reload state');
   await page.getByRole('link', { name: 'Tasks', exact: false }).click();
   await expect(page).toHaveURL(/#\/tasks$/);
   await page.goBack();
   await expect(page.getByRole('slider', { name: 'Progress' })).toHaveValue('0.75');
+  await expect(page.getByRole('tab', { name: 'Second', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByTestId('catalog-input')).toHaveValue('Reload state');
   await page.reload();
   await expect(page.getByTestId('catalog-input')).toHaveValue('Reload state');
   await expect(page.getByRole('slider', { name: 'Progress' })).toHaveValue('0.75');
+  await expect(page.getByRole('tab', { name: 'Second', exact: true })).toHaveAttribute('aria-selected', 'true');
+  expect(errors).toEqual([]);
 });
 
 test('application back traverses history and forward restores the disposed model data', async ({ page }) => {

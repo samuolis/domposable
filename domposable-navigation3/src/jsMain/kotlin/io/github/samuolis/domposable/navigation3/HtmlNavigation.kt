@@ -2,9 +2,18 @@ package io.github.samuolis.domposable.navigation3
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableDoubleState
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableLongState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.referentialEqualityPolicy
@@ -91,6 +100,12 @@ private fun Any?.savedJson(): JsonElement =
         is SnapshotMutableState<*> -> {
             buildJsonObject {
                 put("mutableState", value.savedJson())
+                when (this@savedJson) {
+                    is MutableIntState -> put("stateType", "int")
+                    is MutableLongState -> put("stateType", "long")
+                    is MutableFloatState -> put("stateType", "float")
+                    is MutableDoubleState -> put("stateType", "double")
+                }
                 put(
                     "policy",
                     when (policy) {
@@ -155,14 +170,7 @@ private fun JsonElement.savedValue(): Any? =
             if ("mutableState" in
                 this
             ) {
-                mutableStateOf(
-                    getValue("mutableState").savedValue(),
-                    when (get("policy")?.jsonPrimitive?.content) {
-                        "referential" -> referentialEqualityPolicy()
-                        "never" -> neverEqualPolicy()
-                        else -> structuralEqualityPolicy()
-                    },
-                )
+                restoredMutableState()
             } else if (size == 1 && "map" in this) {
                 getValue("map").jsonObject.mapValues { it.value.savedValue() }
             } else if (size == 2 && this["numericType"] is JsonPrimitive && this["value"] is JsonPrimitive) {
@@ -184,6 +192,38 @@ private fun JsonElement.savedValue(): Any? =
             if (isString) content else booleanOrNull ?: intOrNull ?: longOrNull ?: doubleOrNull
         }
     }
+
+private fun JsonObject.restoredMutableState(): MutableState<*> {
+    val value = getValue("mutableState").savedValue()
+    return when (get("stateType")?.jsonPrimitive?.content) {
+        "int" -> {
+            mutableIntStateOf(value as Int)
+        }
+
+        "long" -> {
+            mutableLongStateOf(value as Long)
+        }
+
+        "float" -> {
+            mutableFloatStateOf(value as Float)
+        }
+
+        "double" -> {
+            mutableDoubleStateOf(value as Double)
+        }
+
+        else -> {
+            mutableStateOf(
+                value,
+                when (get("policy")?.jsonPrimitive?.content) {
+                    "referential" -> referentialEqualityPolicy()
+                    "never" -> neverEqualPolicy()
+                    else -> structuralEqualityPolicy()
+                },
+            )
+        }
+    }
+}
 
 private class BrowserBinding<R : Any>(
     val stack: SnapshotStateList<DomposableEntryScope<R>>,
