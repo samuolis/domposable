@@ -57,6 +57,7 @@ private fun JsonElement.savedValue(): Any? = when (this) {
 }
 
 private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEntryScope<R>>, var codec: DomposableRouteCodec<R>, val urls: DomposableBrowserUrls) {
+    var replaceEntry = false
     private fun routePath(): String = when (val mode = urls) {
         DomposableBrowserUrls.Hash -> window.location.hash.removePrefix("#")
         is DomposableBrowserUrls.Path -> window.location.pathname.removePrefix(mode.basePath.trimEnd('/')).ifEmpty { "/" }.trimEnd('/').ifEmpty { "/" }
@@ -146,7 +147,8 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
         if (id != currentId) {
             snapshots[currentId]?.let { window.history.replaceState(it, "") }
             val value = snapshot()
-            window.history.pushState(value, "", url(stack.last().route))
+            if (replaceEntry) window.history.replaceState(value, "", url(stack.last().route))
+            else window.history.pushState(value, "", url(stack.last().route))
             currentId = id
         }
         saveCurrent()
@@ -172,6 +174,7 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
 actual fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>, urls: DomposableBrowserUrls) {
     val binding = remember(backStack, urls) { BrowserBinding(backStack, codec, urls) }
     binding.codec = codec
+    binding.replaceEntry = LocalReplaceBrowserEntry.current
     DisposableEffect(binding) {
         binding.initialize()
         val pop: (org.w3c.dom.events.Event) -> Unit = { binding.pop() }

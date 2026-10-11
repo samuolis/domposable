@@ -22,7 +22,7 @@ navigator.navigate(Product("mug"))
 navigator.goBack()
 ```
 
-`navigate` avoids duplicate consecutive routes. `replace` replaces the current entry; `reset` starts a new stack. Routes are ordinary application types. Pass a `DomposableRouteCodec` and `DomposableBrowserUrls` to `rememberDomposableNavigator` to opt into HTML browser history. Without a codec, navigation stays in memory.
+`navigate` avoids duplicate consecutive routes. `replace` replaces the current entry; `reset` starts a new stack. On HTML, `replace` and `reset` replace the current browser-history record; they do not erase earlier browser history. Routes are ordinary application types. Pass a `DomposableRouteCodec` and `DomposableBrowserUrls` to `rememberDomposableNavigator` to opt into HTML browser history. Without a codec, navigation stays in memory.
 
 The host creates its registry internally. Entries can come from KSP, hand-written `DomposableDestination` values, or a mixture. The [modular storefront](modular-demo.md) combines catalog and checkout entries without registration calls in the app.
 

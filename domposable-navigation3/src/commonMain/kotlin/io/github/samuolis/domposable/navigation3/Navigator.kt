@@ -4,23 +4,31 @@ import androidx.compose.runtime.*
 import io.github.samuolis.domposable.screens.*
 import io.github.samuolis.domposable.ui.DomposableModifier
 
+internal val LocalReplaceBrowserEntry = staticCompositionLocalOf { false }
+
 /** Optional observable navigation state. Routes and dependencies remain application-owned. */
 @Stable
 class DomposableNavigator<R : Any>(initialRoute: R) {
     internal val entries = mutableStateListOf(DomposableEntryScope(initialRoute))
+    internal var replaceBrowserEntry by mutableStateOf(false)
+        private set
     val currentRoute: R get() = entries.last().route
     val canGoBack: Boolean get() = entries.size > 1
     val backStack: List<DomposableEntryScope<R>> get() = entries.toList()
 
     /** Consecutive navigation to the same route does not create another entry. */
-    fun navigate(route: R) { if (currentRoute != route) entries.add(DomposableEntryScope(route)) }
+    fun navigate(route: R) {
+        replaceBrowserEntry = false
+        if (currentRoute != route) entries.add(DomposableEntryScope(route))
+    }
     fun goBack(): Boolean {
         if (!canGoBack) return false
+        replaceBrowserEntry = false
         entries.removeLast()
         return true
     }
-    fun replace(route: R) { entries[entries.lastIndex] = DomposableEntryScope(route) }
-    fun reset(route: R) { entries.clear(); entries.add(DomposableEntryScope(route)) }
+    fun replace(route: R) { replaceBrowserEntry = true; entries[entries.lastIndex] = DomposableEntryScope(route) }
+    fun reset(route: R) { replaceBrowserEntry = true; entries.clear(); entries.add(DomposableEntryScope(route)) }
 }
 
 /** Without a codec, navigation is entirely in memory. HTML history is an explicit opt-in. */
@@ -31,7 +39,9 @@ fun <R : Any> rememberDomposableNavigator(
     browserUrls: DomposableBrowserUrls = DomposableBrowserUrls.Hash,
 ): DomposableNavigator<R> {
     val navigator = remember { DomposableNavigator(initialRoute) }
-    if (codec != null) DomposableBrowserHistory(navigator.entries, codec, browserUrls)
+    if (codec != null) CompositionLocalProvider(LocalReplaceBrowserEntry provides navigator.replaceBrowserEntry) {
+        DomposableBrowserHistory(navigator.entries, codec, browserUrls)
+    }
     return navigator
 }
 

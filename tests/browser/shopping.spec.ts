@@ -33,9 +33,17 @@ test('shop URLs, filters, cart and validated demo checkout', async ({ page }) =>
   await expect(page.getByRole('heading',{name:'Your bag'})).toBeVisible();
   await page.goForward();
   await expect(page.getByLabel('Full name')).toHaveValue('Demo Customer');
+  const historyLength = await page.evaluate(() => window.history.length);
   await page.getByRole('button',{name:'Place demo order'}).click();
   await expect(page.getByRole('heading',{name:'Thanks for exploring Fieldwork.'})).toBeVisible();
   await expect(page.getByRole('link',{name:'Bag (0)',exact:true})).toBeVisible();
+  await expect(page).toHaveURL(/\/shop\/confirmation\/$/);
+  await expect.poll(() => page.evaluate(() => window.history.length)).toBe(historyLength);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/shop\/cart\/$/);
+  await expect(page.getByRole('heading',{name:'Your bag'})).toBeVisible();
+  await page.goForward();
+  await expect(page.getByRole('heading',{name:'Thanks for exploring Fieldwork.'})).toBeVisible();
 });
 
 test('shop layout, image resources and accessibility at phone and desktop widths',async({page})=>{

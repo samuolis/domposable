@@ -31,7 +31,7 @@ internal fun Checkout(newCheckout: () -> CheckoutViewModel, navigator: Domposabl
     val model = viewModel { newCheckout() }
     val state by model.state.collectAsState()
     LaunchedEffect(model, navigator) {
-        model.effects.collect { if (it == CheckoutEffect.OrderPlaced) navigator.navigate(CheckoutRoute.Confirmation) }
+        model.effects.collect { if (it == CheckoutEffect.OrderPlaced) navigator.replace(CheckoutRoute.Confirmation) }
     }
     CheckoutScreen(state, model::dispatch) { navigator.navigate(CheckoutRoute.Cart) }
 }

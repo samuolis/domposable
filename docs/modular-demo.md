@@ -64,7 +64,7 @@ class CatalogViewModel(
 }
 ```
 
-The cart reducer uses integer cents, rejects unknown product IDs, caps each quantity at 20, calculates delivery, validates checkout and clears personal details after a successful demo order. `CheckoutViewModel` exposes `CheckoutEffect.OrderPlaced` separately from persistent state. Its destination collects that one-off effect and navigates to the confirmation route. Invalid submissions update validation state without navigating.
+The cart reducer uses integer cents, rejects unknown product IDs, caps each quantity at 20, calculates delivery, validates checkout and clears personal details after a successful demo order. `CheckoutViewModel` exposes `CheckoutEffect.OrderPlaced` separately from persistent state. Its destination collects that one-off effect and replaces the checkout entry with confirmation, so Back returns to the bag. Invalid submissions update validation state without navigating.
 
 This MVI protocol belongs to the **sample application**. A Domposable screen still accepts normal values and callbacks. The task playground and small published-consumer examples continue to show plain Compose state.
 
