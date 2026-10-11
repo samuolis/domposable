@@ -9,7 +9,7 @@ android {
     compileSdk { version = release(37) { minorApiLevel = 2 } }
     defaultConfig {
         applicationId = "io.github.samuolis.domposable.demo"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 37
         versionCode = maxOf(1, release.getProperty("BUILD_NUMBER").toInt())
         versionName = release.getProperty("VERSION")

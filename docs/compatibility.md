@@ -4,7 +4,7 @@ Domposable is an unpublished alpha. The table describes this repository's CI cov
 
 | Target | Renderer | UI/behavior checks | Visual baselines | URL owner |
 | --- | --- | --- | --- | --- |
-| Android, API 23+ | Compose UI + Material3 | Robolectric API 36 interaction tests; APK build | Robolectric native graphics, 390 × 844 logical pixels | Application |
+| Android, API 24+ | Compose UI + Material3 | Robolectric API 36 interaction tests; APK build | Robolectric native graphics, 390 × 844 logical pixels | Application |
 | iOS arm64 | Compose UI + Material3 | Device compilation; simulator input/rotation tests | iPad mini A17 Pro, iOS 26.5, portrait/landscape | Application |
 | iOS simulator arm64 | Same native renderer | XCUITest, unsigned app artifact | Same simulator fixtures | Application |
 | JVM desktop | Compose UI + Material3 | JVM tests and compiled consumer | Compose desktop test scene on Ubuntu | Application |
@@ -17,9 +17,9 @@ Desktop and Wasm support are **experimental**. Browser history/saveable restorat
 
 | Dependency | Version |
 | --- | --- |
-| Kotlin / Compose compiler | 2.4.20 |
+| Kotlin / Compose compiler | 2.4.21 |
 | Compose Multiplatform | 1.12.1 |
-| Material3 provider | 1.12.0-alpha03 |
+| Material3 provider | 1.13.0-alpha02 |
 | Navigation 3 runtime / Compose UI display | 1.1.7 / 1.1.2 |
 | KSP | 2.3.12 |
 | Android Gradle plugin / Gradle | 9.4.0 / 9.7.1 |
@@ -32,3 +32,5 @@ These are the versions verified together. Applications adopting older/newer Comp
 ## Rendering differences
 
 HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm uses Compose UI rendering and its accessibility layer. They share declarations and behavior intent, not pixels or browser-native text selection. HTML collections are keyed DOM lists, while Compose UI collections are lazy; HTML virtualization remains future work. Native date/time purposes currently use text fields. Hinge/fold information, rich text, drag/reorder and large-table virtualization are not bundled.
+
+Material 3 1.13.0-alpha02 requires Android API 24. The library modules, demo and published-consumer fixtures use the same minimum; applications upgrading must also set `minSdk = 24` or higher.

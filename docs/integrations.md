@@ -4,7 +4,7 @@ Domposable renders UI. Your application chooses its dependencies, models and sta
 
 ## Metro: a compiled example
 
-[`metro-example`](https://github.com/samuolis/domposable/tree/main/metro-example) uses Metro **1.4.5** with Kotlin **2.4.20**. CI compiles the graph on Android, iOS, JVM, JS and Wasm. Its JVM test checks that repositories are shared, models belong to individual entries, and popping one entry disposes only its model.
+[`metro-example`](https://github.com/samuolis/domposable/tree/main/metro-example) uses Metro **1.4.5** with Kotlin **2.4.21**. CI compiles the graph on Android, iOS, JVM, JS and Wasm. Its JVM test checks that repositories are shared, models belong to individual entries, and popping one entry disposes only its model.
 
 ```kotlin
 @Inject @SingleIn(AppScope::class)
