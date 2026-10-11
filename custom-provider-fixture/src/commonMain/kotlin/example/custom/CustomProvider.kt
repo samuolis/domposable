@@ -138,6 +138,34 @@ fun independentProvider(onRender: (String) -> Unit): DomposableComponents =
             onRender("BottomSheet")
             content()
         },
+        topAppBar = { _, _, content ->
+            onRender("TopAppBar")
+            content()
+        },
+        floatingActionButton = { _, _, content ->
+            onRender("FloatingActionButton")
+            content()
+        },
+        snackbar = { _, _, content ->
+            onRender("Snackbar")
+            content()
+        },
+        select = { _, _, content ->
+            onRender("Select")
+            content()
+        },
+        segmentedButtons = { _, _, content ->
+            onRender("SegmentedButtons")
+            content()
+        },
+        rangeSlider = { _, _, content ->
+            onRender("RangeSlider")
+            content()
+        },
+        tooltip = { _, _, content ->
+            onRender("Tooltip")
+            content()
+        },
         scaffold = { _, _, content ->
             onRender("Scaffold")
             content()

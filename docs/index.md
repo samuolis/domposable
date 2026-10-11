@@ -29,7 +29,7 @@ fun ProductActions(name: String, price: String, onAdd: () -> Unit) {
 }
 ```
 
-Install a provider around the feature. Theme tokens set your product's colors, type and spacing; replace individual component renderers or supply a complete [design system](design-systems.md). Use measured content widths for [adaptive layouts](adaptive.md).
+[Follow the call from shared code to its platform renderer](how-it-works.md). Install a provider around the feature. Theme tokens set your product's colors, type and spacing; replace individual component renderers or supply a complete [design system](design-systems.md). Use measured content widths for [adaptive layouts](adaptive.md).
 
 ## Bring your architecture
 

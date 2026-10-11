@@ -1,3 +1,9 @@
+public final class io/github/samuolis/domposable/material/ComposableSingletons$ExtendedNativeKt {
+	public static final field INSTANCE Lio/github/samuolis/domposable/material/ComposableSingletons$ExtendedNativeKt;
+	public fun <init> ()V
+	public final fun getLambda$995133508$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class io/github/samuolis/domposable/material/ComposableSingletons$NativeMaterialKt {
 	public static final field INSTANCE Lio/github/samuolis/domposable/material/ComposableSingletons$NativeMaterialKt;
 	public fun <init> ()V

@@ -125,3 +125,17 @@ fun DomposableModifier.verticalScroll(): DomposableModifier =
 
 fun DomposableModifier.horizontalScroll(): DomposableModifier =
     append(DomposableModifierOperation.Scroll(DomposableOrientation.Horizontal))
+
+/** Insets are logical: start/end follow the platform's layout direction. */
+fun DomposableModifier.padding(
+    horizontal: DomposableLength,
+    vertical: DomposableLength,
+): DomposableModifier =
+    padding(DomposableInsets(start = horizontal, end = horizontal, top = vertical, bottom = vertical))
+
+fun DomposableModifier.size(
+    width: DomposableLength,
+    height: DomposableLength,
+): DomposableModifier = width(width).height(height)
+
+fun DomposableModifier.fillMaxSize(): DomposableModifier = fillMaxWidth().fillMaxHeight()

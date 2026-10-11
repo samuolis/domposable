@@ -1,4 +1,4 @@
-# A modular app with MVI, ViewModel and Metro
+# A modular app: features, injection and screen ownership
 
 Fieldwork now has **two feature teams**, catalog and checkout. Each owns an API module and an implementation module. The demo application assembles them with Metro, while Domposable's optional KSP processor generates typed destinations and feature entry lists. Android, iOS, desktop, semantic HTML and Wasm run the same feature implementations.
 
@@ -38,35 +38,15 @@ fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
 }
 ```
 
-`DomposableMviScreen` is an **optional** helper in `domposable-lifecycle-viewmodel`. It collects the model's `StateFlow` with the entry lifecycle and supplies its current state and `dispatch` callback. It does not create the model, choose DI, require a ViewModel base class or process application effects. You can pass a model explicitly, collect state yourself, use MVVM, or skip this helper entirely. Smaller content composables still accept state and callbacks for isolated previews and reuse.
+The sample uses a small helper to collect its model. Focus on the screen boundary: the injected model belongs to its navigation entry, and content calls shared components. State collection stays an application choice.
 
 The sample defines `LocalShopNavigator` as a typed composition local in its API module. The app provides it once. This keeps route types checked by Kotlin and lets nested UI navigate without threading a navigator through every function. `LocalShopArtwork` supplies the app's bundled resource renderer in the same way. These are sample application choices, not mandatory library globals.
 
-## 2. MVI state belongs to the ViewModel
+## 2. Each entry owns a model; the flow owns its session
 
-The optional contract is small:
+Collection and Discover create separate entry ViewModels. Both read the same graph-scoped cart. Opening Product creates a model with that route's product ID. Recomposition reuses it; Back removes its owner and clears it. Resizing panes keeps the entry identity and its model.
 
-```kotlin
-interface DomposableMvi<State, Action> {
-    val state: StateFlow<State>
-    fun dispatch(action: Action)
-}
-```
-
-`CatalogViewModel : ViewModel(), DomposableMvi<CatalogState, CatalogAction>` combines its filter state with the shared cart notice. The screen consumes **one state flow**, rather than assembling extra state from repositories. Actions update the catalog reducer or delegate to `ShoppingCart`. Product follows the same pattern with `ProductState` and `ProductAction.Add`.
-
-```kotlin
-@Inject
-@ViewModelKey
-@ContributesIntoMap(ShopScope::class, binding<ViewModel>())
-class CartViewModel(val cart: ShoppingCart) :
-    ViewModel(), DomposableMvi<CartState, CheckoutAction> {
-    override val state = cart.state
-    override fun dispatch(action: CheckoutAction) = cart.dispatch(action)
-}
-```
-
-The cart reducer uses integer cents, rejects unknown product IDs, caps quantities at 20, calculates delivery, validates checkout and clears personal details after a successful demo order. `CheckoutViewModel` exposes `CheckoutEffect.OrderPlaced` separately from persistent state. `CheckoutScreen` collects that effect and replaces checkout with confirmation, so Back returns to the bag. Invalid submissions update validation state without navigating.
+The graph owns repositories and the cart for the whole shopping flow. A reload creates a new in-memory session. Durable orders and process-death restoration belong in application repositories.
 
 ## 3. Metro injects through its standard Compose API
 

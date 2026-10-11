@@ -158,3 +158,22 @@ fun DirectNavigation3() {
         }
     })
 }
+
+// Published consumers exercise the direct API; they do not generate component contracts.
+@Composable
+fun SharedControls() {
+    io.github.samuolis.domposable.ui.DomposableTopAppBar("Preferences")
+    io.github.samuolis.domposable.ui.DomposableSelect(
+        "home", {}, "Address",
+        listOf(io.github.samuolis.domposable.ui.DomposableSelectOption("home", "Home")),
+    )
+    io.github.samuolis.domposable.ui.DomposableSegmentedButtons(listOf("Home", "Office"), 0, {}, "Address")
+    io.github.samuolis.domposable.ui.DomposableRangeSlider(0.2f..0.8f, {}, "Minimum", "Maximum")
+    io.github.samuolis.domposable.ui.DomposableFloatingActionButton({}, "Save") {
+        io.github.samuolis.domposable.ui.DomposableIcon("✓", null)
+    }
+    io.github.samuolis.domposable.ui.DomposableSnackbar("Saved", actionLabel = "Undo", onAction = {})
+    io.github.samuolis.domposable.ui.DomposableTooltip("Supplemental help") {
+        io.github.samuolis.domposable.ui.DomposableIconButton({}, "Help") { DomposableText("?") }
+    }
+}

@@ -601,6 +601,13 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     TextButton(props.onDismiss) { Text("Close") }
                 }
             },
+            topAppBar = { props, modifier, _ -> NativeTopAppBar(props, modifier) },
+            floatingActionButton = { props, modifier, content -> NativeFloatingActionButton(props, modifier, content) },
+            snackbar = { props, modifier, _ -> NativeSnackbar(props, modifier) },
+            select = { props, modifier, _ -> NativeSelect(props, modifier) },
+            segmentedButtons = { props, modifier, _ -> NativeSegmentedButtons(props, modifier) },
+            rangeSlider = { props, modifier, _ -> NativeRangeSlider(props, modifier) },
+            tooltip = { props, modifier, content -> NativeTooltip(props, modifier, content) },
             scaffold = { props, modifier, content ->
                 Surface(modifier.toComposeModifier().fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     Column(Modifier.fillMaxSize()) {

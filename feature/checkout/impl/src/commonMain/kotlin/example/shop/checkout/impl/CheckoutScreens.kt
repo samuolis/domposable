@@ -12,7 +12,6 @@ import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBanner
-import io.github.samuolis.domposable.ui.DomposableBannerProps
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableColumn
@@ -120,9 +119,7 @@ internal fun CheckoutContent(
     ) {
         DomposableText("Checkout", style = DomposableTextStyle.Title, headingLevel = 2)
         DomposableButton("Back to bag", onCart)
-        DomposableBanner(
-            DomposableBannerProps("Demo checkout. Use fictional details. No payment is collected and nothing is sent."),
-        )
+        DomposableBanner(message = "Demo checkout. Use fictional details. No payment is collected and nothing is sent.")
         if (state.count == 0) {
             DomposableText("Add something to your bag before checking out.")
         } else {

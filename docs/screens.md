@@ -42,9 +42,7 @@ fun ProductScreen(
     },
 ) {
     val navigator = LocalAppNavigator.current
-    DomposableMviScreen(model) { state, onAction ->
-        ProductContent(state, onAction, onBack = { navigator.goBack() })
-    }
+    ProductContent(model, onBack = { navigator.goBack() })
 }
 ```
 
@@ -52,7 +50,7 @@ KSP generates `productScreenEntry()` and an explicit `productScreenEntry(model)`
 
 The processor also generates `domposableEntries(...)` per package. The full overload combines explicit dependencies; an additional overload omits default parameters. If all non-route parameters have defaults, use `domposableEntries()` with no arguments. Shared dependencies with the same name and type appear once; conflicting types get entry-prefixed names. The app explicitly combines lists from its feature modules.
 
-The default annotation does **not** install AndroidX ViewModel ownership. `viewModel = true` requires `domposable-lifecycle-viewmodel`. That artifact also provides the optional `DomposableMvi<State, Action>` contract and `DomposableMviScreen(model)` state/action helper. You can collect a ViewModel's state directly, use plain Compose state or another architecture. The annotation is needed only for generated entries.
+The default annotation does **not** install AndroidX ViewModel ownership. `viewModel = true` requires `domposable-lifecycle-viewmodel`. State collection remains in your screen or an application helper. The annotation is needed only for generated entries.
 
 For injected screens, provide your DI environment at the application root. [The modular sample](modular-demo.md) demonstrates MetroX's standard factory and composition local. With Koin, provide the Koin application and use `model: YourViewModel = koinViewModel()` instead. Manual constructors, callbacks and explicit models remain supported.
 
