@@ -44,6 +44,7 @@ Coordinates: `io.github.samuolis.domposable:<artifact>:<released version>`. The 
 The fictional shop shares its catalogue, filters, cart, checkout and feature composables across native apps, semantic HTML and Wasm. HTML uses real header/main/footer landmarks, links and form controls, with product URLs such as `/domposable/shop/products/canvas-weekender/`.
 
 ![Fieldwork responsive storefront on the web](docs/assets/examples/shop-web.png)
+![The same Fieldwork storefront on Android and iOS](docs/assets/examples/shop-native.png)
 ![Domposable shared components on mobile and semantic HTML](docs/assets/examples/components.png)
 
 Start with [the installation guide](docs/getting-started.md), then explore [components](docs/components.md), [responsive layouts](docs/adaptive.md), [design providers](docs/design-systems.md) and [Metro/Kobweb integration](docs/integrations.md). The [shopping walkthrough](docs/shopping.md) connects the pieces in one app. There is no mandatory ViewModel base class, MVI contract or DI container.

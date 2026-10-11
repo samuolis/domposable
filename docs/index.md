@@ -1,29 +1,22 @@
 ![Domposable — shared features for native apps and responsive HTML](assets/brand/header.svg)
 
-# Build a feature once
+# One feature. Many screens.
 
-Native apps and responsive DOM websites from the same Compose feature codebase.
+Build native apps and responsive DOM websites from the same Compose feature codebase. Write ordinary `@Composable` functions, supply your own models, and choose a design provider.
 
-Write a feature once using ordinary `@Composable` functions. Supply your own models. Choose a component provider to render it with Compose UI on Android/iOS or semantic HTML in a browser.
+Android and iOS render Compose UI. Kotlin/JS emits semantic HTML with browser links, form controls and layout. Desktop and Wasm use Compose UI as experimental targets.
 
-Domposable keeps feature contracts independent of dependency injection and state architecture. It adds portable UI primitives, ordered modifiers, semantic tokens, measured adaptive layouts and optional screen/navigation ownership.
+[Get started](getting-started.md) · [Try the component playground](https://samuolis.github.io/domposable/demo/) · [Open the storefront](https://samuolis.github.io/domposable/shop/) · [Compare HTML and Wasm](compare.md)
 
-Try the [task workspace and component catalog](https://samuolis.github.io/domposable/demo/) and download [native demos](https://github.com/samuolis/domposable/releases). The website and downloads identify their commit in `release.json`.
+## See a complete feature
 
-Until the first Maven release, the site is a tested bootstrap preview at `0.1.0-alpha00`. That version is not available on Maven Central. Native debug downloads are available in the successful [CI run artifacts](https://github.com/samuolis/domposable/actions/workflows/ci.yml). Published releases replace this preview with the website attached to the release.
-
-Android, iOS arm64 and Kotlin/JS are the initial targets. JVM desktop is experimental. Alpha coverage and limitations are listed in [Coverage](coverage.md).
-
-
-Explore the same shared feature through [HTML/Wasm comparison](compare.md), [Navigation 3 and clean web URLs](recipes.md), and [Metro/Kobweb integration](integrations.md). See [compatibility](compatibility.md) and [remaining release work](roadmap.md).
-
-## Try a real feature
-
-[Open the Fieldwork storefront](https://samuolis.github.io/domposable/shop/) or [compare HTML and Wasm](compare.md). The demo includes real product URLs, search, category filters, a cart and validated demo checkout. It uses ordinary application-owned models and callbacks.
+Fieldwork is a familiar shopping app with search, category filters, product pages, a bag and validated demo checkout. The same feature code adapts from a phone to a wide browser. It uses fictional products and sends no payments or orders.
 
 ![Fieldwork responsive web storefront](assets/examples/shop-web.png)
 
-## Start small
+Follow the [shopping walkthrough](shopping.md), explore [components](components.md), or try the [navigation recipes](recipes.md).
+
+## Keep the API simple
 
 ```kotlin
 @Composable
@@ -36,4 +29,12 @@ fun ProductActions(name: String, price: String, onAdd: () -> Unit) {
 }
 ```
 
-Install a provider around this feature: Android and iOS render Compose UI; Kotlin/JS renders HTML. Your app supplies the state and dependencies. Follow [Get started](getting-started.md), browse [components](components.md), and choose a [design system](design-systems.md).
+Install a provider around the feature. Theme tokens set your product's colors, type and spacing; replace individual component renderers or supply a complete [design system](design-systems.md). Use measured content widths for [adaptive layouts](adaptive.md).
+
+## Bring your architecture
+
+Screens return `Unit`. Pass plain state and callbacks, a model, a ViewModel or a store. Your app owns dependencies: manual factories, Metro, Koin and other DI choices can stay at its boundary. [Screen entries](screens.md) and Navigation 3 are optional; KSP generates registration helpers without creating business logic or injection rules.
+
+The [Metro example](integrations.md) compiles on all six targets. The Kobweb example checks the Compose HTML page boundary; a complete export is a documented follow-up. See the [compatibility table](compatibility.md) for tested versions and platform differences.
+
+**Alpha preview:** the source examples build today. `0.1.0-alpha00` is an unpublished development baseline; Maven coordinates and native release downloads become available with the first public release. Start with the repository's runnable demo until then.

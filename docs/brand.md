@@ -4,7 +4,7 @@ The mark is a **D** containing two adaptable panes and a small accent dot. It is
 
 ![Domposable icon](assets/brand/icon.svg)
 
-Assets: [icon SVG](assets/brand/icon.svg), [icon PNG](assets/brand/icon.png), [social card SVG](assets/brand/social.svg). The source SVGs remain editable. Repository topics and descriptive documentation help discovery; hashtags are for announcement text rather than API names.
+Assets: [icon SVG](assets/brand/icon.svg), [icon PNG](assets/brand/icon.png), [social card SVG](assets/brand/social.svg), [README banner](assets/brand/header.svg). The source SVGs remain editable. Repository topics and descriptive documentation help discovery; hashtags are for announcement text rather than API names.
 
 Suggested announcement:
 

@@ -5,7 +5,20 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", title)).firstMatch.waitForExistence(timeout: 30))
     }
     private func capture(_ app: XCUIApplication, _ name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
+        // App screenshots can crop with portrait coordinates during iPad rotation.
+        // Capture the display after two consecutive rendered frames agree.
+        var previous: Data?
+        var settled: XCUIScreenshot?
+        let stable = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            let current = XCUIScreen.main.screenshot()
+            let data = current.pngRepresentation
+            defer { previous = data }
+            guard previous == data else { return false }
+            settled = current
+            return true
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [stable], timeout: 15), .completed)
+        let attachment = XCTAttachment(screenshot: settled ?? XCUIScreen.main.screenshot())
         attachment.name = "golden-\(name)"
         attachment.lifetime = .keepAlways
         add(attachment)
@@ -22,6 +35,10 @@ final class SmokeTests: XCTestCase {
         notes.tap()
         notes.typeText("Native feature notes")
         XCUIDevice.shared.orientation = .landscapeLeft
+        let landscape = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            app.frame.width > app.frame.height
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [landscape], timeout: 10), .completed)
         XCTAssertTrue(notes.waitForExistence(timeout: 10))
         XCTAssertTrue((notes.value as? String)?.contains("Native feature notes") == true)
         // Hide the keyboard and leave a stable adaptive scene for the baseline.

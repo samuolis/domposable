@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+from PIL import Image, ImageOps
 
 root = Path(__file__).resolve().parents[2]
 def output(*command):
@@ -33,7 +34,6 @@ finally:
             subprocess.run(["xcrun", "xcresulttool", "export", "attachments", "--path", str(result), "--output-path", str(exported)], check=True)
             destination = root / "build/screenshots/ios"
             destination.mkdir(parents=True, exist_ok=True)
-            import shutil
             for test in json.loads((exported/"manifest.json").read_text()):
                 for attachment in test["attachments"]:
                     name = attachment["suggestedHumanReadableName"]
@@ -42,7 +42,10 @@ finally:
                         # Xcode can append a timestamp to human-readable names.
                         name = name.split("_")[0]
                         if name in set(json.loads((root/"screenshots/manifest.json").read_text())["ios"]):
-                            shutil.copy2(exported/attachment["exportedFileName"], destination/f"{name}.png")
+                            # Simulator display captures carry EXIF orientation.
+                            # Normalize pixels so diff tools and GitHub agree.
+                            with Image.open(exported/attachment["exportedFileName"]) as image:
+                                ImageOps.exif_transpose(image).convert("RGB").save(destination/f"{name}.png")
     finally:
         subprocess.run(["xcrun", "simctl", "shutdown", identifier], capture_output=True)
         subprocess.run(["xcrun", "simctl", "delete", identifier], check=True)

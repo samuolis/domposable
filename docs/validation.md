@@ -3,7 +3,7 @@
 The required **CI passed** check combines Android/desktop/browser validation and native/published-consumer validation. Fork PRs run with read-only permissions and no release secrets. Tests exercise behavior, API variants and rendering separately.
 
 - Shared JVM tests cover adaptive rules, modifier ordering, entry lifetime/saveables and optional ViewModels.
-- Android native-graphics Robolectric tests exercise feature input/back navigation and capture three scenes.
+- Android native-graphics Robolectric tests exercise feature input/back navigation and capture four scenes, including the storefront.
 - iOS XCUITest verifies native input, rotation and recipe navigation, and captures portrait/landscape scenes on iPad mini A17 Pro with **iOS 26.5**.
 - Browser behavior and axe accessibility checks run in Chromium, Firefox and WebKit. They cover wrapping, semantic landmarks/links, modal focus, tab keyboard behavior, adaptive drafts, hash history and path deep links/reload under a base path.
 - Visual comparisons cover **Android, iOS, JVM desktop, semantic HTML and Wasm**. HTML fixtures include phone/tablet/wide views, list/detail and a dialog. Wasm checks startup/errors and phone/wide rendering.
@@ -18,7 +18,7 @@ Each run uploads actual images, expected images, pink diff overlays and JSON com
 
 Comparison rejects missing captures/baselines and dimension changes. It tolerates at most 0.05% differing pixels after ignoring channel differences of 12 or less, to handle small renderer rounding. A failure needs a reviewed fix or baseline update; increasing the threshold to conceal a layout regression is not acceptable.
 
-The visual browser reference is Chromium on Ubuntu 24.04 with Playwright 1.64.0. Desktop and Android references use the same Linux job. iOS pins its runtime/device and status-bar time/battery. A runner/runtime/font update can require a reviewed baseline refresh. Baselines from a different local OS should not replace the CI references casually.
+The visual browser reference is Chromium on Ubuntu 24.04 with Playwright 1.64.0. Desktop and Android references use the same Linux job. iOS pins its runtime/device and status-bar date/time/battery. A runner/runtime/font update can require a reviewed baseline refresh. Baselines from a different local OS should not replace the CI references casually.
 
 ## Update baselines deliberately
 

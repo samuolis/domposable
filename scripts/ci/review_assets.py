@@ -45,7 +45,8 @@ def panel(images, labels):
 def compare(before, after):
     if before.size == after.size:
         diff = ImageChops.difference(before, after)
-        mask = diff.convert('L').point(lambda v: 255 if v > 12 else 0)
+        # Match the regression gate: a difference in any channel counts.
+        mask = diff.point(lambda v: 255 if v > 12 else 0).convert('L').point(lambda v: 255 if v else 0)
         highlight = after.copy(); highlight.paste(Image.new('RGB', after.size, '#ed008c'), mask=mask)
     else:
         highlight = Image.new('RGB', after.size, '#ed008c')
