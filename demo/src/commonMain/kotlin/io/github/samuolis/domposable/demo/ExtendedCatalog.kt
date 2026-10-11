@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
@@ -46,7 +47,10 @@ fun ExtendedComponentCatalog() {
                 DomposableIconButton({ notice = "Back action received" }, "Back") { DomposableIcon("‹", null) }
             },
             actions = {
-                DomposableTooltip("Your preferences stay on this device") {
+                DomposableTooltip(
+                    "Your preferences stay on this device",
+                    DomposableModifier.padding(DomposableInsets(start = 4.dp, end = 12.dp)),
+                ) {
                     DomposableIconButton(
                         { notice = "This is a local demo" },
                         "About preferences",

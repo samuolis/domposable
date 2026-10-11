@@ -52,3 +52,16 @@ test('tooltip describes its control, opens with keyboard focus and dismisses wit
   await control.hover();
   await expect(tooltip).toBeVisible();
 });
+
+
+test('logical padding follows right-to-left layout', async ({ page }) => {
+  await page.addInitScript(() => document.addEventListener('DOMContentLoaded', () => { document.documentElement.dir = 'rtl'; }));
+  await page.goto('/#/components');
+  const control = page.getByRole('button', { name: 'About preferences', exact: true });
+  const padding = await control.evaluate(button => {
+    const wrapper = button.closest('.d-tooltip-anchor')!.parentElement!;
+    const style = getComputedStyle(wrapper);
+    return { start: style.paddingRight, end: style.paddingLeft };
+  });
+  expect(padding).toEqual({ start: '4px', end: '12px' });
+});

@@ -15,10 +15,20 @@ import io.github.samuolis.domposable.screens.DomposableEntryScope
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableComponents
+import io.github.samuolis.domposable.ui.DomposableFloatingActionButton
+import io.github.samuolis.domposable.ui.DomposableIcon
+import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableMeasure
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableRangeSlider
+import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
+import io.github.samuolis.domposable.ui.DomposableSelect
+import io.github.samuolis.domposable.ui.DomposableSelectOption
+import io.github.samuolis.domposable.ui.DomposableSnackbar
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTheme
+import io.github.samuolis.domposable.ui.DomposableTooltip
+import io.github.samuolis.domposable.ui.DomposableTopAppBar
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.size
 
@@ -162,18 +172,22 @@ fun DirectNavigation3() {
 // Published consumers exercise the direct API; they do not generate component contracts.
 @Composable
 fun SharedControls() {
-    io.github.samuolis.domposable.ui.DomposableTopAppBar("Preferences")
-    io.github.samuolis.domposable.ui.DomposableSelect(
-        "home", {}, "Address",
-        listOf(io.github.samuolis.domposable.ui.DomposableSelectOption("home", "Home")),
+    DomposableTopAppBar("Preferences")
+    DomposableSelect(
+        "home",
+        {},
+        "Address",
+        listOf(
+            DomposableSelectOption("home", "Home"),
+        ),
     )
-    io.github.samuolis.domposable.ui.DomposableSegmentedButtons(listOf("Home", "Office"), 0, {}, "Address")
-    io.github.samuolis.domposable.ui.DomposableRangeSlider(0.2f..0.8f, {}, "Minimum", "Maximum")
-    io.github.samuolis.domposable.ui.DomposableFloatingActionButton({}, "Save") {
-        io.github.samuolis.domposable.ui.DomposableIcon("✓", null)
+    DomposableSegmentedButtons(listOf("Home", "Office"), 0, {}, "Address")
+    DomposableRangeSlider(0.2f..0.8f, {}, "Minimum", "Maximum")
+    DomposableFloatingActionButton({}, "Save") {
+        DomposableIcon("✓", null)
     }
-    io.github.samuolis.domposable.ui.DomposableSnackbar("Saved", actionLabel = "Undo", onAction = {})
-    io.github.samuolis.domposable.ui.DomposableTooltip("Supplemental help") {
-        io.github.samuolis.domposable.ui.DomposableIconButton({}, "Help") { DomposableText("?") }
+    DomposableSnackbar("Saved", actionLabel = "Undo", onAction = {})
+    DomposableTooltip("Supplemental help") {
+        DomposableIconButton({}, "Help") { DomposableText("?") }
     }
 }
