@@ -1,0 +1,20 @@
+public final class io/github/samuolis/domposable/navigation3/ComposableSingletons$NavigationKt {
+	public static final field INSTANCE Lio/github/samuolis/domposable/navigation3/ComposableSingletons$NavigationKt;
+	public fun <init> ()V
+	public final fun getLambda$1337057368$io_github_samuolis_domposable_domposable_navigation3 ()Lkotlin/jvm/functions/Function3;
+}
+
+public abstract interface class io/github/samuolis/domposable/navigation3/DomposableRouteCodec {
+	public abstract fun decode (Ljava/lang/String;)Ljava/lang/Object;
+	public abstract fun encode (Ljava/lang/Object;)Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/navigation3/NativeNavigationKt {
+	public static final fun DomposableBrowserHistory (Landroidx/compose/runtime/snapshots/SnapshotStateList;Lio/github/samuolis/domposable/navigation3/DomposableRouteCodec;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/navigation3/NavigationKt {
+	public static final fun DomposableNavigation3Host (Ljava/util/List;Lio/github/samuolis/domposable/screens/DomposableScreenRegistry;Lio/github/samuolis/domposable/ui/DomposableModifier;ILkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+	public static final fun rememberDomposableBackStack (Ljava/lang/Object;Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/snapshots/SnapshotStateList;
+}
+

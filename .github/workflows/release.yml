@@ -1,0 +1,141 @@
+name: Bump and release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version operation
+        type: choice
+        options: [prerelease, patch, minor, major, stable]
+        default: prerelease
+      channel:
+        description: Prerelease channel
+        type: choice
+        options: [alpha, beta, rc]
+        default: alpha
+      deployment_id:
+        description: 'Recovery only: Central deployment ID for an upload with unknown outcome'
+        type: string
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: domposable-release
+  queue: max
+jobs:
+  release:
+    if: github.repository == 'samuolis/domposable' && github.ref == 'refs/heads/main'
+    runs-on: macos-26
+    timeout-minutes: 180
+    environment: release
+    permissions:
+      contents: write
+      actions: write
+      pages: write
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+      CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - name: Release preflight
+        env:
+          APP_ID: ${{ vars.RELEASE_APP_ID }}
+          APP_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          GPG_KEY: ${{ secrets.MAVEN_SIGNING_KEY }}
+          ANDROID_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          IOS_CERT: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_PROFILE: ${{ secrets.IOS_PROFILE_BASE64 }}
+        run: |
+          python - <<'PY'
+          import os
+          required = ['APP_ID','APP_KEY','GPG_KEY','ANDROID_KEY','IOS_CERT','IOS_PROFILE','CENTRAL_USERNAME','CENTRAL_PASSWORD']
+          missing = [key for key in required if not os.environ.get(key)]
+          if missing: raise SystemExit('Missing release configuration: ' + ', '.join(missing))
+          PY
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-actions: read
+      - name: Prepare version candidate or restore unfinished release
+        id: candidate
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          BUMP: ${{ inputs.bump }}
+          CHANNEL: ${{ inputs.channel }}
+        run: |
+          gh auth setup-git
+          python scripts/release.py prepare --bump "$BUMP" --channel "$CHANNEL"
+      - uses: ./.github/actions/setup
+      - name: Await candidate CI
+        if: steps.candidate.outputs.resume != 'true'
+        run: python scripts/release.py wait-ci
+      - name: Build signed demo downloads
+        if: steps.candidate.outputs.resume != 'true'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256 }}
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+        run: python scripts/ci/sign_release.py
+      - name: Build signed publications and released website
+        if: steps.candidate.outputs.resume != 'true'
+        env:
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+        run: |
+          ./gradlew publishAllPublicationsToFixtureRepository :demo:jsBrowserDistribution dokkaGenerate --console=plain
+          python - <<'PY'
+          import os, subprocess
+          subprocess.run(['gpg','--batch','--import'], input=os.environ['ORG_GRADLE_PROJECT_signingInMemoryKey'].encode(), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+          PY
+          python scripts/ci/package_publications.py
+          python scripts/ci/build_site.py
+          python scripts/release.py manifest
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.candidate.outputs.resume != 'true'
+        with:
+          name: release-assets
+          path: .release/artifacts/
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: error
+      - name: Stage immutable assets in a draft release
+        if: steps.candidate.outputs.resume != 'true'
+        run: python scripts/release.py stage
+      - name: Validate with Maven Central
+        env: {RECOVERY_ID: '${{ inputs.deployment_id }}'}
+        run: python scripts/publish_central.py validate --deployment-id "$RECOVERY_ID"
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: refreshed-app
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-actions: read
+      - name: Advance main with the tested version-only commit
+        env: {GH_TOKEN: '${{ steps.refreshed-app.outputs.token }}'}
+        run: python scripts/release.py advance-main
+      - name: Publish Maven Central
+        run: python scripts/publish_central.py publish
+      - name: Verify Central consumers after propagation
+        run: python scripts/ci/verify_central.py
+      - name: Publish GitHub release and extract its website
+        run: python scripts/release.py publish-github
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with: {path: build/released-site}
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        id: pages
+      - name: Mark release complete
+        run: python scripts/release.py complete

@@ -1,0 +1,70 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.samuolis.domposable:domposable-screens>
+final enum class io.github.samuolis.domposable.screens/DomposableEntryLifecycle : kotlin/Enum<io.github.samuolis.domposable.screens/DomposableEntryLifecycle> { // io.github.samuolis.domposable.screens/DomposableEntryLifecycle|null[0]
+    enum entry Created // io.github.samuolis.domposable.screens/DomposableEntryLifecycle.Created|null[0]
+    enum entry Destroyed // io.github.samuolis.domposable.screens/DomposableEntryLifecycle.Destroyed|null[0]
+    enum entry Resumed // io.github.samuolis.domposable.screens/DomposableEntryLifecycle.Resumed|null[0]
+
+    final val entries // io.github.samuolis.domposable.screens/DomposableEntryLifecycle.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.screens/DomposableEntryLifecycle> // io.github.samuolis.domposable.screens/DomposableEntryLifecycle.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.screens/DomposableEntryLifecycle // io.github.samuolis.domposable.screens/DomposableEntryLifecycle.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.screens/DomposableEntryLifecycle> // io.github.samuolis.domposable.screens/DomposableEntryLifecycle.values|values#static(){}[0]
+}
+
+final class <#A: kotlin/Any> io.github.samuolis.domposable.screens/DomposableDestination { // io.github.samuolis.domposable.screens/DomposableDestination|null[0]
+    constructor <init>(kotlin.reflect/KClass<#A>, kotlin/Function3<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>) // io.github.samuolis.domposable.screens/DomposableDestination.<init>|<init>(kotlin.reflect.KClass<1:0>;kotlin.Function3<io.github.samuolis.domposable.screens.DomposableEntryScope<1:0>,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>){}[0]
+
+    final val render // io.github.samuolis.domposable.screens/DomposableDestination.render|{}render[0]
+        final fun <get-render>(): kotlin/Function3<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit> // io.github.samuolis.domposable.screens/DomposableDestination.render.<get-render>|<get-render>(){}[0]
+    final val routeType // io.github.samuolis.domposable.screens/DomposableDestination.routeType|{}routeType[0]
+        final fun <get-routeType>(): kotlin.reflect/KClass<#A> // io.github.samuolis.domposable.screens/DomposableDestination.routeType.<get-routeType>|<get-routeType>(){}[0]
+}
+
+final class <#A: kotlin/Any> io.github.samuolis.domposable.screens/DomposableEntryScope { // io.github.samuolis.domposable.screens/DomposableEntryScope|null[0]
+    constructor <init>(#A, kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/List<kotlin/Any?>> = ...) // io.github.samuolis.domposable.screens/DomposableEntryScope.<init>|<init>(1:0;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.collections.List<kotlin.Any?>>){}[0]
+
+    final val id // io.github.samuolis.domposable.screens/DomposableEntryScope.id|{}id[0]
+        final fun <get-id>(): kotlin/String // io.github.samuolis.domposable.screens/DomposableEntryScope.id.<get-id>|<get-id>(){}[0]
+    final val route // io.github.samuolis.domposable.screens/DomposableEntryScope.route|{}route[0]
+        final fun <get-route>(): #A // io.github.samuolis.domposable.screens/DomposableEntryScope.route.<get-route>|<get-route>(){}[0]
+    final val saveableStateRegistry // io.github.samuolis.domposable.screens/DomposableEntryScope.saveableStateRegistry|{}saveableStateRegistry[0]
+        final fun <get-saveableStateRegistry>(): androidx.compose.runtime.saveable/SaveableStateRegistry // io.github.samuolis.domposable.screens/DomposableEntryScope.saveableStateRegistry.<get-saveableStateRegistry>|<get-saveableStateRegistry>(){}[0]
+
+    final var lifecycle // io.github.samuolis.domposable.screens/DomposableEntryScope.lifecycle|{}lifecycle[0]
+        final fun <get-lifecycle>(): io.github.samuolis.domposable.screens/DomposableEntryLifecycle // io.github.samuolis.domposable.screens/DomposableEntryScope.lifecycle.<get-lifecycle>|<get-lifecycle>(){}[0]
+
+    final fun <#A1: kotlin/Any> retain(kotlin/String, kotlin/Function1<#A1, kotlin/Unit> = ..., kotlin/Function0<#A1>): #A1 // io.github.samuolis.domposable.screens/DomposableEntryScope.retain|retain(kotlin.String;kotlin.Function1<0:0,kotlin.Unit>;kotlin.Function0<0:0>){0§<kotlin.Any>}[0]
+    final fun moveTo(io.github.samuolis.domposable.screens/DomposableEntryLifecycle) // io.github.samuolis.domposable.screens/DomposableEntryScope.moveTo|moveTo(io.github.samuolis.domposable.screens.DomposableEntryLifecycle){}[0]
+    final fun observeLifecycle(kotlin/Function1<io.github.samuolis.domposable.screens/DomposableEntryLifecycle, kotlin/Unit>): kotlin/Function0<kotlin/Unit> // io.github.samuolis.domposable.screens/DomposableEntryScope.observeLifecycle|observeLifecycle(kotlin.Function1<io.github.samuolis.domposable.screens.DomposableEntryLifecycle,kotlin.Unit>){}[0]
+    final fun onDispose(kotlin/Function0<kotlin/Unit>) // io.github.samuolis.domposable.screens/DomposableEntryScope.onDispose|onDispose(kotlin.Function0<kotlin.Unit>){}[0]
+}
+
+final class io.github.samuolis.domposable.screens/DomposableScreenRegistry { // io.github.samuolis.domposable.screens/DomposableScreenRegistry|null[0]
+    final fun <#A1: kotlin/Any> Render(io.github.samuolis.domposable.screens/DomposableEntryScope<#A1>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.samuolis.domposable.screens/DomposableScreenRegistry.Render|Render(io.github.samuolis.domposable.screens.DomposableEntryScope<0:0>;androidx.compose.runtime.Composer?;kotlin.Int){0§<kotlin.Any>}[0]
+}
+
+final class io.github.samuolis.domposable.screens/DomposableScreenRegistryBuilder { // io.github.samuolis.domposable.screens/DomposableScreenRegistryBuilder|null[0]
+    constructor <init>() // io.github.samuolis.domposable.screens/DomposableScreenRegistryBuilder.<init>|<init>(){}[0]
+
+    final fun <#A1: kotlin/Any> register(io.github.samuolis.domposable.screens/DomposableDestination<#A1>) // io.github.samuolis.domposable.screens/DomposableScreenRegistryBuilder.register|register(io.github.samuolis.domposable.screens.DomposableDestination<0:0>){0§<kotlin.Any>}[0]
+    final fun <#A1: kotlin/Any> register(kotlin.reflect/KClass<#A1>, kotlin/Function3<io.github.samuolis.domposable.screens/DomposableEntryScope<#A1>, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>) // io.github.samuolis.domposable.screens/DomposableScreenRegistryBuilder.register|register(kotlin.reflect.KClass<0:0>;kotlin.Function3<io.github.samuolis.domposable.screens.DomposableEntryScope<0:0>,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>){0§<kotlin.Any>}[0]
+}
+
+final val io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableDestination$stableprop // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableDestination$stableprop|#static{}io_github_samuolis_domposable_screens_DomposableDestination$stableprop[0]
+final val io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableEntryScope$stableprop // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableEntryScope$stableprop|#static{}io_github_samuolis_domposable_screens_DomposableEntryScope$stableprop[0]
+final val io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistry$stableprop // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistry$stableprop|#static{}io_github_samuolis_domposable_screens_DomposableScreenRegistry$stableprop[0]
+final val io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistryBuilder$stableprop // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistryBuilder$stableprop|#static{}io_github_samuolis_domposable_screens_DomposableScreenRegistryBuilder$stableprop[0]
+
+final fun io.github.samuolis.domposable.screens/domposableScreenRegistry(kotlin/Function1<io.github.samuolis.domposable.screens/DomposableScreenRegistryBuilder, kotlin/Unit>): io.github.samuolis.domposable.screens/DomposableScreenRegistry // io.github.samuolis.domposable.screens/domposableScreenRegistry|domposableScreenRegistry(kotlin.Function1<io.github.samuolis.domposable.screens.DomposableScreenRegistryBuilder,kotlin.Unit>){}[0]
+final fun io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableDestination$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableDestination$stableprop_getter|io_github_samuolis_domposable_screens_DomposableDestination$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableEntryScope$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableEntryScope$stableprop_getter|io_github_samuolis_domposable_screens_DomposableEntryScope$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistry$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistry$stableprop_getter|io_github_samuolis_domposable_screens_DomposableScreenRegistry$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistryBuilder$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.screens/io_github_samuolis_domposable_screens_DomposableScreenRegistryBuilder$stableprop_getter|io_github_samuolis_domposable_screens_DomposableScreenRegistryBuilder$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.screens/portableSaveable(kotlin/Any): kotlin/Boolean // io.github.samuolis.domposable.screens/portableSaveable|portableSaveable(kotlin.Any){}[0]

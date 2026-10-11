@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Validate, then publish the preserved bundle. Persist every deployment transition."""
+from __future__ import annotations
+import argparse
+import base64
+import hashlib
+import json
+import os
+import time
+import urllib.error
+import urllib.request
+import uuid
+from release import ASSETS, GitHub, checkpoint, read_state, verify_assets
+
+BASE = "https://central.sonatype.com/api/v1/publisher"
+
+def request(path, data=b"", content_type="application/json"):
+    token = base64.b64encode(f"{os.environ['CENTRAL_USERNAME']}:{os.environ['CENTRAL_PASSWORD']}".encode()).decode()
+    req = urllib.request.Request(BASE + path, data=data, headers={"Authorization": "Bearer " + token, "Content-Type": content_type}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=300) as response: return response.read().decode()
+    except urllib.error.HTTPError as error:
+        raise RuntimeError(f"Central request failed ({error.code}); credentials and response bodies are not logged") from None
+
+def publish(mode, recovered_id=None):
+    verify_assets(); state = read_state(); github = GitHub()
+    bundle = ASSETS / "maven-bundle.zip"
+    if hashlib.sha256(bundle.read_bytes()).hexdigest() != state['bundle_sha256']: raise RuntimeError("Bundle changed after staging")
+    if recovered_id:
+        uuid.UUID(recovered_id)
+        if state.get('deployment_id') not in (None, recovered_id): raise RuntimeError("Recovery ID disagrees with saved deployment")
+        state['deployment_id'] = recovered_id; checkpoint(state, github)
+    if not state.get("deployment_id"):
+        if state.get("central_upload_intent"):
+            raise RuntimeError("Previous Central upload outcome is unknown. Locate the named deployment in Central and rerun with its deployment ID; never upload a second bundle blindly")
+        state['central_upload_intent'] = f"domposable-{state['version']}-{state['bundle_sha256'][:12]}"
+        checkpoint(state, github)
+        boundary = uuid.uuid4().hex
+        data = (f'--{boundary}\r\nContent-Disposition: form-data; name="bundle"; filename="maven-bundle.zip"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode() + bundle.read_bytes() + f'\r\n--{boundary}--\r\n'.encode())
+        import urllib.parse
+        query = urllib.parse.urlencode({"name": state['central_upload_intent'], "publishingType": "USER_MANAGED"})
+        deployment = request("/upload?" + query, data, "multipart/form-data; boundary=" + boundary).strip().strip('"')
+        uuid.UUID(deployment)
+        state['deployment_id'] = deployment; checkpoint(state, github)
+    deadline = time.monotonic() + 3600
+    while time.monotonic() < deadline:
+        status = json.loads(request("/status?id=" + state['deployment_id']))
+        current = status['deploymentState']
+        if current != state.get('central_state'):
+            state['central_state'] = current; checkpoint(state, github)
+        if current == "FAILED": raise RuntimeError("Central validation failed. Inspect its deployment errors in the portal; the same version remains reserved")
+        if current == "PUBLISHED": return
+        if current == "VALIDATED":
+            if mode == "validate": return
+            if state.get('phase') not in ['main-advanced', 'github-published', 'complete']:
+                raise RuntimeError("Publish only after the tested version commit has advanced main")
+            request("/deployment/" + state['deployment_id'])
+        time.sleep(20)
+    raise RuntimeError("Central is still processing. Rerun Bump and release to resume this deployment")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mode", choices=["validate", "publish"])
+    parser.add_argument("--deployment-id", default=None)
+    args = parser.parse_args()
+    try: publish(args.mode, args.deployment_id or None)
+    except (RuntimeError, ValueError, KeyError) as error: raise SystemExit(str(error)) from None

@@ -1,0 +1,96 @@
+public final class io/github/samuolis/domposable/adaptive/AdaptiveKt {
+	public static final fun rememberDomposableAdaptiveInfo (Lio/github/samuolis/domposable/foundation/DomposableSize;Lio/github/samuolis/domposable/adaptive/DomposableBreakpoints;Ljava/lang/Boolean;Ljava/lang/Boolean;Landroidx/compose/runtime/Composer;II)Lio/github/samuolis/domposable/adaptive/DomposableAdaptiveInfo;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposableAdaptiveInfo {
+	public static final field $stable I
+	public fun <init> (Lio/github/samuolis/domposable/foundation/DomposableSize;Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;ZZ)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableSize;Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/foundation/DomposableSize;
+	public final fun component2 ()Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun copy (Lio/github/samuolis/domposable/foundation/DomposableSize;Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;ZZ)Lio/github/samuolis/domposable/adaptive/DomposableAdaptiveInfo;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposableAdaptiveInfo;Lio/github/samuolis/domposable/foundation/DomposableSize;Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;ZZILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposableAdaptiveInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPrecisePointer ()Z
+	public final fun getReducedMotion ()Z
+	public final fun getSize ()Lio/github/samuolis/domposable/foundation/DomposableSize;
+	public final fun getWidthClass ()Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposableBreakpoints {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (FFF)V
+	public synthetic fun <init> (FFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun classify (F)Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun copy (FFF)Lio/github/samuolis/domposable/adaptive/DomposableBreakpoints;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposableBreakpoints;FFFILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposableBreakpoints;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExpanded ()F
+	public final fun getLarge ()F
+	public final fun getMedium ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposablePaneRecipe {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public final fun copy (Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;)Lio/github/samuolis/domposable/adaptive/DomposablePaneRecipe;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposablePaneRecipe;Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;ILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposablePaneRecipe;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDualPaneFrom ()Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public fun hashCode ()I
+	public final fun isDualPane (Lio/github/samuolis/domposable/adaptive/DomposableAdaptiveInfo;)Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposablePaneRole : java/lang/Enum {
+	public static final field Detail Lio/github/samuolis/domposable/adaptive/DomposablePaneRole;
+	public static final field List Lio/github/samuolis/domposable/adaptive/DomposablePaneRole;
+	public static final field Supporting Lio/github/samuolis/domposable/adaptive/DomposablePaneRole;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/adaptive/DomposablePaneRole;
+	public static fun values ()[Lio/github/samuolis/domposable/adaptive/DomposablePaneRole;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposableResponsive {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun component3 ()Ljava/lang/Object;
+	public final fun component4 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposableResponsive;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposableResponsive;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposableResponsive;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompact ()Ljava/lang/Object;
+	public final fun getExpanded ()Ljava/lang/Object;
+	public final fun getLarge ()Ljava/lang/Object;
+	public final fun getMedium ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public final fun resolve (Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;)Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposableWidthClass : java/lang/Enum {
+	public static final field Compact Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public static final field Expanded Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public static final field Large Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public static final field Medium Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+	public static fun values ()[Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+}
+

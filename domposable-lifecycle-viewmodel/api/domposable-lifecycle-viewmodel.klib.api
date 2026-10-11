@@ -1,0 +1,25 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.samuolis.domposable:domposable-lifecycle-viewmodel>
+final class io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner : androidx.lifecycle/HasDefaultViewModelProviderFactory, androidx.lifecycle/ViewModelStoreOwner, androidx.savedstate/SavedStateRegistryOwner { // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner|null[0]
+    final val defaultViewModelCreationExtras // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.defaultViewModelCreationExtras|{}defaultViewModelCreationExtras[0]
+        final fun <get-defaultViewModelCreationExtras>(): androidx.lifecycle.viewmodel/CreationExtras // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.defaultViewModelCreationExtras.<get-defaultViewModelCreationExtras>|<get-defaultViewModelCreationExtras>(){}[0]
+    final val defaultViewModelProviderFactory // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.defaultViewModelProviderFactory|{}defaultViewModelProviderFactory[0]
+        final fun <get-defaultViewModelProviderFactory>(): androidx.lifecycle/ViewModelProvider.Factory // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.defaultViewModelProviderFactory.<get-defaultViewModelProviderFactory>|<get-defaultViewModelProviderFactory>(){}[0]
+    final val lifecycle // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.lifecycle|{}lifecycle[0]
+        final fun <get-lifecycle>(): androidx.lifecycle/Lifecycle // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.lifecycle.<get-lifecycle>|<get-lifecycle>(){}[0]
+    final val savedStateRegistry // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.savedStateRegistry|{}savedStateRegistry[0]
+        final fun <get-savedStateRegistry>(): androidx.savedstate/SavedStateRegistry // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.savedStateRegistry.<get-savedStateRegistry>|<get-savedStateRegistry>(){}[0]
+    final val viewModelStore // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.viewModelStore|{}viewModelStore[0]
+        final fun <get-viewModelStore>(): androidx.lifecycle/ViewModelStore // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.viewModelStore.<get-viewModelStore>|<get-viewModelStore>(){}[0]
+}
+
+final val io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop // io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop|#static{}io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop[0]
+
+final fun io.github.samuolis.domposable.lifecycle/DomposableViewModelEntry(io.github.samuolis.domposable.screens/DomposableEntryScope<*>, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.samuolis.domposable.lifecycle/DomposableViewModelEntry|DomposableViewModelEntry(io.github.samuolis.domposable.screens.DomposableEntryScope<*>;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+final fun io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop_getter|io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop_getter(){}[0]

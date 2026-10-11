@@ -1,0 +1,5 @@
+Domposable
+Copyright 2026 Samuolis
+
+Uses Compose Multiplatform, Compose HTML, AndroidX, Kotlin, KSP, Coil and Ktor.
+These dependencies retain their upstream licenses and notices.

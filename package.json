@@ -1,0 +1,6 @@
+{
+  "name": "domposable-browser-tests",
+  "private": true,
+  "scripts": { "test": "playwright test", "test:browser": "playwright test" },
+  "devDependencies": { "@playwright/test": "1.64.0", "@axe-core/playwright": "4.13.0" }
+}

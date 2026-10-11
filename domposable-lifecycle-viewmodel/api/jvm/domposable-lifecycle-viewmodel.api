@@ -1,0 +1,13 @@
+public final class io/github/samuolis/domposable/lifecycle/DomposableViewModelOwner : androidx/lifecycle/HasDefaultViewModelProviderFactory, androidx/lifecycle/ViewModelStoreOwner, androidx/savedstate/SavedStateRegistryOwner {
+	public static final field $stable I
+	public fun getDefaultViewModelCreationExtras ()Landroidx/lifecycle/viewmodel/CreationExtras;
+	public fun getDefaultViewModelProviderFactory ()Landroidx/lifecycle/ViewModelProvider$Factory;
+	public fun getLifecycle ()Landroidx/lifecycle/Lifecycle;
+	public fun getSavedStateRegistry ()Landroidx/savedstate/SavedStateRegistry;
+	public fun getViewModelStore ()Landroidx/lifecycle/ViewModelStore;
+}
+
+public final class io/github/samuolis/domposable/lifecycle/EntryViewModelKt {
+	public static final fun DomposableViewModelEntry (Lio/github/samuolis/domposable/screens/DomposableEntryScope;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+

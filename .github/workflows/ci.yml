@@ -1,0 +1,73 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main, 'release-candidate/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  portable:
+    name: Android, shared APIs and HTML
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: ./.github/actions/setup
+      - run: python -m unittest discover -s scripts/tests -v
+      - run: ./gradlew jvmTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack dokkaGenerate --console=plain
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: python scripts/ci/browser_preview.py
+      - run: npx playwright test
+      - run: ./gradlew :demo:jsBrowserDistribution --console=plain
+      - run: python scripts/ci/build_site.py
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: android-html-evidence
+          path: |
+            androidApp/build/outputs/apk/debug/*.apk
+            test-results/
+            playwright-report/
+            build/site/
+            **/build/reports/tests/
+          retention-days: 14
+  native:
+    name: iOS, ABI and published consumers
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: ./.github/actions/setup
+      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 --console=plain
+      - run: python scripts/ci/package_publications.py --unsigned
+      - name: Resolve and compile published artifacts
+        run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
+      - run: python scripts/ci/generate_xcode_project.py
+      - run: python scripts/ci/ios_test.py
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: native-evidence
+          path: |
+            build/ios-tests-*.xcresult
+            **/build/reports/abi/
+            .release/artifacts/maven-bundle.zip
+          retention-days: 14
+  passed:
+    name: CI passed
+    if: always()
+    needs: [portable, native]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require every validation job
+        env:
+          PORTABLE: ${{ needs.portable.result }}
+          NATIVE: ${{ needs.native.result }}
+        run: test "$PORTABLE" = success && test "$NATIVE" = success

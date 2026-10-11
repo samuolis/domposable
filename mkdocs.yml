@@ -1,0 +1,24 @@
+site_name: Domposable
+site_description: One Compose API for apps and semantic HTML
+site_url: https://samuolis.github.io/domposable/
+repo_url: https://github.com/samuolis/domposable
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: deep purple
+    accent: cyan
+  features: [navigation.tabs, content.code.copy]
+nav:
+  - Home: index.md
+  - Start: getting-started.md
+  - Architecture: architecture.md
+  - Design systems: design-systems.md
+  - Screens and navigation: screens.md
+  - Adaptive UI: adaptive.md
+  - Migration: migration.md
+  - Coverage: coverage.md
+  - Releases: releasing.md
+  - API: https://samuolis.github.io/domposable/api/
+  - Live demo: https://samuolis.github.io/domposable/demo/
+markdown_extensions: [admonition, tables, fenced_code]

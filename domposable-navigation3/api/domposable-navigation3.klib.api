@@ -1,0 +1,16 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.samuolis.domposable:domposable-navigation3>
+abstract interface <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/DomposableRouteCodec { // io.github.samuolis.domposable.navigation3/DomposableRouteCodec|null[0]
+    abstract fun decode(kotlin/String): #A? // io.github.samuolis.domposable.navigation3/DomposableRouteCodec.decode|decode(kotlin.String){}[0]
+    abstract fun encode(#A): kotlin/String // io.github.samuolis.domposable.navigation3/DomposableRouteCodec.encode|encode(1:0){}[0]
+}
+
+final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/DomposableBrowserHistory(androidx.compose.runtime.snapshots/SnapshotStateList<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>>, io.github.samuolis.domposable.navigation3/DomposableRouteCodec<#A>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.samuolis.domposable.navigation3/DomposableBrowserHistory|DomposableBrowserHistory(androidx.compose.runtime.snapshots.SnapshotStateList<io.github.samuolis.domposable.screens.DomposableEntryScope<0:0>>;io.github.samuolis.domposable.navigation3.DomposableRouteCodec<0:0>;androidx.compose.runtime.Composer?;kotlin.Int){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/DomposableNavigation3Host(kotlin.collections/List<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>>, io.github.samuolis.domposable.screens/DomposableScreenRegistry, io.github.samuolis.domposable.ui/DomposableModifier?, kotlin/Int, kotlin/Function0<kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.navigation3/DomposableNavigation3Host|DomposableNavigation3Host(kotlin.collections.List<io.github.samuolis.domposable.screens.DomposableEntryScope<0:0>>;io.github.samuolis.domposable.screens.DomposableScreenRegistry;io.github.samuolis.domposable.ui.DomposableModifier?;kotlin.Int;kotlin.Function0<kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/rememberDomposableBackStack(#A, androidx.compose.runtime/Composer?, kotlin/Int): androidx.compose.runtime.snapshots/SnapshotStateList<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>> // io.github.samuolis.domposable.navigation3/rememberDomposableBackStack|rememberDomposableBackStack(0:0;androidx.compose.runtime.Composer?;kotlin.Int){0§<kotlin.Any>}[0]

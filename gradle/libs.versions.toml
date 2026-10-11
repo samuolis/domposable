@@ -1,0 +1,36 @@
+[versions]
+kotlin = "2.4.20"
+compose = "1.12.1"
+agp = "9.4.0"
+ksp = "2.3.12"
+dokka = "2.2.0"
+mavenPublish = "0.37.0"
+material3 = "1.12.0-alpha03"
+navigation3 = "1.1.2"
+navigation3Runtime = "1.1.7"
+lifecycle = "2.11.0"
+savedstate = "1.4.0"
+activity = "1.13.0"
+
+[libraries]
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3Runtime" }
+navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
+lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle" }
+lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+savedstate = { module = "org.jetbrains.androidx.savedstate:savedstate", version.ref = "savedstate" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }

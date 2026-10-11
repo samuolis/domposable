@@ -1,0 +1,10 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.samuolis.domposable:domposable-design-material>
+final fun io.github.samuolis.domposable.material/DomposableMaterialTheme(io.github.samuolis.domposable.foundation/DomposableTokens?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.material/DomposableMaterialTheme|DomposableMaterialTheme(io.github.samuolis.domposable.foundation.DomposableTokens?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+final fun io.github.samuolis.domposable.material/rememberDomposableMaterialComponents(androidx.compose.runtime/Composer?, kotlin/Int): io.github.samuolis.domposable.ui/DomposableComponents // io.github.samuolis.domposable.material/rememberDomposableMaterialComponents|rememberDomposableMaterialComponents(androidx.compose.runtime.Composer?;kotlin.Int){}[0]

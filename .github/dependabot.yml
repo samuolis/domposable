@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: gradle
+    directory: /
+    schedule: {interval: weekly}
+    groups:
+      compose-toolchain:
+        patterns: ['org.jetbrains.kotlin*', 'org.jetbrains.compose*', 'com.google.devtools.ksp*']
+  - package-ecosystem: npm
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: pip
+    directory: /docs
+    schedule: {interval: weekly}

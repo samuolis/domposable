@@ -1,0 +1,14 @@
+# Contributing
+
+Open an issue for substantial API changes. Keep feature APIs independent of application architecture and platform rendering. Add a portable props declaration and implement behavior/semantics in each supported provider. Preserve modifier ordering and stable keys.
+
+Run shared tests and the relevant platform checks. Public API changes update checked-in baselines with `./gradlew updateKotlinAbi`; review those changes alongside the implementation. CI uses `checkKotlinAbi` and compiles a consumer against actual local Maven publications. Run Playwright when HTML interaction, focus or semantics change.
+
+```sh
+python3 -m unittest discover -s scripts/tests -v
+./gradlew jvmTest checkKotlinAbi publishAllPublicationsToFixtureRepository
+python3 scripts/ci/package_publications.py --unsigned
+./gradlew :consumer-fixture:compileKotlinJs -Pdomposable.consumer.repository="$PWD/build/repository"
+```
+
+All implementation changes go through branches and PRs. Only the release workflow may advance `main` directly with an approved, tested version-only commit. Do not commit credentials, provisioning profiles, signing keys or device lists. The Apache-2.0 license applies to contributions.

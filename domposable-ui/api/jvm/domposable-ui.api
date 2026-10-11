@@ -1,0 +1,1091 @@
+public final class io/github/samuolis/domposable/ui/ComponentsKt {
+	public static final fun DomposableBox (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableAlignment;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableButton (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLandroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableButton (Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLio/github/samuolis/domposable/foundation/DomposableButtonStyle;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableCard (Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableCheckbox (ZLkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLandroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableColumn-MrnRGsg (Lio/github/samuolis/domposable/ui/DomposableModifier;FLio/github/samuolis/domposable/foundation/DomposableAlignment;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableDivider (Lio/github/samuolis/domposable/ui/DomposableModifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableRow-MrnRGsg (Lio/github/samuolis/domposable/ui/DomposableModifier;FLio/github/samuolis/domposable/foundation/DomposableAlignment;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableScaffold (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableScreenScaffold (Lio/github/samuolis/domposable/foundation/DomposableScreenState;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableSpacer--8laelU (FLio/github/samuolis/domposable/ui/DomposableModifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableText-F_K29VY (Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableTextStyle;Lio/github/samuolis/domposable/foundation/DomposableColor;Ljava/lang/Integer;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableTextField (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;ZZLjava/lang/String;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableTheme (Lio/github/samuolis/domposable/foundation/DomposableTokens;Lio/github/samuolis/domposable/ui/DomposableComponents;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun getLocalDomposableComponents ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalDomposableTokens ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+}
+
+public final class io/github/samuolis/domposable/ui/ComposableSingletons$ComponentsKt {
+	public static final field INSTANCE Lio/github/samuolis/domposable/ui/ComposableSingletons$ComponentsKt;
+	public fun <init> ()V
+	public final fun getLambda$-1339183695$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1449678305$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1788984540$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1862186721$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1875896292$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1986867926$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2045722092$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-211464327$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-331082996$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-913642894$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1779346523$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1901234922$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$446461799$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$612957090$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$851512083$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/github/samuolis/domposable/ui/ComposableSingletons$DomposableComponentsKt {
+	public static final field INSTANCE Lio/github/samuolis/domposable/ui/ComposableSingletons$DomposableComponentsKt;
+	public fun <init> ()V
+	public final fun getLambda$-1013824169$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1198270429$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1220197363$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-129006493$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1298216971$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1314642503$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1348528107$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1549303937$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1651440509$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-18519773$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1869155933$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2022666749$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2103159773$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-281827485$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-294034493$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-459594781$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-582510203$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-598100477$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-674049341$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$100919267$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1047068121$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1146193123$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1353080227$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1461126193$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1767089539$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2042804593$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2123145763$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$355353955$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$444912963$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$65971889$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$718375203$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$82604611$io_github_samuolis_domposable_domposable_ui ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/github/samuolis/domposable/ui/ComposeInteropKt {
+	public static final fun DomposableMeasure (Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun toComposeModifier (Lio/github/samuolis/domposable/ui/DomposableModifier;Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/Modifier;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableAvatarProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableAvatarProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableAvatarProps;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableAvatarProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getInitials ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableAvatarRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableAvatarProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableBadgeProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableBadgeProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableBadgeProps;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableBadgeProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableBadgeRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableBadgeProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableBannerProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lio/github/samuolis/domposable/ui/DomposableBannerProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableBannerProps;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableBannerProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isError ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableBannerRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableBannerProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableBottomSheetProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnDismiss ()Lkotlin/jvm/functions/Function0;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableBottomSheetRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableBoxProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lio/github/samuolis/domposable/foundation/DomposableAlignment;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableAlignment;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
+	public final fun copy (Lio/github/samuolis/domposable/foundation/DomposableAlignment;)Lio/github/samuolis/domposable/ui/DomposableBoxProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableBoxProps;Lio/github/samuolis/domposable/foundation/DomposableAlignment;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableBoxProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlignment ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableBoxRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableBoxProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableButtonProps {
+	public static final field $stable I
+	public fun <init> (Lkotlin/jvm/functions/Function0;ZLio/github/samuolis/domposable/foundation/DomposableButtonStyle;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;ZLio/github/samuolis/domposable/foundation/DomposableButtonStyle;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun component2 ()Z
+	public final fun component3 ()Lio/github/samuolis/domposable/foundation/DomposableButtonStyle;
+	public final fun copy (Lkotlin/jvm/functions/Function0;ZLio/github/samuolis/domposable/foundation/DomposableButtonStyle;)Lio/github/samuolis/domposable/ui/DomposableButtonProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableButtonProps;Lkotlin/jvm/functions/Function0;ZLio/github/samuolis/domposable/foundation/DomposableButtonStyle;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableButtonProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
+	public final fun getStyle ()Lio/github/samuolis/domposable/foundation/DomposableButtonStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableButtonRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableButtonProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableCardProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Lkotlin/jvm/functions/Function0;)Lio/github/samuolis/domposable/ui/DomposableCardProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableCardProps;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableCardProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableCardRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableCardProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableCheckboxProps {
+	public static final field $stable I
+	public fun <init> (ZLkotlin/jvm/functions/Function1;Ljava/lang/String;Z)V
+	public synthetic fun <init> (ZLkotlin/jvm/functions/Function1;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (ZLkotlin/jvm/functions/Function1;Ljava/lang/String;Z)Lio/github/samuolis/domposable/ui/DomposableCheckboxProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableCheckboxProps;ZLkotlin/jvm/functions/Function1;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableCheckboxProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChecked ()Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnCheckedChange ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableCheckboxRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableCheckboxProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableChipProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ZZ)Lio/github/samuolis/domposable/ui/DomposableChipProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableChipProps;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ZZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableChipProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
+	public final fun getSelected ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableChipRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableChipProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableColumnProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun <init> (FLio/github/samuolis/domposable/foundation/DomposableAlignment;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FLio/github/samuolis/domposable/foundation/DomposableAlignment;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun component2 ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
+	public final fun copy-seJEgBQ (FLio/github/samuolis/domposable/foundation/DomposableAlignment;)Lio/github/samuolis/domposable/ui/DomposableColumnProps;
+	public static synthetic fun copy-seJEgBQ$default (Lio/github/samuolis/domposable/ui/DomposableColumnProps;FLio/github/samuolis/domposable/foundation/DomposableAlignment;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableColumnProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlignment ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
+	public final fun getGap--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableColumnRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableColumnProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableComponents {
+	public static final field $stable I
+	public fun <init> (Lio/github/samuolis/domposable/ui/DomposableAvatarRenderer;Lio/github/samuolis/domposable/ui/DomposableBadgeRenderer;Lio/github/samuolis/domposable/ui/DomposableBannerRenderer;Lio/github/samuolis/domposable/ui/DomposableBottomSheetRenderer;Lio/github/samuolis/domposable/ui/DomposableBoxRenderer;Lio/github/samuolis/domposable/ui/DomposableButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableCardRenderer;Lio/github/samuolis/domposable/ui/DomposableCheckboxRenderer;Lio/github/samuolis/domposable/ui/DomposableChipRenderer;Lio/github/samuolis/domposable/ui/DomposableColumnRenderer;Lio/github/samuolis/domposable/ui/DomposableDialogRenderer;Lio/github/samuolis/domposable/ui/DomposableDividerRenderer;Lio/github/samuolis/domposable/ui/DomposableIconRenderer;Lio/github/samuolis/domposable/ui/DomposableIconButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableImageRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyColumnRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyGridRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyRowRenderer;Lio/github/samuolis/domposable/ui/DomposableMenuRenderer;Lio/github/samuolis/domposable/ui/DomposableNavigationBarRenderer;Lio/github/samuolis/domposable/ui/DomposableProgressRenderer;Lio/github/samuolis/domposable/ui/DomposableRadioButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableRowRenderer;Lio/github/samuolis/domposable/ui/DomposableScaffoldRenderer;Lio/github/samuolis/domposable/ui/DomposableSliderRenderer;Lio/github/samuolis/domposable/ui/DomposableSpacerRenderer;Lio/github/samuolis/domposable/ui/DomposableSurfaceRenderer;Lio/github/samuolis/domposable/ui/DomposableSwitchRenderer;Lio/github/samuolis/domposable/ui/DomposableTabsRenderer;Lio/github/samuolis/domposable/ui/DomposableTextRenderer;Lio/github/samuolis/domposable/ui/DomposableTextFieldRenderer;Lio/github/samuolis/domposable/ui/DomposableThemeRenderer;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/ui/DomposableAvatarRenderer;
+	public final fun component10 ()Lio/github/samuolis/domposable/ui/DomposableColumnRenderer;
+	public final fun component11 ()Lio/github/samuolis/domposable/ui/DomposableDialogRenderer;
+	public final fun component12 ()Lio/github/samuolis/domposable/ui/DomposableDividerRenderer;
+	public final fun component13 ()Lio/github/samuolis/domposable/ui/DomposableIconRenderer;
+	public final fun component14 ()Lio/github/samuolis/domposable/ui/DomposableIconButtonRenderer;
+	public final fun component15 ()Lio/github/samuolis/domposable/ui/DomposableImageRenderer;
+	public final fun component16 ()Lio/github/samuolis/domposable/ui/DomposableLazyColumnRenderer;
+	public final fun component17 ()Lio/github/samuolis/domposable/ui/DomposableLazyGridRenderer;
+	public final fun component18 ()Lio/github/samuolis/domposable/ui/DomposableLazyRowRenderer;
+	public final fun component19 ()Lio/github/samuolis/domposable/ui/DomposableMenuRenderer;
+	public final fun component2 ()Lio/github/samuolis/domposable/ui/DomposableBadgeRenderer;
+	public final fun component20 ()Lio/github/samuolis/domposable/ui/DomposableNavigationBarRenderer;
+	public final fun component21 ()Lio/github/samuolis/domposable/ui/DomposableProgressRenderer;
+	public final fun component22 ()Lio/github/samuolis/domposable/ui/DomposableRadioButtonRenderer;
+	public final fun component23 ()Lio/github/samuolis/domposable/ui/DomposableRowRenderer;
+	public final fun component24 ()Lio/github/samuolis/domposable/ui/DomposableScaffoldRenderer;
+	public final fun component25 ()Lio/github/samuolis/domposable/ui/DomposableSliderRenderer;
+	public final fun component26 ()Lio/github/samuolis/domposable/ui/DomposableSpacerRenderer;
+	public final fun component27 ()Lio/github/samuolis/domposable/ui/DomposableSurfaceRenderer;
+	public final fun component28 ()Lio/github/samuolis/domposable/ui/DomposableSwitchRenderer;
+	public final fun component29 ()Lio/github/samuolis/domposable/ui/DomposableTabsRenderer;
+	public final fun component3 ()Lio/github/samuolis/domposable/ui/DomposableBannerRenderer;
+	public final fun component30 ()Lio/github/samuolis/domposable/ui/DomposableTextRenderer;
+	public final fun component31 ()Lio/github/samuolis/domposable/ui/DomposableTextFieldRenderer;
+	public final fun component32 ()Lio/github/samuolis/domposable/ui/DomposableThemeRenderer;
+	public final fun component4 ()Lio/github/samuolis/domposable/ui/DomposableBottomSheetRenderer;
+	public final fun component5 ()Lio/github/samuolis/domposable/ui/DomposableBoxRenderer;
+	public final fun component6 ()Lio/github/samuolis/domposable/ui/DomposableButtonRenderer;
+	public final fun component7 ()Lio/github/samuolis/domposable/ui/DomposableCardRenderer;
+	public final fun component8 ()Lio/github/samuolis/domposable/ui/DomposableCheckboxRenderer;
+	public final fun component9 ()Lio/github/samuolis/domposable/ui/DomposableChipRenderer;
+	public final fun copy (Lio/github/samuolis/domposable/ui/DomposableAvatarRenderer;Lio/github/samuolis/domposable/ui/DomposableBadgeRenderer;Lio/github/samuolis/domposable/ui/DomposableBannerRenderer;Lio/github/samuolis/domposable/ui/DomposableBottomSheetRenderer;Lio/github/samuolis/domposable/ui/DomposableBoxRenderer;Lio/github/samuolis/domposable/ui/DomposableButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableCardRenderer;Lio/github/samuolis/domposable/ui/DomposableCheckboxRenderer;Lio/github/samuolis/domposable/ui/DomposableChipRenderer;Lio/github/samuolis/domposable/ui/DomposableColumnRenderer;Lio/github/samuolis/domposable/ui/DomposableDialogRenderer;Lio/github/samuolis/domposable/ui/DomposableDividerRenderer;Lio/github/samuolis/domposable/ui/DomposableIconRenderer;Lio/github/samuolis/domposable/ui/DomposableIconButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableImageRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyColumnRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyGridRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyRowRenderer;Lio/github/samuolis/domposable/ui/DomposableMenuRenderer;Lio/github/samuolis/domposable/ui/DomposableNavigationBarRenderer;Lio/github/samuolis/domposable/ui/DomposableProgressRenderer;Lio/github/samuolis/domposable/ui/DomposableRadioButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableRowRenderer;Lio/github/samuolis/domposable/ui/DomposableScaffoldRenderer;Lio/github/samuolis/domposable/ui/DomposableSliderRenderer;Lio/github/samuolis/domposable/ui/DomposableSpacerRenderer;Lio/github/samuolis/domposable/ui/DomposableSurfaceRenderer;Lio/github/samuolis/domposable/ui/DomposableSwitchRenderer;Lio/github/samuolis/domposable/ui/DomposableTabsRenderer;Lio/github/samuolis/domposable/ui/DomposableTextRenderer;Lio/github/samuolis/domposable/ui/DomposableTextFieldRenderer;Lio/github/samuolis/domposable/ui/DomposableThemeRenderer;)Lio/github/samuolis/domposable/ui/DomposableComponents;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableComponents;Lio/github/samuolis/domposable/ui/DomposableAvatarRenderer;Lio/github/samuolis/domposable/ui/DomposableBadgeRenderer;Lio/github/samuolis/domposable/ui/DomposableBannerRenderer;Lio/github/samuolis/domposable/ui/DomposableBottomSheetRenderer;Lio/github/samuolis/domposable/ui/DomposableBoxRenderer;Lio/github/samuolis/domposable/ui/DomposableButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableCardRenderer;Lio/github/samuolis/domposable/ui/DomposableCheckboxRenderer;Lio/github/samuolis/domposable/ui/DomposableChipRenderer;Lio/github/samuolis/domposable/ui/DomposableColumnRenderer;Lio/github/samuolis/domposable/ui/DomposableDialogRenderer;Lio/github/samuolis/domposable/ui/DomposableDividerRenderer;Lio/github/samuolis/domposable/ui/DomposableIconRenderer;Lio/github/samuolis/domposable/ui/DomposableIconButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableImageRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyColumnRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyGridRenderer;Lio/github/samuolis/domposable/ui/DomposableLazyRowRenderer;Lio/github/samuolis/domposable/ui/DomposableMenuRenderer;Lio/github/samuolis/domposable/ui/DomposableNavigationBarRenderer;Lio/github/samuolis/domposable/ui/DomposableProgressRenderer;Lio/github/samuolis/domposable/ui/DomposableRadioButtonRenderer;Lio/github/samuolis/domposable/ui/DomposableRowRenderer;Lio/github/samuolis/domposable/ui/DomposableScaffoldRenderer;Lio/github/samuolis/domposable/ui/DomposableSliderRenderer;Lio/github/samuolis/domposable/ui/DomposableSpacerRenderer;Lio/github/samuolis/domposable/ui/DomposableSurfaceRenderer;Lio/github/samuolis/domposable/ui/DomposableSwitchRenderer;Lio/github/samuolis/domposable/ui/DomposableTabsRenderer;Lio/github/samuolis/domposable/ui/DomposableTextRenderer;Lio/github/samuolis/domposable/ui/DomposableTextFieldRenderer;Lio/github/samuolis/domposable/ui/DomposableThemeRenderer;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableComponents;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAvatar ()Lio/github/samuolis/domposable/ui/DomposableAvatarRenderer;
+	public final fun getBadge ()Lio/github/samuolis/domposable/ui/DomposableBadgeRenderer;
+	public final fun getBanner ()Lio/github/samuolis/domposable/ui/DomposableBannerRenderer;
+	public final fun getBottomSheet ()Lio/github/samuolis/domposable/ui/DomposableBottomSheetRenderer;
+	public final fun getBox ()Lio/github/samuolis/domposable/ui/DomposableBoxRenderer;
+	public final fun getButton ()Lio/github/samuolis/domposable/ui/DomposableButtonRenderer;
+	public final fun getCard ()Lio/github/samuolis/domposable/ui/DomposableCardRenderer;
+	public final fun getCheckbox ()Lio/github/samuolis/domposable/ui/DomposableCheckboxRenderer;
+	public final fun getChip ()Lio/github/samuolis/domposable/ui/DomposableChipRenderer;
+	public final fun getColumn ()Lio/github/samuolis/domposable/ui/DomposableColumnRenderer;
+	public final fun getDialog ()Lio/github/samuolis/domposable/ui/DomposableDialogRenderer;
+	public final fun getDivider ()Lio/github/samuolis/domposable/ui/DomposableDividerRenderer;
+	public final fun getIcon ()Lio/github/samuolis/domposable/ui/DomposableIconRenderer;
+	public final fun getIconButton ()Lio/github/samuolis/domposable/ui/DomposableIconButtonRenderer;
+	public final fun getImage ()Lio/github/samuolis/domposable/ui/DomposableImageRenderer;
+	public final fun getLazyColumn ()Lio/github/samuolis/domposable/ui/DomposableLazyColumnRenderer;
+	public final fun getLazyGrid ()Lio/github/samuolis/domposable/ui/DomposableLazyGridRenderer;
+	public final fun getLazyRow ()Lio/github/samuolis/domposable/ui/DomposableLazyRowRenderer;
+	public final fun getMenu ()Lio/github/samuolis/domposable/ui/DomposableMenuRenderer;
+	public final fun getNavigationBar ()Lio/github/samuolis/domposable/ui/DomposableNavigationBarRenderer;
+	public final fun getProgress ()Lio/github/samuolis/domposable/ui/DomposableProgressRenderer;
+	public final fun getRadioButton ()Lio/github/samuolis/domposable/ui/DomposableRadioButtonRenderer;
+	public final fun getRow ()Lio/github/samuolis/domposable/ui/DomposableRowRenderer;
+	public final fun getScaffold ()Lio/github/samuolis/domposable/ui/DomposableScaffoldRenderer;
+	public final fun getSlider ()Lio/github/samuolis/domposable/ui/DomposableSliderRenderer;
+	public final fun getSpacer ()Lio/github/samuolis/domposable/ui/DomposableSpacerRenderer;
+	public final fun getSurface ()Lio/github/samuolis/domposable/ui/DomposableSurfaceRenderer;
+	public final fun getSwitch ()Lio/github/samuolis/domposable/ui/DomposableSwitchRenderer;
+	public final fun getTabs ()Lio/github/samuolis/domposable/ui/DomposableTabsRenderer;
+	public final fun getText ()Lio/github/samuolis/domposable/ui/DomposableTextRenderer;
+	public final fun getTextField ()Lio/github/samuolis/domposable/ui/DomposableTextFieldRenderer;
+	public final fun getTheme ()Lio/github/samuolis/domposable/ui/DomposableThemeRenderer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableComponentsKt {
+	public static final fun DomposableAvatar (Lio/github/samuolis/domposable/ui/DomposableAvatarProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableBadge (Lio/github/samuolis/domposable/ui/DomposableBadgeProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableBanner (Lio/github/samuolis/domposable/ui/DomposableBannerProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableBottomSheet (Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableBox (Lio/github/samuolis/domposable/ui/DomposableBoxProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableButton (Lio/github/samuolis/domposable/ui/DomposableButtonProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableCard (Lio/github/samuolis/domposable/ui/DomposableCardProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableCheckbox (Lio/github/samuolis/domposable/ui/DomposableCheckboxProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableChip (Lio/github/samuolis/domposable/ui/DomposableChipProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableColumn (Lio/github/samuolis/domposable/ui/DomposableColumnProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableDialog (Lio/github/samuolis/domposable/ui/DomposableDialogProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableDivider (Lio/github/samuolis/domposable/ui/DomposableDividerProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableIcon (Lio/github/samuolis/domposable/ui/DomposableIconProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableIconButton (Lio/github/samuolis/domposable/ui/DomposableIconButtonProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableImage (Lio/github/samuolis/domposable/ui/DomposableImageProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableLazyColumn (Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableLazyGrid (Lio/github/samuolis/domposable/ui/DomposableLazyGridProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableLazyRow (Lio/github/samuolis/domposable/ui/DomposableLazyRowProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableMenu (Lio/github/samuolis/domposable/ui/DomposableMenuProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableNavigationBar (Lio/github/samuolis/domposable/ui/DomposableNavigationBarProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableProgress (Lio/github/samuolis/domposable/ui/DomposableProgressProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableRadioButton (Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableRow (Lio/github/samuolis/domposable/ui/DomposableRowProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableScaffold (Lio/github/samuolis/domposable/ui/DomposableScaffoldProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableSlider (Lio/github/samuolis/domposable/ui/DomposableSliderProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableSpacer (Lio/github/samuolis/domposable/ui/DomposableSpacerProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableSurface (Lio/github/samuolis/domposable/ui/DomposableSurfaceProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableSwitch (Lio/github/samuolis/domposable/ui/DomposableSwitchProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableTabs (Lio/github/samuolis/domposable/ui/DomposableTabsProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableText (Lio/github/samuolis/domposable/ui/DomposableTextProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableTextField (Lio/github/samuolis/domposable/ui/DomposableTextFieldProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableTheme (Lio/github/samuolis/domposable/ui/DomposableThemeProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableDialogProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun component3 ()Lkotlin/jvm/functions/Function2;
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)Lio/github/samuolis/domposable/ui/DomposableDialogProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableDialogProps;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableDialogProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActions ()Lkotlin/jvm/functions/Function2;
+	public final fun getOnDismiss ()Lkotlin/jvm/functions/Function0;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableDialogRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableDialogProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableDividerProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lio/github/samuolis/domposable/foundation/DomposableOrientation;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableOrientation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/foundation/DomposableOrientation;
+	public final fun copy (Lio/github/samuolis/domposable/foundation/DomposableOrientation;)Lio/github/samuolis/domposable/ui/DomposableDividerProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableDividerProps;Lio/github/samuolis/domposable/foundation/DomposableOrientation;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableDividerProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOrientation ()Lio/github/samuolis/domposable/foundation/DomposableOrientation;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableDividerRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableDividerProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableIconButtonProps {
+	public static final field $stable I
+	public fun <init> (Lkotlin/jvm/functions/Function0;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Lkotlin/jvm/functions/Function0;Ljava/lang/String;Z)Lio/github/samuolis/domposable/ui/DomposableIconButtonProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableIconButtonProps;Lkotlin/jvm/functions/Function0;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableIconButtonProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableIconButtonRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableIconButtonProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableIconProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableIconProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableIconProps;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableIconProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getSymbol ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableIconRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableIconProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableImageProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableImageProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableImageProps;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableImageProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getSource ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableImageRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableImageProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableLazyColumnProps {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/util/List;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2--zYZv-Q ()F
+	public final fun copy-8jShoPA (Ljava/util/List;F)Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;
+	public static synthetic fun copy-8jShoPA$default (Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;Ljava/util/List;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGap--zYZv-Q ()F
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableLazyColumnRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableLazyGridProps {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/util/List;IFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;IFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun component3--zYZv-Q ()F
+	public final fun copy-XEQUAco (Ljava/util/List;IF)Lio/github/samuolis/domposable/ui/DomposableLazyGridProps;
+	public static synthetic fun copy-XEQUAco$default (Lio/github/samuolis/domposable/ui/DomposableLazyGridProps;Ljava/util/List;IFILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableLazyGridProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColumns ()I
+	public final fun getGap--zYZv-Q ()F
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableLazyGridRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableLazyGridProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableLazyItem {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function2;
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lio/github/samuolis/domposable/ui/DomposableLazyItem;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableLazyItem;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableLazyItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Lkotlin/jvm/functions/Function2;
+	public final fun getKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableLazyRowProps {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/util/List;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2--zYZv-Q ()F
+	public final fun copy-8jShoPA (Ljava/util/List;F)Lio/github/samuolis/domposable/ui/DomposableLazyRowProps;
+	public static synthetic fun copy-8jShoPA$default (Lio/github/samuolis/domposable/ui/DomposableLazyRowProps;Ljava/util/List;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableLazyRowProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGap--zYZv-Q ()F
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableLazyRowRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableLazyRowProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableMenuItem {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Z)Lio/github/samuolis/domposable/ui/DomposableMenuItem;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableMenuItem;Ljava/lang/String;Lkotlin/jvm/functions/Function0;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableMenuItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableMenuProps {
+	public static final field $stable I
+	public fun <init> (ZLkotlin/jvm/functions/Function0;Ljava/util/List;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (ZLkotlin/jvm/functions/Function0;Ljava/util/List;)Lio/github/samuolis/domposable/ui/DomposableMenuProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableMenuProps;ZLkotlin/jvm/functions/Function0;Ljava/util/List;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableMenuProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExpanded ()Z
+	public final fun getItems ()Ljava/util/List;
+	public final fun getOnDismiss ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableMenuRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableMenuProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableModifier {
+	public static final field Companion Lio/github/samuolis/domposable/ui/DomposableModifier$Companion;
+	public abstract fun getOperations ()Ljava/util/List;
+	public fun then (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifier$Companion : io/github/samuolis/domposable/ui/DomposableModifier {
+	public fun getOperations ()Ljava/util/List;
+	public fun then (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifier$DefaultImpls {
+	public static fun then (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableModifierOperation {
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Background : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-wAA2Rus ()J
+	public final fun copy-Ds4HWyo (J)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Background;
+	public static synthetic fun copy-Ds4HWyo$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Background;JILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Background;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor-wAA2Rus ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Click : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (Lkotlin/jvm/functions/Function0;Ljava/lang/String;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lkotlin/jvm/functions/Function0;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Click;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Click;Lkotlin/jvm/functions/Function0;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Click;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Description : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Description;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Description;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Description;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$FillHeight : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public static final field INSTANCE Lio/github/samuolis/domposable/ui/DomposableModifierOperation$FillHeight;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$FillWidth : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public static final field INSTANCE Lio/github/samuolis/domposable/ui/DomposableModifierOperation$FillWidth;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Height : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun copy-LPHLHEo (F)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Height;
+	public static synthetic fun copy-LPHLHEo$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Height;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Height;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLength--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$MaxWidth : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun copy-LPHLHEo (F)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$MaxWidth;
+	public static synthetic fun copy-LPHLHEo$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$MaxWidth;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$MaxWidth;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLength--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Opacity : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (F)V
+	public final fun component1 ()F
+	public final fun copy (F)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Opacity;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Opacity;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Opacity;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Padding : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (Lio/github/samuolis/domposable/foundation/DomposableInsets;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/foundation/DomposableInsets;
+	public final fun copy (Lio/github/samuolis/domposable/foundation/DomposableInsets;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Padding;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Padding;Lio/github/samuolis/domposable/foundation/DomposableInsets;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Padding;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInsets ()Lio/github/samuolis/domposable/foundation/DomposableInsets;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Radius : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun copy-LPHLHEo (F)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Radius;
+	public static synthetic fun copy-LPHLHEo$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Radius;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Radius;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLength--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Scroll : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (Lio/github/samuolis/domposable/foundation/DomposableOrientation;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/foundation/DomposableOrientation;
+	public final fun copy (Lio/github/samuolis/domposable/foundation/DomposableOrientation;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scroll;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scroll;Lio/github/samuolis/domposable/foundation/DomposableOrientation;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scroll;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOrientation ()Lio/github/samuolis/domposable/foundation/DomposableOrientation;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$TestId : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$TestId;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$TestId;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$TestId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Width : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun copy-LPHLHEo (F)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Width;
+	public static synthetic fun copy-LPHLHEo$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Width;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Width;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLength--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableNavigationBarProps {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;ILkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/foundation/DomposableOrientation;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/foundation/DomposableOrientation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun component3 ()Lkotlin/jvm/functions/Function1;
+	public final fun component4 ()Lio/github/samuolis/domposable/foundation/DomposableOrientation;
+	public final fun copy (Ljava/util/List;ILkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/foundation/DomposableOrientation;)Lio/github/samuolis/domposable/ui/DomposableNavigationBarProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableNavigationBarProps;Ljava/util/List;ILkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/foundation/DomposableOrientation;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableNavigationBarProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public final fun getOnSelect ()Lkotlin/jvm/functions/Function1;
+	public final fun getOrientation ()Lio/github/samuolis/domposable/foundation/DomposableOrientation;
+	public final fun getSelectedIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableNavigationBarRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableNavigationBarProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableNavigationItem {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableNavigationItem;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableNavigationItem;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableNavigationItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getSymbol ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableProgressProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Float;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Float;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/Float;Ljava/lang/String;Z)Lio/github/samuolis/domposable/ui/DomposableProgressProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableProgressProps;Ljava/lang/Float;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableProgressProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCircular ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/Float;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableProgressRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableProgressProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableRadioButtonProps {
+	public static final field $stable I
+	public fun <init> (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;Z)V
+	public synthetic fun <init> (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;Z)Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
+	public final fun getSelected ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableRadioButtonRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableRowProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun <init> (FLio/github/samuolis/domposable/foundation/DomposableAlignment;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FLio/github/samuolis/domposable/foundation/DomposableAlignment;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun component2 ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
+	public final fun copy-seJEgBQ (FLio/github/samuolis/domposable/foundation/DomposableAlignment;)Lio/github/samuolis/domposable/ui/DomposableRowProps;
+	public static synthetic fun copy-seJEgBQ$default (Lio/github/samuolis/domposable/ui/DomposableRowProps;FLio/github/samuolis/domposable/foundation/DomposableAlignment;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableRowProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlignment ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
+	public final fun getGap--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableRowRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableRowProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableScaffoldProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function2;
+	public final fun component2 ()Lkotlin/jvm/functions/Function2;
+	public final fun component3 ()Lkotlin/jvm/functions/Function2;
+	public final fun component4 ()Lkotlin/jvm/functions/Function2;
+	public final fun component5 ()Lkotlin/jvm/functions/Function2;
+	public final fun component6 ()Lkotlin/jvm/functions/Function2;
+	public final fun component7 ()Lkotlin/jvm/functions/Function2;
+	public final fun copy (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lio/github/samuolis/domposable/ui/DomposableScaffoldProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableScaffoldProps;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableScaffoldProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBottomBar ()Lkotlin/jvm/functions/Function2;
+	public final fun getContextual ()Lkotlin/jvm/functions/Function2;
+	public final fun getFloatingAction ()Lkotlin/jvm/functions/Function2;
+	public final fun getNavigation ()Lkotlin/jvm/functions/Function2;
+	public final fun getOverlays ()Lkotlin/jvm/functions/Function2;
+	public final fun getSnackbar ()Lkotlin/jvm/functions/Function2;
+	public final fun getTopBar ()Lkotlin/jvm/functions/Function2;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableScaffoldRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableScaffoldProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableScaffoldScope {
+	public static final field $stable I
+	public final fun getAvailableContentSize ()Lio/github/samuolis/domposable/foundation/DomposableSize;
+	public final fun getContentModifier ()Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public final fun getInsets ()Lio/github/samuolis/domposable/foundation/DomposableInsets;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableSliderProps {
+	public static final field $stable I
+	public fun <init> (FLkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/ranges/ClosedFloatingPointRange;IZ)V
+	public synthetic fun <init> (FLkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/ranges/ClosedFloatingPointRange;IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lkotlin/ranges/ClosedFloatingPointRange;
+	public final fun component5 ()I
+	public final fun component6 ()Z
+	public final fun copy (FLkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/ranges/ClosedFloatingPointRange;IZ)Lio/github/samuolis/domposable/ui/DomposableSliderProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableSliderProps;FLkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/ranges/ClosedFloatingPointRange;IZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableSliderProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnValueChange ()Lkotlin/jvm/functions/Function1;
+	public final fun getRange ()Lkotlin/ranges/ClosedFloatingPointRange;
+	public final fun getSteps ()I
+	public final fun getValue ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableSliderRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableSliderProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableSpacerProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun copy-LPHLHEo (F)Lio/github/samuolis/domposable/ui/DomposableSpacerProps;
+	public static synthetic fun copy-LPHLHEo$default (Lio/github/samuolis/domposable/ui/DomposableSpacerProps;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableSpacerProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLength--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableSpacerRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableSpacerProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableSurfaceProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun copy-hoQtP6c (Lio/github/samuolis/domposable/foundation/DomposableColor;)Lio/github/samuolis/domposable/ui/DomposableSurfaceProps;
+	public static synthetic fun copy-hoQtP6c$default (Lio/github/samuolis/domposable/ui/DomposableSurfaceProps;Lio/github/samuolis/domposable/foundation/DomposableColor;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableSurfaceProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableSurfaceRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableSurfaceProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableSwitchProps {
+	public static final field $stable I
+	public fun <init> (ZLkotlin/jvm/functions/Function1;Ljava/lang/String;Z)V
+	public synthetic fun <init> (ZLkotlin/jvm/functions/Function1;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (ZLkotlin/jvm/functions/Function1;Ljava/lang/String;Z)Lio/github/samuolis/domposable/ui/DomposableSwitchProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableSwitchProps;ZLkotlin/jvm/functions/Function1;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableSwitchProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChecked ()Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnCheckedChange ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableSwitchRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableSwitchProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableTabsProps {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;ILkotlin/jvm/functions/Function1;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun component3 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Ljava/util/List;ILkotlin/jvm/functions/Function1;)Lio/github/samuolis/domposable/ui/DomposableTabsProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableTabsProps;Ljava/util/List;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableTabsProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabels ()Ljava/util/List;
+	public final fun getOnSelect ()Lkotlin/jvm/functions/Function1;
+	public final fun getSelectedIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableTabsRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableTabsProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableTextFieldProps {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;ZZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;ZZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;ZZLjava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableTextFieldProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableTextFieldProps;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;ZZLjava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableTextFieldProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getError ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getMultiline ()Z
+	public final fun getOnValueChange ()Lkotlin/jvm/functions/Function1;
+	public final fun getPurpose ()Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableTextFieldRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableTextFieldProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableTextProps {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableTextStyle;Lio/github/samuolis/domposable/foundation/DomposableColor;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableTextStyle;Lio/github/samuolis/domposable/foundation/DomposableColor;Ljava/lang/Integer;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/github/samuolis/domposable/foundation/DomposableTextStyle;
+	public final fun component3-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun copy-RWQdWfs (Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableTextStyle;Lio/github/samuolis/domposable/foundation/DomposableColor;Ljava/lang/Integer;)Lio/github/samuolis/domposable/ui/DomposableTextProps;
+	public static synthetic fun copy-RWQdWfs$default (Lio/github/samuolis/domposable/ui/DomposableTextProps;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableTextStyle;Lio/github/samuolis/domposable/foundation/DomposableColor;Ljava/lang/Integer;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableTextProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getHeadingLevel ()Ljava/lang/Integer;
+	public final fun getStyle ()Lio/github/samuolis/domposable/foundation/DomposableTextStyle;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableTextRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableTextProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableThemeProps {
+	public static final field $stable I
+	public fun <init> (Lio/github/samuolis/domposable/foundation/DomposableTokens;)V
+	public final fun component1 ()Lio/github/samuolis/domposable/foundation/DomposableTokens;
+	public final fun copy (Lio/github/samuolis/domposable/foundation/DomposableTokens;)Lio/github/samuolis/domposable/ui/DomposableThemeProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableThemeProps;Lio/github/samuolis/domposable/foundation/DomposableTokens;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableThemeProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTokens ()Lio/github/samuolis/domposable/foundation/DomposableTokens;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/ui/DomposableThemeRenderer {
+	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableThemeProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/ModifierKt {
+	public static final fun alpha (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun background-fb0MHlQ (Lio/github/samuolis/domposable/ui/DomposableModifier;J)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun clickable (Lio/github/samuolis/domposable/ui/DomposableModifier;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun clip-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun constrainContentWidth-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun contentDescription (Lio/github/samuolis/domposable/ui/DomposableModifier;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun fillMaxHeight (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun fillMaxWidth (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun height-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun horizontalScroll (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun padding (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableInsets;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun padding-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun size-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun testId (Lio/github/samuolis/domposable/ui/DomposableModifier;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun verticalScroll (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun width-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+}
+
