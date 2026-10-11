@@ -18,7 +18,7 @@ shutil.copytree(api, site / "api", dirs_exist_ok=True)
 shutil.copytree(demo, site / "demo", dirs_exist_ok=True)
 version, build = read_version(root / "version.properties")
 commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-(site / "release.json").write_text(json.dumps({"version": str(version), "build": build, "commit": commit}) + "\n")
+(site / "release.json").write_text(json.dumps({"version": str(version), "build": build, "commit": commit, "status": "preview" if build == 0 else "release"}) + "\n")
 target = root / ".release/artifacts/website.zip"; target.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as archive:
     for path in sorted(site.rglob("*")):
