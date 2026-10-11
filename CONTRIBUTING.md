@@ -13,6 +13,18 @@ python3 scripts/ci/package_publications.py --unsigned
 ./gradlew :consumer-fixture:compileKotlinJs -Pdomposable.consumer.repository="$PWD/build/repository"
 ```
 
+Run the required quality checks before submitting a PR:
+
+```sh
+./gradlew ktlintFormat
+./gradlew qualityCheck --continue
+# Linux desktop tests need a display: xvfb-run -a ./gradlew qualityCheck --continue
+```
+
+`ktlintCheck` checks formatting without editing files. `detekt` analyzes handwritten Kotlin across all source sets. `androidLint` checks every Android app/library with warnings as errors. `koverHtmlReport`, `koverXmlReport`, `koverVerify` and `verifyCoverage` measure JVM/Android host tests and enforce total/per-package floors. Reports live in `build/reports/`; CI retains `quality-and-coverage` for 30 days. Read [test coverage](docs/coverage.md) for the measured scope and remaining gaps.
+
+Compose functions retain their normal naming and declarative layout. Narrow, explained suppressions cover portable-to-native modifier conversion, related DSL functions and existing JVM file facades. Do not add blanket suppressions or baselines to conceal failures. ktlint deliberately excludes generated/build outputs, so checking formatting never runs KSP or formats third-party generated code.
+
 All implementation changes go through branches and PRs. Only the release workflow may advance `main` directly with an approved, tested version-only commit. Do not commit credentials, provisioning profiles, signing keys or device lists. The Apache-2.0 license applies to contributions.
 
 Visual baselines live in `screenshots/`; follow [the review process](docs/validation.md) to record candidates on CI, inspect them, and commit approved images. Never automatically overwrite them in a PR run. Browser tests require both JS and Wasm development bundles.

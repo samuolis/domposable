@@ -1,4 +1,5 @@
 @file:OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+
 plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.multiplatform)
@@ -19,44 +20,66 @@ kotlin {
         withHostTest {}
     }
     jvm()
-    js { browser();  }
-    wasmJs { browser(); }
+    js {
+        browser()
+    }
+    wasmJs {
+        browser()
+    }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain = getByName("commonMain") {
-            dependencies {
-                api(libs.compose.runtime)
-                api(project(":domposable-foundation"))
+        val commonMain =
+            getByName("commonMain") {
+                dependencies {
+                    api(libs.compose.runtime)
+                    api(project(":domposable-foundation"))
+                }
             }
-        }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        val composeUiMain = create("composeUiMain") {
-            dependsOn(commonMain)
-            dependencies {
-                api(libs.compose.ui)
-                api(libs.compose.foundation)
+        val composeUiMain =
+            create("composeUiMain") {
+                dependsOn(commonMain)
+                dependencies {
+                    api(libs.compose.ui)
+                    api(libs.compose.foundation)
+                }
             }
-        }
         getByName("androidMain").dependsOn(composeUiMain)
         getByName("jvmMain").dependsOn(composeUiMain)
         getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
-        jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        jsMain {
+            dependencies {
+                implementation(libs.compose.html)
+                implementation(libs.kotlinx.browser)
+            }
+        }
     }
 }
 
-publishing { repositories { maven { name = "Fixture"; url = uri(rootProject.layout.buildDirectory.dir("repository")) } } }
+publishing {
+    repositories {
+        maven {
+            name = "Fixture"
+            url = uri(rootProject.layout.buildDirectory.dir("repository"))
+        }
+    }
+}
 
 kotlin.sourceSets.commonMain { kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin") }
 dependencies { add("kspCommonMainMetadata", project(":domposable-ksp")) }
 ksp { arg("domposable.internal.components", "true") }
-tasks.matching { (it.name.startsWith("compile") || it.name.contains("sourcesJar", ignoreCase = true)) && it.name != "kspCommonMainKotlinMetadata" }.configureEach {
-    dependsOn("kspCommonMainKotlinMetadata")
-}
+tasks
+    .matching {
+        (it.name.startsWith("compile") || it.name.contains("sourcesJar", ignoreCase = true)) &&
+            it.name != "kspCommonMainKotlinMetadata"
+    }.configureEach {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
 
 tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMetadata" }.configureEach {
     dependsOn("kspCommonMainKotlinMetadata")

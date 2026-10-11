@@ -5,9 +5,15 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import example.shop.catalog.api.*
-import example.shop.checkout.api.CheckoutRoute
+import example.shop.catalog.api.CatalogFeature
+import example.shop.catalog.api.CatalogRoute
+import example.shop.catalog.api.LocalShopArtwork
+import example.shop.catalog.api.LocalShopArtworkLoaded
+import example.shop.catalog.api.LocalShopNavigator
+import example.shop.catalog.api.ProductAction
+import example.shop.catalog.api.ShopScope
 import example.shop.catalog.impl.generated.domposableEntries
+import example.shop.checkout.api.CheckoutRoute
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.lifecycle.DomposableMviScreen
 import io.github.samuolis.domposable.screens.DomposableDestination
@@ -25,9 +31,15 @@ fun DiscoverScreen(model: CatalogViewModel = metroViewModel()) {
     val artwork = LocalShopArtwork.current
     val onArtworkLoaded = LocalShopArtworkLoaded.current
     DomposableMviScreen(model) { state, onAction ->
-        StorefrontContent(state, onAction, artwork, true,
+        StorefrontContent(
+            state,
+            onAction,
+            artwork,
+            true,
             { navigator.navigate(CatalogRoute.Collection) },
-            { navigator.navigate(CatalogRoute.Product(it)) }, onArtworkLoaded)
+            { navigator.navigate(CatalogRoute.Product(it)) },
+            onArtworkLoaded,
+        )
     }
 }
 
@@ -37,9 +49,14 @@ fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
     val navigator = LocalShopNavigator.current
     val artwork = LocalShopArtwork.current
     DomposableMviScreen(model) { state, onAction ->
-        StorefrontContent(state, onAction, artwork, false,
+        StorefrontContent(
+            state,
+            onAction,
+            artwork,
+            false,
             { navigator.navigate(CatalogRoute.Collection) },
-            { navigator.navigate(CatalogRoute.Product(it)) })
+            { navigator.navigate(CatalogRoute.Product(it)) },
+        )
     }
 }
 
@@ -52,8 +69,12 @@ fun ProductScreen(
     val navigator = LocalShopNavigator.current
     val artwork = LocalShopArtwork.current
     DomposableMviScreen(model) { state, onAction ->
-        ProductContent(state, artwork, { onAction(ProductAction.Add) },
+        ProductContent(
+            state,
+            artwork,
+            { onAction(ProductAction.Add) },
             { navigator.navigate(CatalogRoute.Collection) },
-            { navigator.navigate(CheckoutRoute.Cart) })
+            { navigator.navigate(CheckoutRoute.Cart) },
+        )
     }
 }

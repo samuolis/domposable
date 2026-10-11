@@ -1,4 +1,5 @@
 @file:OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
@@ -18,25 +19,42 @@ kotlin {
         withHostTest {}
     }
     jvm()
-    js { browser();  }
-    wasmJs { browser(); }
+    js {
+        browser()
+    }
+    wasmJs {
+        browser()
+    }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain = getByName("commonMain") {
-            dependencies {
-                api(libs.compose.runtime)
-                api(project(":domposable-foundation"))
+        val commonMain =
+            getByName("commonMain") {
+                dependencies {
+                    api(libs.compose.runtime)
+                    api(project(":domposable-foundation"))
+                }
             }
-        }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         androidMain { dependencies { implementation(libs.compose.ui) } }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        wasmJsMain { dependencies { implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
-        jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
+        jsMain {
+            dependencies {
+                implementation(libs.compose.html)
+                implementation(libs.kotlinx.browser)
+            }
+        }
     }
 }
 
-publishing { repositories { maven { name = "Fixture"; url = uri(rootProject.layout.buildDirectory.dir("repository")) } } }
+publishing {
+    repositories {
+        maven {
+            name = "Fixture"
+            url = uri(rootProject.layout.buildDirectory.dir("repository"))
+        }
+    }
+}

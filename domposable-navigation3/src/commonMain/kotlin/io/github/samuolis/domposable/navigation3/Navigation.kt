@@ -1,13 +1,24 @@
 package io.github.samuolis.domposable.navigation3
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.navigation3.runtime.*
-import io.github.samuolis.domposable.screens.*
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
+import androidx.navigation3.runtime.contains
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import io.github.samuolis.domposable.screens.DomposableEntryLifecycle
+import io.github.samuolis.domposable.screens.DomposableEntryScope
+import io.github.samuolis.domposable.screens.DomposableScreenRegistry
 import io.github.samuolis.domposable.ui.DomposableModifier
 
 interface DomposableRouteCodec<R : Any> {
     fun encode(route: R): String
+
     fun decode(path: String): R?
 }
 
@@ -39,16 +50,23 @@ fun <R : Any> rememberDomposableNavEntries(
     val retained = remember { mutableSetOf<DomposableEntryScope<R>>() }
     val currentStack by rememberUpdatedState(backStack.toList())
     retained.addAll(backStack)
-    val decorator = remember {
-        NavEntryDecorator<DomposableEntryScope<R>>(
-            onPop = { id ->
-                val removed = retained.filter { it.id == id && it !in currentStack }
-                removed.forEach { it.moveTo(DomposableEntryLifecycle.Destroyed); retained.remove(it) }
-            },
-        ) { it.Content() }
-    }
+    val decorator =
+        remember {
+            NavEntryDecorator<DomposableEntryScope<R>>(
+                onPop = { id ->
+                    val removed = retained.filter { it.id == id && it !in currentStack }
+                    removed.forEach {
+                        it.moveTo(DomposableEntryLifecycle.Destroyed)
+                        retained.remove(it)
+                    }
+                },
+            ) { it.Content() }
+        }
     DisposableEffect(Unit) {
-        onDispose { retained.toList().forEach { it.moveTo(DomposableEntryLifecycle.Destroyed) }; retained.clear() }
+        onDispose {
+            retained.toList().forEach { it.moveTo(DomposableEntryLifecycle.Destroyed) }
+            retained.clear()
+        }
     }
     val raw = backStack.map { scope -> NavEntry(scope, contentKey = scope.id) { screens.Render(it) } }
     return rememberDecoratedNavEntries(raw, listOf(decorator) + entryDecorators)
@@ -61,14 +79,20 @@ fun <R : Any> rememberDomposableNavEntries(
  */
 @Composable
 expect fun <T : Any> DomposableNavDisplay(
-    entries: List<NavEntry<T>>, modifier: DomposableModifier = DomposableModifier,
-    visibleEntries: Int = 1, onBack: () -> Unit,
+    entries: List<NavEntry<T>>,
+    modifier: DomposableModifier = DomposableModifier,
+    visibleEntries: Int = 1,
+    onBack: () -> Unit,
 )
 
 sealed interface DomposableBrowserUrls {
     data object Hash : DomposableBrowserUrls
+
     /** Host must serve the application entry point for every path beneath this base. */
-    data class Path(val basePath: String = "/", val trailingSlash: Boolean = false) : DomposableBrowserUrls {
+    data class Path(
+        val basePath: String = "/",
+        val trailingSlash: Boolean = false,
+    ) : DomposableBrowserUrls {
         init {
             require(basePath.startsWith("/") && !basePath.contains("//"))
             require(basePath.all { it.isLetterOrDigit() || it in "/_-" })
@@ -78,4 +102,8 @@ sealed interface DomposableBrowserUrls {
 
 /** Application-owned URL codec; hash URLs support GitHub Pages project hosting. */
 @Composable
-expect fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>, urls: DomposableBrowserUrls = DomposableBrowserUrls.Hash)
+expect fun <R : Any> DomposableBrowserHistory(
+    backStack: SnapshotStateList<DomposableEntryScope<R>>,
+    codec: DomposableRouteCodec<R>,
+    urls: DomposableBrowserUrls = DomposableBrowserUrls.Hash,
+)

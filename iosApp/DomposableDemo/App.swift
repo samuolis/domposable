@@ -3,7 +3,7 @@ import DomposableDemo
 
 struct ComposeContent: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        MainViewControllerKt.mainViewController()
     }
     func updateUIViewController(_ controller: UIViewController, context: Context) {}
 }

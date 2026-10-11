@@ -5,8 +5,12 @@ import androidx.compose.runtime.LaunchedEffect
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import example.shop.catalog.api.*
-import example.shop.checkout.api.*
+import example.shop.catalog.api.CatalogRoute
+import example.shop.catalog.api.LocalShopArtwork
+import example.shop.catalog.api.LocalShopNavigator
+import example.shop.catalog.api.ShopScope
+import example.shop.checkout.api.CheckoutFeature
+import example.shop.checkout.api.CheckoutRoute
 import example.shop.checkout.impl.generated.domposableEntries
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.lifecycle.DomposableMviScreen
@@ -24,9 +28,13 @@ fun CartScreen(model: CartViewModel = metroViewModel()) {
     val navigator = LocalShopNavigator.current
     val artwork = LocalShopArtwork.current
     DomposableMviScreen(model) { state, onAction ->
-        CartContent(state, onAction, artwork,
+        CartContent(
+            state,
+            onAction,
+            artwork,
             { navigator.navigate(CatalogRoute.Collection) },
-            { navigator.navigate(CheckoutRoute.Checkout) })
+            { navigator.navigate(CheckoutRoute.Checkout) },
+        )
     }
 }
 

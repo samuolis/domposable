@@ -1,4 +1,4 @@
-# Alpha coverage
+# Component support and test coverage
 
 | Family | Shared API and native/HTML/Wasm implementations |
 | --- | --- |
@@ -17,3 +17,32 @@ The initial API has 34 renderer contracts. HTML uses native input elements, head
 HTML keyed collections currently render all items. Virtualized lists, rich text editors, drag/reorder, complex date pickers, fold/hinge APIs, platform camera/maps and product-specific widgets are outside the initial provider. Date/time HTML inputs use browser controls; native text fields currently expose text input for those purposes. Scrolling and sizing use each platform's layout model and are not pixel-identical.
 
 The default design provider uses upstream Material3 alpha APIs matching the current Compose release. JVM desktop is experimental. Until 1.0, minor releases may change APIs. KSP generates typed entries and feature entry lists; screen business logic and DI remain application-owned.
+
+## Measured test coverage
+
+Every PR runs `qualityCheck`: ktlint checks handwritten Kotlin and Gradle scripts; detekt checks all source sets; Android lint checks the app and every Android library, including dependencies and tests. Correctness warnings fail the build. Dependency update notices are handled by Dependabot. There are no lint or detekt baselines that hide existing findings.
+
+Kover instruments **JVM and Android host tests** and reports the eight published library modules together. Demo and modular feature tests contribute execution to that report. Demo application classes, generated entry lists and Android-generated resource classes are excluded from the library percentage. Handwritten KSP processor code stays included, so its unmeasured execution is visible.
+
+| Gate | Minimum line coverage | Minimum branch coverage |
+| --- | ---: | ---: |
+| All library JVM/Android code | 70% | 35% |
+| Each core package: foundation, adaptive, screens, navigation3, lifecycle | 80% | 60% |
+
+The policy lives in [`config/coverage.json`](https://github.com/samuolis/domposable/blob/main/config/coverage.json). Both Kover and the package verifier enforce it. Missing reports, missing required packages, empty measured source and coverage below a floor fail validation. Raise floors as tests improve; lowering a floor requires a reviewed justification.
+
+```bash
+./gradlew qualityCheck --continue
+# On Linux, use xvfb-run -a ./gradlew qualityCheck --continue
+python3 scripts/ci/coverage_report.py build/reports/coverage/coverage.xml --verify config/coverage.json
+```
+
+The **Kotlin quality, Android lint and coverage** job summarizes total and per-package percentages. Download its `quality-and-coverage` artifact for `build/reports/coverage/html/index.html`, XML, JSON, test results and lint reports. Artifacts are retained for 30 days. The latest successful CI report is the source of truth; a percentage in documentation would become stale.
+
+## What the percentage does not cover
+
+Kover does not instrument Kotlin/JS, Wasm or iOS. Their behavior, accessibility, screenshots and published consumer builds remain required, separate checks. A native screenshot and a browser interaction test exercise different renderers; neither implies the other platform's branch coverage.
+
+KSP currently has no instrumented processor tests. Its generated contracts are validated by compiling real feature and consumer fixtures across all six targets, but those compiler-worker executions do not contribute to Kover. The report displays this as zero coverage rather than excluding the processor. Dedicated processor diagnostic/output tests and instrumentation remain a coverage gap.
+
+Line coverage also does not prove correct behavior. Tests must assert meaningful contracts, including invalid values, state restoration, entry disposal, navigation and API 24 compatibility. See [validation](validation.md) for platform checks and screenshot review.

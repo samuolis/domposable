@@ -1,4 +1,5 @@
 @file:OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
@@ -18,37 +19,56 @@ kotlin {
         withHostTest {}
     }
     jvm()
-    js { browser();  }
-    wasmJs { browser(); }
+    js {
+        browser()
+    }
+    wasmJs {
+        browser()
+    }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain = getByName("commonMain") {
-            dependencies {
-                api(libs.compose.runtime)
-                api(project(":domposable-screens"))
-                api(project(":domposable-ui"))
-                api(libs.navigation3.runtime)
+        val commonMain =
+            getByName("commonMain") {
+                dependencies {
+                    api(libs.compose.runtime)
+                    api(project(":domposable-screens"))
+                    api(project(":domposable-ui"))
+                    api(libs.navigation3.runtime)
+                }
             }
-        }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        val composeUiMain = create("composeUiMain") {
-            dependsOn(commonMain)
-            dependencies {
-                api(libs.compose.ui)
-                api(libs.compose.foundation)
-                implementation(libs.navigation3.ui)
+        val composeUiMain =
+            create("composeUiMain") {
+                dependsOn(commonMain)
+                dependencies {
+                    api(libs.compose.ui)
+                    api(libs.compose.foundation)
+                    implementation(libs.navigation3.ui)
+                }
             }
-        }
         getByName("androidMain").dependsOn(composeUiMain)
         getByName("jvmMain").dependsOn(composeUiMain)
         getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
-        jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        jsMain {
+            dependencies {
+                implementation(libs.compose.html)
+                implementation(libs.serialization.json)
+                implementation(libs.kotlinx.browser)
+            }
+        }
     }
 }
 
-publishing { repositories { maven { name = "Fixture"; url = uri(rootProject.layout.buildDirectory.dir("repository")) } } }
+publishing {
+    repositories {
+        maven {
+            name = "Fixture"
+            url = uri(rootProject.layout.buildDirectory.dir("repository"))
+        }
+    }
+}

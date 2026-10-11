@@ -1,0 +1,28 @@
+{
+  "total": {
+    "line": 70,
+    "branch": 35
+  },
+  "packages": {
+    "io.github.samuolis.domposable.foundation": {
+      "line": 80,
+      "branch": 60
+    },
+    "io.github.samuolis.domposable.adaptive": {
+      "line": 80,
+      "branch": 60
+    },
+    "io.github.samuolis.domposable.screens": {
+      "line": 80,
+      "branch": 60
+    },
+    "io.github.samuolis.domposable.navigation3": {
+      "line": 80,
+      "branch": 60
+    },
+    "io.github.samuolis.domposable.lifecycle": {
+      "line": 80,
+      "branch": 60
+    }
+  }
+}

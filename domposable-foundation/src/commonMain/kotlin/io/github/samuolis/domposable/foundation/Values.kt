@@ -1,22 +1,32 @@
 package io.github.samuolis.domposable.foundation
 
 import androidx.compose.runtime.Immutable
-import kotlin.reflect.KClass
 import kotlin.jvm.JvmInline
+import kotlin.reflect.KClass
 
 /** A logical, density-independent length shared by native and HTML renderers. */
 @Immutable
 @JvmInline
-value class DomposableLength(val value: Float) {
-    init { require(value.isFinite() && value >= 0f) { "Length must be finite and non-negative" } }
+value class DomposableLength(
+    val value: Float,
+) {
+    init {
+        require(value.isFinite() && value >= 0f) { "Length must be finite and non-negative" }
+    }
 }
+
 val Int.dp: DomposableLength get() = DomposableLength(toFloat())
 val Float.dp: DomposableLength get() = DomposableLength(this)
 
 @Immutable
 @JvmInline
-value class DomposableColor(val argb: Long) {
-    init { require(argb in 0..0xFFFFFFFFL) }
+value class DomposableColor(
+    val argb: Long,
+) {
+    init {
+        require(argb in 0..0xFFFFFFFFL)
+    }
+
     fun css(): String {
         val red = (argb shr 16) and 255
         val green = (argb shr 8) and 255
@@ -36,7 +46,10 @@ data class DomposableInsets(
 }
 
 @Immutable
-data class DomposableSize(val width: Float, val height: Float)
+data class DomposableSize(
+    val width: Float,
+    val height: Float,
+)
 
 @Immutable
 data class DomposableTypography(
@@ -74,29 +87,47 @@ data class DomposableTokens(
     val elevation: DomposableLength = 2.dp,
     val motionDurationMillis: Int = 180,
 ) {
-    init { require(motionDurationMillis >= 0) }
+    init {
+        require(motionDurationMillis >= 0)
+    }
 }
 
 enum class DomposableImageScale { Fit, Crop, Fill }
 
 enum class DomposableTextStyle { Body, Title, Label }
+
 enum class DomposableAlignment { Start, Center, End }
+
 enum class DomposableOrientation { Vertical, Horizontal }
+
 enum class DomposableButtonStyle { Filled, Outlined, Text }
+
 enum class DomposableInputPurpose { Text, Email, Password, Number, Search, Date, Time }
 
 /** Declaration analysis only: generators never rewrite a composable's body. */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
-annotation class DomposableScreen(val route: KClass<*>, val viewModel: Boolean = false)
+annotation class DomposableScreen(
+    val route: KClass<*>,
+    val viewModel: Boolean = false,
+)
 
 /** Generates a typed renderer contract and forwarding API for this props declaration. */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-annotation class DomposableComponent(val name: String)
+annotation class DomposableComponent(
+    val name: String,
+)
 
 sealed interface DomposableScreenState<out T> {
     data object Loading : DomposableScreenState<Nothing>
-    data class Error(val message: String, val retry: (() -> Unit)? = null) : DomposableScreenState<Nothing>
-    data class Content<T>(val value: T) : DomposableScreenState<T>
+
+    data class Error(
+        val message: String,
+        val retry: (() -> Unit)? = null,
+    ) : DomposableScreenState<Nothing>
+
+    data class Content<T>(
+        val value: T,
+    ) : DomposableScreenState<T>
 }

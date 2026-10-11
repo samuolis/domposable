@@ -66,8 +66,10 @@ fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
 
 KSP generates `domposableEntries()` with no factory arguments. It evaluates injection defaults under each entry's ViewModel owner. DI, the navigator and MVI are optional; [manual registry and direct Navigation 3](docs/screens.md) are supported too.
 
+Every PR requires ktlint, detekt, Android lint, measured JVM/Android [coverage floors](docs/coverage.md), and functional/screenshot checks across Android, iOS, desktop, HTML and Wasm. CI retains coverage and analysis reports as GitHub Actions artifacts.
+
 For local development, tests and release maintenance, see [CONTRIBUTING.md](CONTRIBUTING.md). Current support and limitations are in the [compatibility table](docs/compatibility.md).
 
-Alpha APIs may change. HTML collections currently render keyed DOM lists rather than virtualizing; platform escape hatches remain platform-specific. See [coverage](docs/coverage.md) for current boundaries.
+Before 1.0, minor releases may change APIs. HTML collections currently render keyed DOM lists rather than virtualizing; platform escape hatches remain platform-specific. See [coverage](docs/coverage.md) for current boundaries.
 
 Apache-2.0. Copyright 2026 Samuolis.

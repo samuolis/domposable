@@ -1,22 +1,42 @@
 pluginManagement {
-    repositories { google(); mavenCentral(); gradlePluginPortal() }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 dependencyResolutionManagement {
     repositories {
         providers.gradleProperty("domposable.consumer.repository").orNull?.let { repository ->
-            maven { url = uri(repository); content { includeGroup("io.github.samuolis.domposable") } }
+            maven {
+                url = uri(repository)
+                content { includeGroup("io.github.samuolis.domposable") }
+            }
         }
-        google(); mavenCentral()
+        google()
+        mavenCentral()
     }
 }
 rootProject.name = "domposable"
 include(
-    ":domposable-foundation", ":domposable-ui", ":domposable-design-material",
-    ":domposable-adaptive", ":domposable-screens", ":domposable-navigation3",
-    ":domposable-lifecycle-viewmodel", ":domposable-ksp", ":demo", ":androidApp",
-    ":metro-example", ":kobweb-example",
-    ":catalog-api", ":catalog-impl", ":checkout-api", ":checkout-impl",
-    ":consumer-fixture", ":custom-provider-fixture",
+    ":domposable-foundation",
+    ":domposable-ui",
+    ":domposable-design-material",
+    ":domposable-adaptive",
+    ":domposable-screens",
+    ":domposable-navigation3",
+    ":domposable-lifecycle-viewmodel",
+    ":domposable-ksp",
+    ":demo",
+    ":androidApp",
+    ":metro-example",
+    ":kobweb-example",
+    ":catalog-api",
+    ":catalog-impl",
+    ":checkout-api",
+    ":checkout-impl",
+    ":consumer-fixture",
+    ":custom-provider-fixture",
 )
 
 // Unique Gradle identities avoid api/impl capability collisions between features.
