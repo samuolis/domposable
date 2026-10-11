@@ -31,7 +31,7 @@ kotlin {
                 api(project(":domposable-lifecycle-viewmodel"))
             }
         }
-        jvmTest { dependencies { implementation("org.jetbrains.compose.ui:ui-test-junit4:1.12.1"); implementation(compose.desktop.currentOs) } }
+        jvmTest { dependencies { implementation("org.jetbrains.compose.ui:ui-test-junit4:${libs.versions.compose.get()}"); implementation(compose.desktop.currentOs) } }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         getByName("androidHostTest") { dependencies {
             implementation("org.robolectric:robolectric:4.17")

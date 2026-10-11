@@ -18,11 +18,11 @@ Desktop and Wasm support are **experimental**. Browser history/saveable restorat
 | Dependency | Version |
 | --- | --- |
 | Kotlin / Compose compiler | 2.4.21 |
-| Compose Multiplatform | 1.12.1 |
+| Compose Multiplatform plugin / runtime / UI / HTML | 1.13.0-alpha02 |
 | Material3 provider | 1.13.0-alpha02 |
 | Navigation 3 runtime / Compose UI display | 1.1.7 / 1.1.2 |
 | KSP | 2.3.12 |
-| Android Gradle plugin / Gradle | 9.4.0 / 9.7.1 |
+| Android Gradle plugin / Gradle | 9.4.1 / 9.7.1 |
 | Metro example | 1.4.5 |
 | Kobweb page API example | 0.25.1 |
 | Playwright | 1.64.0 |
@@ -34,3 +34,5 @@ These are the versions verified together. Applications adopting older/newer Comp
 HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm uses Compose UI rendering and its accessibility layer. They share declarations and behavior intent, not pixels or browser-native text selection. HTML collections are keyed DOM lists, while Compose UI collections are lazy; HTML virtualization remains future work. Native date/time purposes currently use text fields. Hinge/fold information, rich text, drag/reorder and large-table virtualization are not bundled.
 
 Material 3 1.13.0-alpha02 requires Android API 24. The library modules, demo and published-consumer fixtures use the same minimum; applications upgrading must also set `minSdk = 24` or higher.
+
+The Compose plugin, UI and foundation are aligned with Material 3’s dependency version. On Wasm, mixing older compile-time UI dependencies with newer runtime UI can bundle incompatible Skiko JavaScript glue; the startup checks exercise the actual browser bundle.
