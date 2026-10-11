@@ -44,10 +44,10 @@ kotlin {
             }
         }
         getByName("androidMain").dependsOn(composeUiMain)
-        wasmJsMain { dependencies { implementation("io.ktor:ktor-client-js:3.5.2") } }
-        androidMain { dependencies { implementation("io.ktor:ktor-client-okhttp:3.5.2") } }
-        jvmMain { dependencies { implementation("io.ktor:ktor-client-java:3.5.2") } }
-        iosMain { dependencies { implementation("io.ktor:ktor-client-darwin:3.5.2") } }
+        wasmJsMain { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
+        androidMain { dependencies { implementation("io.ktor:ktor-client-okhttp:3.6.0") } }
+        jvmMain { dependencies { implementation("io.ktor:ktor-client-java:3.6.0") } }
+        iosMain { dependencies { implementation("io.ktor:ktor-client-darwin:3.6.0") } }
         getByName("jvmMain").dependsOn(composeUiMain)
         getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
