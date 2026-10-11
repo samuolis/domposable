@@ -15,16 +15,21 @@ kotlin {
         withHostTest {}
     }
     jvm()
-    js { browser();  }
-    wasmJs { browser(); }
+    js {
+        browser()
+    }
+    wasmJs {
+        browser()
+    }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain = getByName("commonMain") {
-            dependencies {
-                api(libs.compose.runtime)
+        val commonMain =
+            getByName("commonMain") {
+                dependencies {
+                    api(libs.compose.runtime)
+                }
             }
-        }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
@@ -32,7 +37,15 @@ kotlin {
         commonMain {
             dependencies {
                 if (providers.gradleProperty("domposable.consumer.repository").isPresent) {
-                    listOf("foundation", "ui", "design-material", "adaptive", "screens", "navigation3", "lifecycle-viewmodel").forEach {
+                    listOf(
+                        "foundation",
+                        "ui",
+                        "design-material",
+                        "adaptive",
+                        "screens",
+                        "navigation3",
+                        "lifecycle-viewmodel",
+                    ).forEach {
                         implementation("io.github.samuolis.domposable:domposable-$it:${project.version}")
                     }
                 } else {
@@ -50,9 +63,14 @@ kotlin.sourceSets.commonMain { kotlin.srcDir("build/generated/ksp/metadata/commo
 dependencies {
     if (providers.gradleProperty("domposable.consumer.repository").isPresent) {
         add("kspCommonMainMetadata", "io.github.samuolis.domposable:domposable-ksp:${project.version}")
-    } else add("kspCommonMainMetadata", project(":domposable-ksp"))
+    } else {
+        add("kspCommonMainMetadata", project(":domposable-ksp"))
+    }
 }
-tasks.matching { it.name.startsWith("compile") || it.name.contains("sourcesJar", ignoreCase = true) }.configureEach { dependsOn("kspCommonMainKotlinMetadata") }
+tasks
+    .matching {
+        it.name.startsWith("compile") || it.name.contains("sourcesJar", ignoreCase = true)
+    }.configureEach { dependsOn("kspCommonMainKotlinMetadata") }
 tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMetadata" }.configureEach {
     dependsOn("kspCommonMainKotlinMetadata")
     enabled = false

@@ -1,6 +1,11 @@
 package io.github.samuolis.domposable.adaptive
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.browser.window
 
 @Composable private fun mediaPreference(query: String): Boolean {
@@ -13,5 +18,7 @@ import kotlinx.browser.window
     }
     return matches
 }
+
 @Composable internal actual fun reducedMotionPreference(): Boolean = mediaPreference("(prefers-reduced-motion: reduce)")
+
 @Composable internal actual fun precisePointerPreference(): Boolean = mediaPreference("(pointer: fine)")

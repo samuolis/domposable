@@ -1,4 +1,5 @@
 @file:OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
@@ -18,41 +19,59 @@ kotlin {
         withHostTest {}
     }
     jvm()
-    js { browser();  }
-    wasmJs { browser(); }
+    js {
+        browser()
+    }
+    wasmJs {
+        browser()
+    }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain = getByName("commonMain") {
-            dependencies {
-                api(libs.compose.runtime)
-                api(project(":domposable-ui"))
+        val commonMain =
+            getByName("commonMain") {
+                dependencies {
+                    api(libs.compose.runtime)
+                    api(project(":domposable-ui"))
+                }
             }
-        }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        val composeUiMain = create("composeUiMain") {
-            dependsOn(commonMain)
-            dependencies {
-                api(libs.compose.ui)
-                api(libs.compose.foundation)
-                implementation(libs.material3)
-                implementation("io.coil-kt.coil3:coil-compose:3.6.3")
-                implementation("io.coil-kt.coil3:coil-network-ktor3:3.6.3")
+        val composeUiMain =
+            create("composeUiMain") {
+                dependsOn(commonMain)
+                dependencies {
+                    api(libs.compose.ui)
+                    api(libs.compose.foundation)
+                    implementation(libs.material3)
+                    implementation(libs.coil.compose)
+                    implementation(libs.coil.network.ktor)
+                }
             }
-        }
         getByName("androidMain").dependsOn(composeUiMain)
-        wasmJsMain { dependencies { implementation("io.ktor:ktor-client-js:3.6.0") } }
-        androidMain { dependencies { implementation("io.ktor:ktor-client-okhttp:3.6.0") } }
-        jvmMain { dependencies { implementation("io.ktor:ktor-client-java:3.6.0") } }
-        iosMain { dependencies { implementation("io.ktor:ktor-client-darwin:3.6.0") } }
+        wasmJsMain { dependencies { implementation(libs.ktor.client.js) } }
+        androidMain { dependencies { implementation(libs.ktor.client.okhttp) } }
+        jvmMain { dependencies { implementation(libs.ktor.client.java) } }
+        iosMain { dependencies { implementation(libs.ktor.client.darwin) } }
         getByName("jvmMain").dependsOn(composeUiMain)
         getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
-        jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
+        jsMain {
+            dependencies {
+                implementation(libs.compose.html)
+                implementation(libs.kotlinx.browser)
+            }
+        }
     }
 }
 
-publishing { repositories { maven { name = "Fixture"; url = uri(rootProject.layout.buildDirectory.dir("repository")) } } }
+publishing {
+    repositories {
+        maven {
+            name = "Fixture"
+            url = uri(rootProject.layout.buildDirectory.dir("repository"))
+        }
+    }
+}

@@ -1,3 +1,6 @@
+// This API groups composable helpers with their owner/contract and preserves its JVM facade.
+@file:Suppress("MatchingDeclarationName")
+
 package io.github.samuolis.domposable.lifecycle
 
 import androidx.compose.runtime.Composable
@@ -8,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** Optional state/action contract. Models need no Domposable or ViewModel base class. */
 interface DomposableMvi<State, Action> {
     val state: StateFlow<State>
+
     fun dispatch(action: Action)
 }
 

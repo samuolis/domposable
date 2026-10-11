@@ -31,6 +31,30 @@ jobs:
         run: |
           if [ "$BASE" = 0000000000000000000000000000000000000000 ]; then BASE=HEAD; fi
           git diff --check "$BASE" HEAD
+  quality:
+    name: Kotlin quality, Android lint and coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: ./.github/actions/setup
+      - name: Check formatting, static analysis, Android lint and coverage floors
+        run: xvfb-run -a ./gradlew qualityCheck --continue --console=plain
+      - name: Summarize measured coverage
+        if: always()
+        run: python scripts/ci/coverage_report.py build/reports/coverage/coverage.xml --summary "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: quality-and-coverage
+          path: |
+            build/reports/ktlint/
+            build/reports/detekt/
+            build/reports/coverage/
+            **/build/reports/lint*
+            **/build/reports/tests/
+          retention-days: 30
   portable:
     name: Android, desktop, DOM and Wasm
     runs-on: ubuntu-24.04
@@ -120,13 +144,14 @@ jobs:
   passed:
     name: CI passed
     if: always()
-    needs: [hygiene, portable, native]
+    needs: [hygiene, quality, portable, native]
     runs-on: ubuntu-24.04
     steps:
       - name: Require validation and prevent recording from satisfying branch or release gates
         env:
           HYGIENE: ${{ needs.hygiene.result }}
+          QUALITY: ${{ needs.quality.result }}
           PORTABLE: ${{ needs.portable.result }}
           NATIVE: ${{ needs.native.result }}
           RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
-        run: test "$HYGIENE" = success && test "$PORTABLE" = success && test "$NATIVE" = success && test "$RECORD" != true
+        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$NATIVE" = success && test "$RECORD" != true

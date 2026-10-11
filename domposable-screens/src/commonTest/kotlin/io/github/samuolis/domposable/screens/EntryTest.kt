@@ -1,21 +1,43 @@
 package io.github.samuolis.domposable.screens
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class EntryTest {
     @Test fun standardMutationPoliciesArePortableAndCustomPoliciesRequireASaver() {
-        assertTrue(portableSaveable(androidx.compose.runtime.mutableStateOf("text", androidx.compose.runtime.neverEqualPolicy())))
-        assertTrue(portableSaveable(androidx.compose.runtime.mutableStateOf(1, androidx.compose.runtime.referentialEqualityPolicy())))
-        val custom = object : androidx.compose.runtime.SnapshotMutationPolicy<Int> {
-            override fun equivalent(a: Int, b: Int): Boolean = a / 10 == b / 10
-        }
+        assertTrue(
+            portableSaveable(
+                androidx.compose.runtime.mutableStateOf("text", androidx.compose.runtime.neverEqualPolicy()),
+            ),
+        )
+        assertTrue(
+            portableSaveable(
+                androidx.compose.runtime.mutableStateOf(1, androidx.compose.runtime.referentialEqualityPolicy()),
+            ),
+        )
+        val custom =
+            object : androidx.compose.runtime.SnapshotMutationPolicy<Int> {
+                override fun equivalent(
+                    a: Int,
+                    b: Int,
+                ): Boolean = a / 10 == b / 10
+            }
         assertFalse(portableSaveable(androidx.compose.runtime.mutableStateOf(1, custom)))
     }
+
     @Test fun retainedResourceIsDisposedOnceAndCannotBeRevived() {
         val entry = DomposableEntryScope("route")
         var creations = 0
         var disposals = 0
-        val first = entry.retain("model", dispose = { _: Any -> disposals++ }) { creations++; Any() }
+        val first =
+            entry.retain("model", dispose = { _: Any -> disposals++ }) {
+                creations++
+                Any()
+            }
         assertSame(first, entry.retain("model") { Any() })
         entry.moveTo(DomposableEntryLifecycle.Resumed)
         entry.moveTo(DomposableEntryLifecycle.Created)
@@ -41,7 +63,10 @@ class EntryTest {
 
     @Test fun registrationRejectsDuplicatesAndSaveablesStayPortable() {
         assertFailsWith<IllegalArgumentException> {
-            domposableScreenRegistry { register(String::class) {}; register(String::class) {} }
+            domposableScreenRegistry {
+                register(String::class) {}
+                register(String::class) {}
+            }
         }
         assertTrue(portableSaveable(mapOf("count" to 1, "values" to listOf("a", null, true))))
         assertFalse(portableSaveable(Any()))
@@ -51,7 +76,8 @@ class EntryTest {
         val registry = DomposableEntryScope("route").saveableStateRegistry
         val first = registry.registerProvider("shared") { "text" }
         val second = registry.registerProvider("shared") { 0.5f }
-        first.unregister(); second.unregister()
+        first.unregister()
+        second.unregister()
         assertEquals(listOf("text", 0.5f), registry.performSave()["shared"])
         assertEquals("text", registry.consumeRestored("shared"))
         assertEquals(0.5f, registry.consumeRestored("shared"))

@@ -141,4 +141,4 @@ Applications using their own route back stack also own URL integration and resto
 
 For a manually built registry, `rememberDomposableNavEntries(stack, registry, entryDecorators)` provides the entry ownership adapter without a host. Pass its result to native `NavDisplay` or the DOM display. This gives you registry-based screen ownership while retaining control of the display and additional decorators.
 
-[Compiled consumer examples](https://github.com/samuolis/domposable/blob/main/consumer-fixture/src/commonMain/kotlin/Consumer.kt) · [Navigation 3 entry decoration](https://developer.android.com/guide/navigation/navigation-3/naventrydecorators)
+[Compiled consumer examples](https://github.com/samuolis/domposable/blob/main/consumer-fixture/src/commonMain/kotlin/example/consumer/Consumer.kt) · [Navigation 3 entry decoration](https://developer.android.com/guide/navigation/navigation-3/naventrydecorators)

@@ -43,7 +43,7 @@ setContent {
 Kotlin/iOS (export this controller to your Swift app):
 
 ```kotlin
-fun MainViewController() = ComposeUIViewController {
+fun mainViewController() = ComposeUIViewController {
     DomposableMaterialTheme { Greeting() }
 }
 ```

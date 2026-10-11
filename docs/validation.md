@@ -1,7 +1,8 @@
 # Validation and visual review
 
-The required **CI passed** check combines Android/desktop/browser validation and native/published-consumer validation. Fork PRs run with read-only permissions and no release secrets. Tests exercise behavior, API variants and rendering separately.
+The required **CI passed** check combines workflow hygiene, Kotlin quality/coverage, Android/desktop/browser validation and native/published-consumer validation. Fork PRs run with read-only permissions and no release secrets. Tests exercise behavior, API variants and rendering separately.
 
+- Required ktlint, detekt and Android lint checks enforce source formatting and correctness. Kover line/branch gates and individual core package floors prevent coverage regressions; [test coverage](coverage.md) explains scope and reports.
 - Shared JVM tests cover adaptive rules, modifier ordering, entry lifetime/saveables and optional ViewModels.
 - Android native-graphics Robolectric tests exercise feature input/back navigation and capture four scenes, including the storefront.
 - iOS XCUITest verifies native input, rotation and recipe navigation, and captures portrait/landscape scenes on iPad mini A17 Pro with **iOS 26.5**.

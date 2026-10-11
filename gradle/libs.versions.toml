@@ -12,6 +12,20 @@ lifecycle = "2.11.0"
 savedstate = "1.4.0"
 activity = "1.13.0"
 metro = "1.4.5"
+ktlint = "1.8.0"
+detekt = "2.0.0-alpha.6"
+kover = "0.9.11"
+coroutines = "1.11.0"
+kotlinxBrowser = "0.5.0"
+serialization = "1.11.0"
+composeStable = "1.12.1"
+coil = "3.6.3"
+ktor = "3.6.0"
+robolectric = "4.17"
+junit = "4.13.2"
+androidxTestRunner = "1.7.0"
+kotlinpoet = "2.3.0"
+kobweb = "0.25.1"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -30,6 +44,29 @@ savedstate = { module = "org.jetbrains.androidx.savedstate:savedstate", version.
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 metrox-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
+kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinxBrowser" }
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+compose-runtime-saveable = { module = "org.jetbrains.compose.runtime:runtime-saveable", version.ref = "composeStable" }
+savedstate-compose = { module = "org.jetbrains.androidx.savedstate:savedstate-compose", version.ref = "savedstate" }
+compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "compose" }
+android-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "composeStable" }
+android-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "composeStable" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
+kobweb-core = { module = "com.varabyte.kobweb:kobweb-core", version.ref = "kobweb" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -37,8 +74,11 @@ compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-lint = { id = "com.android.lint", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 
 metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

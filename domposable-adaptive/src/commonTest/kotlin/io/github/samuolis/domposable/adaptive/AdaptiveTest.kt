@@ -1,6 +1,8 @@
 package io.github.samuolis.domposable.adaptive
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class AdaptiveTest {
     @Test fun boundariesAndInheritedValues() {

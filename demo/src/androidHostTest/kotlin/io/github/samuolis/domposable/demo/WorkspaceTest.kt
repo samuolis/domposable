@@ -1,7 +1,14 @@
 package io.github.samuolis.domposable.demo
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,6 +21,7 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class WorkspaceTest {
     @get:Rule val compose = createComposeRule()
+
     @Test fun sharedFeatureUsesNativeInputAndNavigation() {
         compose.setContent { DemoApp() }
         compose.onNodeWithText("Task workspace").performScrollTo().assertIsDisplayed()

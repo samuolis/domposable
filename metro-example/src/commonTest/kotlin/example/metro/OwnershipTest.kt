@@ -1,6 +1,13 @@
 package example.metro
-import io.github.samuolis.domposable.screens.*
-import kotlin.test.*
+
+import io.github.samuolis.domposable.screens.DomposableEntryLifecycle
+import io.github.samuolis.domposable.screens.DomposableEntryScope
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+
 class OwnershipTest {
     @Test fun graphSharesRepositoryWhileEntriesOwnModels() {
         val graph = createAppGraph()

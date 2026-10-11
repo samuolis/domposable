@@ -1,10 +1,14 @@
 package example.shop.catalog.impl
 
-import example.shop.catalog.api.*
-import kotlin.test.*
+import example.shop.catalog.api.CatalogAction
+import example.shop.catalog.api.CatalogState
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class CatalogTest {
     private val products = InMemoryProductCatalog().products
+
     @Test fun filtersAndOrderingAreIndependentOfRendering() {
         var state = CatalogState(products)
         state = reduceCatalog(state, CatalogAction.Category("Home"))

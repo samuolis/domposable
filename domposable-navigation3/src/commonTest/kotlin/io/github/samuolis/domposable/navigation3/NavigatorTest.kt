@@ -1,6 +1,12 @@
 package io.github.samuolis.domposable.navigation3
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class NavigatorTest {
     @Test fun backKeepsRootAndRetainsThePreviousEntryIdentity() {
@@ -16,6 +22,7 @@ class NavigatorTest {
         navigator.navigate("product")
         assertNotEquals(product.id, navigator.backStack.last().id)
     }
+
     @Test fun replaceAndResetUseFreshEntriesWithoutAnEmptyStack() {
         val navigator = DomposableNavigator("home")
         navigator.navigate("cart")
@@ -27,11 +34,14 @@ class NavigatorTest {
         assertEquals("confirmation", navigator.currentRoute)
         assertFalse(navigator.canGoBack)
     }
+
     @Test fun anchorsShareTheBrowserHistoryUrlRules() {
-        val codec = object : DomposableRouteCodec<String> {
-            override fun encode(route: String) = route
-            override fun decode(path: String) = path
-        }
+        val codec =
+            object : DomposableRouteCodec<String> {
+                override fun encode(route: String) = route
+
+                override fun decode(path: String) = path
+            }
         assertEquals("#/products/mug", codec.urlFor("/products/mug"))
         assertEquals("/app/products/mug/", codec.urlFor("/products/mug/", DomposableBrowserUrls.Path("/app/", true)))
         assertEquals("/app/", codec.urlFor("/", DomposableBrowserUrls.Path("/app", true)))
