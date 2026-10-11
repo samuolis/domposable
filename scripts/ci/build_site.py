@@ -16,15 +16,17 @@ wasm = root / "demo/build/dist/wasmJs/productionExecutable"
 demo = root / "demo/build/dist/js/productionExecutable"
 if not api.is_dir() or not demo.is_dir() or not wasm.is_dir(): raise SystemExit("Build Dokka and both browser distributions before assembling the site")
 shutil.copytree(api, site / "api", dirs_exist_ok=True)
-shutil.copytree(demo, site / "demo", dirs_exist_ok=True)
-shutil.copytree(wasm, site / "wasm", dirs_exist_ok=True)
+from web_assets import copy_hashed_bundle, verify_bundle
+web = {'html': copy_hashed_bundle(demo, site / 'demo'), 'wasm': copy_hashed_bundle(wasm, site / 'wasm')}
+verify_bundle(site / 'demo', web['html'])
+verify_bundle(site / 'wasm', web['wasm'])
 
 from web_routes import assemble_routes
-assemble_routes(demo, site, "/domposable/routes/")
+assemble_routes(site / 'demo', site, "/domposable/routes/")
 
 version, build = read_version(root / "version.properties")
 commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-(site / "release.json").write_text(json.dumps({"version": str(version), "build": build, "commit": commit, "status": "preview" if build == 0 else "release"}) + "\n")
+(site / "release.json").write_text(json.dumps({"version": str(version), "build": build, "commit": commit, "status": "preview" if build == 0 else "release", "web": web}) + "\n")
 target = root / ".release/artifacts/website.zip"; target.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as archive:
     for path in sorted(site.rglob("*")):

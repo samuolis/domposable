@@ -23,6 +23,27 @@ The action creates a temporary version-only commit, waits for that exact commit'
 
 Public demo downloads currently include the signed Android APK only. The release verifies its dedicated certificate fingerprint and both version values before attaching it. iOS remains supported by the library and validated with simulator tests and visual captures in CI, but device/simulator downloads and Apple signing are deferred. A release requires no Apple credentials.
 
+## HTML and Wasm build hashes
+
+Libraries and the APK use the same plain semantic version. The HTML and Wasm distributions also have independent SHA-256 build identifiers. Public demo URLs stay at `/demo/` and `/wasm/`; their HTML loads `demo.<full-content-sha256>.js`. Source maps and licence sidecars receive their own content hashes, while Wasm binaries retain webpack's content-hashed names. Nested task and shopping routes reference the same fingerprinted HTML bundle.
+
+Each distribution contains `web-assets.json`, recording the entry filename and the SHA-256 of every packaged file. Its distribution hash covers the sorted file/checksum inventory, so a resource change also changes the build identifier. `release.json` links both build identifiers to the library version, build number and Git commit:
+
+```json
+{
+  "version": "0.1.0",
+  "build": 1,
+  "commit": "<git-commit>",
+  "status": "release",
+  "web": {
+    "html": {"entry": "demo.<sha256>.js", "sha256": "<distribution-sha256>"},
+    "wasm": {"entry": "demo.<sha256>.js", "sha256": "<distribution-sha256>"}
+  }
+}
+```
+
+CI runs browser tests against the assembled production website at the real `/domposable/` project base. It checks entry/binary hashes, nested route reloads, HTML rendering and Wasm startup. Bootstrap deployments verify both full manifests before deploying; release deployments preserve these exact distributions in `website.zip`.
+
 ## Retry behavior
 
 Dispatch again after fixing configuration or transient service failure. An unfinished release takes precedence over the new bump request. The action restores its original commit/assets and Central deployment ID. It does not manufacture a new version or rebuild already staged binaries. Draft assets and `manifest.json` retain SHA-256 checksums; `release-state.json` identifies progress. Interrupted draft uploads recover the same immutable Actions artifact, retained for 90 days. After draft upload completes, GitHub release assets preserve the bundle permanently.

@@ -47,12 +47,17 @@ jobs:
       - name: Verify website provenance
         run: |
           python - <<'PY'
-          import json, os
+          import json, os, sys
           from pathlib import Path
           site = Path('build/site')
           metadata = json.loads((site / 'release.json').read_text())
-          if metadata != {'version': '0.0.0', 'build': 0, 'commit': os.environ['GITHUB_SHA'], 'status': 'preview'}:
+          expected = {'version': '0.0.0', 'build': 0, 'commit': os.environ['GITHUB_SHA'], 'status': 'preview'}
+          if {key: metadata.get(key) for key in expected} != expected:
               raise SystemExit('Website does not match this unpublished bootstrap commit.')
+          sys.path.insert(0, 'scripts/ci')
+          from web_assets import verify_bundle
+          for key, folder in [('html', 'demo'), ('wasm', 'wasm')]:
+              verify_bundle(site / folder, metadata['web'][key])
           for path in ['index.html', 'api/index.html', 'demo/index.html', 'wasm/index.html', 'compare/index.html', 'routes/tasks/welcome/index.html', 'shop/products/canvas-weekender/index.html', 'components/index.html']:
               if not (site / path).is_file(): raise SystemExit('Incomplete website: ' + path)
           PY

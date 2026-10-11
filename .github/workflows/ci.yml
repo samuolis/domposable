@@ -61,6 +61,8 @@ jobs:
           exit "$status"
       - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution --console=plain
       - run: python scripts/ci/build_site.py
+      - name: Verify fingerprinted production HTML and Wasm distributions
+        run: npx playwright test --config playwright.production.config.ts
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
@@ -69,6 +71,8 @@ jobs:
             androidApp/build/outputs/apk/debug/*.apk
             test-results/
             playwright-report/
+            production-test-results/
+            playwright-production-report/
             build/site/
             build/screenshots/
             build/visual-report/

@@ -20,6 +20,14 @@ Comparison rejects missing captures/baselines and dimension changes. It tolerate
 
 The visual browser reference is Chromium on Ubuntu 24.04 with Playwright 1.64.0. Desktop and Android references use the same Linux job. iOS pins its runtime/device and status-bar date/time/battery, waits for stable full-screen captures, and normalizes orientation metadata. A runner/runtime/font update can require a reviewed baseline refresh. Baselines from a different local OS should not replace the CI references casually.
 
+Production packaging has a separate browser check after `build_site.py`. It serves `build/site` under `/domposable/`, verifies content-hashed JavaScript and Wasm assets, reloads nested HTML routes in Chromium/Firefox/WebKit, and starts the production Wasm shop in Chromium. Development previews remain convenient for ordinary feature tests; these production checks exercise the files that Pages receives.
+
+```bash
+./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution dokkaGenerate
+python scripts/ci/build_site.py
+npx playwright test --config playwright.production.config.ts
+```
+
 ## Update baselines deliberately
 
 1. Push the implementation branch and run **CI** manually on that branch with `record_screenshots=true`.

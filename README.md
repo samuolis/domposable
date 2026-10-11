@@ -33,6 +33,8 @@ Your application supplies its models and dependencies. Plain Compose state, MVVM
 
 Coordinates: `io.github.samuolis.domposable:<artifact>:<released version>`. Choose the published version from [Releases](https://github.com/samuolis/domposable/releases). `0.0.0` is reserved for the unpublished bootstrap baseline.
 
+Releases use plain semantic versions. The HTML and Wasm demos load content-hashed JavaScript; `release.json` and each demo's `web-assets.json` record their independent build hashes and exact assets. See [web build versioning](https://samuolis.github.io/domposable/releasing/#html-and-wasm-build-hashes).
+
 [![CI](https://github.com/samuolis/domposable/actions/workflows/ci.yml/badge.svg)](https://github.com/samuolis/domposable/actions/workflows/ci.yml)
 
 [Guides](https://samuolis.github.io/domposable/) · [Demo](https://samuolis.github.io/domposable/demo/) · [HTML/Wasm comparison](https://samuolis.github.io/domposable/compare/) · [Clean URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Release downloads](https://github.com/samuolis/domposable/releases)
