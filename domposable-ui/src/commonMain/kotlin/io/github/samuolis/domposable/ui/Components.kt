@@ -17,6 +17,13 @@ data class DomposableColumnProps(val gap: DomposableLength = 0.dp, val alignment
 @DomposableComponent("Row")
 data class DomposableRowProps(val gap: DomposableLength = 0.dp, val alignment: DomposableAlignment = DomposableAlignment.Start)
 
+@DomposableComponent("FlowRow")
+data class DomposableFlowRowProps(val gap: DomposableLength = 8.dp)
+
+/** A browser anchor on HTML; opens a URI with the platform handler on Compose UI. */
+@DomposableComponent("Link")
+data class DomposableLinkProps(val label: String, val href: String)
+
 @DomposableComponent("Box")
 data class DomposableBoxProps(val alignment: DomposableAlignment = DomposableAlignment.Start)
 
@@ -128,6 +135,10 @@ fun DomposableTheme(tokens: DomposableTokens = DomposableTokens(), components: D
     DomposableColumn(DomposableColumnProps(gap, alignment), modifier, content)
 @Composable fun DomposableRow(modifier: DomposableModifier = DomposableModifier, gap: DomposableLength = 0.dp, alignment: DomposableAlignment = DomposableAlignment.Start, content: @Composable () -> Unit) =
     DomposableRow(DomposableRowProps(gap, alignment), modifier, content)
+@Composable fun DomposableFlowRow(modifier: DomposableModifier = DomposableModifier, gap: DomposableLength = 8.dp, content: @Composable () -> Unit) =
+    DomposableFlowRow(DomposableFlowRowProps(gap), modifier, content)
+@Composable fun DomposableLink(label: String, href: String, modifier: DomposableModifier = DomposableModifier) =
+    DomposableLink(DomposableLinkProps(label, href), modifier)
 @Composable fun DomposableBox(modifier: DomposableModifier = DomposableModifier, alignment: DomposableAlignment = DomposableAlignment.Start, content: @Composable () -> Unit) =
     DomposableBox(DomposableBoxProps(alignment), modifier, content)
 @Composable fun DomposableCard(modifier: DomposableModifier = DomposableModifier, onClick: (() -> Unit)? = null, content: @Composable () -> Unit) =

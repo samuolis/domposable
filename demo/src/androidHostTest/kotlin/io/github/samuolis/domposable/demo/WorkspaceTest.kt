@@ -20,7 +20,8 @@ class WorkspaceTest {
         compose.onNodeWithTag("task-welcome").performScrollTo().performClick()
         compose.onNodeWithTag("task-notes").performTextInput("Android feature notes")
         compose.onNodeWithTag("task-notes").assertTextContains("Android feature notes")
-        compose.onNodeWithText("Back to tasks").performClick()
+        compose.onNodeWithText("Back to tasks").performScrollTo().performClick()
+        compose.waitUntil(5000) { compose.onAllNodesWithText("Task workspace").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Task workspace").performScrollTo().assertIsDisplayed()
     }
 }

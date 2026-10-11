@@ -21,6 +21,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
         theme = { props, _, content -> HtmlTheme(props.tokens, content) },
         column = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "flex"); property("flex-direction", "column"); property("gap", "${props.gap.value}px"); property("align-items", props.alignment.css()) } }) { content() } } },
         row = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "flex"); property("gap", "${props.gap.value}px"); property("align-items", props.alignment.css()) } }) { content() } } },
+        flowRow = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "flex"); property("flex-wrap", "wrap"); property("gap", "${props.gap.value}px") } }) { content() } } },
+        link = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { A(href = props.href, attrs = { domposableAttributes(modifier); classes("d-link") }) { Text(props.label) } } },
         box = { props, modifier, content -> DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "grid"); property("place-items", when(props.alignment) { DomposableAlignment.Start -> "start"; DomposableAlignment.Center -> "center"; DomposableAlignment.End -> "end" }) } }) { content() } } },
         lazyColumn = { props, modifier, _ -> HtmlCollection(props.items, modifier, props.gap, "column") },
         lazyRow = { props, modifier, _ -> HtmlCollection(props.items, modifier, props.gap, "row") },
@@ -144,12 +146,12 @@ private fun HtmlTheme(tokens: DomposableTokens, content: @Composable () -> Unit)
 }
 
 private const val MATERIAL_CSS = """
-.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
+.d-theme *{box-sizing:border-box}.d-link{color:var(--d-primary);padding:8px;display:inline-flex;align-items:center;min-height:44px}.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
 .d-theme button,.d-theme input,.d-theme textarea{font:inherit;accent-color:var(--d-primary)}
 .d-theme button{cursor:pointer}.d-theme button:disabled{cursor:default;opacity:.5}
 .d-theme :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
-.d-theme h1,.d-theme h2{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
+.d-theme h1,.d-theme h2,.d-theme h3{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:var(--d-radius);min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}
 .d-icon-button{border-radius:50%;padding:10px}.d-chip{background:var(--d-variant);color:var(--d-on-surface)}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}

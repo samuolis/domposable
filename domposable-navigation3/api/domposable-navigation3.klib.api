@@ -1,5 +1,5 @@
 // Klib ABI Dump
-// Targets: [iosArm64, iosSimulatorArm64, js]
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -11,6 +11,35 @@ abstract interface <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/Do
     abstract fun encode(#A): kotlin/String // io.github.samuolis.domposable.navigation3/DomposableRouteCodec.encode|encode(1:0){}[0]
 }
 
-final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/DomposableBrowserHistory(androidx.compose.runtime.snapshots/SnapshotStateList<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>>, io.github.samuolis.domposable.navigation3/DomposableRouteCodec<#A>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.samuolis.domposable.navigation3/DomposableBrowserHistory|DomposableBrowserHistory(androidx.compose.runtime.snapshots.SnapshotStateList<io.github.samuolis.domposable.screens.DomposableEntryScope<0:0>>;io.github.samuolis.domposable.navigation3.DomposableRouteCodec<0:0>;androidx.compose.runtime.Composer?;kotlin.Int){0§<kotlin.Any>}[0]
+sealed interface io.github.samuolis.domposable.navigation3/DomposableBrowserUrls { // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls|null[0]
+    final class Path : io.github.samuolis.domposable.navigation3/DomposableBrowserUrls { // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path|null[0]
+        constructor <init>(kotlin/String = ..., kotlin/Boolean = ...) // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
+
+        final val basePath // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.basePath|{}basePath[0]
+            final fun <get-basePath>(): kotlin/String // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.basePath.<get-basePath>|<get-basePath>(){}[0]
+        final val trailingSlash // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.trailingSlash|{}trailingSlash[0]
+            final fun <get-trailingSlash>(): kotlin/Boolean // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.trailingSlash.<get-trailingSlash>|<get-trailingSlash>(){}[0]
+
+        final fun component1(): kotlin/String // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.component1|component1(){}[0]
+        final fun component2(): kotlin/Boolean // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.component2|component2(){}[0]
+        final fun copy(kotlin/String = ..., kotlin/Boolean = ...): io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.copy|copy(kotlin.String;kotlin.Boolean){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Path.toString|toString(){}[0]
+    }
+
+    final object Hash : io.github.samuolis.domposable.navigation3/DomposableBrowserUrls { // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Hash|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Hash.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Hash.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.navigation3/DomposableBrowserUrls.Hash.toString|toString(){}[0]
+    }
+}
+
+final val io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop // io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop|#static{}io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop[0]
+final val io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop // io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop|#static{}io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop[0]
+
+final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/DomposableBrowserHistory(androidx.compose.runtime.snapshots/SnapshotStateList<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>>, io.github.samuolis.domposable.navigation3/DomposableRouteCodec<#A>, io.github.samuolis.domposable.navigation3/DomposableBrowserUrls?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.navigation3/DomposableBrowserHistory|DomposableBrowserHistory(androidx.compose.runtime.snapshots.SnapshotStateList<io.github.samuolis.domposable.screens.DomposableEntryScope<0:0>>;io.github.samuolis.domposable.navigation3.DomposableRouteCodec<0:0>;io.github.samuolis.domposable.navigation3.DomposableBrowserUrls?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any>}[0]
 final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/DomposableNavigation3Host(kotlin.collections/List<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>>, io.github.samuolis.domposable.screens/DomposableScreenRegistry, io.github.samuolis.domposable.ui/DomposableModifier?, kotlin/Int, kotlin/Function0<kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.navigation3/DomposableNavigation3Host|DomposableNavigation3Host(kotlin.collections.List<io.github.samuolis.domposable.screens.DomposableEntryScope<0:0>>;io.github.samuolis.domposable.screens.DomposableScreenRegistry;io.github.samuolis.domposable.ui.DomposableModifier?;kotlin.Int;kotlin.Function0<kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any>}[0]
 final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/rememberDomposableBackStack(#A, androidx.compose.runtime/Composer?, kotlin/Int): androidx.compose.runtime.snapshots/SnapshotStateList<io.github.samuolis.domposable.screens/DomposableEntryScope<#A>> // io.github.samuolis.domposable.navigation3/rememberDomposableBackStack|rememberDomposableBackStack(0:0;androidx.compose.runtime.Composer?;kotlin.Int){0§<kotlin.Any>}[0]
+final fun io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop_getter|io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop_getter|io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop_getter(){}[0]

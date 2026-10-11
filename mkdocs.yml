@@ -4,6 +4,8 @@ site_url: https://samuolis.github.io/domposable/
 repo_url: https://github.com/samuolis/domposable
 theme:
   name: material
+  logo: assets/brand/icon.svg
+  favicon: assets/brand/icon.svg
   palette:
     scheme: slate
     primary: deep purple
@@ -17,9 +19,15 @@ nav:
   - Screens and navigation: screens.md
   - Adaptive UI: adaptive.md
   - Migration: migration.md
+  - Recipes: recipes.md
+  - Integrations: integrations.md
+  - Compatibility: compatibility.md
+  - Compare web: compare.md
   - Coverage: coverage.md
   - Validation: validation.md
   - Releases: releasing.md
+  - Roadmap: roadmap.md
+  - Brand: brand.md
   - API: https://samuolis.github.io/domposable/api/
   - Live demo: https://samuolis.github.io/domposable/demo/
 markdown_extensions: [admonition, tables, fenced_code]

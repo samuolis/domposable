@@ -11,3 +11,6 @@ Try the [task workspace and component catalog](https://samuolis.github.io/dompos
 Until the first Maven release, the site is a tested bootstrap preview at `0.1.0-alpha00`. That version is not available on Maven Central. Native debug downloads are available in the successful [CI run artifacts](https://github.com/samuolis/domposable/actions/workflows/ci.yml). Published releases replace this preview with the website attached to the release.
 
 Android, iOS arm64 and Kotlin/JS are the initial targets. JVM desktop is experimental. Alpha coverage and limitations are listed in [Coverage](coverage.md).
+
+
+Explore the same shared feature through [HTML/Wasm comparison](compare.md), [Navigation 3 and clean web URLs](recipes.md), and [Metro/Kobweb integration](integrations.md). See [compatibility](compatibility.md) and [remaining release work](roadmap.md).

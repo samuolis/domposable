@@ -19,6 +19,7 @@ kotlin {
     }
     jvm()
     js { browser();  }
+    wasmJs { browser(); }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
@@ -43,10 +44,12 @@ kotlin {
             }
         }
         getByName("androidMain").dependsOn(composeUiMain)
+        wasmJsMain { dependencies { implementation("io.ktor:ktor-client-js:3.5.2") } }
         androidMain { dependencies { implementation("io.ktor:ktor-client-okhttp:3.5.2") } }
         jvmMain { dependencies { implementation("io.ktor:ktor-client-java:3.5.2") } }
         iosMain { dependencies { implementation("io.ktor:ktor-client-darwin:3.5.2") } }
         getByName("jvmMain").dependsOn(composeUiMain)
+        getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
         jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
     }

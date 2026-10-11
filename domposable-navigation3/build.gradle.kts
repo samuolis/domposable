@@ -19,6 +19,7 @@ kotlin {
     }
     jvm()
     js { browser();  }
+    wasmJs { browser(); }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
@@ -44,6 +45,7 @@ kotlin {
         }
         getByName("androidMain").dependsOn(composeUiMain)
         getByName("jvmMain").dependsOn(composeUiMain)
+        getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
         jsMain { dependencies { implementation(libs.compose.html); implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"); implementation("org.jetbrains.kotlinx:kotlinx-browser:0.5.0") } }
     }

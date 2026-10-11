@@ -1,8 +1,10 @@
+<img src="docs/assets/brand/icon.svg" alt="Domposable" width="72" height="72">
+
 # Domposable
 
 **One Compose API for apps and semantic HTML.**
 
-Domposable gives feature teams a small shared UI vocabulary: ordinary composable screens, ordered modifiers, component renderers, theme tokens and adaptive recipes. Android and iOS use Compose UI. Kotlin/JS uses HTML elements, CSS and native browser controls. JVM desktop is experimental.
+Domposable gives feature teams a small shared UI vocabulary: ordinary composable screens, ordered modifiers, component renderers, theme tokens and adaptive recipes. Android and iOS use Compose UI. Kotlin/JS uses HTML elements, CSS and native browser controls. The same demo also builds for JVM desktop and Kotlin/Wasm; these targets are experimental. It is a Kotlin Multiplatform (KMP) and Compose Multiplatform (CMP) UI library with a semantic DOM renderer, responsive layouts and a replaceable design system.
 
 ```kotlin
 @Composable
@@ -31,14 +33,16 @@ Your application supplies its models and dependencies. Plain Compose state, MVVM
 
 Coordinates: `io.github.samuolis.domposable:<artifact>:<released version>`. The checked-in `0.1.0-alpha00` is an unpublished bootstrap version. The first release action produces `0.1.0-alpha01`.
 
-[Guides](https://samuolis.github.io/domposable/) · [Demo](https://samuolis.github.io/domposable/demo/) · [Release downloads](https://github.com/samuolis/domposable/releases)
+[![CI](https://github.com/samuolis/domposable/actions/workflows/ci.yml/badge.svg)](https://github.com/samuolis/domposable/actions/workflows/ci.yml)
+
+[Guides](https://samuolis.github.io/domposable/) · [Demo](https://samuolis.github.io/domposable/demo/) · [HTML/Wasm comparison](https://samuolis.github.io/domposable/compare/) · [Clean URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Release downloads](https://github.com/samuolis/domposable/releases)
 
 ## Development
 
 Use JDK 21, Node 24, Android SDK 37.2 and macOS/Xcode 26 for iOS. Put your SDK path in ignored `local.properties`, or set `ANDROID_HOME`.
 
 ```sh
-./gradlew jvmTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack
+./gradlew jvmTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack
 npm ci
 npx playwright install chromium firefox webkit
 python3 scripts/ci/browser_preview.py
@@ -48,6 +52,8 @@ npx playwright test
 For iOS, build `:demo:linkDebugFrameworkIosSimulatorArm64`, then run `python3 scripts/ci/ios_test.py`. CI checks API baselines and consumers resolving actual published variants; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The **Bump and release** GitHub Action owns `version.properties`, publishes Maven artifacts, attaches a signed APK, Ad Hoc IPA, simulator app and symbols, and deploys the website to GitHub Pages. [Release setup and recovery](docs/releasing.md).
+
+See the [compatibility table](docs/compatibility.md), [Metro/Kobweb examples](docs/integrations.md), [visual review process](docs/validation.md) and [remaining release work](docs/roadmap.md).
 
 Alpha APIs may change. HTML collections currently render keyed DOM lists rather than virtualizing; platform escape hatches remain platform-specific. See [coverage](docs/coverage.md) for current boundaries.
 

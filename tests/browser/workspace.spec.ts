@@ -73,3 +73,45 @@ test('application back traverses history and forward restores the disposed model
   await page.goForward();
   await expect(page.getByTestId('task-notes')).toHaveValue('Forward restores a fresh model');
 });
+
+test('landmarks, portable links and wrapping controls fit narrow layouts', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/#/catalog');
+  await expect(page.getByRole('banner')).toBeVisible();
+  await expect(page.getByRole('main')).toBeVisible();
+  await expect(page.getByRole('contentinfo')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Source' })).toHaveAttribute('href', 'https://github.com/samuolis/domposable');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  const result = await new AxeBuilder({ page }).analyze();
+  expect(result.violations.map(v => v.id)).toEqual([]);
+});
+
+test('Navigation 3 recipe preserves drafts across pane changes and pop', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto('/#/recipes');
+  await page.getByTestId('recipe-open').click();
+  await page.getByTestId('recipe-draft').fill('Shared draft');
+  await page.getByRole('switch', { name: 'Allow three panes' }).check();
+  await page.getByRole('button', { name: 'Show supporting pane' }).click();
+  await expect(page.getByRole('heading', { name: 'Inbox', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Context', exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole('heading', { name: 'Inbox', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Recipe back' }).click();
+  await expect(page.getByTestId('recipe-draft')).toHaveValue('Shared draft');
+});
+
+test('path URLs support deep links, history and reload below a hosting base', async ({ page }) => {
+  await page.goto('/routes/tasks/welcome/');
+  await expect(page.getByTestId('task-notes')).toBeVisible();
+  await expect(page).toHaveURL(/\/routes\/tasks\/welcome\/$/);
+  await page.getByTestId('task-notes').fill('Path URL draft');
+  await page.reload();
+  await expect(page.getByTestId('task-notes')).toHaveValue('Path URL draft');
+  await page.getByRole('button', { name: 'Components', exact: false }).click();
+  await expect(page).toHaveURL(/\/routes\/catalog\/$/);
+  await page.goBack();
+  await expect(page.getByTestId('task-notes')).toHaveValue('Path URL draft');
+  await page.goForward();
+  await expect(page.getByRole('heading', { name: 'Component catalog' })).toBeVisible();
+});

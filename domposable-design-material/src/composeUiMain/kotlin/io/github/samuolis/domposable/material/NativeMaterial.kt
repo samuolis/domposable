@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.input.*
@@ -64,6 +65,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents = rememb
         },
         column = { props, modifier, content -> Column(modifier.toComposeModifier(), verticalArrangement = Arrangement.spacedBy(props.gap.value.dp), horizontalAlignment = props.alignment.horizontal()) { content() } },
         row = { props, modifier, content -> Row(modifier.toComposeModifier(), horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp), verticalAlignment = props.alignment.vertical()) { content() } },
+        flowRow = { props, modifier, content -> FlowRow(modifier.toComposeModifier(), horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp), verticalArrangement = Arrangement.spacedBy(props.gap.value.dp)) { content() } },
+        link = { props, modifier, _ -> val handler = LocalUriHandler.current; TextButton({ handler.openUri(props.href) }, modifier.toComposeModifier()) { Text(props.label) } },
         box = { props, modifier, content -> Box(modifier.toComposeModifier(), contentAlignment = props.alignment.box()) { content() } },
         lazyColumn = { props, modifier, _ -> LazyColumn(modifier.toComposeModifier(), verticalArrangement = Arrangement.spacedBy(props.gap.value.dp)) { items(props.items, key = { it.key }) { it.content() } } },
         lazyRow = { props, modifier, _ -> LazyRow(modifier.toComposeModifier(), horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp)) { items(props.items, key = { it.key }) { it.content() } } },

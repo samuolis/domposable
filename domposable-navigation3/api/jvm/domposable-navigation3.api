@@ -4,13 +4,40 @@ public final class io/github/samuolis/domposable/navigation3/ComposableSingleton
 	public final fun getLambda$1337057368$io_github_samuolis_domposable_domposable_navigation3 ()Lkotlin/jvm/functions/Function3;
 }
 
+public abstract interface class io/github/samuolis/domposable/navigation3/DomposableBrowserUrls {
+}
+
+public final class io/github/samuolis/domposable/navigation3/DomposableBrowserUrls$Hash : io/github/samuolis/domposable/navigation3/DomposableBrowserUrls {
+	public static final field $stable I
+	public static final field INSTANCE Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls$Hash;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/navigation3/DomposableBrowserUrls$Path : io/github/samuolis/domposable/navigation3/DomposableBrowserUrls {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls$Path;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls$Path;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls$Path;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBasePath ()Ljava/lang/String;
+	public final fun getTrailingSlash ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class io/github/samuolis/domposable/navigation3/DomposableRouteCodec {
 	public abstract fun decode (Ljava/lang/String;)Ljava/lang/Object;
 	public abstract fun encode (Ljava/lang/Object;)Ljava/lang/String;
 }
 
 public final class io/github/samuolis/domposable/navigation3/NativeNavigationKt {
-	public static final fun DomposableBrowserHistory (Landroidx/compose/runtime/snapshots/SnapshotStateList;Lio/github/samuolis/domposable/navigation3/DomposableRouteCodec;Landroidx/compose/runtime/Composer;I)V
+	public static final fun DomposableBrowserHistory (Landroidx/compose/runtime/snapshots/SnapshotStateList;Lio/github/samuolis/domposable/navigation3/DomposableRouteCodec;Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/github/samuolis/domposable/navigation3/NavigationKt {

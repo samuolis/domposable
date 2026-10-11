@@ -11,18 +11,36 @@ def output(*command):
 
 devices = json.loads(output("xcrun", "simctl", "list", "devicetypes", "-j"))["devicetypes"]
 runtimes = json.loads(output("xcrun", "simctl", "list", "runtimes", "-j"))["runtimes"]
-runtime = sorted((item for item in runtimes if item.get("isAvailable") and "iOS" in item["name"]), key=lambda item: tuple(map(int, item["version"].split("."))))[-1]
+runtime = sorted((item for item in runtimes if item.get("isAvailable") and item["version"] == "26.5" and "iOS" in item["name"]), key=lambda item: tuple(map(int, item["version"].split("."))))[-1]
 available = json.loads(output("xcrun", "simctl", "list", "devices", "available", "-j"))["devices"].get(runtime["identifier"], [])
-compatible = next((item for item in available if "iPad mini" in item["name"]), None) or next((item for item in available if "iPad Air 11" in item["name"]), None) or next((item for item in available if "iPad" in item["name"]), None)
-device = next(item for item in devices if item["identifier"] == compatible["deviceTypeIdentifier"]) if compatible else next(item for item in devices if "iPad Air" in item["name"])
+device = next(item for item in devices if item["identifier"] == "com.apple.CoreSimulator.SimDeviceType.iPad-mini-A17-Pro")
 identifier = output("xcrun", "simctl", "create", f"Domposable-{os.getpid()}", device["identifier"], runtime["identifier"]).strip()
+result = root / f"build/ios-tests-{os.getpid()}.xcresult"
 try:
+    subprocess.run(["xcrun", "simctl", "boot", identifier], check=True)
+    subprocess.run(["xcrun", "simctl", "bootstatus", identifier, "-b"], check=True, timeout=600)
+    subprocess.run(["xcrun", "simctl", "status_bar", identifier, "override", "--time", "09:41", "--batteryState", "charged", "--batteryLevel", "100", "--wifiMode", "active", "--wifiBars", "3"], check=True)
     subprocess.run([
         "xcodebuild", "test", "-project", "iosApp/DomposableDemo.xcodeproj", "-scheme", "DomposableDemo",
         "-configuration", "Debug", "-destination", f"id={identifier}",
-        "-derivedDataPath", f"build/ios-tests/{os.getpid()}", "-resultBundlePath", f"build/ios-tests-{os.getpid()}.xcresult",
+        "-derivedDataPath", f"build/ios-tests/{os.getpid()}", "-resultBundlePath", str(result),
         "CODE_SIGNING_ALLOWED=NO",
     ], cwd=root, check=True, timeout=1800)
 finally:
+    if result.exists():
+        exported = root / "build/ios-attachments"
+        subprocess.run(["xcrun", "xcresulttool", "export", "attachments", "--path", str(result), "--output-path", str(exported)], check=True)
+        destination = root / "build/screenshots/ios"
+        destination.mkdir(parents=True, exist_ok=True)
+        import shutil
+        for test in json.loads((exported/"manifest.json").read_text()):
+            for attachment in test["attachments"]:
+                name = attachment["suggestedHumanReadableName"]
+                if name.startswith("golden-"):
+                    name = name.removeprefix("golden-").removesuffix(".png")
+                    # Xcode can append a timestamp to human-readable names.
+                    name = name.split("_")[0]
+                    if name in {"tasks", "catalog", "recipes", "adaptive"}:
+                        shutil.copy2(exported/attachment["exportedFileName"], destination/f"{name}.png")
     subprocess.run(["xcrun", "simctl", "shutdown", identifier], capture_output=True)
     subprocess.run(["xcrun", "simctl", "delete", identifier], check=True)

@@ -14,5 +14,6 @@ include(
     ":domposable-foundation", ":domposable-ui", ":domposable-design-material",
     ":domposable-adaptive", ":domposable-screens", ":domposable-navigation3",
     ":domposable-lifecycle-viewmodel", ":domposable-ksp", ":demo", ":androidApp",
+    ":metro-example", ":kobweb-example",
     ":consumer-fixture", ":custom-provider-fixture",
 )
