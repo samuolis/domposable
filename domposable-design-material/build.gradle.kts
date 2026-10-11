@@ -39,8 +39,8 @@ kotlin {
                 api(libs.compose.ui)
                 api(libs.compose.foundation)
                 implementation(libs.material3)
-                implementation("io.coil-kt.coil3:coil-compose:3.6.2")
-                implementation("io.coil-kt.coil3:coil-network-ktor3:3.6.2")
+                implementation("io.coil-kt.coil3:coil-compose:3.6.3")
+                implementation("io.coil-kt.coil3:coil-network-ktor3:3.6.3")
             }
         }
         getByName("androidMain").dependsOn(composeUiMain)
