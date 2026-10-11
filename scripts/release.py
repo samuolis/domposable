@@ -96,7 +96,7 @@ def validate_state(state):
     if not isinstance(state.get("build"), int) or state["build"] < 1: raise RuntimeError("Invalid release build")
 
 def asset_names(state):
-    return [f"domposable-{state['version']}.apk", f"domposable-{state['version']}.ipa", "ios-simulator.app.zip", "ios-dsyms.zip", "website.zip", "maven-bundle.zip"]
+    return [f"domposable-{state['version']}.apk", "website.zip", "maven-bundle.zip"]
 
 def write_state(state):
     STATE.parent.mkdir(parents=True, exist_ok=True)

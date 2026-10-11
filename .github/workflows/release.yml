@@ -47,12 +47,10 @@ jobs:
           APP_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           GPG_KEY: ${{ secrets.MAVEN_SIGNING_KEY }}
           ANDROID_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          IOS_CERT: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
-          IOS_PROFILE: ${{ secrets.IOS_PROFILE_BASE64 }}
         run: |
           python - <<'PY'
           import os
-          required = ['APP_ID','APP_KEY','GPG_KEY','ANDROID_KEY','IOS_CERT','IOS_PROFILE','CENTRAL_USERNAME','CENTRAL_PASSWORD']
+          required = ['APP_ID','APP_KEY','GPG_KEY','ANDROID_KEY','CENTRAL_USERNAME','CENTRAL_PASSWORD']
           missing = [key for key in required if not os.environ.get(key)]
           if missing: raise SystemExit('Missing release configuration: ' + ', '.join(missing))
           PY
@@ -76,7 +74,7 @@ jobs:
       - name: Await candidate CI
         if: steps.candidate.outputs.resume != 'true'
         run: python scripts/release.py wait-ci
-      - name: Build signed demo downloads
+      - name: Build signed Android demo download
         if: steps.candidate.outputs.resume != 'true'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -84,10 +82,6 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256 }}
-          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
-          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
-          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
-          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
         run: python scripts/ci/sign_release.py
       - name: Build signed publications and released website
         if: steps.candidate.outputs.resume != 'true'

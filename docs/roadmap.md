@@ -16,3 +16,5 @@
 - Manually review native assistive technology, browser screen readers, keyboard/touch behavior, dark themes and real-device rendering.
 
 These are explicit remaining boundaries, not prerequisites for every application that wants to try an alpha. Additional platforms should be added through renderer/source-set implementations and published-consumer checks rather than a larger mandatory screen abstraction.
+
+Public demo downloads currently include Android APKs. iOS download/signing configuration is deferred; iOS library compilation and simulator regression checks remain required.

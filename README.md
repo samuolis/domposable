@@ -54,3 +54,5 @@ For local development, tests and release maintenance, see [CONTRIBUTING.md](CONT
 Alpha APIs may change. HTML collections currently render keyed DOM lists rather than virtualizing; platform escape hatches remain platform-specific. See [coverage](docs/coverage.md) for current boundaries.
 
 Apache-2.0. Copyright 2026 Samuolis.
+
+The [modular shopping example](https://samuolis.github.io/domposable/modular-demo/) has catalog and checkout API/implementation modules, MVI state and effects, entry-owned ViewModels, Metro injection and KSP destination declarations. These choices stay in the example; the library accepts your application architecture.

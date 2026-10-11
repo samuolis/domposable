@@ -11,6 +11,7 @@ navigation3Runtime = "1.1.7"
 lifecycle = "2.11.0"
 savedstate = "1.4.0"
 activity = "1.13.0"
+metro = "1.4.5"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -38,3 +39,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.metro)
 }
 
 kotlin {
@@ -24,6 +25,10 @@ kotlin {
         val commonMain = getByName("commonMain") {
             dependencies {
                 api(libs.compose.runtime)
+                api(project(":catalog-api"))
+                api(project(":checkout-api"))
+                implementation(project(":catalog-impl"))
+                implementation(project(":checkout-impl"))
                 implementation(compose.components.resources)
                 api(project(":domposable-design-material"))
                 api(project(":domposable-adaptive"))

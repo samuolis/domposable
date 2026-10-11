@@ -15,5 +15,12 @@ include(
     ":domposable-adaptive", ":domposable-screens", ":domposable-navigation3",
     ":domposable-lifecycle-viewmodel", ":domposable-ksp", ":demo", ":androidApp",
     ":metro-example", ":kobweb-example",
+    ":catalog-api", ":catalog-impl", ":checkout-api", ":checkout-impl",
     ":consumer-fixture", ":custom-provider-fixture",
 )
+
+// Unique Gradle identities avoid api/impl capability collisions between features.
+project(":catalog-api").projectDir = file("feature/catalog/api")
+project(":catalog-impl").projectDir = file("feature/catalog/impl")
+project(":checkout-api").projectDir = file("feature/checkout/api")
+project(":checkout-impl").projectDir = file("feature/checkout/impl")

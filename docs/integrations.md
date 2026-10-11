@@ -29,9 +29,11 @@ fun contactsDestination(graph: AppGraph) =
     }
 ```
 
-Apply `id("dev.zacsweers.metro") version "1.4.5"` in the **application module**. The library has no Metro dependency. Create an application graph once, then pass factories into destinations. Do not make an entry-owned model an application singleton. Use a portable `Saver` or a saveable-state provider for restorable model data; `retain` owns a live instance and does not serialize it.
+Apply `id("dev.zacsweers.metro") version "1.4.5"` in modules containing injected implementations, contributions or the application graph. The library has no Metro dependency. Create an application graph once, then pass factories into destinations. Do not make an entry-owned model an application singleton. Use a portable `Saver` or a saveable-state provider for restorable model data; `retain` owns a live instance and does not serialize it.
 
 Metro is a compiler plugin; Domposable's optional KSP processor generates registration factories. They have separate responsibilities. Check Metro's [compiler compatibility](https://zacsweers.github.io/metro/latest/compatibility/) and [multiplatform guide](https://zacsweers.github.io/metro/latest/multiplatform/) when changing Kotlin or declaring platform contributions.
+
+See the [modular storefront](modular-demo.md) for two feature API/implementation pairs, cross-module Metro contributions, assisted ViewModel creation and KSP-generated entries.
 
 ## Kobweb: the Compose HTML boundary
 
@@ -63,7 +65,7 @@ Use `DomposableColumn` for an embedded feature rather than the demo's full-windo
 | Manual/plain Compose state | Construct the model in the app; pass it to a screen | Shared demo and published-consumer fixture |
 | Metro | Pass an application graph's factory into an entry | Compiled six-target example; ownership test |
 | AndroidX ViewModel | Use the optional `domposable-lifecycle-viewmodel` adapter | JVM ownership tests; compiled published consumers |
-| MVI/reducer/store | Pass a store or values/callbacks from the app | API accepts ordinary arguments; no bundled store integration |
+| MVI/reducer/store | Pass a store or values/callbacks from the app | Modular shopping demo: StateFlow, reducers, ViewModels and checkout effects |
 | Koin/Dagger/custom DI | Resolve at the app boundary and supply a factory | Architecture-compatible; dedicated integrations not tested |
 | Kobweb | Render a JS feature in `@Page`; let its router own URLs | Page wrapper compiles; full export not tested |
 

@@ -34,6 +34,8 @@ class ReleaseGuardsTest(unittest.TestCase):
         self.git('commit', '-m', 'release')
         state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0-alpha01', 'build': 1, 'branch': 'release-candidate/test'}
         release.write_state(state); return state
+    def test_public_download_inventory_is_android_only(self):
+        self.assertEqual(release.asset_names(self.candidate()), ["domposable-0.1.0-alpha01.apk", "website.zip", "maven-bundle.zip"])
     def test_version_only_candidate(self):
         release.validate_candidate(self.candidate())
     def test_implementation_change_rejected(self):
