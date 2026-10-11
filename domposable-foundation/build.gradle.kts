@@ -14,7 +14,7 @@ kotlin {
     android {
         namespace = "io.github.samuolis.domposable.foundation"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
-        minSdk = 23
+        minSdk = 24
         withHostTest {}
     }
     jvm()
