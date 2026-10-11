@@ -2,9 +2,9 @@
 
 ## Release setup still pending
 
-- Finish the dedicated Apple Distribution certificate, register the demo bundle identifier and create its Ad Hoc profile. Decide whether the public IPA should embed the registered-device identifier, or whether public downloads should contain only the simulator app.
+- Public demo downloads contain the signed Android APK. Apple signing and public iOS downloads are deferred; iOS library compilation and simulator tests remain in CI.
 - Review and merge the expanded demo/visual-check PR, then deploy the updated bootstrap site through its approved workflow.
-- Run the first **Bump and release** action, verify Maven Central publication and signed downloads, and install the demo on a real registered device. The checked-in `alpha00` is still unpublished.
+- Run the first **Bump and release** action, verify Maven Central publication and signed downloads, and install the Android demo on a real device. The checked-in `alpha00` is still unpublished.
 - Keep dedicated credential backups secure and track publishing-token, certificate and developer-membership expiry dates privately.
 
 ## Product follow-ups

@@ -2,7 +2,8 @@ package example.shop.catalog.api
 
 import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableImageScale
-import io.github.samuolis.domposable.screens.DomposableScreenRegistryBuilder
+import io.github.samuolis.domposable.screens.DomposableDestination
+import io.github.samuolis.domposable.navigation3.DomposableNavigator
 import io.github.samuolis.domposable.ui.DomposableModifier
 
 /** Sample application scope marker; no dependency on a DI framework. */
@@ -37,5 +38,5 @@ data class ProductState(val product: ShopProduct?, val notice: String)
 /** The application supplies bundled artwork; features have no resource or platform dependency. */
 typealias ShopArtwork = @Composable (String, String, DomposableModifier, (() -> Unit)?, DomposableImageScale) -> Unit
 interface CatalogFeature {
-    fun register(builder: DomposableScreenRegistryBuilder, artwork: ShopArtwork, onBrowse: () -> Unit, onProduct: (String) -> Unit, onCart: () -> Unit, onArtworkLoaded: (() -> Unit)?)
+    fun entries(navigator: DomposableNavigator<ShopRoute>, artwork: ShopArtwork, onArtworkLoaded: (() -> Unit)? = null): List<DomposableDestination<*>>
 }

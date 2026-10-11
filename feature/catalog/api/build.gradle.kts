@@ -12,6 +12,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":domposable-ui"))
             api(project(":domposable-screens"))
+                api(project(":domposable-navigation3"))
         }
         commonTest.dependencies { implementation(kotlin("test")); implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0") }
     }

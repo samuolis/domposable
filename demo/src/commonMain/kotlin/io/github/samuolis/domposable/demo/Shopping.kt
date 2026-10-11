@@ -51,31 +51,25 @@ private val ShopTokens = DomposableTokens(
 
 @Composable
 fun ShoppingApp(graph: ShopGraph = remember { createShopGraph() }, initialRoute: ShopRoute = CatalogRoute.Home, browserUrls: DomposableBrowserUrls = DomposableBrowserUrls.Hash, onExit: (() -> Unit)? = null, onArtworkLoaded: (() -> Unit)? = null) {
-    val stack = rememberDomposableBackStack<ShopRoute>(initialRoute)
-    fun open(route: ShopRoute) { if (stack.last().route != route) stack.add(DomposableEntryScope(route)) }
-    fun href(route: ShopRoute): String = when (val urls = browserUrls) {
-        DomposableBrowserUrls.Hash -> "#${ShopCodec.encode(route)}"
-        is DomposableBrowserUrls.Path -> urls.basePath.trimEnd('/') + ShopCodec.encode(route) + if (urls.trailingSlash) "/" else ""
-    }
+    val navigator = rememberDomposableNavigator(initialRoute, ShopCodec, browserUrls)
+    fun href(route: ShopRoute): String = ShopCodec.urlFor(route, browserUrls)
     val cart by graph.cart.state.collectAsState()
     val artwork: ShopArtwork = remember { { file, description, modifier, onLoaded, scale -> ShopPhoto(file, description, modifier, onLoaded, scale) } }
-    val screens = remember(stack, graph, onArtworkLoaded) { domposableScreenRegistry {
-        graph.catalog.register(this, artwork, { open(CatalogRoute.Collection) }, { open(CatalogRoute.Product(it)) }, { open(CheckoutRoute.Cart) }, onArtworkLoaded)
-        graph.checkout.register(this, artwork, { open(CatalogRoute.Collection) }, { open(CheckoutRoute.Cart) }, { open(CheckoutRoute.Checkout) }, { open(CheckoutRoute.Confirmation) })
-        register(CatalogRoute.Missing::class) { UnavailableScreen(route.path) { open(CatalogRoute.Home) } }
-    } }
+    val entries = remember(navigator, graph, artwork, onArtworkLoaded) {
+        graph.catalog.entries(navigator, artwork, onArtworkLoaded) + graph.checkout.entries(navigator, artwork) +
+            DomposableDestination(CatalogRoute.Missing::class) { UnavailableScreen(route.path) { navigator.navigate(CatalogRoute.Home) } }
+    }
     DomposableTheme(ShopTokens, rememberDomposableMaterialComponents()) {
-        DomposableBrowserHistory(stack, ShopCodec, browserUrls)
         DomposableScaffold(topBar = {
             DomposableSurface(DomposableSurfaceProps(ShopTokens.colors.primary), DomposableModifier.fillMaxWidth()) {
                 DomposableText("Everyday essentials. Free delivery over €100.", DomposableModifier.padding(8.dp), style = DomposableTextStyle.Label, color = ShopTokens.colors.onPrimary)
             }
             DomposableFlowRow(DomposableModifier.padding(16.dp).fillMaxWidth(), gap = 16.dp) {
                 DomposableText("FIELDWORK", style = DomposableTextStyle.Title, headingLevel = 1)
-                val selected = when (stack.last().route) { CatalogRoute.Home -> 0; CheckoutRoute.Cart, CheckoutRoute.Checkout, CheckoutRoute.Confirmation -> 2; else -> 1 }
+                val selected = when (navigator.currentRoute) { CatalogRoute.Home -> 0; CheckoutRoute.Cart, CheckoutRoute.Checkout, CheckoutRoute.Confirmation -> 2; else -> 1 }
                 DomposableNavigationBar(DomposableNavigationBarProps(
                     listOf(DomposableNavigationItem("Discover", href = href(CatalogRoute.Home)), DomposableNavigationItem("Shop all", href = href(CatalogRoute.Collection)), DomposableNavigationItem("Bag (${cart.count})", href = href(CheckoutRoute.Cart))),
-                    selected, { open(when (it) { 0 -> CatalogRoute.Home; 1 -> CatalogRoute.Collection; else -> CheckoutRoute.Cart }) },
+                    selected, { navigator.navigate(when (it) { 0 -> CatalogRoute.Home; 1 -> CatalogRoute.Collection; else -> CheckoutRoute.Cart }) },
                 ))
             }
         }, bottomBar = {
@@ -88,7 +82,7 @@ fun ShoppingApp(graph: ShopGraph = remember { createShopGraph() }, initialRoute:
                 }
             }
         }) {
-            DomposableNavigation3Host(stack, screens, contentModifier.fillMaxWidth().fillMaxHeight()) { if (stack.size > 1) stack.removeLast() }
+            DomposableNavHost(navigator, entries, contentModifier.fillMaxWidth().fillMaxHeight())
         }
     }
 }

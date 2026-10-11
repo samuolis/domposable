@@ -58,7 +58,6 @@ fun StorefrontScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, art
 }
 
 @Composable
-@DomposableScreen(route = CatalogRoute.Product::class)
 fun ProductScreen(state: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, onBrowse: () -> Unit, onCart: () -> Unit) {
     val product = state.product
     DomposableColumn(DomposableModifier.fillMaxWidth().fillMaxHeight().verticalScroll().padding(24.dp), gap = 16.dp) {
@@ -80,10 +79,8 @@ fun ProductScreen(state: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, 
 }
 
 
-@Composable @DomposableScreen(route = CatalogRoute.Home::class)
-fun DiscoverScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onProduct: (String) -> Unit, onArtworkLoaded: (() -> Unit)?) =
+@Composable fun DiscoverScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onProduct: (String) -> Unit, onArtworkLoaded: (() -> Unit)?) =
     StorefrontScreen(state, onAction, artwork, true, onBrowse, onProduct, onArtworkLoaded)
 
-@Composable @DomposableScreen(route = CatalogRoute.Collection::class)
-fun CollectionScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onProduct: (String) -> Unit) =
+@Composable fun CollectionScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onProduct: (String) -> Unit) =
     StorefrontScreen(state, onAction, artwork, false, onBrowse, onProduct)

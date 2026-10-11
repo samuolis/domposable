@@ -14,10 +14,12 @@ open annotation class io.github.samuolis.domposable.foundation/DomposableCompone
 }
 
 open annotation class io.github.samuolis.domposable.foundation/DomposableScreen : kotlin/Annotation { // io.github.samuolis.domposable.foundation/DomposableScreen|null[0]
-    constructor <init>(kotlin.reflect/KClass<*>) // io.github.samuolis.domposable.foundation/DomposableScreen.<init>|<init>(kotlin.reflect.KClass<*>){}[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin/Boolean = ...) // io.github.samuolis.domposable.foundation/DomposableScreen.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.Boolean){}[0]
 
     final val route // io.github.samuolis.domposable.foundation/DomposableScreen.route|{}route[0]
         final fun <get-route>(): kotlin.reflect/KClass<*> // io.github.samuolis.domposable.foundation/DomposableScreen.route.<get-route>|<get-route>(){}[0]
+    final val viewModel // io.github.samuolis.domposable.foundation/DomposableScreen.viewModel|{}viewModel[0]
+        final fun <get-viewModel>(): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableScreen.viewModel.<get-viewModel>|<get-viewModel>(){}[0]
 }
 
 final enum class io.github.samuolis.domposable.foundation/DomposableAlignment : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableAlignment> { // io.github.samuolis.domposable.foundation/DomposableAlignment|null[0]

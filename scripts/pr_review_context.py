@@ -123,9 +123,12 @@ def validate_description(body: str, changed_paths: Iterable[str]) -> list[str]:
     visual = any(p.startswith(("demo/src/", "domposable-design-material/src/")) and p.endswith((".kt", ".css", ".html", ".png", ".svg")) for p in paths)
     if visual:
         evidence = section(body, "Visual evidence") or ""
-        images = re.findall(r"!\[([^\]]+)\]\((https://raw\.githubusercontent\.com/samuolis/domposable/[0-9a-f]{40}/[^)]+\.png)\)", evidence)
+        image_urls = re.findall(r"!\[([^\]]+)\]\((https://[^)]+)\)", evidence)
+        immutable_git = r"https://raw\.githubusercontent\.com/samuolis/domposable/[0-9a-f]{40}/[^)]+\.png"
+        addressed_asset = r"https://github\.com/samuolis/domposable/releases/download/visual-evidence(?:-[1-9][0-9]*)?/pr-[1-9][0-9]*-run-[1-9][0-9]*-(?:android|desktop|ios|dom|wasm)-[a-z0-9-]+-[0-9a-f]{64}\.png"
+        images = [(label, url) for label, url in image_urls if re.fullmatch(immutable_git, url) or re.fullmatch(addressed_asset, url)]
         if not images:
-            errors.append("Visual changes need descriptive inline PNG previews at immutable repository URLs under `## Visual evidence`; artifact links alone are insufficient.")
+            errors.append("Visual changes need descriptive inline PNG previews at content-addressed release asset URLs (or legacy immutable commit URLs) under `## Visual evidence`; artifact links alone are insufficient.")
     verification = section(body, "Verification")
     if not verification or not re.search(r"^\s*[-*]\s+\S", verification, re.MULTILINE):
         errors.append("Include relevant validation results under `## Verification`.")

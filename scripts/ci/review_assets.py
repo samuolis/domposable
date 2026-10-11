@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Publish CI PNG comparisons to an isolated immutable Git ref; never execute artifact code.
+"""Publish content-addressed CI PNG comparisons as GitHub release assets.
 
 Requires gh authenticated for this repository. Prints Markdown to paste into Visual evidence.
 """
 from __future__ import annotations
 import argparse
 import base64
+import hashlib
 from io import BytesIO
 import json
 from pathlib import Path
@@ -17,6 +18,7 @@ from urllib.error import HTTPError
 from PIL import Image, ImageChops, ImageDraw
 
 REPO = 'samuolis/domposable'
+ASSET_TAG = 'visual-evidence'
 MAX_IMAGE = 20 * 1024 * 1024
 Image.MAX_IMAGE_PIXELS = 20_000_000
 
@@ -54,6 +56,67 @@ def compare(before, after):
         highlight = Image.new('RGB', after.size, '#ed008c')
     return panel([before, highlight, after], ['Main', 'Pixel difference', 'PR'])
 
+def asset_name(pr: int, run: int, platform: str, scenario: str, data: bytes) -> str:
+    if pr <= 0 or run <= 0 or platform not in {'android', 'desktop', 'ios', 'dom', 'wasm'} or not re.fullmatch(r'[a-z0-9-]+', scenario):
+        raise ValueError('Invalid review asset identity')
+    return f'pr-{pr}-run-{run}-{platform}-{scenario}-{hashlib.sha256(data).hexdigest()}.png'
+
+def release_assets(release_id):
+    assets = []
+    for page in range(1, 12):
+        batch = api(f'releases/{release_id}/assets?per_page=100&page={page}')
+        assets.extend(batch)
+        if len(batch) < 100: return assets
+    raise ValueError('Unexpected release asset inventory')
+
+def evidence_bucket(count):
+    # Each bucket holds up to GitHub's 1,000-asset limit. It is never marked latest.
+    for index in range(1, 101):
+        tag = ASSET_TAG if index == 1 else f'{ASSET_TAG}-{index}'
+        result = subprocess.run(['gh', 'api', f'repos/{REPO}/releases/tags/{tag}'], capture_output=True)
+        if result.returncode:
+            if 'HTTP 404' not in result.stderr.decode():
+                raise RuntimeError(result.stderr.decode())
+            release = api('releases', {
+                'tag_name': tag, 'target_commitish': 'main', 'name': f'Visual review assets {index}',
+                'prerelease': True, 'make_latest': 'false',
+                'body': 'Screenshot comparisons for pull request review. These are evidence assets, not a Domposable library version. Filenames include the PR, CI run and SHA-256 of the image. Reviewed golden inputs remain in main; full captures are retained in Actions artifacts.',
+            })
+            return release, []
+        release = json.loads(result.stdout)
+        assets = release_assets(release['id'])
+        if not release.get('immutable') and len(assets) + count <= 1000:
+            return release, assets
+    raise ValueError('Visual evidence buckets are full')
+
+def publish_images(files, pr: int, run: int):
+    release, existing = evidence_bucket(len(files))
+    by_name = {asset['name']: asset for asset in existing}
+    lines = []
+    with tempfile.TemporaryDirectory(prefix='domposable-review-assets-') as directory:
+        for platform, scenario, data, label in files:
+            png(data)
+            name = asset_name(pr, run, platform, scenario, data)
+            digest = 'sha256:' + hashlib.sha256(data).hexdigest()
+            asset = by_name.get(name)
+            if asset is None:
+                path = Path(directory) / name
+                path.write_bytes(data)
+                # No --clobber: a previously published image is never overwritten.
+                subprocess.run(['gh', 'release', 'upload', release['tag_name'], str(path), '--repo', REPO], check=True)
+                by_name = {asset['name']: asset for asset in release_assets(release['id'])}
+                asset = by_name[name]
+            if asset.get('digest') not in (None, digest):
+                raise ValueError('Published asset digest does not match its filename')
+            url = asset['browser_download_url']
+            expected = f'https://github.com/{REPO}/releases/download/{release["tag_name"]}/{name}'
+            if url != expected: raise ValueError('Unexpected release asset URL')
+            with urlopen(url, timeout=30) as response: downloaded = response.read(MAX_IMAGE + 1)
+            if downloaded != data: raise ValueError('Published image bytes differ from reviewed evidence')
+            png(downloaded)
+            lines.append(f'![{label}]({url})')
+    return '\n\n'.join(lines) + '\n'
+
 def main():
     parser = argparse.ArgumentParser(); parser.add_argument('--run', required=True, type=int); parser.add_argument('--pr', required=True, type=int)
     args = parser.parse_args()
@@ -89,17 +152,8 @@ def main():
                     data = compare(before, after); label = f'{platform} {name}: Main | Pixel difference | PR'
                 else:
                     data = panel([after], [f'Added: {platform} {name}']); label = f'{platform} {name}: added preview'
-                blob = api('git/blobs', {'content':base64.b64encode(data).decode(), 'encoding':'base64'})
-                files.append((f'previews/{platform}/{name}.png', blob['sha'], label))
-    tree = api('git/trees', {'tree':[{'path':path,'mode':'100644','type':'blob','sha':sha} for path,sha,_ in files]})
-    commit = api('git/commits', {'message':f'Visual review for PR #{args.pr}, CI {args.run}, head {run["head_sha"]}', 'tree':tree['sha'], 'parents':[]})
-    api('git/refs', {'ref':f'refs/heads/visual-review/pr-{args.pr}/run-{args.run}', 'sha':commit['sha']})
-    lines = []
-    for path, _, label in files:
-        url = f'https://raw.githubusercontent.com/{REPO}/{commit["sha"]}/{path}'
-        with urlopen(url,timeout=30) as response: png(response.read(MAX_IMAGE+1))
-        lines.append(f'![{label}]({url})')
-    markdown = '\n\n'.join(lines) + '\n'
+                files.append((platform, name, data, label))
+    markdown = publish_images(files, args.pr, args.run)
     Path('build').mkdir(exist_ok=True); Path('build/visual-review.md').write_text(markdown)
     print(markdown)
 

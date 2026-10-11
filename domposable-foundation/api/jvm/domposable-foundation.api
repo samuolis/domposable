@@ -128,6 +128,7 @@ public final class io/github/samuolis/domposable/foundation/DomposableOrientatio
 
 public abstract interface annotation class io/github/samuolis/domposable/foundation/DomposableScreen : java/lang/annotation/Annotation {
 	public abstract fun route ()Ljava/lang/Class;
+	public abstract fun viewModel ()Z
 }
 
 public abstract interface class io/github/samuolis/domposable/foundation/DomposableScreenState {

@@ -14,7 +14,10 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Section
 
 @Composable
-internal actual fun <R : Any> PlatformNavigation3Display(entries: List<NavEntry<DomposableEntryScope<R>>>, modifier: DomposableModifier, visibleEntries: Int, onBack: () -> Unit) {
+actual fun <T : Any> DomposableNavDisplay(entries: List<NavEntry<T>>, modifier: DomposableModifier, visibleEntries: Int, onBack: () -> Unit) {
+    require(entries.isNotEmpty()) { "Navigation requires at least one entry" }
+    require(visibleEntries > 0)
+    require(entries.map { it.contentKey }.distinct().size == entries.size) { "Navigation content keys must be unique" }
     DomposableHtmlModifiers(modifier) { Div(attrs = { domposableAttributes(modifier); style { property("display", "flex"); property("height", "100%") } }) {
         entries.takeLast(visibleEntries).forEach { entry -> key(entry.contentKey) {
             Section(attrs = { attr("data-entry-id", entry.contentKey.toString()); style { property("flex", "1"); property("min-width", "0"); property("overflow", "auto") } }) { entry.Content() }
@@ -59,12 +62,7 @@ private class BrowserBinding<R : Any>(val stack: SnapshotStateList<DomposableEnt
         is DomposableBrowserUrls.Path -> window.location.pathname.removePrefix(mode.basePath.trimEnd('/')).ifEmpty { "/" }.trimEnd('/').ifEmpty { "/" }
     }
     private fun url(route: R): String {
-        val path = codec.encode(route)
-        require(path.startsWith("/") && !path.startsWith("//")) { "Encode an absolute application path" }
-        return when (val mode = urls) {
-            DomposableBrowserUrls.Hash -> "#$path"
-            is DomposableBrowserUrls.Path -> mode.basePath.trimEnd('/') + if (mode.trailingSlash) path.trimEnd('/') + "/" else path
-        }
+        return codec.urlFor(route, urls)
     }
     private val snapshots = mutableMapOf<String, String>()
     private var currentId = stack.last().id

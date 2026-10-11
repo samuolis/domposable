@@ -19,7 +19,6 @@ private fun OrderSummary(state: CartState) {
 }
 
 @Composable
-@DomposableScreen(route = CheckoutRoute.Cart::class)
 fun CartScreen(state: CartState, onAction: (CheckoutAction) -> Unit, artwork: ShopArtwork, onBrowse: () -> Unit, onCheckout: () -> Unit) {
     DomposableColumn(DomposableModifier.fillMaxWidth().fillMaxHeight().verticalScroll().padding(24.dp), gap = 16.dp) {
         DomposableText("Your bag", style = DomposableTextStyle.Title, headingLevel = 2)
@@ -48,7 +47,6 @@ fun CartScreen(state: CartState, onAction: (CheckoutAction) -> Unit, artwork: Sh
 }
 
 @Composable
-@DomposableScreen(route = CheckoutRoute.Checkout::class)
 fun CheckoutScreen(state: CartState, onAction: (CheckoutAction) -> Unit, onCart: () -> Unit) {
     DomposableColumn(DomposableModifier.fillMaxWidth().fillMaxHeight().verticalScroll().padding(24.dp), gap = 16.dp) {
         DomposableText("Checkout", style = DomposableTextStyle.Title, headingLevel = 2)
@@ -66,7 +64,6 @@ fun CheckoutScreen(state: CartState, onAction: (CheckoutAction) -> Unit, onCart:
 }
 
 @Composable
-@DomposableScreen(route = CheckoutRoute.Confirmation::class)
 fun ConfirmationScreen(order: ShopOrder?, onBrowse: () -> Unit) {
     DomposableColumn(DomposableModifier.fillMaxWidth().padding(24.dp), gap = 16.dp) {
         DomposableText(if (order == null) "No order to show" else "Thanks for exploring Fieldwork.", style = DomposableTextStyle.Title, headingLevel = 2)

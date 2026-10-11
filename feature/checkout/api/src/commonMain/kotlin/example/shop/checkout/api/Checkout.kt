@@ -1,7 +1,8 @@
 package example.shop.checkout.api
 
 import example.shop.catalog.api.*
-import io.github.samuolis.domposable.screens.DomposableScreenRegistryBuilder
+import io.github.samuolis.domposable.screens.DomposableDestination
+import io.github.samuolis.domposable.navigation3.DomposableNavigator
 import kotlinx.coroutines.flow.StateFlow
 
 sealed interface CheckoutRoute : ShopRoute {
@@ -36,5 +37,5 @@ interface ShoppingCart {
     fun dispatch(action: CheckoutAction)
 }
 interface CheckoutFeature {
-    fun register(builder: DomposableScreenRegistryBuilder, artwork: ShopArtwork, onBrowse: () -> Unit, onCart: () -> Unit, onCheckout: () -> Unit, onOrdered: () -> Unit)
+    fun entries(navigator: DomposableNavigator<ShopRoute>, artwork: ShopArtwork): List<DomposableDestination<*>>
 }

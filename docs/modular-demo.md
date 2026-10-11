@@ -1,6 +1,6 @@
 # A modular app with MVI, ViewModel and Metro
 
-Fieldwork now has **two feature teams**, catalog and checkout. Each owns an API module and an implementation module. The demo application assembles them with Metro, while Domposable's optional KSP processor declares Navigation 3 destinations. Android, iOS, desktop, semantic HTML and Wasm run the same feature implementations.
+Fieldwork now has **two feature teams**, catalog and checkout. Each owns an API module and an implementation module. The demo application assembles them with Metro, while Domposable's optional KSP processor generates typed destinations and feature entry lists. Android, iOS, desktop, semantic HTML and Wasm run the same feature implementations.
 
 ![Application and feature module boundaries](assets/examples/module-boundaries.svg)
 
@@ -8,30 +8,27 @@ Fieldwork now has **two feature teams**, catalog and checkout. Each owns an API 
 
 | Gradle module | Source directory | Owns |
 | --- | --- | --- |
-| `:catalog-api` | `feature/catalog/api` | Product contracts, catalog routes, immutable state/actions and the feature registration interface |
+| `:catalog-api` | `feature/catalog/api` | Product contracts, catalog routes, immutable state/actions and the feature entry interface |
 | `:catalog-impl` | `feature/catalog/impl` | Catalog repository, reducers, ViewModels, screens, Metro contributions and generated entries |
-| `:checkout-api` | `feature/checkout/api` | Cart/checkout routes, state/actions, session contract and feature registration interface |
+| `:checkout-api` | `feature/checkout/api` | Cart/checkout routes, state/actions, session contract and feature entry interface |
 | `:checkout-impl` | `feature/checkout/impl` | Cart reducer, session implementation, entry ViewModels, checkout effects and screens |
-| `:demo` | `demo` | Application graph, theme, artwork, shell, URL codec and navigation callbacks |
+| `:demo` | `demo` | Application graph, theme, artwork, shell, URL codec and navigator |
 
-The API modules depend on the UI and screen contracts. They have **no Metro dependency or ViewModel base class**. Catalog implementation consumes the checkout API to add products; checkout implementation consumes the catalog API for product data. Implementation modules never depend on each other or on the application.
+The API modules depend on the UI, screen and optional navigation contracts. They have **no Metro dependency or ViewModel base class**. Catalog implementation consumes the checkout API to add products; checkout implementation consumes the catalog API for product data. Implementation modules never depend on each other or on the application.
 
 Gradle uses distinct names such as `catalog-api` and `checkout-api` even though their directories end in `api`. This prevents artifact capability and Kotlin module identity collisions. These are application sample modules; they are not part of Domposable's Maven publication.
 
 ## 1. Define a feature API
 
-Expose the values and callbacks a feature needs, together with an explicit registration boundary:
+Expose the feature's entry list and ordinary values/actions. The storefront chooses the optional navigator:
 
 ```kotlin
 interface CatalogFeature {
-    fun register(
-        builder: DomposableScreenRegistryBuilder,
+    fun entries(
+        navigator: DomposableNavigator<ShopRoute>,
         artwork: ShopArtwork,
-        onBrowse: () -> Unit,
-        onProduct: (String) -> Unit,
-        onCart: () -> Unit,
-        onArtworkLoaded: (() -> Unit)?,
-    )
+        onArtworkLoaded: (() -> Unit)? = null,
+    ): List<DomposableDestination<*>>
 }
 
 sealed interface CatalogAction {
@@ -43,7 +40,7 @@ sealed interface CatalogAction {
 }
 ```
 
-`ShopArtwork` is a composable function supplied by the application. The features request a filename, accessible description, size and image scale; only the app knows its Compose resource bundle. Navigation is also supplied as callbacks, so features do not reference the app's router or another feature's implementation.
+`ShopArtwork` is a composable function supplied by the application. The features request a filename, accessible description, size and image scale; only the app knows its Compose resource bundle. Entry wrappers receive the sample navigator and navigate using route API types. Their UI composables still receive callbacks. A feature choosing another router can expose callbacks instead; the library does not require this sample interface.
 
 ## 2. Implement MVI behind the API
 
@@ -67,48 +64,62 @@ class CatalogViewModel(
 }
 ```
 
-The cart reducer uses integer cents, rejects unknown product IDs, caps each quantity at 20, calculates delivery, validates checkout and clears personal details after a successful demo order. `CheckoutViewModel` exposes `CheckoutEffect.OrderPlaced` separately from persistent state. Its destination collects that one-off effect and invokes the application navigation callback. Invalid submissions update validation state without navigating.
+The cart reducer uses integer cents, rejects unknown product IDs, caps each quantity at 20, calculates delivery, validates checkout and clears personal details after a successful demo order. `CheckoutViewModel` exposes `CheckoutEffect.OrderPlaced` separately from persistent state. Its destination collects that one-off effect and navigates to the confirmation route. Invalid submissions update validation state without navigating.
 
 This MVI protocol belongs to the **sample application**. A Domposable screen still accepts normal values and callbacks. The task playground and small published-consumer examples continue to show plain Compose state.
 
 ## 3. Declare entries with KSP
 
-Apply the Domposable processor to each implementation module's common metadata. The feature declares a regular composable:
+Apply the Domposable processor to each implementation module's common metadata. Annotate the entry wrapper:
 
 ```kotlin
 @Composable
-@DomposableScreen(route = CatalogRoute.Collection::class)
-fun CollectionScreen(
-    state: CatalogState,
-    onAction: (CatalogAction) -> Unit,
+@DomposableScreen(route = CatalogRoute.Collection::class, viewModel = true)
+internal fun Collection(
+    newCatalog: () -> CatalogViewModel,
+    navigator: DomposableNavigator<ShopRoute>,
     artwork: ShopArtwork,
-    onBrowse: () -> Unit,
-    onProduct: (String) -> Unit,
 ) {
-    StorefrontScreen(state, onAction, artwork, false, onBrowse, onProduct)
+    val model = viewModel { newCatalog() }
+    val state by model.state.collectAsState()
+    val cart by model.cart.state.collectAsState()
+    CollectionScreen(
+        state.copy(notice = cart.notice), model::dispatch, artwork,
+        { navigator.navigate(CatalogRoute.Collection) },
+        { navigator.navigate(CatalogRoute.Product(it)) },
+    )
 }
 ```
 
-KSP generates `collectionScreenDestination(render)` in `example.shop.catalog.impl.generated`. Parameters remain explicit: the processor does not construct a model or choose DI. The feature implementation registers that generated destination and installs the optional ViewModel owner:
+KSP generates `collectionEntry(newCatalog, navigator, artwork)`, installs the entry's optional ViewModel owner and supplies route parameters when present. It also generates `domposableEntries(...)` containing every annotated entry in that package. The Metro feature implementation supplies its dependencies once:
 
 ```kotlin
-builder.register(collectionScreenDestination {
-    DomposableViewModelEntry(this) {
-        val model = viewModel { newCatalog() }
-        val state by model.state.collectAsState()
-        val cart by model.cart.state.collectAsState()
-        CollectionScreen(
-            state.copy(notice = cart.notice),
-            model::dispatch,
-            artwork,
-            onBrowse,
-            onProduct,
-        )
-    }
-})
+override fun entries(
+    navigator: DomposableNavigator<ShopRoute>,
+    artwork: ShopArtwork,
+    onArtworkLoaded: (() -> Unit)?,
+) = domposableEntries(
+    newCatalog = newCatalog,
+    newProduct = newProduct,
+    navigator = navigator,
+    artwork = artwork,
+    onArtworkLoaded = onArtworkLoaded,
+)
 ```
 
-`newCatalog` is an injected `() -> CatalogViewModel`. The ViewModel store belongs to this navigation entry, so recomposition reuses its model and removing the entry clears it. Discover and Collection receive different ViewModels, preserving their own filters when returning to an existing entry. They share the same shopping session.
+The app combines both feature lists; there is no application registry:
+
+```kotlin
+val navigator = rememberDomposableNavigator<ShopRoute>(CatalogRoute.Home, ShopCodec, browserUrls)
+val entries = remember(graph, navigator, artwork) {
+    graph.catalog.entries(navigator, artwork) + graph.checkout.entries(navigator, artwork)
+}
+DomposableNavHost(navigator, entries)
+```
+
+`newCatalog` is an injected `() -> CatalogViewModel`. The ViewModel store belongs to its entry, so recomposition reuses the model and removing the entry clears it. Discover and Collection have different ViewModels and preserve their filters when returning to an existing entry. They share the shopping session. Product gets its route ID automatically and passes it to Metro's assisted factory.
+
+KSP does not infer MVI or DI. Without KSP, declare `DomposableDestination` or register route types directly. Without the navigator, keep your own stack. [Direct Navigation 3 and manual registry examples](screens.md) show both alternatives.
 
 ## 4. Aggregate Metro contributions in the app
 
@@ -154,6 +165,6 @@ The graph and cart are an in-memory demo session. Resize and navigation preserve
 ./gradlew :demo:linkDebugFrameworkIosSimulatorArm64
 ```
 
-CI compiles these modules through every demo target, checks reducer behavior and session independence, and runs the same browser checkout and reviewed platform screenshots. Because KSP-generated factories are used in registration, compilation also verifies their generated names and route types.
+CI compiles these modules through every demo target, checks reducer behavior and session independence, and runs the same browser checkout and reviewed platform screenshots. Because KSP-generated factories and aggregated lists are used by feature implementations, compilation also verifies their generated names and route types.
 
 [Browse the feature modules](https://github.com/samuolis/domposable/tree/main/feature) · [Metro aggregation](https://zacsweers.github.io/metro/latest/aggregation/) · [Optional library integrations](integrations.md)

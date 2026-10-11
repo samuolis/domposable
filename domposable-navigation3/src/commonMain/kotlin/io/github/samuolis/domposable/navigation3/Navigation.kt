@@ -23,8 +23,18 @@ fun <R : Any> DomposableNavigation3Host(
     visibleEntries: Int = 1,
     onBack: () -> Unit,
 ) {
+    val decorated = rememberDomposableNavEntries(backStack, screens)
+    DomposableNavDisplay(decorated, modifier, visibleEntries, onBack)
+}
+
+/** Optional entry ownership adapter. Pass the result to native NavDisplay or DomposableNavDisplay. */
+@Composable
+fun <R : Any> rememberDomposableNavEntries(
+    backStack: List<DomposableEntryScope<R>>,
+    screens: DomposableScreenRegistry,
+    entryDecorators: List<NavEntryDecorator<DomposableEntryScope<R>>> = emptyList(),
+): List<NavEntry<DomposableEntryScope<R>>> {
     require(backStack.isNotEmpty()) { "Navigation requires at least one entry" }
-    require(visibleEntries > 0)
     require(backStack.map { it.id }.distinct().size == backStack.size) { "Navigation entry IDs must be unique" }
     val retained = remember { mutableSetOf<DomposableEntryScope<R>>() }
     val currentStack by rememberUpdatedState(backStack.toList())
@@ -41,14 +51,18 @@ fun <R : Any> DomposableNavigation3Host(
         onDispose { retained.toList().forEach { it.moveTo(DomposableEntryLifecycle.Destroyed) }; retained.clear() }
     }
     val raw = backStack.map { scope -> NavEntry(scope, contentKey = scope.id) { screens.Render(it) } }
-    val decorated = rememberDecoratedNavEntries(raw, listOf(decorator))
-    PlatformNavigation3Display(decorated, modifier, visibleEntries, onBack)
+    return rememberDecoratedNavEntries(raw, listOf(decorator) + entryDecorators)
 }
 
+/**
+ * Displays ordinary Navigation 3 entries. The caller owns the stack, entry provider and decorators.
+ * Native targets delegate to NavDisplay; Kotlin/JS composes directly into semantic HTML.
+ * Entries must already be decorated when ownership/saveable adapters are required.
+ */
 @Composable
-internal expect fun <R : Any> PlatformNavigation3Display(
-    entries: List<NavEntry<DomposableEntryScope<R>>>, modifier: DomposableModifier,
-    visibleEntries: Int, onBack: () -> Unit,
+expect fun <T : Any> DomposableNavDisplay(
+    entries: List<NavEntry<T>>, modifier: DomposableModifier = DomposableModifier,
+    visibleEntries: Int = 1, onBack: () -> Unit,
 )
 
 sealed interface DomposableBrowserUrls {

@@ -27,6 +27,7 @@ nav:
       - Component coverage: coverage.md
   - Examples:
       - Shopping app: shopping.md
+      - Modular MVI and Metro app: modular-demo.md
       - Compare HTML and Wasm: compare.md
       - Playground: https://samuolis.github.io/domposable/demo/
       - Storefront: https://samuolis.github.io/domposable/shop/
