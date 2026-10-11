@@ -31,7 +31,7 @@ Your application supplies its models and dependencies. Plain Compose state, MVVM
 | `domposable-lifecycle-viewmodel` | Optional AndroidX ownership and MVI state/action helper |
 | `domposable-ksp` | Optional typed entries and feature entry lists |
 
-Coordinates: `io.github.samuolis.domposable:<artifact>:<released version>`. Choose the published version from [Releases](https://github.com/samuolis/domposable/releases). `0.1.0-alpha00` is reserved for the unpublished bootstrap baseline.
+Coordinates: `io.github.samuolis.domposable:<artifact>:<released version>`. Choose the published version from [Releases](https://github.com/samuolis/domposable/releases). `0.0.0` is reserved for the unpublished bootstrap baseline.
 
 [![CI](https://github.com/samuolis/domposable/actions/workflows/ci.yml/badge.svg)](https://github.com/samuolis/domposable/actions/workflows/ci.yml)
 

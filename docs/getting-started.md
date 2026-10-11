@@ -1,6 +1,6 @@
 # Getting started
 
-Add `mavenCentral()` and `google()` to your repositories. Use the current version from [Releases](https://github.com/samuolis/domposable/releases); `alpha00` is an unpublished development baseline.
+Add `mavenCentral()` and `google()` to your repositories. Use the current version from [Releases](https://github.com/samuolis/domposable/releases); `0.0.0` is an unpublished development baseline.
 
 ```kotlin
 commonMain.dependencies {

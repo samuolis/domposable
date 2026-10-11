@@ -37,4 +37,4 @@ Screens return `Unit`. Pass plain state and callbacks, a model, a ViewModel or a
 
 The [Metro example](integrations.md) compiles on all six targets. The Kobweb example checks the Compose HTML page boundary; a complete export is a documented follow-up. See the [compatibility table](compatibility.md) for tested versions and platform differences.
 
-**Alpha:** APIs are evolving. Use a published version from [Releases](https://github.com/samuolis/domposable/releases) for Maven dependencies and the signed APK demo. `0.1.0-alpha00` is the unpublished bootstrap baseline. The repository also includes runnable HTML, Wasm and native examples.
+**Before 1.0:** APIs may change in minor releases. Use a published version from [Releases](https://github.com/samuolis/domposable/releases) for Maven dependencies and the signed APK demo. `0.0.0` is the unpublished bootstrap baseline. The repository also includes runnable HTML, Wasm and native examples.

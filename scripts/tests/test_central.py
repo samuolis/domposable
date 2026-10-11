@@ -11,7 +11,7 @@ class CentralRecoveryTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(); self.assets = Path(self.temp.name)
         (self.assets / 'maven-bundle.zip').write_bytes(b'preserved bundle')
-        self.state = {'version':'0.1.0-alpha01', 'bundle_sha256':hashlib.sha256(b'preserved bundle').hexdigest(), 'phase':'staged'}
+        self.state = {'version':'0.1.0', 'bundle_sha256':hashlib.sha256(b'preserved bundle').hexdigest(), 'phase':'staged'}
         self.context = patch.multiple(central, ASSETS=self.assets)
         self.context.start()
         self.patches = [patch.object(central,'verify_assets'), patch.object(central,'read_state',return_value=self.state), patch.object(central,'checkpoint'), patch.object(central,'GitHub'), patch.object(central.time,'sleep')]

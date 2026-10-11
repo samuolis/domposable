@@ -5,13 +5,8 @@ on:
       bump:
         description: Version operation
         type: choice
-        options: [prerelease, patch, minor, major, stable]
-        default: prerelease
-      channel:
-        description: Prerelease channel
-        type: choice
-        options: [alpha, beta, rc]
-        default: alpha
+        options: [patch, minor, major]
+        default: patch
       deployment_id:
         description: 'Recovery only: Central deployment ID for an upload with unknown outcome'
         type: string
@@ -66,10 +61,9 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           BUMP: ${{ inputs.bump }}
-          CHANNEL: ${{ inputs.channel }}
         run: |
           gh auth setup-git
-          python scripts/release.py prepare --bump "$BUMP" --channel "$CHANNEL"
+          python scripts/release.py prepare --bump "$BUMP"
       - uses: ./.github/actions/setup
       - name: Await candidate CI
         if: steps.candidate.outputs.resume != 'true'

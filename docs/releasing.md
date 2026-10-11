@@ -1,8 +1,8 @@
 # Release setup and recovery
 
-The single **Bump and release** action reads `version.properties`. Choose prerelease/channel, patch, minor, major or stable. Normal operation needs one dispatch. Alpha sequence `00` is the unpublished baseline; the first dispatch increments it to `01` and build number 1. Stable promotes the current prerelease; patch/minor/major start a stable version at a new core number.
+The single **Bump and release** action reads `version.properties`. Choose **patch**, **minor** or **major**; published versions use `MAJOR.MINOR.PATCH` without a suffix. Normal operation needs one dispatch. The repository starts at the unpublished `0.0.0` / build 0 baseline; choose **minor** for the first `0.1.0` / build 1 release. Subsequent releases increment the selected version component and the build number together.
 
-The action creates a temporary version-only commit, waits for that exact commit's CI, builds a signed Android APK and a signed Maven bundle, stages immutable assets in a draft, validates Central, fast-forwards `main`, publishes Central, verifies consumers, exposes the GitHub release and deploys its preserved website. Implementation changes use PRs. The release app's direct version push was explicitly approved by the owner.
+The action creates a temporary version-only commit, waits for that exact commit's CI, builds a signed Android APK and a signed Maven bundle, stages immutable assets in a draft, validates Central, fast-forwards `main`, publishes Central, verifies consumers, exposes the GitHub release and deploys its preserved website. Implementation changes use PRs. Obtain the owner's approval for the specific version-only `main` push before dispatching a release.
 
 ## Repository configuration
 
@@ -37,6 +37,6 @@ A local build can exercise all unsigned artifacts and scripts, but live signing,
 
 ## Initial website preview
 
-Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `alpha00` / build 0 baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
+Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `0.0.0` / build 0 baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
 
 The dedicated Maven public key is checked in as `signing-key.asc`; its primary fingerprint is `646AC0FE7F73C347929C825937E5A0EA1E6DA396`. It is also published to `keyserver.ubuntu.com` for Central signature verification. Private identities are held in the protected release environment, never in source control.

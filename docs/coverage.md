@@ -16,4 +16,4 @@ The initial API has 34 renderer contracts. HTML uses native input elements, head
 
 HTML keyed collections currently render all items. Virtualized lists, rich text editors, drag/reorder, complex date pickers, fold/hinge APIs, platform camera/maps and product-specific widgets are outside the initial provider. Date/time HTML inputs use browser controls; native text fields currently expose text input for those purposes. Scrolling and sizing use each platform's layout model and are not pixel-identical.
 
-The default design provider uses upstream Material3 alpha APIs matching the current Compose release. JVM desktop is experimental. There is no compatibility promise before a stable Domposable release. KSP currently generates registration factories, not screen business logic or DI graphs.
+The default design provider uses upstream Material3 alpha APIs matching the current Compose release. JVM desktop is experimental. Until 1.0, minor releases may change APIs. KSP generates typed entries and feature entry lists; screen business logic and DI remain application-owned.

@@ -1,6 +1,6 @@
 # Compatibility and tested boundaries
 
-Domposable is an alpha library. The table describes this repository's CI coverage, not a stable compatibility promise. Both browser demos use the **same `DemoApp` feature sources**.
+Domposable uses plain semantic versions. Until 1.0, minor releases may change APIs; the table describes this repository's CI coverage. Both browser demos use the **same `DemoApp` feature sources**.
 
 | Target | Renderer | UI/behavior checks | Visual baselines | URL owner |
 | --- | --- | --- | --- | --- |

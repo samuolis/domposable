@@ -8,27 +8,23 @@ import argparse
 import json
 import re
 
-VERSION_PATTERN = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(alpha|beta|rc)(\d{2,}))?")
-CHANNELS = {"alpha": 0, "beta": 1, "rc": 2, None: 3}
+VERSION_PATTERN = re.compile(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)")
 
 @dataclass(frozen=True)
 class Version:
     major: int
     minor: int
     patch: int
-    channel: str | None = None
-    sequence: int = 0
 
     @classmethod
     def parse(cls, text):
         match = VERSION_PATTERN.fullmatch(text)
         if not match:
             raise ValueError(f"Invalid release version: {text!r}")
-        major, minor, patch, channel, sequence = match.groups()
-        return cls(int(major), int(minor), int(patch), channel, int(sequence or 0))
+        return cls(*(int(value) for value in match.groups()))
 
     def __str__(self):
-        return self.marketing + (f"-{self.channel}{self.sequence:02d}" if self.channel else "")
+        return self.marketing
 
     @property
     def marketing(self):
@@ -36,21 +32,9 @@ class Version:
 
     @property
     def order(self):
-        return self.major, self.minor, self.patch, CHANNELS[self.channel], self.sequence
+        return self.major, self.minor, self.patch
 
-    def bump(self, operation, channel="alpha"):
-        if channel not in CHANNELS or channel is None:
-            raise ValueError("Choose alpha, beta or rc")
-        if operation == "stable":
-            if self.channel is None:
-                raise ValueError("Already stable; choose patch, minor or major")
-            return Version(self.major, self.minor, self.patch)
-        if operation == "prerelease":
-            if self.channel is None:
-                return Version(self.major, self.minor, self.patch + 1, channel, 1)
-            if CHANNELS[channel] < CHANNELS[self.channel]:
-                raise ValueError("Cannot move a prerelease backwards to an earlier channel")
-            return Version(self.major, self.minor, self.patch, channel, self.sequence + 1 if self.channel == channel else 1)
+    def bump(self, operation):
         if operation == "patch":
             return Version(self.major, self.minor, self.patch + 1)
         if operation == "minor":
@@ -86,14 +70,13 @@ def write_version(path, version, build):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", default="version.properties")
-    parser.add_argument("--bump", choices=["prerelease", "patch", "minor", "major", "stable"])
-    parser.add_argument("--channel", default="alpha", choices=["alpha", "beta", "rc"])
+    parser.add_argument("--bump", choices=["patch", "minor", "major"])
     parser.add_argument("--write", action="store_true")
     args = parser.parse_args()
     version, build = read_version(args.file)
     if args.bump:
-        version, build = version.bump(args.bump, args.channel), build + 1
+        version, build = version.bump(args.bump), build + 1
     if args.write:
         if not args.bump: parser.error("--write requires --bump")
         write_version(args.file, version, build)
-    print(json.dumps({"version": str(version), "build": build, "marketing": version.marketing, "prerelease": version.channel is not None}))
+    print(json.dumps({"version": str(version), "build": build, "marketing": version.marketing}))

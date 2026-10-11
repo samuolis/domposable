@@ -147,7 +147,7 @@ def verify_assets():
         if Path(name).name != name: raise RuntimeError("Invalid manifest path")
         if hashlib.sha256((ASSETS / name).read_bytes()).hexdigest() != checksum: raise RuntimeError(f"Corrupt release asset: {name}")
 
-def prepare(operation, channel):
+def prepare(operation):
     github = GitHub()
     if os.environ.get("GITHUB_REF") != "refs/heads/main": raise RuntimeError("Dispatch Bump and release from main")
     run("git", "fetch", "origin", "main", "--tags")
@@ -180,7 +180,7 @@ def prepare(operation, channel):
     # A version already pushed but interrupted before draft creation must be resumed.
     if build > 0 and not any(release["tag_name"] == f"v{current}" for release in releases):
         raise RuntimeError("Current version has no release checkpoint. Recover its saved candidate artifact; do not bump again")
-    version = current.bump(operation, channel)
+    version = current.bump(operation)
     if version.order <= current.order: raise RuntimeError("Release versions must increase")
     if any(release["tag_name"] == f"v{version}" for release in releases): raise RuntimeError("Version already reserved")
     base = run("git", "rev-parse", "HEAD", capture=True)
@@ -241,7 +241,7 @@ def manifest():
 def stage():
     state = read_state(); validate_candidate(state); verify_assets()
     github = GitHub()
-    release = github.request("releases", "POST", {"tag_name": f"v{state['version']}", "target_commitish": state["commit"], "name": f"Domposable {state['version']}", "body": release_body(state), "draft": True, "prerelease": Version.parse(state["version"]).channel is not None})
+    release = github.request("releases", "POST", {"tag_name": f"v{state['version']}", "target_commitish": state["commit"], "name": f"Domposable {state['version']}", "body": release_body(state), "draft": True, "prerelease": False})
     state["release_id"] = release["id"]; checkpoint(state, github)
     for path in sorted(ASSETS.iterdir()):
         if path.name != "release-state.json": github.upload(state["release_id"], path)
@@ -272,7 +272,7 @@ def publish_github():
     state = read_state(); github = GitHub(); verify_assets()
     if state.get("central_state") != "PUBLISHED": raise RuntimeError("Maven publication must succeed before exposing the GitHub release")
     state["phase"] = "github-published"
-    github.request(f"releases/{state['release_id']}", "PATCH", {"draft": False, "body": release_body(state), "make_latest": "false" if Version.parse(state["version"]).channel else "true"})
+    github.request(f"releases/{state['release_id']}", "PATCH", {"draft": False, "body": release_body(state), "make_latest": "true"})
     checkpoint(state, github)
     extract_website()
 
@@ -294,11 +294,10 @@ def complete():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["prepare", "wait-ci", "manifest", "stage", "advance-main", "publish-github", "extract-website", "complete"])
-    parser.add_argument("--bump", default="prerelease", choices=["prerelease", "patch", "minor", "major", "stable"])
-    parser.add_argument("--channel", default="alpha", choices=["alpha", "beta", "rc"])
+    parser.add_argument("--bump", default="patch", choices=["patch", "minor", "major"])
     args = parser.parse_args()
     try:
-        if args.command == "prepare": prepare(args.bump, args.channel)
+        if args.command == "prepare": prepare(args.bump)
         else: {"wait-ci": wait_ci, "manifest": manifest, "stage": stage, "advance-main": advance_main, "publish-github": publish_github, "extract-website": extract_website, "complete": complete}[args.command]()
     except (RuntimeError, ValueError, KeyError) as error:
         raise SystemExit(str(error)) from None
