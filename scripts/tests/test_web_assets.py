@@ -49,6 +49,9 @@ class WebAssetsTest(unittest.TestCase):
         output = self.root / 'site'; output.mkdir()
         metadata = copy_hashed_bundle(self.source, output / 'demo')
         assemble_routes(output / 'demo', output, '/domposable/routes/')
+        verify_bundle(output / 'demo', metadata)
+        self.assertFalse((output / 'routes/web-assets.json').exists())
+        self.assertFalse((output / 'shop/web-assets.json').exists())
         for path in ['routes/tasks/welcome/index.html', 'shop/products/canvas-weekender/index.html']:
             page = (output / path).read_text()
             self.assertIn(metadata['entry'], page)
