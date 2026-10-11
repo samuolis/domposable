@@ -50,6 +50,42 @@ class ReleaseGuardsTest(unittest.TestCase):
             published = github.return_value.request.call_args.args[2]
             self.assertFalse(published['draft'])
             self.assertEqual(published['make_latest'], 'true')
+            self.assertEqual(published['tag_name'], 'v0.1.0')
+            self.assertEqual(published['target_commitish'], state['commit'])
+            self.assertFalse(published['prerelease'])
+    def failed_candidate(self):
+        state = self.candidate()
+        state.update(phase='staged', central_state='FAILED', deployment_id='00000000-0000-0000-0000-000000000001', release_id=9, run_id=123)
+        release.write_state(state)
+        return state
+    def test_failed_candidate_is_archived_without_changing_immutable_assets(self):
+        state = self.failed_candidate()
+        with patch.object(release, 'verify_assets'), patch('publish_central.request', return_value='{"deploymentState":"FAILED"}'), patch.object(release, 'run', side_effect=[state['base']+'\trefs/heads/main', '']), patch.object(release, 'GitHub') as github, patch.object(release, 'checkpoint') as checkpoint:
+            github.return_value.request.return_value = {'draft':True}
+            release.abandon()
+        self.assertEqual(checkpoint.call_args.args[0]['phase'], 'abandoned')
+    def test_abandon_rechecks_central_failure(self):
+        self.failed_candidate()
+        with patch.object(release, 'verify_assets'), patch('publish_central.request', return_value='{"deploymentState":"PUBLISHED"}'):
+            with self.assertRaisesRegex(RuntimeError, 'still report FAILED'): release.abandon()
+    def test_abandon_rejects_main_race(self):
+        self.failed_candidate()
+        with patch.object(release, 'verify_assets'), patch('publish_central.request', return_value='{"deploymentState":"FAILED"}'), patch.object(release, 'run', return_value='f'*40+'\trefs/heads/main'):
+            with self.assertRaisesRegex(RuntimeError, 'Main moved'): release.abandon()
+    def test_abandon_rejects_existing_version_tag(self):
+        state = self.failed_candidate()
+        with patch.object(release, 'verify_assets'), patch('publish_central.request', return_value='{"deploymentState":"FAILED"}'), patch.object(release, 'run', side_effect=[state['base']+'\trefs/heads/main','f'*40+'\trefs/tags/v0.1.0']):
+            with self.assertRaisesRegex(RuntimeError, 'version tag exists'): release.abandon()
+    def test_abandon_rejects_published_release(self):
+        state = self.failed_candidate()
+        with patch.object(release, 'verify_assets'), patch('publish_central.request', return_value='{"deploymentState":"FAILED"}'), patch.object(release, 'run', side_effect=[state['base']+'\trefs/heads/main','']), patch.object(release, 'GitHub') as github:
+            github.return_value.request.return_value = {'draft':False}
+            with self.assertRaisesRegex(RuntimeError, 'Published releases'): release.abandon()
+    def test_only_abandoned_drafts_are_ignored_during_preparation(self):
+        state = self.failed_candidate(); state['phase'] = 'abandoned'
+        archived = {'draft':True,'body':release.release_body(state)}
+        self.assertTrue(release.is_abandoned_draft(archived))
+        self.assertFalse(release.is_abandoned_draft({**archived,'draft':False}))
     def test_version_only_candidate(self):
         release.validate_candidate(self.candidate())
     def test_implementation_change_rejected(self):

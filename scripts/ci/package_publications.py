@@ -32,7 +32,7 @@ def package(repository: Path, target: Path, signed: bool):
         if not list(pom.parent.glob("*-javadoc.jar")): raise ValueError(f"Missing documentation: {artifact}")
     if published != MODULES: raise ValueError(f"Missing modules: {MODULES - published}")
     files = sorted(path for pom in poms for path in pom.parent.iterdir() if path.is_file() and not path.name.startswith("maven-metadata") and path.suffix not in {".md5", ".sha1", ".sha256", ".sha512"})
-    binaries = [path for path in files if path.suffix in {".jar", ".klib", ".aar", ".pom", ".module"}]
+    binaries = [path for path in files if path.suffix != ".asc"]
     if signed:
         import subprocess
         for path in binaries:
@@ -45,11 +45,10 @@ def package(repository: Path, target: Path, signed: bool):
             name = path.relative_to(repository).as_posix()
             info = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0)); info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, path.read_bytes())
-            if path.suffix in {".jar", ".klib", ".aar", ".pom", ".module", ".asc"}:
-                for algorithm in ["md5", "sha1", "sha256", "sha512"]:
-                    checksum = hashlib.new(algorithm, path.read_bytes()).hexdigest()
-                    check_info = zipfile.ZipInfo(name + "." + algorithm, (2026, 1, 1, 0, 0, 0))
-                    archive.writestr(check_info, checksum)
+            for algorithm in ["md5", "sha1", "sha256", "sha512"]:
+                checksum = hashlib.new(algorithm, path.read_bytes()).hexdigest()
+                check_info = zipfile.ZipInfo(name + "." + algorithm, (2026, 1, 1, 0, 0, 0))
+                archive.writestr(check_info, checksum)
     print(f"Verified {len(poms)} Maven publications")
 
 if __name__ == "__main__":

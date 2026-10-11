@@ -147,6 +147,10 @@ def verify_assets():
         if Path(name).name != name: raise RuntimeError("Invalid manifest path")
         if hashlib.sha256((ASSETS / name).read_bytes()).hexdigest() != checksum: raise RuntimeError(f"Corrupt release asset: {name}")
 
+def is_abandoned_draft(release):
+    match = MARKER.search(release.get("body") or "")
+    return bool(release.get("draft") and match and json.loads(match.group(1)).get("phase") == "abandoned")
+
 def prepare(operation):
     github = GitHub()
     if os.environ.get("GITHUB_REF") != "refs/heads/main": raise RuntimeError("Dispatch Bump and release from main")
@@ -157,7 +161,7 @@ def prepare(operation):
         match = MARKER.search(release.get("body") or "")
         if match:
             state = json.loads(match.group(1))
-            if state.get("phase") != "complete": pending.append((release, state))
+            if state.get("phase") != "complete" and not is_abandoned_draft(release): pending.append((release, state))
     if len(pending) > 1: raise RuntimeError("Multiple unfinished releases; reconcile their states before continuing")
     if pending:
         release, state = pending[0]
@@ -182,7 +186,7 @@ def prepare(operation):
         raise RuntimeError("Current version has no release checkpoint. Recover its saved candidate artifact; do not bump again")
     version = current.bump(operation)
     if version.order <= current.order: raise RuntimeError("Release versions must increase")
-    if any(release["tag_name"] == f"v{version}" for release in releases): raise RuntimeError("Version already reserved")
+    if any(release["tag_name"] == f"v{version}" and not is_abandoned_draft(release) for release in releases): raise RuntimeError("Version already reserved")
     base = run("git", "rev-parse", "HEAD", capture=True)
     branch = f"release-candidate/v{version}-{os.environ['GITHUB_RUN_ID']}"
     existing = run("git", "ls-remote", "origin", f"refs/heads/{branch}", capture=True)
@@ -272,7 +276,7 @@ def publish_github():
     state = read_state(); github = GitHub(); verify_assets()
     if state.get("central_state") != "PUBLISHED": raise RuntimeError("Maven publication must succeed before exposing the GitHub release")
     state["phase"] = "github-published"
-    github.request(f"releases/{state['release_id']}", "PATCH", {"draft": False, "body": release_body(state), "make_latest": "true"})
+    github.request(f"releases/{state['release_id']}", "PATCH", {"tag_name": f"v{state['version']}", "target_commitish": state["commit"], "draft": False, "prerelease": False, "body": release_body(state), "make_latest": "true"})
     checkpoint(state, github)
     extract_website()
 
@@ -291,13 +295,34 @@ def complete():
     if run("git", "ls-remote", "origin", f"refs/heads/{state['branch']}", capture=True):
         run("git", "push", "origin", "--delete", state["branch"])
 
+def abandon():
+    """Retain a failed validation checkpoint without resuming its invalid bundle."""
+    state = read_state(); verify_assets()
+    if state.get("phase") != "staged" or state.get("central_state") != "FAILED":
+        raise RuntimeError("Only a staged candidate with failed Central validation can be abandoned")
+    from publish_central import request as central_request
+    status = json.loads(central_request("/status?id=" + state["deployment_id"]))
+    if status.get("deploymentState") != "FAILED":
+        raise RuntimeError("Central must still report FAILED before abandoning a candidate")
+    remote = run("git", "ls-remote", "origin", "refs/heads/main", capture=True).split()[0]
+    if remote != state["base"]:
+        raise RuntimeError("Main moved; reconcile the candidate before abandoning it")
+    if run("git", "ls-remote", "origin", f"refs/tags/v{state['version']}", capture=True):
+        raise RuntimeError("The version tag exists; reconcile it before abandoning the candidate")
+    github = GitHub()
+    draft = github.request(f"releases/{state['release_id']}")
+    if not draft.get("draft"):
+        raise RuntimeError("Published releases cannot be abandoned")
+    state["phase"] = "abandoned"; checkpoint(state, github)
+    github.request(f"releases/{state['release_id']}", "PATCH", {"name": f"Domposable {state['version']} — failed validation archive", "tag_name": f"failed-v{state['version']}-{state['run_id']}"})
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["prepare", "wait-ci", "manifest", "stage", "advance-main", "publish-github", "extract-website", "complete"])
+    parser.add_argument("command", choices=["prepare", "wait-ci", "manifest", "stage", "advance-main", "publish-github", "extract-website", "complete", "abandon"])
     parser.add_argument("--bump", default="patch", choices=["patch", "minor", "major"])
     args = parser.parse_args()
     try:
         if args.command == "prepare": prepare(args.bump)
-        else: {"wait-ci": wait_ci, "manifest": manifest, "stage": stage, "advance-main": advance_main, "publish-github": publish_github, "extract-website": extract_website, "complete": complete}[args.command]()
+        else: {"wait-ci": wait_ci, "manifest": manifest, "stage": stage, "advance-main": advance_main, "publish-github": publish_github, "extract-website": extract_website, "complete": complete, "abandon": abandon}[args.command]()
     except (RuntimeError, ValueError, KeyError) as error:
         raise SystemExit(str(error)) from None
