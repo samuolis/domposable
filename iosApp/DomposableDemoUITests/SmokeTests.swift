@@ -6,14 +6,16 @@ final class SmokeTests: XCTestCase {
     }
     private func capture(_ app: XCUIApplication, _ name: String) {
         // App screenshots can crop with portrait coordinates during iPad rotation.
-        // Capture the display after two consecutive rendered frames agree.
+        // Require a full second of identical rendered frames before capture.
         var previous: Data?
         var settled: XCUIScreenshot?
+        var unchangedSince = Date()
         let stable = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             let current = XCUIScreen.main.screenshot()
             let data = current.pngRepresentation
             defer { previous = data }
-            guard previous == data else { return false }
+            guard previous == data else { unchangedSince = Date(); return false }
+            guard Date().timeIntervalSince(unchangedSince) >= 1 else { return false }
             settled = current
             return true
         }, object: nil)
@@ -22,6 +24,26 @@ final class SmokeTests: XCTestCase {
         attachment.name = "golden-\(name)"
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+    private func artworkIsRendered(_ element: XCUIElement) -> Bool {
+        // A decoded-image callback can precede its first GPU frame on a slow simulator.
+        // The bundled hero has light and dark texture; an unpainted image is a flat surface.
+        guard let image = element.screenshot().image.cgImage,
+              image.bitsPerComponent == 8, image.bitsPerPixel >= 24,
+              let data = image.dataProvider?.data,
+              let bytes = CFDataGetBytePtr(data) else { return false }
+        let stride = image.bitsPerPixel / 8
+        var darkest = 255
+        var lightest = 0
+        for y in Swift.stride(from: 0, to: image.height, by: max(1, image.height / 20)) {
+            for x in Swift.stride(from: 0, to: image.width, by: max(1, image.width / 20)) {
+                let offset = y * image.bytesPerRow + x * stride
+                let light = (Int(bytes[offset]) + Int(bytes[offset + 1]) + Int(bytes[offset + 2])) / 3
+                darkest = min(darkest, light)
+                lightest = max(lightest, light)
+            }
+        }
+        return lightest - darkest > 40
     }
     func testSharedFeatureAndNotes() {
         XCUIDevice.shared.orientation = .portrait
@@ -67,7 +89,12 @@ final class SmokeTests: XCTestCase {
         ready(app, "Task workspace")
         app.buttons["Shop demo"].tap()
         ready(app, "FIELDWORK")
-        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "shop-hero.png-loaded").firstMatch.waitForExistence(timeout: 30))
+        let hero = app.descendants(matching: .any).matching(identifier: "shop-hero.png-loaded").firstMatch
+        XCTAssertTrue(hero.waitForExistence(timeout: 30))
+        let painted = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            self.artworkIsRendered(hero)
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [painted], timeout: 30), .completed)
         capture(app, "shop")
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Shop all")).firstMatch.tap()
         ready(app, "Shop the collection")
