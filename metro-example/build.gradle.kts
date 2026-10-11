@@ -6,7 +6,7 @@ plugins {
 }
 kotlin {
     jvmToolchain(21)
-    android { namespace = "example.metro"; compileSdk { version = release(37) { minorApiLevel = 2 } }; minSdk = 23; withHostTest {} }
+    android { namespace = "example.metro"; compileSdk { version = release(37) { minorApiLevel = 2 } }; minSdk = 24; withHostTest {} }
     jvm(); js { browser() }; wasmJs { browser() }; iosArm64(); iosSimulatorArm64()
     sourceSets {
         commonMain.dependencies {
