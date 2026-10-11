@@ -5,7 +5,7 @@ import io.github.samuolis.domposable.foundation.*
 import io.github.samuolis.domposable.ui.*
 import example.shop.catalog.api.*
 @Composable
-fun StorefrontScreen(model: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, showHero: Boolean, onBrowse: () -> Unit, onProduct: (String) -> Unit, onArtworkLoaded: (() -> Unit)? = null) {
+fun StorefrontScreen(state: CatalogState, onAction: (CatalogAction) -> Unit, artwork: ShopArtwork, showHero: Boolean, onBrowse: () -> Unit, onProduct: (String) -> Unit, onArtworkLoaded: (() -> Unit)? = null) {
     DomposableMeasure(DomposableModifier.fillMaxWidth().fillMaxHeight()) { size ->
         // Wait for real constraints before starting size-dependent image requests.
         if (size.width <= 0f) return@DomposableMeasure
@@ -29,17 +29,17 @@ fun StorefrontScreen(model: CatalogState, onAction: (CatalogAction) -> Unit, art
             }
             DomposableText(if (showHero) "Everyday favourites" else "Shop the collection", style = DomposableTextStyle.Title, headingLevel = 2)
             DomposableFlowRow(gap = 12.dp) {
-                DomposableTextField(model.search, { onAction(CatalogAction.Search(it)) }, "Search products", modifier = DomposableModifier.width(240.dp).testId("shop-search"), purpose = DomposableInputPurpose.Search)
-                DomposableSwitch(DomposableSwitchProps(model.priceAscending, { onAction(CatalogAction.Sort(it)) }, "Price: low to high"))
+                DomposableTextField(state.search, { onAction(CatalogAction.Search(it)) }, "Search products", modifier = DomposableModifier.width(240.dp).testId("shop-search"), purpose = DomposableInputPurpose.Search)
+                DomposableSwitch(DomposableSwitchProps(state.priceAscending, { onAction(CatalogAction.Sort(it)) }, "Price: low to high"))
             }
-            DomposableFlowRow(gap = 8.dp) { listOf("All", "Home", "Travel").forEach { category -> DomposableChip(DomposableChipProps(category, { onAction(CatalogAction.Category(category)) }, model.category == category)) } }
-            if (model.notice.isNotEmpty()) DomposableBanner(DomposableBannerProps(model.notice))
-            DomposableText("${model.visibleProducts.size} thoughtfully chosen pieces", style = DomposableTextStyle.Label)
-            if (model.visibleProducts.isEmpty()) {
+            DomposableFlowRow(gap = 8.dp) { listOf("All", "Home", "Travel").forEach { category -> DomposableChip(DomposableChipProps(category, { onAction(CatalogAction.Category(category)) }, state.category == category)) } }
+            if (state.notice.isNotEmpty()) DomposableBanner(DomposableBannerProps(state.notice))
+            DomposableText("${state.visibleProducts.size} thoughtfully chosen pieces", style = DomposableTextStyle.Label)
+            if (state.visibleProducts.isEmpty()) {
                 DomposableText("No products match your search.")
                 DomposableButton("Clear filters", { onAction(CatalogAction.ClearFilters) })
             }
-            DomposableFlowRow(gap = 16.dp) { model.visibleProducts.forEach { product -> key(product.id) {
+            DomposableFlowRow(gap = 16.dp) { state.visibleProducts.forEach { product -> key(product.id) {
                 DomposableCard(DomposableModifier.width(cardWidth)) {
                     DomposableColumn(DomposableModifier.padding(16.dp).fillMaxWidth(), gap = 8.dp) {
                         artwork(product.image, product.name, DomposableModifier.fillMaxWidth().height(220.dp), null, DomposableImageScale.Fit)
@@ -59,8 +59,8 @@ fun StorefrontScreen(model: CatalogState, onAction: (CatalogAction) -> Unit, art
 
 @Composable
 @DomposableScreen(route = CatalogRoute.Product::class)
-fun ProductScreen(model: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, onBrowse: () -> Unit, onCart: () -> Unit) {
-    val product = model.product
+fun ProductScreen(state: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, onBrowse: () -> Unit, onCart: () -> Unit) {
+    val product = state.product
     DomposableColumn(DomposableModifier.fillMaxWidth().fillMaxHeight().verticalScroll().padding(24.dp), gap = 16.dp) {
         DomposableButton("Back to collection", onBrowse)
         if (product == null) DomposableText("This product is unavailable.") else {
@@ -71,7 +71,7 @@ fun ProductScreen(model: ProductState, artwork: ShopArtwork, onAdd: () -> Unit, 
             DomposableText(product.description)
             DomposableText("In stock · Dispatches in 2–3 working days", style = DomposableTextStyle.Label)
             DomposableFlowRow(gap = 12.dp) { DomposableButton("Add to bag", { onAdd() }); DomposableButton("View bag", onCart) }
-            if (model.notice.isNotEmpty()) DomposableBanner(DomposableBannerProps(model.notice))
+            if (state.notice.isNotEmpty()) DomposableBanner(DomposableBannerProps(state.notice))
             DomposableDivider()
             DomposableText("The details", style = DomposableTextStyle.Title, headingLevel = 3)
             DomposableText("Designed to be used every day. Carefully chosen materials and simple, useful details. This is a fictional product in an open source example.")
