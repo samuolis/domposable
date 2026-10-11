@@ -76,13 +76,12 @@ DomposableCard(onClick = onOpenProduct) {
     }
 }
 DomposableLazyGrid(
-    items = products.map { product ->
-        DomposableLazyItem(product.id) { ProductCard(product) }
-    },
+    items = products,
+    key = { it.id },
     modifier = DomposableModifier.fillMaxWidth().height(480.dp),
     columns = columnsForContentWidth,
     gap = 16.dp,
-)
+) { product -> ProductCard(product) }
 ```
 
 `ProductCard` belongs to the feature. Keys must be stable and unique. Compose UI collections virtualize; HTML currently emits all keyed items as lists/CSS grid. Keep a bounded height when nesting a native lazy collection inside another scroll container. The storefront uses wrapping rows for its small catalogue.

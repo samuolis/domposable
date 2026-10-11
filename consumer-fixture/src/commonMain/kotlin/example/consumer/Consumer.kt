@@ -172,6 +172,10 @@ fun DirectNavigation3() {
 // Published consumers exercise the direct API; they do not generate component contracts.
 @Composable
 fun SharedControls() {
+    io.github.samuolis.domposable.ui.DomposableLazyColumn(
+        items = listOf("one", "two"),
+        key = { it },
+    ) { DomposableText(it) }
     DomposableTopAppBar("Preferences")
     DomposableSelect(
         "home",

@@ -55,7 +55,6 @@ import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableImage
 import io.github.samuolis.domposable.ui.DomposableLazyColumn
 import io.github.samuolis.domposable.ui.DomposableLazyGrid
-import io.github.samuolis.domposable.ui.DomposableLazyItem
 import io.github.samuolis.domposable.ui.DomposableLazyRow
 import io.github.samuolis.domposable.ui.DomposableLink
 import io.github.samuolis.domposable.ui.DomposableMeasure
@@ -479,32 +478,22 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
         DomposableText("Keyed collections", style = DomposableTextStyle.Title)
         DomposableText("Keyed collections", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableLazyRow(
-            items =
-                (1..6).map { n ->
-                    DomposableLazyItem("tag-$n") {
-                        DomposableChip(label = "Collection $n", onClick = {})
-                    }
-                },
-            gap = 8.dp,
+            items = (1..6).toList(),
+            key = { "tag-$it" },
             modifier = DomposableModifier.fillMaxWidth().height(64.dp),
-        )
-        DomposableLazyColumn(
-            items =
-                (1..3).map { n ->
-                    DomposableLazyItem("activity-$n") {
-                        DomposableText("Activity $n · Stable keyed content")
-                    }
-                },
             gap = 8.dp,
+        ) { number -> DomposableChip("Collection $number", {}) }
+        DomposableLazyColumn(
+            items = (1..3).toList(),
+            key = { "activity-$it" },
             modifier = DomposableModifier.fillMaxWidth().height(104.dp),
-        )
+            gap = 8.dp,
+        ) { number -> DomposableText("Activity $number · Stable keyed content") }
         DomposableLazyGrid(
-            items =
-                (1..4).map { number ->
-                    DomposableLazyItem("cell-$number") { DomposableCard { DomposableText("Cell $number") } }
-                },
+            items = (1..4).toList(),
+            key = { "cell-$it" },
             modifier = DomposableModifier.height(180.dp).fillMaxWidth(),
-        )
+        ) { number -> DomposableCard { DomposableText("Cell $number") } }
         DomposableText("Nested theme", style = DomposableTextStyle.Title)
         val base = LocalDomposableTokens.current
         DomposableTheme(

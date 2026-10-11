@@ -11,6 +11,42 @@ import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.dp
 
+/** Stable keys preserve each item's composition when the application reorders its data. */
+@Composable
+fun <T> DomposableLazyColumn(
+    items: List<T>,
+    key: (T) -> String,
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    itemContent: @Composable (T) -> Unit,
+) = DomposableLazyColumn(items.map { item -> DomposableLazyItem(key(item)) { itemContent(item) } }, modifier, gap)
+
+@Composable
+fun <T> DomposableLazyRow(
+    items: List<T>,
+    key: (T) -> String,
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    itemContent: @Composable (T) -> Unit,
+) = DomposableLazyRow(items.map { item -> DomposableLazyItem(key(item)) { itemContent(item) } }, modifier, gap)
+
+@Composable
+fun <T> DomposableLazyGrid(
+    items: List<T>,
+    key: (T) -> String,
+    modifier: DomposableModifier = DomposableModifier,
+    columns: Int = 2,
+    gap: DomposableLength = 8.dp,
+    itemContent: @Composable (T) -> Unit,
+) = DomposableLazyGrid(
+    items.map { item ->
+        DomposableLazyItem(key(item)) { itemContent(item) }
+    },
+    modifier,
+    columns,
+    gap,
+)
+
 @Composable
 fun DomposableIconButton(
     onClick: () -> Unit,

@@ -4,6 +4,7 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -72,10 +73,20 @@ internal fun NativeSnackbar(
     props: DomposableSnackbarProps,
     modifier: DomposableModifier,
 ) {
+    val actionColors =
+        ButtonDefaults.textButtonColors(
+            contentColor = androidx.compose.material3.MaterialTheme.colorScheme.inversePrimary,
+        )
     Snackbar(
         modifier.toComposeModifier().semantics { liveRegion = LiveRegionMode.Polite },
-        action = props.onAction?.let { action -> { TextButton(action) { Text(props.actionLabel!!) } } },
-        dismissAction = props.onDismiss?.let { dismiss -> { TextButton(dismiss) { Text("Dismiss") } } },
+        action =
+            props.onAction?.let { action ->
+                { TextButton(action, colors = actionColors) { Text(props.actionLabel!!) } }
+            },
+        dismissAction =
+            props.onDismiss?.let { dismiss ->
+                { TextButton(dismiss, colors = actionColors) { Text("Dismiss") } }
+            },
     ) { Text(props.message) }
 }
 
