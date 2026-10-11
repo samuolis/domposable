@@ -32,6 +32,7 @@ kotlin {
                 api(libs.savedstate)
                 api(libs.lifecycle.viewmodel.compose)
                 api(libs.lifecycle.runtime.compose)
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
                 api("org.jetbrains.androidx.savedstate:savedstate-compose:1.4.0")
             }
         }

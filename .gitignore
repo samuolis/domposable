@@ -18,3 +18,5 @@ __pycache__/
 **/xcuserdata/
 playwright-report/
 test-results/
+playwright-production-report/
+production-test-results/

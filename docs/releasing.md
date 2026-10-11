@@ -1,8 +1,8 @@
 # Release setup and recovery
 
-The single **Bump and release** action reads `version.properties`. Choose prerelease/channel, patch, minor, major or stable. Normal operation needs one dispatch. Alpha sequence `00` is the unpublished baseline; the first dispatch increments it to `01` and build number 1. Stable promotes the current prerelease; patch/minor/major start a stable version at a new core number.
+The single **Bump and release** action reads `version.properties`. Choose **patch**, **minor** or **major**; published versions use `MAJOR.MINOR.PATCH` without a suffix. Normal operation needs one dispatch. The repository starts at the unpublished `0.0.0` / build 0 baseline; choose **minor** for the first `0.1.0` / build 1 release. Subsequent releases increment the selected version component and the build number together.
 
-The action creates a temporary version-only commit, waits for that exact commit's CI, builds signed downloads and a signed Maven bundle, stages immutable assets in a draft, validates Central, fast-forwards `main`, publishes Central, verifies consumers, exposes the GitHub release and deploys its preserved website. Implementation changes use PRs. The release app's direct version push was explicitly approved by the owner.
+The action creates a temporary version-only commit, waits for that exact commit's CI, builds a signed Android APK and a signed Maven bundle, stages immutable assets in a draft, validates Central, fast-forwards `main`, publishes Central, verifies consumers, exposes the GitHub release and deploys its preserved website. Implementation changes use PRs. Obtain the owner's approval for the specific version-only `main` push before dispatching a release.
 
 ## Repository configuration
 
@@ -11,7 +11,7 @@ The action creates a temporary version-only commit, waits for that exact commit'
 3. Create a dedicated GitHub App, install it on this repository only, grant Contents read/write and Actions read, and store its ID in `RELEASE_APP_ID` and private key in `RELEASE_APP_PRIVATE_KEY`.
 4. Protect `main` with two rulesets. One requires PRs and permits the release app to bypass that PR rule. The second requires **CI passed**, blocks force pushes/deletion and grants the app no bypass. Do not give the app a blanket exemption from CI. Require checks on the candidate commit; configure the CI Actions integration as the expected source if available.
 5. Verify ownership of `io.github.samuolis` in Sonatype Central. Create a portal token and configure `CENTRAL_USERNAME` / `CENTRAL_PASSWORD`. Publish the public GPG key to a supported keyserver and store the ASCII-armored private key/password in `MAVEN_SIGNING_KEY` / `MAVEN_SIGNING_PASSWORD`.
-6. Create dedicated demo signing identities. Store secrets and variables below in the release environment; never reuse another application's production credentials.
+6. Create a dedicated Android demo signing identity. Store secrets and variables below in the release environment; never reuse another application's production credentials.
 
 | Kind | Name | Value |
 | --- | --- | --- |
@@ -20,12 +20,29 @@ The action creates a temporary version-only commit, waits for that exact commit'
 | Secret | `ANDROID_KEY_ALIAS` | Signing alias |
 | Secret | `ANDROID_KEY_PASSWORD` | Key password |
 | Variable | `ANDROID_CERT_SHA256` | Dedicated certificate SHA-256, colon separators allowed |
-| Secret | `IOS_CERTIFICATE_BASE64` | Base64 Apple Distribution p12 |
-| Secret | `IOS_CERTIFICATE_PASSWORD` | p12 password |
-| Secret | `IOS_PROFILE_BASE64` | Base64 Ad Hoc profile for `io.github.samuolis.domposable.demo` |
-| Variable | `IOS_TEAM_ID` | Apple developer team ID |
 
-Ad Hoc IPA installation works on devices registered in that profile. The arm64 simulator app needs no registered device. The script checks profile type, expiry, application/team IDs, certificate matching, code signatures and version values; it creates and deletes a temporary keychain and its dedicated profile copy. Credentials are never release assets.
+Public demo downloads currently include the signed Android APK only. The release verifies its dedicated certificate fingerprint and both version values before attaching it. iOS remains supported by the library and validated with simulator tests and visual captures in CI, but device/simulator downloads and Apple signing are deferred. A release requires no Apple credentials.
+
+## HTML and Wasm build hashes
+
+Libraries and the APK use the same plain semantic version. The HTML and Wasm distributions also have independent SHA-256 build identifiers. Public demo URLs stay at `/demo/` and `/wasm/`; their HTML loads `demo.<full-content-sha256>.js`. Source maps and licence sidecars receive their own content hashes, while Wasm binaries retain webpack's content-hashed names. Nested task and shopping routes reference the same fingerprinted HTML bundle.
+
+Each distribution contains `web-assets.json`, recording the entry filename and the SHA-256 of every packaged file. Its distribution hash covers the sorted file/checksum inventory, so a resource change also changes the build identifier. `release.json` links both build identifiers to the library version, build number and Git commit:
+
+```json
+{
+  "version": "0.1.0",
+  "build": 1,
+  "commit": "<git-commit>",
+  "status": "release",
+  "web": {
+    "html": {"entry": "demo.<sha256>.js", "sha256": "<distribution-sha256>"},
+    "wasm": {"entry": "demo.<sha256>.js", "sha256": "<distribution-sha256>"}
+  }
+}
+```
+
+CI runs browser tests against the assembled production website at the real `/domposable/` project base. It checks entry/binary hashes, nested route reloads, HTML rendering and Wasm startup. Bootstrap deployments verify both full manifests before deploying; release deployments preserve these exact distributions in `website.zip`.
 
 ## Retry behavior
 
@@ -41,6 +58,6 @@ A local build can exercise all unsigned artifacts and scripts, but live signing,
 
 ## Initial website preview
 
-Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `alpha00` / build 0 baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
+Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `0.0.0` / build 0 baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
 
 The dedicated Maven public key is checked in as `signing-key.asc`; its primary fingerprint is `646AC0FE7F73C347929C825937E5A0EA1E6DA396`. It is also published to `keyserver.ubuntu.com` for Central signature verification. Private identities are held in the protected release environment, never in source control.

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+<title id="title">Fieldwork module boundaries</title><desc id="desc">The demo app depends on catalog and checkout API and implementation modules. Features use Domposable UI and entry contracts. Metro and ViewModels remain in the sample implementations.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10" fill="#AAA2CF"/></marker></defs>
+<rect width="960" height="560" rx="24" fill="#171923"/>
+<g font-family="system-ui,sans-serif" fill="#F4F0FF" text-anchor="middle">
+<rect x="235" y="25" width="490" height="90" rx="14" fill="#5746B2"/><text x="480" y="62" font-size="23" font-weight="700">demo · application composition root</text><text x="480" y="91" font-size="16">Metro graph · routes · resources · shell</text>
+<rect x="65" y="175" width="370" height="85" rx="14" fill="#313545" stroke="#8F83D3"/><text x="250" y="209" font-size="23" font-weight="700">catalog-api</text><text x="250" y="239" font-size="16">Contracts · routes · state / actions</text>
+<rect x="525" y="175" width="370" height="85" rx="14" fill="#313545" stroke="#8F83D3"/><text x="710" y="209" font-size="23" font-weight="700">checkout-api</text><text x="710" y="239" font-size="16">Session contract · routes · state / actions</text>
+<rect x="65" y="315" width="370" height="100" rx="14" fill="#313545"/><text x="250" y="350" font-size="23" font-weight="700">catalog-impl</text><text x="250" y="380" font-size="16">Screens · ViewModels · reducer</text><text x="250" y="402" font-size="15">KSP entries · Metro contributions</text>
+<rect x="525" y="315" width="370" height="100" rx="14" fill="#313545"/><text x="710" y="350" font-size="23" font-weight="700">checkout-impl</text><text x="710" y="380" font-size="16">Screens · ViewModels · reducer / effects</text><text x="710" y="402" font-size="15">KSP entries · Metro contributions</text>
+<rect x="180" y="475" width="600" height="60" rx="14" fill="#235351"/><text x="480" y="511" font-size="21">Domposable UI · entries · optional ViewModel adapter</text>
+</g>
+<g stroke="#AAA2CF" stroke-width="3" fill="none" marker-end="url(#arrow)"><path d="M360 115 L250 175"/><path d="M600 115 L710 175"/><path d="M250 315 L250 260"/><path d="M710 315 L710 260"/><path d="M250 415 L330 475"/><path d="M710 415 L630 475"/></g>
+</svg>

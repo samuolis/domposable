@@ -7,6 +7,7 @@ plugins {
 kotlin { jvmToolchain(21); abiValidation() }
 dependencies {
     implementation(libs.ksp.api)
+    implementation("com.squareup:kotlinpoet-ksp:2.3.0")
     testImplementation(kotlin("test"))
 }
 publishing { repositories { maven { name = "Fixture"; url = uri(rootProject.layout.buildDirectory.dir("repository")) } } }

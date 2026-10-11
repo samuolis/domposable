@@ -19,7 +19,7 @@ class ReleaseGuardsTest(unittest.TestCase):
         self.context.start()
         self.git('init', '-b', 'main')
         self.git('config', 'commit.gpgSign', 'false'); self.git('config', 'user.name', 'Test'); self.git('config', 'user.email', 'test@example.test')
-        (self.root / 'version.properties').write_text('VERSION=0.1.0-alpha00\nBUILD_NUMBER=0\n')
+        (self.root / 'version.properties').write_text('VERSION=0.0.0\nBUILD_NUMBER=0\n')
         self.git('add', '.'); self.git('commit', '-m', 'baseline')
         self.base = self.git('rev-parse', 'HEAD')
     def tearDown(self):
@@ -27,13 +27,29 @@ class ReleaseGuardsTest(unittest.TestCase):
     def git(self, *args):
         return subprocess.check_output(['git', *args], cwd=self.root, stderr=subprocess.DEVNULL, text=True).strip()
     def candidate(self, extra=False):
-        write_version(self.root / 'version.properties', Version.parse('0.1.0-alpha01'), 1)
+        write_version(self.root / 'version.properties', Version.parse('0.1.0'), 1)
         if extra: (self.root / 'implementation.kt').write_text('unexpected')
         self.git('add', 'version.properties')
         if extra: self.git('add', 'implementation.kt')
         self.git('commit', '-m', 'release')
-        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0-alpha01', 'build': 1, 'branch': 'release-candidate/test'}
+        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0', 'build': 1, 'branch': 'release-candidate/test'}
         release.write_state(state); return state
+    def test_public_download_inventory_is_android_only(self):
+        self.assertEqual(release.asset_names(self.candidate()), ["domposable-0.1.0.apk", "website.zip", "maven-bundle.zip"])
+    def test_plain_semver_release_is_published_as_latest(self):
+        state = self.candidate()
+        with patch.object(release, 'verify_assets'), patch.object(release, 'GitHub') as github, patch.object(release, 'checkpoint'), patch.object(release, 'extract_website'):
+            github.return_value.request.return_value = {'id': 9}
+            release.stage()
+            created = github.return_value.request.call_args.args[2]
+            self.assertEqual(created['tag_name'], 'v0.1.0')
+            self.assertFalse(created['prerelease'])
+            state.update(release_id=9, central_state='PUBLISHED')
+            release.write_state(state)
+            release.publish_github()
+            published = github.return_value.request.call_args.args[2]
+            self.assertFalse(published['draft'])
+            self.assertEqual(published['make_latest'], 'true')
     def test_version_only_candidate(self):
         release.validate_candidate(self.candidate())
     def test_implementation_change_rejected(self):

@@ -17,8 +17,8 @@ jobs:
         with: {persist-credentials: false}
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with: {python-version: '3.13'}
-      - run: pip install Pillow==11.3.0
-      - name: Publish verified PNG assets on an isolated review ref
+      - run: pip install --requirement docs/requirements.txt
+      - name: Publish verified PNG comparisons as release assets
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ inputs.run_id }}

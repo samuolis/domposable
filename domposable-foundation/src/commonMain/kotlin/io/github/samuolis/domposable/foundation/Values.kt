@@ -88,7 +88,7 @@ enum class DomposableInputPurpose { Text, Email, Password, Number, Search, Date,
 /** Declaration analysis only: generators never rewrite a composable's body. */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
-annotation class DomposableScreen(val route: KClass<*>)
+annotation class DomposableScreen(val route: KClass<*>, val viewModel: Boolean = false)
 
 /** Generates a typed renderer contract and forwarding API for this props declaration. */
 @Target(AnnotationTarget.CLASS)

@@ -6,6 +6,8 @@ import shutil
 def assemble_routes(bundle: Path, output: Path, base: str):
     target = output/'routes'
     shutil.copytree(bundle, target, dirs_exist_ok=True)
+    # Routed HTML shells add files/change index.html; the canonical bundle owns its manifest.
+    (target/'web-assets.json').unlink(missing_ok=True)
     index = (target/'index.html').read_text().replace('<head>', f'<head><base href="{base}">').replace('<body>', f'<body data-route-base="{base}">')
     (target/'index.html').write_text(index)
     for route in ['tasks', 'catalog', 'recipes', 'tasks/welcome', 'tasks/adaptive', 'tasks/customize']:
@@ -17,6 +19,7 @@ def assemble_routes(bundle: Path, output: Path, base: str):
     shop_assets = shop_base + "shop/"
     shop = output/'shop'
     shutil.copytree(bundle, shop, dirs_exist_ok=True)
+    (shop/'web-assets.json').unlink(missing_ok=True)
     shop_index = (bundle/'index.html').read_text().replace('<head>', f'<head><base href="{shop_assets}">').replace('<body>', f'<body data-route-base="{shop_base}" data-app="shop">')
     (shop/'index.html').write_text(shop_index)
     for route in ['collection', 'cart', 'checkout', 'confirmation', 'products/canvas-weekender', 'products/studio-mug', 'products/clay-table-lamp']:

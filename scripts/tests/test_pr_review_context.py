@@ -41,3 +41,10 @@ DomposableButton("Add", onAdd)
     def test_titles_accept_ranker_action_style(self):
         self.assertEqual([],review.validate_title('Add adaptive storefront and web routes'))
         self.assertTrue(review.validate_title('WIP new stuff'))
+
+    def test_release_previews_require_repository_identity_and_checksum(self):
+        old = 'https://raw.githubusercontent.com/samuolis/domposable/' + 'a'*40 + '/previews/android/shop.png'
+        new = 'https://github.com/samuolis/domposable/releases/download/visual-evidence/pr-9-run-1234-android-shop-' + 'a'*64 + '.png'
+        self.assertEqual([], review.validate_description(self.body.replace(old, new), ['demo/src/commonMain/Shop.kt']))
+        for invalid in [new.replace('samuolis/domposable', 'someone/else'), new.replace('a'*64, 'latest'), new.replace('visual-evidence', 'v0.1.0')]:
+            self.assertTrue(review.validate_description(self.body.replace(old, invalid), ['demo/src/commonMain/Shop.kt']))

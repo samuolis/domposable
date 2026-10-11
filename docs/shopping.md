@@ -9,21 +9,25 @@ A familiar ecommerce layout: announcement bar, shop header, editorial hero, prod
 
 ## Feature teams own their state
 
-The [complete shared implementation](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/Shopping.kt) contains a plain `ShopModel`. It uses integer cents for prices, derives cart totals, and validates checkout before clearing the cart. Construct it manually, inject it, or adapt the screen arguments to your store.
+The [modular implementation](modular-demo.md) separates catalog and checkout into API and implementation modules. API modules expose immutable state/actions, routes and feature contracts. Implementations supply MVI reducers, entry-owned AndroidX ViewModels, Metro contributions and KSP-generated destinations. The application owns the graph, shared cart session, resource images, theme, shell and URL codec.
 
 ```kotlin
 @Composable
-fun ShopFeature(model: ShopModel, openProduct: (String) -> Unit) {
-    StorefrontScreen(
-        model = model,
-        showHero = true,
-        onBrowse = { model.category = "All" },
-        onProduct = openProduct,
-    )
+@DomposableScreen(CatalogRoute.Collection::class, viewModel = true)
+fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
+    val navigator = LocalShopNavigator.current
+    val artwork = LocalShopArtwork.current
+    DomposableMviScreen(model) { state, onAction ->
+        StorefrontContent(
+            state, onAction, artwork, showHero = false,
+            onBrowse = { navigator.navigate(CatalogRoute.Collection) },
+            onProduct = { navigator.navigate(CatalogRoute.Product(it)) },
+        )
+    }
 }
 ```
 
-`ShoppingApp` composes the theme, shell and Navigation 3 destinations. The feature screens receive models and callbacks, without a required base class or action protocol.
+These are application architecture choices. Screens receive ViewModels; their smaller content functions remain ordinary composable functions returning `Unit`, and Domposable does not require MVI, Metro or a ViewModel. Follow the [complete module walkthrough](modular-demo.md) for graph assembly, assisted product injection and checkout effects.
 
 ## Layout follows available space
 

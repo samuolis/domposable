@@ -61,6 +61,8 @@ jobs:
           exit "$status"
       - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution --console=plain
       - run: python scripts/ci/build_site.py
+      - name: Verify fingerprinted production HTML and Wasm distributions
+        run: npx playwright test --config playwright.production.config.ts
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
@@ -69,6 +71,8 @@ jobs:
             androidApp/build/outputs/apk/debug/*.apk
             test-results/
             playwright-report/
+            production-test-results/
+            playwright-production-report/
             build/site/
             build/screenshots/
             build/visual-report/
@@ -84,7 +88,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
-      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 --console=plain
+      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 --console=plain
       - run: python scripts/ci/package_publications.py --unsigned
       - name: Resolve and compile published artifacts on all six targets
         run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain

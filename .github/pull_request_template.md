@@ -33,7 +33,7 @@ Include concrete commands/configuration when changing Gradle, modules or CI. Oth
 
 ## Visual evidence
 
-For visual changes, embed descriptive, immutable PNG URLs from the isolated review ref. Existing scenarios show Main | Pixel difference | PR; new scenarios show an added preview. Do not commit generated comparisons to the feature branch. Artifact links alone are insufficient. Remove this section for nonvisual changes.
+For visual changes, embed descriptive, content-addressed PNG URLs from the visual-evidence release assets. Existing scenarios show Main | Pixel difference | PR; new scenarios show an added preview. Reviewed goldens belong in main; generated comparisons belong in release assets. Artifact links alone are insufficient. Remove this section for nonvisual changes.
 
 ## Verification
 

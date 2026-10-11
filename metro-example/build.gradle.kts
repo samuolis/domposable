@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.compiler)
-    id("dev.zacsweers.metro") version "1.4.5"
+    alias(libs.plugins.metro)
 }
 kotlin {
     jvmToolchain(21)

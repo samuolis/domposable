@@ -1,7 +1,7 @@
 public final class io/github/samuolis/domposable/navigation3/ComposableSingletons$NavigationKt {
 	public static final field INSTANCE Lio/github/samuolis/domposable/navigation3/ComposableSingletons$NavigationKt;
 	public fun <init> ()V
-	public final fun getLambda$1337057368$io_github_samuolis_domposable_domposable_navigation3 ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1824004815$io_github_samuolis_domposable_domposable_navigation3 ()Lkotlin/jvm/functions/Function3;
 }
 
 public abstract interface class io/github/samuolis/domposable/navigation3/DomposableBrowserUrls {
@@ -31,6 +31,18 @@ public final class io/github/samuolis/domposable/navigation3/DomposableBrowserUr
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/samuolis/domposable/navigation3/DomposableNavigator {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun getBackStack ()Ljava/util/List;
+	public final fun getCanGoBack ()Z
+	public final fun getCurrentRoute ()Ljava/lang/Object;
+	public final fun goBack ()Z
+	public final fun navigate (Ljava/lang/Object;)V
+	public final fun replace (Ljava/lang/Object;)V
+	public final fun reset (Ljava/lang/Object;)V
+}
+
 public abstract interface class io/github/samuolis/domposable/navigation3/DomposableRouteCodec {
 	public abstract fun decode (Ljava/lang/String;)Ljava/lang/Object;
 	public abstract fun encode (Ljava/lang/Object;)Ljava/lang/String;
@@ -38,10 +50,19 @@ public abstract interface class io/github/samuolis/domposable/navigation3/Dompos
 
 public final class io/github/samuolis/domposable/navigation3/NativeNavigationKt {
 	public static final fun DomposableBrowserHistory (Landroidx/compose/runtime/snapshots/SnapshotStateList;Lio/github/samuolis/domposable/navigation3/DomposableRouteCodec;Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableNavDisplay (Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;ILkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/github/samuolis/domposable/navigation3/NavigationKt {
 	public static final fun DomposableNavigation3Host (Ljava/util/List;Lio/github/samuolis/domposable/screens/DomposableScreenRegistry;Lio/github/samuolis/domposable/ui/DomposableModifier;ILkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
 	public static final fun rememberDomposableBackStack (Ljava/lang/Object;Landroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/snapshots/SnapshotStateList;
+	public static final fun rememberDomposableNavEntries (Ljava/util/List;Lio/github/samuolis/domposable/screens/DomposableScreenRegistry;Ljava/util/List;Landroidx/compose/runtime/Composer;II)Ljava/util/List;
+}
+
+public final class io/github/samuolis/domposable/navigation3/NavigatorKt {
+	public static final fun DomposableNavHost (Lio/github/samuolis/domposable/navigation3/DomposableNavigator;Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;ILkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+	public static final fun rememberDomposableNavigator (Ljava/lang/Object;Lio/github/samuolis/domposable/navigation3/DomposableRouteCodec;Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls;Landroidx/compose/runtime/Composer;II)Lio/github/samuolis/domposable/navigation3/DomposableNavigator;
+	public static final fun urlFor (Lio/github/samuolis/domposable/navigation3/DomposableRouteCodec;Ljava/lang/Object;Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls;)Ljava/lang/String;
+	public static synthetic fun urlFor$default (Lio/github/samuolis/domposable/navigation3/DomposableRouteCodec;Ljava/lang/Object;Lio/github/samuolis/domposable/navigation3/DomposableBrowserUrls;ILjava/lang/Object;)Ljava/lang/String;
 }
 

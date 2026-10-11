@@ -6,6 +6,13 @@
 // - Show declarations: true
 
 // Library unique name: <io.github.samuolis.domposable:domposable-lifecycle-viewmodel>
+abstract interface <#A: kotlin/Any?, #B: kotlin/Any?> io.github.samuolis.domposable.lifecycle/DomposableMvi { // io.github.samuolis.domposable.lifecycle/DomposableMvi|null[0]
+    abstract val state // io.github.samuolis.domposable.lifecycle/DomposableMvi.state|{}state[0]
+        abstract fun <get-state>(): kotlinx.coroutines.flow/StateFlow<#A> // io.github.samuolis.domposable.lifecycle/DomposableMvi.state.<get-state>|<get-state>(){}[0]
+
+    abstract fun dispatch(#B) // io.github.samuolis.domposable.lifecycle/DomposableMvi.dispatch|dispatch(1:1){}[0]
+}
+
 final class io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner : androidx.lifecycle/HasDefaultViewModelProviderFactory, androidx.lifecycle/ViewModelStoreOwner, androidx.savedstate/SavedStateRegistryOwner { // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner|null[0]
     final val defaultViewModelCreationExtras // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.defaultViewModelCreationExtras|{}defaultViewModelCreationExtras[0]
         final fun <get-defaultViewModelCreationExtras>(): androidx.lifecycle.viewmodel/CreationExtras // io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner.defaultViewModelCreationExtras.<get-defaultViewModelCreationExtras>|<get-defaultViewModelCreationExtras>(){}[0]
@@ -21,5 +28,6 @@ final class io.github.samuolis.domposable.lifecycle/DomposableViewModelOwner : a
 
 final val io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop // io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop|#static{}io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop[0]
 
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> io.github.samuolis.domposable.lifecycle/DomposableMviScreen(io.github.samuolis.domposable.lifecycle/DomposableMvi<#A, #B>, kotlin/Function4<#A, kotlin/Function1<#B, kotlin/Unit>, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.samuolis.domposable.lifecycle/DomposableMviScreen|DomposableMviScreen(io.github.samuolis.domposable.lifecycle.DomposableMvi<0:0,0:1>;kotlin.Function4<0:0,kotlin.Function1<0:1,kotlin.Unit>,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
 final fun io.github.samuolis.domposable.lifecycle/DomposableViewModelEntry(io.github.samuolis.domposable.screens/DomposableEntryScope<*>, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.samuolis.domposable.lifecycle/DomposableViewModelEntry|DomposableViewModelEntry(io.github.samuolis.domposable.screens.DomposableEntryScope<*>;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int){}[0]
 final fun io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.lifecycle/io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop_getter|io_github_samuolis_domposable_lifecycle_DomposableViewModelOwner$stableprop_getter(){}[0]

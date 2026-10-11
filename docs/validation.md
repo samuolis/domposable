@@ -20,6 +20,14 @@ Comparison rejects missing captures/baselines and dimension changes. It tolerate
 
 The visual browser reference is Chromium on Ubuntu 24.04 with Playwright 1.64.0. Desktop and Android references use the same Linux job. iOS pins its runtime/device and status-bar date/time/battery, waits for stable full-screen captures, and normalizes orientation metadata. A runner/runtime/font update can require a reviewed baseline refresh. Baselines from a different local OS should not replace the CI references casually.
 
+Production packaging has a separate browser check after `build_site.py`. It serves `build/site` under `/domposable/`, verifies content-hashed JavaScript and Wasm assets, reloads nested HTML routes in Chromium/Firefox/WebKit, and starts the production Wasm shop in Chromium. Development previews remain convenient for ordinary feature tests; these production checks exercise the files that Pages receives.
+
+```bash
+./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution dokkaGenerate
+python scripts/ci/build_site.py
+npx playwright test --config playwright.production.config.ts
+```
+
 ## Update baselines deliberately
 
 1. Push the implementation branch and run **CI** manually on that branch with `record_screenshots=true`.
@@ -37,6 +45,6 @@ ABI changes require `./gradlew updateKotlinAbi` and review of the generated diff
 
 Ranker's review format is also used here: action title, scoped architecture bullets plus Mermaid, consumer API example, executable build commands, and relevant validation. For visual changes, embed PNG previews in the PR body. Main | Pixel difference | PR comparisons apply when a scenario has a main baseline; new scenarios get an added preview.
 
-Run **Publish visual review** with a completed CI run ID and the open PR number. It validates provenance against the current PR head, reads bounded PNG captures, fetches baseline images at the exact base revision, and creates an isolated `visual-review/pr-<n>/run-<id>` ref. The job summary and `visual-review-markdown` artifact contain immutable image URLs to paste into `Visual evidence`. The publisher verifies that each URL returns PNG bytes. Maintainers also inspect the rendered PR body before marking it ready.
+Run **Publish visual review** with a completed CI run ID and the open PR number. It validates provenance against the current PR head, reads bounded PNG captures, fetches baseline images at the exact base revision, and uploads comparisons to the `visual-evidence` GitHub prerelease asset bucket. The job summary and `visual-review-markdown` artifact contain content-addressed image URLs to paste into `Visual evidence`. Each filename records the PR, CI run and SHA-256. The publisher verifies the downloaded PNG bytes and never overwrites an existing asset. Buckets rotate at GitHub’s asset limit; they are excluded from library release/version selection. No image branches are created. Reviewed golden inputs remain in main and full CI captures remain in Actions artifacts. Maintainers also inspect the rendered PR body before marking it ready.
 
 Generated comparisons stay outside main and feature branches. Approved golden inputs remain in `screenshots/`; documentation illustrations can be refreshed from them with `python scripts/ci/export_examples.py`. Recording candidates and publishing review evidence are separate from approving baseline updates.
