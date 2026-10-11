@@ -1,10 +1,10 @@
-# Before the first public release
+# Release readiness and product follow-ups
 
-## Release setup still pending
+## Release validation
 
 - Public demo downloads contain the signed Android APK. Apple signing and public iOS downloads are deferred; iOS library compilation and simulator tests remain in CI.
-- Review and merge the expanded demo/visual-check PR, then deploy the updated bootstrap site through its approved workflow.
-- Run the first **Bump and release** action, verify Maven Central publication and signed downloads, and install the Android demo on a real device. The checked-in `alpha00` is still unpublished.
+- Require platform behavior, visual comparisons, public ABI and published-consumer checks before merging a release input. Deploy the website from the same candidate as the Maven artifacts and APK.
+- Use **Bump and release**, verify Maven Central coordinates and signed APK identity/version, and install the demo on a real Android device. `alpha00` is reserved for the unpublished bootstrap baseline.
 - Keep dedicated credential backups secure and track publishing-token, certificate and developer-membership expiry dates privately.
 
 ## Product follow-ups
