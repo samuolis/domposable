@@ -51,6 +51,10 @@ DomposableRangeSlider(
 
 Select values must be unique and include the current value. Use an explicit placeholder option when no choice has been made. Native presents a Material dropdown; HTML emits a `<select>` with disabled options and preserves the app's controlled value. SegmentedButtons provides one selected choice with native selection semantics or an HTML radio group. A range has ordered, finite endpoints inside its bounds; `steps = 9` divides 0–100 into ten intervals. HTML displays two labelled browser sliders; native uses Material's two-thumb slider. Both thumbs remain independently accessible.
 
+![The same delivery preferences feature on Android and semantic HTML](assets/examples/selection-controls.png)
+
+Both previews run `ExtendedComponentCatalog()` from `commonMain`. The provider changes the controls' structure; the selected delivery, address, price range and callbacks come from the same feature. The [HTML/Wasm comparison](compare.md) lets you change the actual viewport width.
+
 ## Actions and help
 
 ```kotlin
@@ -64,6 +68,8 @@ DomposableLink("Help", "https://example.com/help")
 ```
 
 Tooltips provide supplemental descriptions. The control still needs its own accessible label. HTML shows help on hover or keyboard focus and supports Escape; native delegates hover/long-press behavior to Material. Link emits a browser anchor or opens the native URI handler. Navigation items with `href` preserve browser new-tab behavior while ordinary clicks call `onSelect`.
+
+Use `description = null` for a decorative Icon inside a labelled control. IconButton and FloatingActionButton take the control's accessible `label`; the decorative glyph does not become part of that name.
 
 ## Content and collections
 
@@ -141,4 +147,4 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 
 Every component has direct arguments and a `Props` overload. Keep props for renderer customization or reusable configuration; ordinary feature code can use the calls above. See [design-system customization](design-systems.md), [adaptive examples](adaptive.md) and [platform boundaries](coverage.md).
 
-The additional controls demo shares the same source for native, HTML and Wasm. These examples describe the 41-contract API introduced after 0.1.1; the published 0.1.1 provider has 34 contracts. Use the source checkout until the next minor version is published.
+The additional controls demo shares the same source for native, HTML and Wasm. The 0.1.x provider has 34 renderer contracts; the expanded provider described here has 41 and requires a minor-version upgrade. Check [release versions](https://github.com/samuolis/domposable/releases) when selecting Maven dependencies.

@@ -12,7 +12,7 @@ Migrate one feature first. Verify semantics, focus/keyboard behavior and measure
 
 Feature code can replace `DomposableChip(DomposableChipProps(label, onClick, selected))` with `DomposableChip(label, onClick, selected = selected)`. Existing props overloads remain available. The demo and modular shop use direct calls throughout; props stay at custom renderer boundaries.
 
-The next minor release expands the provider from 34 to 41 required contracts. A provider built entirely by your application must implement `topAppBar`, `floatingActionButton`, `snackbar`, `select`, `segmentedButtons`, `rangeSlider` and `tooltip`. This changes the `DomposableComponents` constructor/copy ABI; rebuild consumers and update complete custom providers when upgrading. A provider copied from `rememberDomposableMaterialComponents()` inherits the new defaults. Component users do not need KSP.
+Upgrading from the 0.1.x provider expands it from 34 to 41 required contracts. A provider built entirely by your application must implement `topAppBar`, `floatingActionButton`, `snackbar`, `select`, `segmentedButtons`, `rangeSlider` and `tooltip`. This changes the `DomposableComponents` constructor, copy and generated destructuring ABI; rebuild consumers and update complete custom providers when upgrading. Access renderers by their named properties rather than destructuring the provider. A provider copied from `rememberDomposableMaterialComponents()` inherits the new defaults. Component users do not need KSP.
 
 | Native Compose | Shared call | HTML implementation |
 | --- | --- | --- |

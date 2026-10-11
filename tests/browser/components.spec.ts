@@ -36,6 +36,14 @@ test('range endpoints stay ordered and keyboard interaction updates the feature'
   await expect(maximum).toHaveValue('30');
   await expect(maximum).toHaveAttribute('aria-valuemin', '30');
   await expect(minimum).toHaveAttribute('aria-valuemax', '30');
+  // Repeated attempts to cross must stay clamped even when the app state is unchanged.
+  await maximum.press('Home');
+  await expect(maximum).toHaveValue('30');
+  await minimum.focus();
+  await minimum.press('End');
+  await expect(minimum).toHaveValue('30');
+  await minimum.press('End');
+  await expect(minimum).toHaveValue('30');
 });
 
 test('tooltip describes its control, opens with keyboard focus and dismisses with Escape', async ({ page }) => {
