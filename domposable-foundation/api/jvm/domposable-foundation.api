@@ -61,6 +61,15 @@ public abstract interface annotation class io/github/samuolis/domposable/foundat
 	public abstract fun name ()Ljava/lang/String;
 }
 
+public final class io/github/samuolis/domposable/foundation/DomposableImageScale : java/lang/Enum {
+	public static final field Crop Lio/github/samuolis/domposable/foundation/DomposableImageScale;
+	public static final field Fill Lio/github/samuolis/domposable/foundation/DomposableImageScale;
+	public static final field Fit Lio/github/samuolis/domposable/foundation/DomposableImageScale;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableImageScale;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableImageScale;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableInputPurpose : java/lang/Enum {
 	public static final field Date Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
 	public static final field Email Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;

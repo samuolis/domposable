@@ -32,4 +32,4 @@ internal actual fun <R : Any> PlatformNavigation3Display(entries: List<NavEntry<
 }
 
 @Composable
-actual fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>) = Unit
+actual fun <R : Any> DomposableBrowserHistory(backStack: SnapshotStateList<DomposableEntryScope<R>>, codec: DomposableRouteCodec<R>, urls: DomposableBrowserUrls) = Unit

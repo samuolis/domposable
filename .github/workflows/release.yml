@@ -95,7 +95,7 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
         run: |
-          ./gradlew publishAllPublicationsToFixtureRepository :demo:jsBrowserDistribution dokkaGenerate --console=plain
+          ./gradlew publishAllPublicationsToFixtureRepository :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution dokkaGenerate --console=plain
           python - <<'PY'
           import os, subprocess
           subprocess.run(['gpg','--batch','--import'], input=os.environ['ORG_GRADLE_PROJECT_signingInMemoryKey'].encode(), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

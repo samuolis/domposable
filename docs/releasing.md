@@ -38,3 +38,9 @@ If `main` changes while a new candidate is building, the version push fails safe
 Pages always receives the `website.zip` attached to that release. A Pages-only failure resumes the same site deployment. Tags, published artifacts and public downloads refer to the tested version commit.
 
 A local build can exercise all unsigned artifacts and scripts, but live signing, App ruleset behavior, Central publication and Pages deployment require the repository configuration above. CI and release workflow files alone cannot create Apple identities or verify a Central namespace.
+
+## Initial website preview
+
+Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `alpha00` / build 0 baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
+
+The dedicated Maven public key is checked in as `signing-key.asc`; its primary fingerprint is `646AC0FE7F73C347929C825937E5A0EA1E6DA396`. It is also published to `keyserver.ubuntu.com` for Central signature verification. Private identities are held in the protected release environment, never in source control.

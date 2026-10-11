@@ -77,6 +77,8 @@ data class DomposableTokens(
     init { require(motionDurationMillis >= 0) }
 }
 
+enum class DomposableImageScale { Fit, Crop, Fill }
+
 enum class DomposableTextStyle { Body, Title, Label }
 enum class DomposableAlignment { Start, Center, End }
 enum class DomposableOrientation { Vertical, Horizontal }

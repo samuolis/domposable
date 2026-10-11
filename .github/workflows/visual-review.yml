@@ -1,0 +1,28 @@
+name: Publish visual review
+on:
+  workflow_dispatch:
+    inputs:
+      run_id: {description: 'Completed CI run for the current PR head', required: true, type: string}
+      pr_number: {description: 'Open same-repository PR number', required: true, type: string}
+permissions:
+  contents: write
+  actions: read
+  pull-requests: read
+jobs:
+  previews:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: {python-version: '3.13'}
+      - run: pip install Pillow==11.3.0
+      - name: Publish verified PNG assets on an isolated review ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: python scripts/ci/review_assets.py --run "$RUN_ID" --pr "$PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with: {name: visual-review-markdown, path: build/visual-review.md, retention-days: 30}
