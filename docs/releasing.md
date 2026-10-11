@@ -50,6 +50,10 @@ Dispatch again after fixing configuration or transient service failure. An unfin
 
 If a Central upload response is lost before its ID is saved, the action stops. Locate the deployment named `domposable-<version>-<bundle hash>` in Central and supply its ID through the recovery input. The action never blindly uploads a duplicate. Central failures remain reserved until the cause is understood; Maven coordinates cannot be overwritten.
 
+For a rejected bundle that needs a packaging fix, restore its draft assets and `release-state.json` into `.release/artifacts/` and `.release/state.json`, configure the existing GitHub/Central credentials, and run `python scripts/release.py abandon` **before merging the fix**. This command requires a staged draft, a fresh Central `FAILED` response, unchanged main and no existing version tag. It retains the original signed assets and deployment record as a failed draft archive. Merge the tested fix, then dispatch **Bump and release** again; because no version commit advanced main, the corrected candidate uses the same unpublished version/build number. Publishing or published deployments cannot use this recovery path.
+
+Packaging verifies signatures for every publication attachment and writes MD5, SHA-1, SHA-256 and SHA-512 checksums for every payload and signature, including Kotlin tooling metadata JSON and Compose resource ZIP files. GitHub publication explicitly selects the tested commit and SemVer tag, even when GitHub assigns a temporary tag to a draft.
+
 If `main` changes while a new candidate is building, the version push fails safely. Reconcile the unpublished draft candidate before starting a new release; do not delete a draft whose Central deployment is publishing or published. Later implementation commits are never rolled back. Once publication starts, finish that same release through its saved checkpoint.
 
 Pages always receives the `website.zip` attached to that release. A Pages-only failure resumes the same site deployment. Tags, published artifacts and public downloads refer to the tested version commit.
