@@ -23,7 +23,8 @@ def run(*args, capture=False, env=None):
 def verify_apk(signer, analyzer, apk, version, build_number):
     verification = run(str(signer), 'verify', '--verbose', '--print-certs', str(apk), capture=True).decode()
     expected = os.environ['ANDROID_CERT_SHA256'].replace(':', '').lower()
-    digests = [line.split(':', 1)[1].strip() for line in verification.lower().splitlines() if 'certificate sha-256 digest:' in line]
+    marker = 'certificate sha-256 digest:'
+    digests = [line.partition(marker)[2].strip() for line in verification.lower().splitlines() if marker in line]
     if expected not in digests: raise RuntimeError("APK certificate fingerprint differs")
     if run(str(analyzer), 'manifest', 'version-name', str(apk), capture=True).decode().strip() != str(version): raise RuntimeError("APK version name differs")
     if run(str(analyzer), 'manifest', 'version-code', str(apk), capture=True).decode().strip() != str(build_number): raise RuntimeError("APK build number differs")
