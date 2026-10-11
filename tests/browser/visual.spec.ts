@@ -22,7 +22,7 @@ async function stableCapture(page: Page, platform: string, name: string) {
 for (const [name, width, height, route] of [
   ['tasks-phone', 390, 844, 'tasks'], ['tasks-tablet', 768, 900, 'tasks'],
   ['tasks-wide', 1440, 900, 'tasks'], ['catalog-phone', 390, 844, 'catalog'],
-  ['catalog-wide', 1440, 900, 'catalog'], ['recipes-wide', 1440, 900, 'recipes'],
+  ['catalog-wide', 1440, 900, 'catalog'], ['extended-components', 1024, 1100, 'components'], ['recipes-wide', 1440, 900, 'recipes'],
 ] as const) {
   test(`DOM visual ${name}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
@@ -48,7 +48,7 @@ test('DOM visual dialog-phone', async ({ page }) => {
 
 for (const [name, width, height, route] of [
   ['tasks-phone', 390, 844, 'tasks'], ['tasks-wide', 1440, 900, 'tasks'],
-  ['catalog-wide', 1440, 900, 'catalog'], ['recipes-wide', 1440, 900, 'recipes'],
+  ['catalog-wide', 1440, 900, 'catalog'], ['extended-components', 1024, 1100, 'components'], ['recipes-wide', 1440, 900, 'recipes'],
 ] as const) {
   test(`Wasm visual ${name}`, async ({ page }) => {
     const errors: string[] = [];
@@ -57,6 +57,7 @@ for (const [name, width, height, route] of [
     await page.goto(`/wasm/#/${route}`);
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 60000 });
     await expect(page.locator('body')).toHaveAttribute('data-domposable-ready', 'true', { timeout: 60000 });
+    await expect(page.locator('body')).toHaveAttribute('data-domposable-initial-route', `/${route}`);
     await stableCapture(page, 'wasm', name);
     expect(errors).toEqual([]);
   });

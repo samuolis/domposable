@@ -12,6 +12,7 @@ for name, inputs in {
     'shop-web': [('dom/shop-phone.png','HTML · phone'),('dom/shop-wide.png','HTML · desktop')],
     'shop-native': [('android/shop.png','Android'),('ios/shop.png','iOS · tablet')],
     'components': [('android/catalog.png','Android components'),('dom/catalog-wide.png','Semantic HTML components')],
+    'selection-controls': [('android/extended-components.png','Android · selection and feedback'),('dom/extended-components.png','Semantic HTML · same feature')],
 }.items():
     images = [png((source/path).read_bytes()) for path,_ in inputs]
     (target/f'{name}.png').write_bytes(panel(images,[label for _,label in inputs]))

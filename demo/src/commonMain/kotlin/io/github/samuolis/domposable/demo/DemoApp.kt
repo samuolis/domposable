@@ -16,6 +16,7 @@ import io.github.samuolis.domposable.adaptive.DomposablePaneRecipe
 import io.github.samuolis.domposable.adaptive.DomposableWidthClass
 import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
+import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
 import io.github.samuolis.domposable.demo.generated.taskDetailScreenDestination
 import io.github.samuolis.domposable.demo.generated.taskListScreenDestination
@@ -36,61 +37,40 @@ import io.github.samuolis.domposable.navigation3.rememberDomposableBackStack
 import io.github.samuolis.domposable.screens.DomposableEntryScope
 import io.github.samuolis.domposable.screens.domposableScreenRegistry
 import io.github.samuolis.domposable.ui.DomposableAvatar
-import io.github.samuolis.domposable.ui.DomposableAvatarProps
 import io.github.samuolis.domposable.ui.DomposableBadge
-import io.github.samuolis.domposable.ui.DomposableBadgeProps
 import io.github.samuolis.domposable.ui.DomposableBanner
-import io.github.samuolis.domposable.ui.DomposableBannerProps
 import io.github.samuolis.domposable.ui.DomposableBottomSheet
-import io.github.samuolis.domposable.ui.DomposableBottomSheetProps
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableButtonRenderer
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableChip
-import io.github.samuolis.domposable.ui.DomposableChipProps
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableDialog
-import io.github.samuolis.domposable.ui.DomposableDialogProps
 import io.github.samuolis.domposable.ui.DomposableDivider
 import io.github.samuolis.domposable.ui.DomposableFlowRow
 import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableIconButton
-import io.github.samuolis.domposable.ui.DomposableIconButtonProps
-import io.github.samuolis.domposable.ui.DomposableIconProps
 import io.github.samuolis.domposable.ui.DomposableImage
-import io.github.samuolis.domposable.ui.DomposableImageProps
 import io.github.samuolis.domposable.ui.DomposableLazyColumn
-import io.github.samuolis.domposable.ui.DomposableLazyColumnProps
 import io.github.samuolis.domposable.ui.DomposableLazyGrid
-import io.github.samuolis.domposable.ui.DomposableLazyGridProps
-import io.github.samuolis.domposable.ui.DomposableLazyItem
 import io.github.samuolis.domposable.ui.DomposableLazyRow
-import io.github.samuolis.domposable.ui.DomposableLazyRowProps
 import io.github.samuolis.domposable.ui.DomposableLink
 import io.github.samuolis.domposable.ui.DomposableMeasure
 import io.github.samuolis.domposable.ui.DomposableMenu
 import io.github.samuolis.domposable.ui.DomposableMenuItem
-import io.github.samuolis.domposable.ui.DomposableMenuProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableNavigationBar
-import io.github.samuolis.domposable.ui.DomposableNavigationBarProps
 import io.github.samuolis.domposable.ui.DomposableNavigationItem
 import io.github.samuolis.domposable.ui.DomposableProgress
-import io.github.samuolis.domposable.ui.DomposableProgressProps
 import io.github.samuolis.domposable.ui.DomposableRadioButton
-import io.github.samuolis.domposable.ui.DomposableRadioButtonProps
 import io.github.samuolis.domposable.ui.DomposableScaffold
 import io.github.samuolis.domposable.ui.DomposableSlider
-import io.github.samuolis.domposable.ui.DomposableSliderProps
 import io.github.samuolis.domposable.ui.DomposableSpacer
 import io.github.samuolis.domposable.ui.DomposableSurface
-import io.github.samuolis.domposable.ui.DomposableSurfaceProps
 import io.github.samuolis.domposable.ui.DomposableSwitch
-import io.github.samuolis.domposable.ui.DomposableSwitchProps
 import io.github.samuolis.domposable.ui.DomposableTabs
-import io.github.samuolis.domposable.ui.DomposableTabsProps
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.DomposableTheme
@@ -113,6 +93,8 @@ sealed interface DemoRoute {
         val taskId: String,
     ) : DemoRoute
 
+    data object ExtendedCatalog : DemoRoute
+
     data object Catalog : DemoRoute
 
     data object Recipes : DemoRoute
@@ -122,10 +104,11 @@ sealed interface DemoRoute {
     ) : DemoRoute
 }
 
-private object DemoCodec : DomposableRouteCodec<DemoRoute> {
+internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
     override fun encode(route: DemoRoute): String =
         when (route) {
             DemoRoute.Tasks -> "/tasks"
+            DemoRoute.ExtendedCatalog -> "/components"
             DemoRoute.Catalog -> "/catalog"
             DemoRoute.Recipes -> "/recipes"
             is DemoRoute.NotFound -> route.path
@@ -135,6 +118,8 @@ private object DemoCodec : DomposableRouteCodec<DemoRoute> {
     override fun decode(path: String): DemoRoute? =
         when {
             path == "/tasks" || path == "/" || path.isEmpty() -> DemoRoute.Tasks
+
+            path == "/components" -> DemoRoute.ExtendedCatalog
 
             path == "/catalog" -> DemoRoute.Catalog
 
@@ -253,7 +238,12 @@ fun DemoApp(
                         }
                     },
                 )
-                register(componentCatalogScreenDestination())
+                register(
+                    componentCatalogScreenDestination {
+                        ComponentCatalogScreen { stack.add(DomposableEntryScope(DemoRoute.ExtendedCatalog)) }
+                    },
+                )
+                register(extendedComponentCatalogDestination())
                 register(navigationRecipesScreenDestination())
                 register(
                     unavailableScreenDestination {
@@ -271,7 +261,7 @@ fun DemoApp(
             val shell = rememberDomposableAdaptiveInfo(shellSize)
             val selected =
                 when (stack.last().route) {
-                    DemoRoute.Catalog -> 1
+                    DemoRoute.Catalog, DemoRoute.ExtendedCatalog -> 1
                     DemoRoute.Recipes -> 2
                     is DemoRoute.NotFound -> -1
                     else -> 0
@@ -290,25 +280,26 @@ fun DemoApp(
                 }
             val navigation: @Composable () -> Unit = {
                 DomposableNavigationBar(
-                    DomposableNavigationBarProps(
+                    items =
                         listOf(
                             DomposableNavigationItem("Tasks", "✓", href("/tasks")),
                             DomposableNavigationItem("Components", "◉", href("/catalog")),
                             DomposableNavigationItem("Recipes", "▦", href("/recipes")),
                         ),
-                        selected,
-                        { index ->
-                            stack.clear()
-                            stack.add(
-                                DomposableEntryScope(
-                                    when (index) {
-                                        1 -> DemoRoute.Catalog
-                                        2 -> DemoRoute.Recipes
-                                        else -> DemoRoute.Tasks
-                                    },
-                                ),
-                            )
-                        },
+                    selectedIndex = selected,
+                    onSelect = { index ->
+                        stack.clear()
+                        stack.add(
+                            DomposableEntryScope(
+                                when (index) {
+                                    1 -> DemoRoute.Catalog
+                                    2 -> DemoRoute.Recipes
+                                    else -> DemoRoute.Tasks
+                                },
+                            ),
+                        )
+                    },
+                    orientation =
                         if (shell.widthClass ==
                             DomposableWidthClass.Compact
                         ) {
@@ -316,15 +307,18 @@ fun DemoApp(
                         } else {
                             DomposableOrientation.Vertical
                         },
-                    ),
                 )
             }
             DomposableScaffold(
                 topBar = {
                     DomposableFlowRow(DomposableModifier.padding(16.dp).fillMaxWidth(), gap = 16.dp) {
                         DomposableText("◈ Domposable", style = DomposableTextStyle.Title, headingLevel = 1)
-                        DomposableBadge(DomposableBadgeProps("PLAYGROUND"))
-                        DomposableSwitch(DomposableSwitchProps(customButtons, { customButtons = it }, "Custom buttons"))
+                        DomposableBadge(text = "PLAYGROUND")
+                        DomposableSwitch(
+                            checked = customButtons,
+                            onCheckedChange = { customButtons = it },
+                            label = "Custom buttons",
+                        )
                         DomposableButton("Shop demo", { openShopDemo { shopping = true } })
                     }
                 },
@@ -373,9 +367,7 @@ fun TaskListScreen(
             DemoMetric("6", "Targets")
         }
         DomposableBanner(
-            DomposableBannerProps(
-                "Open a task, write a draft, then resize. Wide layouts keep the list alongside its detail.",
-            ),
+            message = "Open a task, write a draft, then resize. Wide layouts keep the list alongside its detail.",
         )
         DomposableTextField(title, { title = it }, "New task", modifier = DomposableModifier.testId("new-task"))
         DomposableButton("Add task", {
@@ -408,7 +400,7 @@ fun TaskDetailScreen(
     DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
         DomposableButton("Back to tasks", onBack)
         if (task == null) {
-            DomposableBanner(DomposableBannerProps("This task is unavailable", true))
+            DomposableBanner(message = "This task is unavailable", isError = true)
         } else {
             DomposableText(task.title, style = DomposableTextStyle.Title)
             DomposableCheckbox(task.done, { workspace.toggle(task.id) }, "Completed")
@@ -422,7 +414,7 @@ fun TaskDetailScreen(
 
 @Composable
 @DomposableScreen(route = DemoRoute.Catalog::class)
-fun ComponentCatalogScreen() {
+fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
     var text by rememberSaveable { mutableStateOf("") }
     var checked by rememberSaveable { mutableStateOf(false) }
     var slider by rememberSaveable { mutableFloatStateOf(0.5f) }
@@ -434,18 +426,17 @@ fun ComponentCatalogScreen() {
         DomposableText("Component catalog", style = DomposableTextStyle.Title)
         DomposableText("Explore the same controls through native Compose UI and semantic HTML.")
         DomposableFlowRow(gap = 8.dp) {
-            DomposableBadge(DomposableBadgeProps("34 renderers"))
-            DomposableChip(DomposableChipProps("Theme tokens", {}, true))
+            DomposableBadge(text = "41 renderers")
+            DomposableChip(label = "Theme tokens", onClick = {}, selected = true)
             DomposableLink("Renderer contracts", "https://samuolis.github.io/domposable/design-systems/")
         }
         DomposableText("Actions", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableFlowRow(gap = 12.dp) {
+            DomposableButton("More components", onMoreComponents)
             DomposableButton("Filled", {})
             DomposableButton({}, style = DomposableButtonStyle.Outlined) { DomposableText("Outlined") }
             DomposableButton({}, enabled = false) { DomposableText("Disabled") }
-            DomposableIconButton(
-                DomposableIconButtonProps({}, "Favorite"),
-            ) { DomposableIcon(DomposableIconProps("♡", null)) }
+            DomposableIconButton(onClick = {}, label = "Favorite") { DomposableIcon(symbol = "♡", description = null) }
         }
         DomposableText("Forms and selection", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableTextField(text, { text = it }, "Example input", modifier = DomposableModifier.testId("catalog-input"))
@@ -454,29 +445,30 @@ fun ComponentCatalogScreen() {
         DomposableTextField("Read only", {}, "Disabled input", enabled = false)
         DomposableTextField("sample", {}, "Password", purpose = DomposableInputPurpose.Password)
         DomposableCheckbox(checked, { checked = it }, "Checkbox")
-        DomposableSwitch(DomposableSwitchProps(checked, { checked = it }, "Switch"))
-        DomposableRadioButton(DomposableRadioButtonProps(checked, { checked = true }, "Radio option"))
-        DomposableSlider(DomposableSliderProps(slider, { slider = it }, "Progress"))
+        DomposableSwitch(checked = checked, onCheckedChange = { checked = it }, label = "Switch")
+        DomposableRadioButton(selected = checked, onClick = { checked = true }, label = "Radio option")
+        DomposableSlider(value = slider, onValueChange = { slider = it }, label = "Progress")
         DomposableFlowRow(gap = 12.dp) {
-            DomposableChip(DomposableChipProps("Filter", { checked = !checked }, checked))
-            DomposableBadge(DomposableBadgeProps("3"))
-            DomposableAvatar(DomposableAvatarProps("DS", "Domposable sample"))
+            DomposableChip(label = "Filter", onClick = { checked = !checked }, selected = checked)
+            DomposableBadge(text = "3")
+            DomposableAvatar(initials = "DS", description = "Domposable sample")
         }
         DomposableImage(
-            DomposableImageProps(DEMO_ARTWORK, "Domposable mark"),
-            DomposableModifier.width(96.dp).height(96.dp),
+            source = DEMO_ARTWORK,
+            description = "Domposable mark",
+            modifier = DomposableModifier.width(96.dp).height(96.dp),
         )
         DomposableDivider()
         DomposableText("Content and feedback", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableCard {
             DomposableColumn(gap = 8.dp) {
                 DomposableText("Cards and surfaces")
-                DomposableSurface(DomposableSurfaceProps()) { DomposableText("Surface content") }
+                DomposableSurface { DomposableText("Surface content") }
             }
         }
-        DomposableBanner(DomposableBannerProps("Accessible status messages"))
-        DomposableProgress(DomposableProgressProps(slider, circular = false))
-        DomposableTabs(DomposableTabsProps(listOf("First", "Second"), tab, { tab = it }))
+        DomposableBanner(message = "Accessible status messages")
+        DomposableProgress(value = slider, circular = false)
+        DomposableTabs(labels = listOf("First", "Second"), selectedIndex = tab, onSelect = { tab = it })
         DomposableText("Selected section: ${tab + 1}")
         DomposableFlowRow(gap = 12.dp) {
             DomposableButton("Open dialog", { dialog = true })
@@ -486,35 +478,22 @@ fun ComponentCatalogScreen() {
         DomposableText("Keyed collections", style = DomposableTextStyle.Title)
         DomposableText("Keyed collections", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableLazyRow(
-            DomposableLazyRowProps(
-                (1..6).map { n ->
-                    DomposableLazyItem("tag-$n") {
-                        DomposableChip(DomposableChipProps("Collection $n", {}))
-                    }
-                },
-                8.dp,
-            ),
-            DomposableModifier.fillMaxWidth().height(64.dp),
-        )
+            items = (1..6).toList(),
+            key = { "tag-$it" },
+            modifier = DomposableModifier.fillMaxWidth().height(64.dp),
+            gap = 8.dp,
+        ) { number -> DomposableChip("Collection $number", {}) }
         DomposableLazyColumn(
-            DomposableLazyColumnProps(
-                (1..3).map { n ->
-                    DomposableLazyItem("activity-$n") {
-                        DomposableText("Activity $n · Stable keyed content")
-                    }
-                },
-                8.dp,
-            ),
-            DomposableModifier.fillMaxWidth().height(104.dp),
-        )
+            items = (1..3).toList(),
+            key = { "activity-$it" },
+            modifier = DomposableModifier.fillMaxWidth().height(104.dp),
+            gap = 8.dp,
+        ) { number -> DomposableText("Activity $number · Stable keyed content") }
         DomposableLazyGrid(
-            DomposableLazyGridProps(
-                (1..4).map { number ->
-                    DomposableLazyItem("cell-$number") { DomposableCard { DomposableText("Cell $number") } }
-                },
-            ),
-            DomposableModifier.height(180.dp).fillMaxWidth(),
-        )
+            items = (1..4).toList(),
+            key = { "cell-$it" },
+            modifier = DomposableModifier.height(180.dp).fillMaxWidth(),
+        ) { number -> DomposableCard { DomposableText("Cell $number") } }
         DomposableText("Nested theme", style = DomposableTextStyle.Title)
         val base = LocalDomposableTokens.current
         DomposableTheme(
@@ -524,33 +503,28 @@ fun ComponentCatalogScreen() {
             DomposableButton("Independent theme tokens", {})
         }
         DomposableSpacer()
-        DomposableText("No ViewModel, DI or action interface is required by this screen.")
+        DomposableText("Open More components for app bars, selection fields and feedback controls.")
     }
     if (dialog) {
-        DomposableDialog(
-            DomposableDialogProps("Example dialog", {
-                dialog = false
-            }),
-        ) { DomposableText("Escape closes this dialog and restores focus.") }
+        DomposableDialog(title = "Example dialog", onDismiss = {
+            dialog = false
+        }) { DomposableText("Escape closes this dialog and restores focus.") }
     }
     if (sheet) {
-        DomposableBottomSheet(
-            DomposableBottomSheetProps("Example sheet", {
-                sheet = false
-            }),
-        ) { DomposableText("Platform-adapted presentation.") }
+        DomposableBottomSheet(title = "Example sheet", onDismiss = {
+            sheet = false
+        }) { DomposableText("Platform-adapted presentation.") }
     }
     DomposableMenu(
-        DomposableMenuProps(
-            menu,
-            { menu = false },
+        expanded = menu,
+        onDismiss = { menu = false },
+        items =
             listOf(
                 DomposableMenuItem("Example action", {
                     checked =
                         !checked
                 }),
             ),
-        ),
     )
 }
 

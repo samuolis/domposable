@@ -26,6 +26,8 @@ class VisualTest {
 
     @Test fun catalog() = capture("catalog", DemoRoute.Catalog)
 
+    @Test fun extendedComponents() = capture("extended-components", DemoRoute.ExtendedCatalog)
+
     @Test fun recipes() = capture("recipes", DemoRoute.Recipes)
 
     @OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)

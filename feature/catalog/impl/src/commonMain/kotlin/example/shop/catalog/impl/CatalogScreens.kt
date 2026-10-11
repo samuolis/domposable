@@ -13,11 +13,9 @@ import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBanner
-import io.github.samuolis.domposable.ui.DomposableBannerProps
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableChip
-import io.github.samuolis.domposable.ui.DomposableChipProps
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableDivider
 import io.github.samuolis.domposable.ui.DomposableFlowRow
@@ -25,7 +23,6 @@ import io.github.samuolis.domposable.ui.DomposableMeasure
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableRow
 import io.github.samuolis.domposable.ui.DomposableSwitch
-import io.github.samuolis.domposable.ui.DomposableSwitchProps
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.contentDescription
@@ -150,24 +147,21 @@ internal fun StorefrontContent(
                             ).testId("shop-search"),
                     purpose = DomposableInputPurpose.Search,
                 )
-                DomposableSwitch(
-                    DomposableSwitchProps(state.priceAscending, {
-                        onAction(CatalogAction.Sort(it))
-                    }, "Price: low to high"),
-                )
+                DomposableSwitch(checked = state.priceAscending, onCheckedChange = {
+                    onAction(CatalogAction.Sort(it))
+                }, label = "Price: low to high")
             }
             DomposableFlowRow(gap = 8.dp) {
                 listOf("All", "Home", "Travel").forEach { category ->
                     DomposableChip(
-                        DomposableChipProps(
-                            category,
-                            { onAction(CatalogAction.Category(category)) },
+                        label = category,
+                        onClick = { onAction(CatalogAction.Category(category)) },
+                        selected =
                             state.category == category,
-                        ),
                     )
                 }
             }
-            if (state.notice.isNotEmpty()) DomposableBanner(DomposableBannerProps(state.notice))
+            if (state.notice.isNotEmpty()) DomposableBanner(message = state.notice)
             DomposableText(
                 "${state.visibleProducts.size} thoughtfully chosen pieces",
                 style = DomposableTextStyle.Label,
@@ -245,7 +239,7 @@ internal fun ProductContent(
                 DomposableButton("Add to bag", { onAdd() })
                 DomposableButton("View bag", onCart)
             }
-            if (state.notice.isNotEmpty()) DomposableBanner(DomposableBannerProps(state.notice))
+            if (state.notice.isNotEmpty()) DomposableBanner(message = state.notice)
             DomposableDivider()
             DomposableText("The details", style = DomposableTextStyle.Title, headingLevel = 3)
             DomposableText(

@@ -39,20 +39,16 @@ import io.github.samuolis.domposable.navigation3.rememberDomposableNavigator
 import io.github.samuolis.domposable.navigation3.urlFor
 import io.github.samuolis.domposable.screens.DomposableDestination
 import io.github.samuolis.domposable.ui.DomposableBanner
-import io.github.samuolis.domposable.ui.DomposableBannerProps
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableFlowRow
 import io.github.samuolis.domposable.ui.DomposableImage
-import io.github.samuolis.domposable.ui.DomposableImageProps
 import io.github.samuolis.domposable.ui.DomposableLink
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableNavigationBar
-import io.github.samuolis.domposable.ui.DomposableNavigationBarProps
 import io.github.samuolis.domposable.ui.DomposableNavigationItem
 import io.github.samuolis.domposable.ui.DomposableScaffold
 import io.github.samuolis.domposable.ui.DomposableSurface
-import io.github.samuolis.domposable.ui.DomposableSurfaceProps
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTheme
 import io.github.samuolis.domposable.ui.fillMaxHeight
@@ -162,10 +158,7 @@ fun ShoppingApp(
     ) {
         DomposableTheme(ShopTokens, rememberDomposableMaterialComponents()) {
             DomposableScaffold(topBar = {
-                DomposableSurface(
-                    DomposableSurfaceProps(ShopTokens.colors.primary),
-                    DomposableModifier.fillMaxWidth(),
-                ) {
+                DomposableSurface(color = ShopTokens.colors.primary, modifier = DomposableModifier.fillMaxWidth()) {
                     DomposableText(
                         "Everyday essentials. Free delivery over €100.",
                         DomposableModifier.padding(8.dp),
@@ -182,23 +175,22 @@ fun ShoppingApp(
                             else -> 1
                         }
                     DomposableNavigationBar(
-                        DomposableNavigationBarProps(
+                        items =
                             listOf(
                                 DomposableNavigationItem("Discover", href = href(CatalogRoute.Home)),
                                 DomposableNavigationItem("Shop all", href = href(CatalogRoute.Collection)),
                                 DomposableNavigationItem("Bag (${cart.count})", href = href(CheckoutRoute.Cart)),
                             ),
-                            selected,
-                            {
-                                navigator.navigate(
-                                    when (it) {
-                                        0 -> CatalogRoute.Home
-                                        1 -> CatalogRoute.Collection
-                                        else -> CheckoutRoute.Cart
-                                    },
-                                )
-                            },
-                        ),
+                        selectedIndex = selected,
+                        onSelect = {
+                            navigator.navigate(
+                                when (it) {
+                                    0 -> CatalogRoute.Home
+                                    1 -> CatalogRoute.Collection
+                                    else -> CheckoutRoute.Cart
+                                },
+                            )
+                        },
                     )
                 }
             }, bottomBar = {
@@ -234,15 +226,12 @@ private fun ShopPhoto(
     val uri = remember(file) { Res.getUri("files/$file") }
     var loaded by remember(uri) { mutableStateOf(false) }
     var failed by remember(uri) { mutableStateOf(false) }
-    DomposableImage(
-        DomposableImageProps(uri, description, onLoaded = {
-            loaded = true
-            onLoaded?.invoke()
-        }, onError = {
-            failed =
-                true
-        }, scale = scale),
-        modifier.testId("$file-${if (loaded) "loaded" else "loading"}"),
-    )
-    if (failed) DomposableBanner(DomposableBannerProps("Image unavailable: $description", true))
+    DomposableImage(source = uri, description = description, onLoaded = {
+        loaded = true
+        onLoaded?.invoke()
+    }, onError = {
+        failed =
+            true
+    }, scale = scale, modifier = modifier.testId("$file-${if (loaded) "loaded" else "loading"}"))
+    if (failed) DomposableBanner(message = "Image unavailable: $description", isError = true)
 }

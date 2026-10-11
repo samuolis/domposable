@@ -20,9 +20,7 @@ import io.github.samuolis.domposable.navigation3.rememberDomposableBackStack
 import io.github.samuolis.domposable.screens.DomposableEntryScope
 import io.github.samuolis.domposable.screens.domposableScreenRegistry
 import io.github.samuolis.domposable.ui.DomposableBadge
-import io.github.samuolis.domposable.ui.DomposableBadgeProps
 import io.github.samuolis.domposable.ui.DomposableBanner
-import io.github.samuolis.domposable.ui.DomposableBannerProps
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableColumn
@@ -31,9 +29,7 @@ import io.github.samuolis.domposable.ui.DomposableLink
 import io.github.samuolis.domposable.ui.DomposableMeasure
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableSurface
-import io.github.samuolis.domposable.ui.DomposableSurfaceProps
 import io.github.samuolis.domposable.ui.DomposableSwitch
-import io.github.samuolis.domposable.ui.DomposableSwitchProps
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.fillMaxHeight
@@ -130,7 +126,7 @@ fun NavigationRecipesScreen() {
     DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
         DomposableText("Navigation recipes", style = DomposableTextStyle.Title)
         DomposableText("Navigation 3 hosts the same application-owned routes on every renderer.")
-        DomposableSwitch(DomposableSwitchProps(supporting, { supporting = it }, "Allow three panes"))
+        DomposableSwitch(checked = supporting, onCheckedChange = { supporting = it }, label = "Allow three panes")
         DomposableButton("Reset recipe", {
             stack.clear()
             stack.add(DomposableEntryScope(RecipeRoute.List))
@@ -147,9 +143,7 @@ fun NavigationRecipesScreen() {
                 if (stack.size > 1) stack.removeAt(stack.lastIndex)
             }
         }
-        DomposableBanner(
-            DomposableBannerProps("Try list/detail, add a supporting pane, type a reply, resize, and go back."),
-        )
+        DomposableBanner(message = "Try list/detail, add a supporting pane, type a reply, resize, and go back.")
         DomposableText("Entry ownership", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableText(
             "Use entry.retain for an application-owned model and disposal. Use " +
@@ -169,9 +163,9 @@ private fun RecipePane(
     role: String,
     content: @Composable () -> Unit,
 ) {
-    DomposableSurface(DomposableSurfaceProps(), DomposableModifier.fillMaxWidth().fillMaxHeight()) {
+    DomposableSurface(modifier = DomposableModifier.fillMaxWidth().fillMaxHeight()) {
         DomposableColumn(DomposableModifier.padding(16.dp).fillMaxWidth().verticalScroll(), gap = 12.dp) {
-            DomposableBadge(DomposableBadgeProps(role))
+            DomposableBadge(text = role)
             DomposableText(title, style = DomposableTextStyle.Title, headingLevel = 3)
             content()
         }

@@ -3,20 +3,23 @@
     "tasks",
     "catalog",
     "recipes",
-    "shop"
+    "shop",
+    "extended-components"
   ],
   "desktop": [
     "tasks",
     "catalog",
     "recipes",
-    "shop"
+    "shop",
+    "extended-components"
   ],
   "ios": [
     "tasks",
     "catalog",
     "recipes",
     "adaptive",
-    "shop"
+    "shop",
+    "extended-components"
   ],
   "dom": [
     "tasks-phone",
@@ -30,7 +33,8 @@
     "shop-phone",
     "shop-wide",
     "shop-collection-wide",
-    "shop-cart-phone"
+    "shop-cart-phone",
+    "extended-components"
   ],
   "wasm": [
     "tasks-phone",
@@ -38,6 +42,7 @@
     "catalog-wide",
     "recipes-wide",
     "shop-phone",
-    "shop-wide"
+    "shop-wide",
+    "extended-components"
   ]
 }

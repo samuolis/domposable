@@ -67,11 +67,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.dialog
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
@@ -464,14 +464,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             icon = { props, modifier, _ ->
                 Text(
                     props.symbol,
-                    modifier.toComposeModifier().semantics {
-                        if (props.description !=
-                            null
-                        ) {
-                            contentDescription = props.description!!
-                        } else {
-                            hideFromAccessibility()
-                        }
+                    modifier.toComposeModifier().clearAndSetSemantics {
+                        props.description?.let { contentDescription = it }
                     },
                 )
             },
@@ -601,6 +595,13 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     TextButton(props.onDismiss) { Text("Close") }
                 }
             },
+            topAppBar = { props, modifier, _ -> NativeTopAppBar(props, modifier) },
+            floatingActionButton = { props, modifier, content -> NativeFloatingActionButton(props, modifier, content) },
+            snackbar = { props, modifier, _ -> NativeSnackbar(props, modifier) },
+            select = { props, modifier, _ -> NativeSelect(props, modifier) },
+            segmentedButtons = { props, modifier, _ -> NativeSegmentedButtons(props, modifier) },
+            rangeSlider = { props, modifier, _ -> NativeRangeSlider(props, modifier) },
+            tooltip = { props, modifier, content -> NativeTooltip(props, modifier, content) },
             scaffold = { props, modifier, content ->
                 Surface(modifier.toComposeModifier().fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     Column(Modifier.fillMaxSize()) {

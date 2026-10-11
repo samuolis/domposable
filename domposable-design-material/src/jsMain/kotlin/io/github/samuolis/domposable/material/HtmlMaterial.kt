@@ -622,6 +622,13 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 ->
                 HtmlModal(props.title, props.onDismiss, modifier, sheet = true, content)
             },
+            topAppBar = { props, modifier, _ -> HtmlTopAppBar(props, modifier) },
+            floatingActionButton = { props, modifier, content -> HtmlFloatingActionButton(props, modifier, content) },
+            snackbar = { props, modifier, _ -> HtmlSnackbar(props, modifier) },
+            select = { props, modifier, _ -> HtmlSelect(props, modifier) },
+            segmentedButtons = { props, modifier, _ -> HtmlSegmentedButtons(props, modifier) },
+            rangeSlider = { props, modifier, _ -> HtmlRangeSlider(props, modifier) },
+            tooltip = { props, modifier, content -> HtmlTooltip(props, modifier, content) },
             scaffold = { props, modifier, content ->
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
@@ -881,7 +888,7 @@ private const val MATERIAL_CSS = """
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}
 .d-icon-button{border-radius:50%;padding:10px}.d-chip{background:var(--d-variant);color:var(--d-on-surface)}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}
 .d-card{padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}
-.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea{padding:12px;border:1px solid var(--d-outline);border-radius:var(--d-radius);color:var(--d-on-surface);background:var(--d-surface)}
+.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{padding:12px;border:1px solid var(--d-outline);border-radius:var(--d-radius);color:var(--d-on-surface);background:var(--d-surface)}
 .d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}
 .d-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{border-radius:12px;padding:2px 8px;background:var(--d-primary);color:var(--d-on-primary)}
 .d-divider{border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
@@ -890,5 +897,9 @@ private const val MATERIAL_CSS = """
 .d-dialog{border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface);max-width:min(600px,90vw)}
 .d-dialog::backdrop{background:#0006}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw)}
 .d-scaffold{display:flex;flex-direction:column;height:100dvh}.d-scaffold-middle{display:flex;flex:1;min-height:0}.d-scaffold-body{flex:1;min-width:0;min-height:0;position:relative;overflow:auto}.d-floating{position:absolute;bottom:16px;right:16px}.d-snackbar{position:absolute;bottom:16px;left:16px}
+.d-app-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;background:var(--d-surface)}.d-app-bar h2{font-size:var(--d-title);flex:1}.d-app-bar-actions{display:flex;gap:8px}.d-fab{min-width:56px;min-height:56px;border-radius:16px;box-shadow:0 3px 8px #0003}
+.d-snackbar-message{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 16px;border-radius:var(--d-radius);background:var(--d-on-surface);color:var(--d-surface)}.d-snackbar-message button{border:0;background:transparent;color:inherit;min-height:44px;padding:8px}
+.d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer}.d-segment input{position:absolute;opacity:0;width:1px;height:1px}.d-segment span{display:flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid var(--d-outline)}.d-segment:first-child span{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child span{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+span{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+span{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+span{opacity:.5;cursor:default}
+.d-range{display:flex;flex-direction:column;gap:12px}.d-tooltip-anchor{display:inline-block;position:relative}.d-tooltip{position:absolute;z-index:5;bottom:100%;left:0;min-width:160px;max-width:280px;border-radius:4px;padding:8px 12px;background:var(--d-on-surface);color:var(--d-surface);font-size:var(--d-label)}
 @media(prefers-reduced-motion:reduce){.d-theme *{transition:none!important;animation:none!important}}
 """

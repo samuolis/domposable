@@ -16,7 +16,7 @@ fun ContactsScreen(model: ContactsModel) {
 }
 ```
 
-Your application supplies its models and dependencies. Plain Compose state, MVVM, MVI, Metro, Koin, Dagger and manual construction are application choices. Screens return `Unit`; neither state/action wrappers nor dependency injection are mandatory.
+A theme installs the component provider. Each shared call forwards typed values and callbacks to that provider: Material controls on Compose UI targets, HTML elements in Kotlin/JS. Your application owns its models and dependencies. [See how the API works](docs/how-it-works.md).
 
 ## Modules
 
@@ -49,22 +49,9 @@ The fictional shop shares its catalogue, filters, cart, checkout and feature com
 ![The same Fieldwork storefront on Android and iOS](docs/assets/examples/shop-native.png)
 ![Domposable shared components on mobile and semantic HTML](docs/assets/examples/components.png)
 
-Start with [the installation guide](docs/getting-started.md), then explore [components](docs/components.md), [responsive layouts](docs/adaptive.md), [design providers](docs/design-systems.md) and [Metro/Kobweb integration](docs/integrations.md). The [shopping walkthrough](docs/shopping.md) connects the pieces in one app. There is no mandatory ViewModel base class, MVI contract or DI container.
+Start with [the installation guide](docs/getting-started.md), read [how the API works](docs/how-it-works.md), then explore [components](docs/components.md), [responsive layouts](docs/adaptive.md), [design providers](docs/design-systems.md) and [Metro/Kobweb integration](docs/integrations.md). The [shopping walkthrough](docs/shopping.md) connects the pieces in one app. There is no mandatory ViewModel base class, MVI contract or DI container.
 
-The [modular shopping example](https://samuolis.github.io/domposable/modular-demo/) has catalog and checkout API/implementation modules. Screens receive ViewModels through MetroX's standard Compose injection, navigate through a typed composition local, and optionally use the MVI helper:
-
-```kotlin
-@Composable
-@DomposableScreen(CatalogRoute.Collection::class, viewModel = true)
-fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
-    val navigator = LocalShopNavigator.current
-    DomposableMviScreen(model) { state, onAction ->
-        CollectionContent(state, onAction, onProduct = { navigator.navigate(CatalogRoute.Product(it)) })
-    }
-}
-```
-
-KSP generates `domposableEntries()` with no factory arguments. It evaluates injection defaults under each entry's ViewModel owner. DI, the navigator and MVI are optional; [manual registry and direct Navigation 3](docs/screens.md) are supported too.
+The [modular shopping example](https://samuolis.github.io/domposable/modular-demo/) separates catalog and checkout into API and implementation modules. Metro supplies entry-owned ViewModels; an application composition local supplies typed navigation. Optional KSP generates feature entry lists and preserves injection defaults. [The walkthrough](docs/modular-demo.md) explains ownership and assembly; [manual registry and direct Navigation 3](docs/screens.md) remain available.
 
 Every PR requires ktlint, detekt, Android lint, measured JVM/Android [coverage floors](docs/coverage.md), and functional/screenshot checks across Android, iOS, desktop, HTML and Wasm. CI retains coverage and analysis reports as GitHub Actions artifacts.
 

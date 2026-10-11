@@ -56,11 +56,10 @@ private fun HtmlModifierBox(
             property("box-sizing", "border-box")
             when (operation) {
                 is DomposableModifierOperation.Padding -> {
-                    property(
-                        "padding",
-                        "${operation.insets.top.value}px ${operation.insets.end.value}px " +
-                            "${operation.insets.bottom.value}px ${operation.insets.start.value}px",
-                    )
+                    property("padding-block-start", "${operation.insets.top.value}px")
+                    property("padding-inline-end", "${operation.insets.end.value}px")
+                    property("padding-block-end", "${operation.insets.bottom.value}px")
+                    property("padding-inline-start", "${operation.insets.start.value}px")
                 }
 
                 is DomposableModifierOperation.Width -> {

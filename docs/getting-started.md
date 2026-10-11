@@ -73,6 +73,8 @@ Use standard Compose hosts and compiler plugins matching the [tested toolchain](
 
 These snippets illustrate host boundaries; runnable target configurations are in [`demo/build.gradle.kts`](https://github.com/samuolis/domposable/blob/main/demo/build.gradle.kts) and its source sets. Do not call Compose UI layout or Material composables from the HTML host. Within shared feature code, use the `Domposable` primitives so the selected provider controls rendering.
 
+Read [how the API works](how-it-works.md) for the relationship between calls, props, providers, modifiers and adaptive layout.
+
 ## Supply your dependencies
 
 ```kotlin
