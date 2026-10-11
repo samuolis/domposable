@@ -131,8 +131,9 @@ def validate_candidate(state):
     if state["repository"] != REPOSITORY: raise RuntimeError("Release state belongs to another repository")
     Version.parse(state["version"])
     parent = run("git", "rev-parse", state["commit"] + "^", capture=True)
+    parents = run("git", "rev-list", "--parents", "-n", "1", state["commit"], capture=True).split()
     changed = run("git", "diff", "--name-only", state["base"], state["commit"], capture=True).splitlines()
-    if parent != state["base"] or changed != ["version.properties"]:
+    if len(parents) != 2 or parent != state["base"] or changed != ["version.properties"]:
         raise RuntimeError("Release candidate must be one commit changing only version.properties")
     version, build = read_version(ROOT / "version.properties")
     if str(version) != state["version"] or build != state["build"]: raise RuntimeError("Version file disagrees with release state")
@@ -245,8 +246,15 @@ def stage():
     for path in sorted(ASSETS.iterdir()):
         if path.name != "release-state.json": github.upload(state["release_id"], path)
 
+def verify_candidate_ci(state):
+    identifier = state.get("ci_run_id")
+    if not isinstance(identifier, int): raise RuntimeError("Candidate has no successful CI checkpoint")
+    result = GitHub().request(f"actions/runs/{identifier}")
+    if result.get("head_sha") != state["commit"] or result.get("conclusion") != "success" or result.get("path") != ".github/workflows/ci.yml":
+        raise RuntimeError("Candidate CI does not prove success for this commit")
+
 def advance_main():
-    state = read_state(); validate_candidate(state); verify_assets()
+    state = read_state(); validate_candidate(state); verify_assets(); verify_candidate_ci(state)
     remote = run("git", "ls-remote", "origin", "refs/heads/main", capture=True).split()[0]
     if remote == state["commit"]:
         state["phase"] = "main-advanced"; checkpoint(state); return

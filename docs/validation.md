@@ -11,7 +11,7 @@ Locally verified on macOS with JDK 21, Xcode 26.6 and Android SDK 37.2:
 - Forty-three Maven publications across eight artifacts, with POM metadata, sources and generated documentation.
 - Independent consumers resolving local Maven artifacts on Android, JVM, JS, iOS device arm64 and iOS simulator arm64; generated KSP registration and a full provider fixture without Material.
 - Strict documentation build, Dokka API site and production HTML demo bundle.
-- Fifteen Python tests for version progression, candidate guards, immutable asset checks, main races and Central recovery.
+- Seventeen Python tests for version progression, candidate/CI guards, immutable asset checks, main races and Central recovery.
 
 The workflows are checked with actionlint 1.7.12, with its unsupported `concurrency.queue` schema diagnostic excluded. GitHub documents `queue: max` for FIFO release serialization; no other workflow diagnostics are excluded.
 

@@ -55,15 +55,22 @@ class ReleaseGuardsTest(unittest.TestCase):
             commands.append(args)
             if args[1] == 'ls-remote': return 'f' * 40 + '\trefs/heads/main'
             return ''
-        with patch.object(release, 'validate_candidate'), patch.object(release, 'verify_assets'), patch.object(release, 'run', side_effect=fake), patch.object(release.subprocess, 'run') as result:
+        with patch.object(release, 'validate_candidate'), patch.object(release, 'verify_assets'), patch.object(release, 'verify_candidate_ci'), patch.object(release, 'run', side_effect=fake), patch.object(release.subprocess, 'run') as result:
             result.return_value.returncode = 1
             with self.assertRaisesRegex(RuntimeError, 'Main advanced'): release.advance_main()
         self.assertFalse(any(command[1] == 'push' for command in commands))
     def test_already_advanced_main_records_checkpoint(self):
         state = self.candidate()
-        with patch.object(release, 'validate_candidate'), patch.object(release, 'verify_assets'), patch.object(release, 'run', return_value=state['commit'] + '\trefs/heads/main'), patch.object(release, 'checkpoint') as checkpoint:
+        with patch.object(release, 'validate_candidate'), patch.object(release, 'verify_assets'), patch.object(release, 'verify_candidate_ci'), patch.object(release, 'run', return_value=state['commit'] + '\trefs/heads/main'), patch.object(release, 'checkpoint') as checkpoint:
             release.advance_main()
         self.assertEqual(checkpoint.call_args.args[0]['phase'], 'main-advanced')
+    def test_ci_checkpoint_must_be_for_the_exact_candidate(self):
+        state = self.candidate(); state['ci_run_id'] = 123
+        with patch.object(release, 'GitHub') as github:
+            github.return_value.request.return_value = {'head_sha':'f'*40, 'conclusion':'success', 'path':'.github/workflows/ci.yml'}
+            with self.assertRaisesRegex(RuntimeError, 'this commit'): release.verify_candidate_ci(state)
+    def test_missing_ci_checkpoint_rejected(self):
+        with self.assertRaisesRegex(RuntimeError, 'no successful CI'): release.verify_candidate_ci(self.candidate())
     def test_download_redirect_drops_github_credentials(self):
         import urllib.request
         request = urllib.request.Request('https://api.github.com/asset', headers={'Authorization':'Bearer test'})
