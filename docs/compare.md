@@ -1,6 +1,6 @@
 # Compare semantic HTML and Wasm
 
-Both previews compile the same shared feature sources, theme tokens, application-owned models and navigation recipes. Drag the width control or choose a viewport to compare how each renderer responds. Open each preview separately for browser controls and full-window testing.
+Both previews compile the same shared feature sources, theme tokens, application-owned models and navigation recipes. Choose a viewport and feature to compare how each renderer responds. Open each preview separately for browser controls and full-window testing.
 
 [HTML demo](https://samuolis.github.io/domposable/demo/) · [Wasm demo](https://samuolis.github.io/domposable/wasm/) · [Path URLs](https://samuolis.github.io/domposable/routes/tasks/welcome/)
 
@@ -23,7 +23,9 @@ Both previews compile the same shared feature sources, theme tokens, application
     frame.style.height = width.value === '390' ? '844px' : '900px';
   }));
   route.addEventListener('change', () => frames.forEach((frame, index) => {
-    frame.src = (index ? '../wasm/#/' : '../demo/#/') + route.value;
+    // A hash-only change would keep the previous application shell mounted.
+    // Changing the fixture query forces both hosts to read the initial route.
+    frame.src = (index ? '../wasm/' : '../demo/') + '?preview=' + encodeURIComponent(route.value) + '#/' + route.value;
   }));
 })();
 </script>

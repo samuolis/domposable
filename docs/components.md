@@ -63,6 +63,43 @@ Keys must be unique. Native collections virtualize through Compose; the HTML pro
 
 `DomposableScaffold` accepts top bar, navigation, content, footer, contextual and overlay slots. HTML emits header/main/footer landmarks with a skip link. Avoid nesting full-window scaffolds inside a page; embed feature columns instead. Use banners for status, dialogs/sheets for focused flows, and tabs for local sections.
 
+```kotlin
+DomposableScaffold(
+    props = DomposableScaffoldProps(
+        topBar = { DomposableText("My shop", style = DomposableTextStyle.Title) },
+        bottomBar = { DomposableLink("Help", "https://example.com/help") },
+    ),
+) {
+    ProductsScreen(model)
+}
+```
+
+The app controls whether a dialog exists and what confirming it does:
+
+```kotlin
+@Composable
+fun RemoveItem(onRemove: () -> Unit) {
+    var confirming by remember { mutableStateOf(false) }
+    DomposableButton("Remove item", { confirming = true })
+    if (confirming) {
+        DomposableDialog(
+            DomposableDialogProps(
+                title = "Remove item?",
+                onDismiss = { confirming = false },
+                actions = {
+                    DomposableButton("Cancel", { confirming = false })
+                    DomposableButton("Remove", { confirming = false; onRemove() })
+                },
+            ),
+        ) {
+            DomposableText("This removes the item from your list.")
+        }
+    }
+}
+```
+
+The HTML provider uses a modal dialog with keyboard focus handling; native uses Material's dialog. Keep dismissal and application state in the feature, including any cancellation or validation rules.
+
 | Family | Components |
 | --- | --- |
 | Layout | Column, Row, FlowRow, Box, LazyColumn, LazyRow, LazyGrid, Spacer, Divider, Scaffold |

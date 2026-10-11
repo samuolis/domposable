@@ -27,7 +27,9 @@ def api(path, payload=None):
 
 def png(data: bytes):
     if len(data) > MAX_IMAGE or not data.startswith(b'\x89PNG\r\n\x1a\n'): raise ValueError('Expected bounded PNG bytes')
-    image = Image.open(BytesIO(data)); image.load()
+    image = Image.open(BytesIO(data))
+    if image.width * image.height > 20_000_000: raise ValueError('PNG dimensions exceed the review limit')
+    image.load()
     return image.convert('RGB')
 
 def panel(images, labels):

@@ -13,21 +13,18 @@ commonMain.dependencies {
 import androidx.compose.runtime.*
 import io.github.samuolis.domposable.foundation.*
 import io.github.samuolis.domposable.ui.*
-import io.github.samuolis.domposable.material.*
 
 @Composable
 fun Greeting() {
     var name by remember { mutableStateOf("") }
-    DomposableMaterialTheme {
-        DomposableColumn(gap = 16.dp) {
-            DomposableTextField(name, { name = it }, "Name")
-            DomposableText("Hello $name")
-        }
+    DomposableColumn(gap = 16.dp) {
+        DomposableTextField(name, { name = it }, "Name")
+        DomposableText("Hello $name")
     }
 }
 ```
 
-Call the shared composable from Android `setContent`, iOS `ComposeUIViewController`, or JS `renderComposable(rootElementId = "root")`. The JS entry point uses Compose HTML; add `org.jetbrains.compose.html:html-core` matching the catalog version to the application host. Android/iOS hosts use standard Compose UI.
+Install a provider at the app root and call the shared composable from Android `setContent`, iOS `ComposeUIViewController`, or JS `renderComposable(rootElementId = "root")`. Import `DomposableMaterialTheme` from `io.github.samuolis.domposable.material` for the default provider shown below. The feature itself does not choose its renderer. The JS entry point uses Compose HTML; add `org.jetbrains.compose.html:html-core` matching the catalog version to the application host. Android/iOS hosts use standard Compose UI.
 
 Use the [consumer fixture](https://github.com/samuolis/domposable/tree/main/consumer-fixture) and demo as runnable integration examples. No runtime reflection registry or DI adapter is required.
 

@@ -3,10 +3,9 @@
 ## Release setup still pending
 
 - Finish the dedicated Apple Distribution certificate, register the demo bundle identifier and create its Ad Hoc profile. Decide whether the public IPA should embed the registered-device identifier, or whether public downloads should contain only the simulator app.
-- Remove the unused first GitHub App key after the account owner's revocation approval. The configured release key already authenticates correctly.
 - Review and merge the expanded demo/visual-check PR, then deploy the updated bootstrap site through its approved workflow.
 - Run the first **Bump and release** action, verify Maven Central publication and signed downloads, and install the demo on a real registered device. The checked-in `alpha00` is still unpublished.
-- Back up dedicated credentials securely. The Central token expires **11 April 2027**; Apple team membership currently expires **10 November 2026** and needs renewal by its owner.
+- Keep dedicated credential backups secure and track publishing-token, certificate and developer-membership expiry dates privately.
 
 ## Product follow-ups
 

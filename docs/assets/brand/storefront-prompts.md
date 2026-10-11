@@ -17,4 +17,3 @@ Use case: product-mockup. Asset type: square catalog product photo for the Field
 ## shop-lamp
 
 Use case: product-mockup. Asset type: square catalog product photo for the Fieldwork ecommerce demo. Subject: one sculptural table lamp with rounded terracotta clay base and natural cream linen shade, no branding. Scene: warm cream studio backdrop, soft natural side light, subtle floor shadow. Style: realistic premium catalog photography, tactile clay and linen texture. Composition: product centered fully inside a square 1024 by 1024 frame, three quarter view, generous breathing room. Constraints: no people, no text, no logo, no watermark, no other products.
-
