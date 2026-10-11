@@ -239,6 +239,7 @@ internal fun HtmlTooltip(
             }
         }
     }
+    val visible = (hovering || focused) && !dismissed
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
@@ -248,7 +249,13 @@ internal fun HtmlTooltip(
                 dismissed = false
             }
             onMouseLeave { hovering = false }
-            onKeyDown { if (it.key == "Escape") dismissed = true }
+            onKeyDown {
+                if (it.key == "Escape" && visible) {
+                    it.preventDefault()
+                    it.stopPropagation()
+                    dismissed = true
+                }
+            }
             ref { element ->
                 anchor = element
                 val focusIn: (org.w3c.dom.events.Event) -> Unit = {
@@ -263,11 +270,17 @@ internal fun HtmlTooltip(
                 onDispose {
                     element.removeEventListener("focusin", focusIn)
                     element.removeEventListener("focusout", focusOut)
-                    described.forEach { (control, original) ->
-                        if (original == null) {
+                    described.keys.forEach { control ->
+                        val remaining =
+                            control
+                                .getAttribute("aria-describedby")
+                                ?.split(" ")
+                                ?.filter { it != tooltipId && it.isNotBlank() }
+                                ?.joinToString(" ")
+                        if (remaining.isNullOrEmpty()) {
                             control.removeAttribute("aria-describedby")
                         } else {
-                            control.setAttribute("aria-describedby", original)
+                            control.setAttribute("aria-describedby", remaining)
                         }
                     }
                     described.clear()
@@ -279,7 +292,7 @@ internal fun HtmlTooltip(
                 id(tooltipId)
                 attr("role", "tooltip")
                 classes("d-tooltip")
-                if (!(hovering || focused) || dismissed) attr("hidden", "")
+                if (!visible) attr("hidden", "")
             }) { Text(props.text) }
         }
     }

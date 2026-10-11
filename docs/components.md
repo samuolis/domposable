@@ -141,4 +141,4 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 
 Every component has direct arguments and a `Props` overload. Keep props for renderer customization or reusable configuration; ordinary feature code can use the calls above. See [design-system customization](design-systems.md), [adaptive examples](adaptive.md) and [platform boundaries](coverage.md).
 
-The [additional controls demo](https://samuolis.github.io/domposable/demo/#/components) shares the same source for native, HTML and Wasm. These additions are on the next-release branch until merged and published; released 0.1.1 has the earlier 34-contract provider.
+The additional controls demo shares the same source for native, HTML and Wasm. These examples describe the 41-contract API introduced after 0.1.1; the published 0.1.1 provider has 34 contracts. Use the source checkout until the next minor version is published.

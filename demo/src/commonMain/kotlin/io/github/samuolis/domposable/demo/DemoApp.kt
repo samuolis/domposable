@@ -104,7 +104,7 @@ sealed interface DemoRoute {
     ) : DemoRoute
 }
 
-private object DemoCodec : DomposableRouteCodec<DemoRoute> {
+internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
     override fun encode(route: DemoRoute): String =
         when (route) {
             DemoRoute.Tasks -> "/tasks"

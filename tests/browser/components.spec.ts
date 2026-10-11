@@ -65,3 +65,21 @@ test('logical padding follows right-to-left layout', async ({ page }) => {
   });
   expect(padding).toEqual({ start: '4px', end: '12px' });
 });
+
+test('Escape dismisses a focused tooltip before its containing modal', async ({ page }) => {
+  await page.goto('/#/components');
+  const open = page.getByRole('button', { name: 'About preferences', exact: true });
+  await open.focus();
+  await open.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'About preferences', exact: true });
+  const details = dialog.getByRole('button', { name: 'Show demo details', exact: true });
+  await details.focus();
+  await expect(dialog.getByRole('tooltip')).toBeVisible();
+  await details.press('Escape');
+  await expect(dialog.getByRole('tooltip')).toBeHidden();
+  await expect(dialog).toBeVisible();
+  await expect(details).toBeFocused();
+  await details.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(open).toBeFocused();
+});

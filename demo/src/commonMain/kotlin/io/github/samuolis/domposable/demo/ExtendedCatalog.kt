@@ -12,7 +12,9 @@ import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableColumn
+import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableFloatingActionButton
 import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableIconButton
@@ -38,6 +40,7 @@ fun ExtendedComponentCatalog() {
     var segment by rememberSaveable { mutableIntStateOf(0) }
     var minimum by rememberSaveable { mutableFloatStateOf(20f) }
     var maximum by rememberSaveable { mutableFloatStateOf(80f) }
+    var about by remember { mutableStateOf(false) }
     var notice by remember { mutableStateOf<String?>("Your preferences are saved") }
     DomposableColumn(DomposableModifier.fillMaxWidth().padding(16.dp).verticalScroll(), gap = 12.dp) {
         DomposableText("More shared components", style = DomposableTextStyle.Title, headingLevel = 2)
@@ -52,7 +55,7 @@ fun ExtendedComponentCatalog() {
                     DomposableModifier.padding(DomposableInsets(start = 4.dp, end = 12.dp)),
                 ) {
                     DomposableIconButton(
-                        { notice = "This is a local demo" },
+                        { about = true },
                         "About preferences",
                     ) { DomposableIcon("?", null) }
                 }
@@ -95,6 +98,13 @@ fun ExtendedComponentCatalog() {
                 maximum = 80f
                 notice = "Preferences reset"
             }, onDismiss = { notice = null })
+        }
+    }
+    if (about) {
+        DomposableDialog("About preferences", onDismiss = { about = false }) {
+            DomposableTooltip("Shows a status message without sending any data") {
+                DomposableButton("Show demo details", { notice = "This is a local demo" })
+            }
         }
     }
 }

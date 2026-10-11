@@ -57,6 +57,7 @@ for (const [name, width, height, route] of [
     await page.goto(`/wasm/#/${route}`);
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 60000 });
     await expect(page.locator('body')).toHaveAttribute('data-domposable-ready', 'true', { timeout: 60000 });
+    await expect(page.locator('body')).toHaveAttribute('data-domposable-initial-route', `/${route}`);
     await stableCapture(page, 'wasm', name);
     expect(errors).toEqual([]);
   });
