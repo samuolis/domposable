@@ -9,9 +9,9 @@ Domposable uses plain semantic versions. Until 1.0, minor releases may change AP
 | iOS simulator arm64 | Same native renderer | XCUITest, unsigned app artifact | Same simulator fixtures | Application |
 | JVM desktop | Compose UI + Material3 | JVM tests and compiled consumer | Compose desktop test scene on Ubuntu | Application |
 | Kotlin/JS HTML | Native DOM + CSS + browser controls | Chromium, Firefox, WebKit; axe; inputs/focus/history/URLs | Chromium on Ubuntu, phone/tablet/wide | Hash or path history; or host router |
-| Kotlin/Wasm JS | Compose UI + Material3 | Build and canvas startup/error checks | Chromium on Ubuntu, phone/wide | Initial URL selects fixture; subsequent navigation is in memory |
+| Kotlin/Wasm JS | Compose UI + Material3 | Canvas startup; navigation, back/forward and saveable restoration in Chromium | Chromium on Ubuntu, phone/wide | Hash or path history; or host router |
 
-Desktop and Wasm support are **experimental**. Browser history/saveable restoration is implemented by the HTML renderer; the Compose UI implementation of `DomposableBrowserHistory` is currently a no-op. Wasm screenshots do not establish screen-reader parity. Native platform accessibility still needs manual assistive-technology testing.
+Desktop and Wasm support are **experimental**. HTML and Wasm share the optional browser-history/saveable binding. Android, iOS and desktop leave URL ownership to the application. Wasm screenshots do not establish screen-reader parity. Native platform accessibility still needs manual assistive-technology testing.
 
 ## Pinned build versions
 

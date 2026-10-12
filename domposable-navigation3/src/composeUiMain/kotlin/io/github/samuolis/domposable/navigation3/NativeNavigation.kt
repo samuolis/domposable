@@ -64,4 +64,11 @@ actual fun <R : Any> DomposableBrowserHistory(
     backStack: SnapshotStateList<DomposableEntryScope<R>>,
     codec: DomposableRouteCodec<R>,
     urls: DomposableBrowserUrls,
-) = Unit
+) = PlatformBrowserHistory(backStack, codec, urls)
+
+@Composable
+internal expect fun <R : Any> PlatformBrowserHistory(
+    backStack: SnapshotStateList<DomposableEntryScope<R>>,
+    codec: DomposableRouteCodec<R>,
+    urls: DomposableBrowserUrls,
+)

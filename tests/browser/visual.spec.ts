@@ -5,6 +5,13 @@ import { createHash } from 'node:crypto';
 test.skip(({ browserName }) => browserName !== 'chromium', 'Visual baselines use pinned Chromium on Ubuntu; behavior/axe checks cover all three engines.');
 
 async function stableCapture(page: Page, platform: string, name: string) {
+  // The playground's diamond/checkmark glyphs use a canvas fallback font loaded after the
+  // first frame. document.fonts.ready and a previously reached networkidle do not cover it.
+  if (platform === 'wasm' && !name.startsWith('shop')) {
+    await page.waitForFunction(() => performance.getEntriesByType('resource')
+      .some(resource => resource.name.includes('/notosanssymbols2/')));
+    await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+  }
   await page.evaluate(() => document.fonts.ready);
   let previous = '';
   let capture: Buffer;
