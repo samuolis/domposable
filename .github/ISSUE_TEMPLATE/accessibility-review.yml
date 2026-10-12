@@ -1,0 +1,63 @@
+name: Accessibility and device review
+description: Record a hands-on review of a specific renderer, build and device.
+title: "Review accessibility on "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Follow [the device checklist](https://github.com/samuolis/domposable/blob/main/docs/accessibility-review.md).
+        Record Pass, Fail or Not run for each case. CI and screenshots are separate evidence.
+  - type: input
+    id: build
+    attributes:
+      label: App version, build and source commit
+      placeholder: 0.2.0 / build 3 / 9e47fe8
+    validations:
+      required: true
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: Renderer
+      options: [Android, iOS, HTML, Wasm, Desktop]
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Device, OS, browser and screen reader/version
+      description: Say whether this was a physical device or simulator. Omit serial numbers and UDIDs.
+    validations:
+      required: true
+  - type: input
+    id: configuration
+    attributes:
+      label: Review date, font/display size and app palette
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Checklist results
+      description: Replace Not run with Pass or Fail only for checks you performed.
+      value: |
+        structure: Not run
+        actions: Not run
+        forms: Not run
+        selection: Not run
+        feedback: Not run
+        overlays: Not run
+        collections: Not run
+        navigation: Not run
+        large-text: Not run
+        touch-keyboard: Not run
+        theme: Not run
+        shop-flow: Not run
+    validations:
+      required: true
+  - type: textarea
+    id: observations
+    attributes:
+      label: Failures and checks not run
+      description: Include reproduction steps, expected/actual behavior and reasons for checks not run.
+    validations:
+      required: true

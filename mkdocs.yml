@@ -35,6 +35,7 @@ nav:
   - API: https://samuolis.github.io/domposable/api/
   - Contributing:
       - Validation and visual review: validation.md
+      - Device and accessibility review: accessibility-review.md
       - Release maintenance: releasing.md
       - Roadmap: roadmap.md
       - Brand assets: brand.md
