@@ -24,9 +24,11 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -106,16 +108,18 @@ internal fun NativeSelect(
                     props.error?.let { error(it) }
                 },
         ) { Text("${props.label}: ${props.options.first { it.value == props.value }.label}") }
-        DropdownMenu(expanded && props.enabled, { expanded = false }) {
-            props.options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option.label) },
-                    onClick = {
-                        expanded = false
-                        props.onValueChange(option.value)
-                    },
-                    enabled = option.enabled,
-                )
+        NativeWindow {
+            DropdownMenu(expanded && props.enabled, { expanded = false }) {
+                props.options.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option.label) },
+                        onClick = {
+                            expanded = false
+                            props.onValueChange(option.value)
+                        },
+                        enabled = option.enabled,
+                    )
+                }
             }
         }
     }
@@ -186,11 +190,13 @@ internal fun NativeTooltip(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-        tooltip = { PlainTooltip { Text(props.text) } },
-        state = rememberTooltipState(),
-        modifier = modifier.toComposeModifier(),
-        content = content,
-    )
+    NativeWindow { featureRegistry ->
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+            tooltip = { PlainTooltip { Text(props.text) } },
+            state = rememberTooltipState(),
+            modifier = modifier.toComposeModifier(),
+            content = { CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) { content() } },
+        )
+    }
 }

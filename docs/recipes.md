@@ -66,7 +66,59 @@ NavDisplay(
 
 The [native implementation](https://github.com/samuolis/domposable/blob/main/demo/src/composeUiMain/kotlin/io/github/samuolis/domposable/demo/RootListDetailScene.kt) is compiled across all Compose UI targets. HTML uses `DomposableNavDisplay` with one or two equal-width semantic panes; the native scene's ratio and transition policy are not an HTML API. Keep Compose UI scenes out of the DOM applier. Applications can use ordinary Navigation 3 keys, providers and decorators without a Domposable registry, navigator or KSP; [direct integration](screens.md) shows that lower-level path.
 
-For broader scene policies, see the [official Navigation 3 scene guide](https://developer.android.com/guide/navigation/navigation-3/scenes). Dialog/overlay strategies, predictive-back animation tuning and live-model retention across inactive roots remain application decisions.
+For broader scene policies, see the [official Navigation 3 scene guide](https://developer.android.com/guide/navigation/navigation-3/scenes). The advanced recipe below demonstrates those application decisions without expanding the library host API.
+
+## Overlays, Back policy and retained models
+
+Open [navigation policies](https://samuolis.github.io/domposable/demo/#/navigation-policies), or choose **Advanced navigation policies** from Recipes. Edit a message, switch roots and return: its live model identity and draft remain. Request Back to open a route-owned confirmation overlay; Escape or **Keep editing** dismisses it without popping the underlying entry.
+
+### Put overlays in the caller's scene policy
+
+Native Compose and Wasm use the pinned Navigation 3 `DialogSceneStrategy`. Put it before list/detail strategies and add its metadata to the dialog entry:
+
+```kotlin
+// Your Compose UI source set; your app owns stack and entry provider.
+val provider = entryProvider<Route> {
+    entry<Route.Editor> { route -> EditorScreen(route.id) }
+    entry<Route.ConfirmLeave>(metadata = DialogSceneStrategy.dialog()) {
+        ConfirmLeaveScreen(onCancel, onConfirm)
+    }
+}
+NavDisplay(
+    backStack = stack,
+    entryProvider = provider,
+    sceneStrategies = listOf(DialogSceneStrategy(), listDetailStrategy),
+    onBack = requestBack,
+)
+```
+
+When this display is nested inside a portable Domposable entry, the sample gives the native scene host a transient saveable boundary. Each decorated entry installs its own feature registry; platform window IDs do not enter browser-restorable state. The Material dialog, sheet, menu, select and tooltip renderers use the same separation while preserving their feature content saveables.
+
+The HTML application adapter reads the same app-owned route intent. It displays decorated background entries through `DomposableNavDisplay` and the top overlay through `DomposableDialog`. That preserves browser modal focus, Escape dismissal and the background's keyed state. Do not create a second dialog inside the native `DialogSceneStrategy` entry. See the [HTML adapter](https://github.com/samuolis/domposable/blob/main/demo/src/jsMain/kotlin/io/github/samuolis/domposable/demo/RootRecipeDisplay.kt).
+
+### Commit navigation after a completed gesture
+
+Native `NavDisplay` handles actual predictive Back progress, cancellation and transitions; its `onBack` requests the app's mutation after completion. The JVM interop test sends real `NavigationEventInput` start/progress/cancel/complete events through that display and verifies that cancellation preserves the entry and completion pops once. Your custom scene's `previousEntries` must describe the actual back target; use `predictivePopTransitionSpec` for app-specific visuals.
+
+The shared gallery's slider is explicitly a **simulation of app policy**, not an Android gesture implementation. `RootBackPolicy` records the starting root and entry ID, updates preview progress without changing the stack, cancels without popping, and rejects stale/repeated commits. An edited entry requests a confirmation overlay on commit. Browser keyboard tests exercise these controls; they do not verify a physical Android edge gesture.
+
+```kotlin
+// Policy methods are application sample code, not required framework APIs.
+policy.progress(progress) // Capture root/entry identity; keep stack unchanged.
+policy.cancel()           // Keep the entry and its model.
+policy.commit()           // Request Back only if that root/entry is still current.
+```
+
+### Choose a model owner deliberately
+
+| Owner | On inactive root switch | On recipe/app owner disposal | After reload |
+| --- | --- | --- | --- |
+| Entry `retain` in the basic root recipe | Disposed; recreated on return | Disposed | Recreated from app inputs/saveables |
+| App-owned `RootModels` in the advanced recipe | Same live model remains | All owned models close | Fresh model; live drafts are not persisted |
+
+The advanced recipe keeps plain models in an application scope outside the entry decorator. Entry scopes still reach `Destroyed` and are recreated with saved route IDs. It never resumes a destroyed scope or keeps a disposed ViewModel store. Metro/Koin scopes or your own owner can provide the same lifetime; if using AndroidX ViewModels, keep their **owning ViewModelStore** at the desired root/app lifetime and clear it when that owner ends. Retaining a model reference cannot revive a cleared ViewModel.
+
+`RootModels` uses more memory than the snapshot recipe and intentionally clears its models when the recipe leaves composition. Persist important drafts in your repository/model layer when they must survive reload or process death. See the [policy and model owner](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/RootBackPolicy.kt) and [feature implementation](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/NavigationPolicies.kt).
 
 ## Semantic HTML hash routes
 

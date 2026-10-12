@@ -132,6 +132,7 @@ HTML and Wasm support optional browser history, hash or path URLs and portable e
 | **HTML / Wasm comparison** | The same feature at phone, tablet and desktop widths | [Compare](https://samuolis.github.io/domposable/compare/) |
 | **Browser routes** | Clean paths, deep links and browser navigation | [URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Routing guide](docs/screens.md) |
 | **Large collections** | Measured lists, horizontal rows, responsive grids and semantic tables | [Gallery](https://samuolis.github.io/domposable/demo/#/collection-recipes) · [Guide](docs/performance.md) |
+| **Navigation policies** | Route overlays, Back previews and live models across root switches | [Recipe](https://samuolis.github.io/domposable/demo/#/navigation-policies) · [Guide](docs/recipes.md) |
 | **Saved root stacks** | Independent tabs, restored drafts and caller-owned Navigation 3 scenes | [Recipe source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/RootStackRecipe.kt) · [Guide](docs/recipes.md) |
 
 ### Collections with real table semantics

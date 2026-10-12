@@ -82,7 +82,10 @@ internal fun RootStackContent(
                         NavEntry(
                             scope,
                             contentKey = entry.contentKey,
-                            metadata = mapOf(ROOT_ROUTE_METADATA to scope.route),
+                            metadata =
+                                mapOf(
+                                    ROOT_ROUTE_METADATA to scope.route,
+                                ) + rootPresentationMetadata(scope.route),
                         ) {
                             entry.Content()
                         }
@@ -108,6 +111,9 @@ internal fun rootPaneEntries(
     if (!wide || panes.size != 2) return null
     val list = panes[0].metadata[ROOT_ROUTE_METADATA] as? RootRoute ?: return null
     val detail = panes[1].metadata[ROOT_ROUTE_METADATA] as? RootRoute ?: return null
+    if (list.overlay || detail.overlay) return null
     if (list.root != detail.root || list.detail.isNotEmpty() || detail.detail.isEmpty()) return null
     return panes
 }
+
+internal expect fun rootPresentationMetadata(route: RootRoute): Map<String, Any>
