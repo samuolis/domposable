@@ -77,7 +77,10 @@ private sealed interface RecipeRoute {
 /** The feature only accepts application callbacks; no DI or ViewModel base type. */
 @Composable
 @DomposableScreen(route = DemoRoute.Recipes::class)
-fun NavigationRecipesScreen() {
+fun NavigationRecipesScreen(
+    onRoots: (() -> Unit)? = null,
+    onPolicies: (() -> Unit)? = null,
+) {
     val stack = rememberDomposableBackStack<RecipeRoute>(RecipeRoute.List)
     var supporting by rememberSaveable { mutableStateOf(false) }
     val screens =
@@ -154,6 +157,8 @@ fun NavigationRecipesScreen() {
             DomposableLink("Navigation guide", "https://samuolis.github.io/domposable/recipes/")
             DomposableLink("Metro and Kobweb", "https://samuolis.github.io/domposable/integrations/")
         }
+        onRoots?.let { DomposableButton("Saved root stacks", it) }
+        onPolicies?.let { DomposableButton("Advanced navigation policies", it) }
     }
 }
 

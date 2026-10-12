@@ -26,7 +26,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -41,7 +40,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Label
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -614,23 +612,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                AlertDialog(onDismissRequest = props.onDismiss, confirmButton = props.actions, dismissButton = {
-                    TextButton(props.onDismiss) {
-                        Text("Close")
-                    }
-                }, title = { Text(props.title) }, text = content, modifier = modifier.toComposeModifier())
+                NativeDialog(props, modifier, content)
             },
-            bottomSheet = {
-                props,
-                modifier,
-                content,
-                ->
-                ModalBottomSheet(onDismissRequest = props.onDismiss, modifier = modifier.toComposeModifier()) {
-                    Text(props.title, style = MaterialTheme.typography.titleLarge)
-                    content()
-                    TextButton(props.onDismiss) { Text("Close") }
-                }
-            },
+            bottomSheet = { props, modifier, content -> NativeBottomSheet(props, modifier, content) },
             topAppBar = { props, modifier, _ -> NativeTopAppBar(props, modifier) },
             floatingActionButton = { props, modifier, content -> NativeFloatingActionButton(props, modifier, content) },
             snackbar = { props, modifier, _ -> NativeSnackbar(props, modifier) },

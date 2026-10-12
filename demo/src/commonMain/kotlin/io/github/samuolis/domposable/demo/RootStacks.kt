@@ -8,11 +8,14 @@ import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.screens.DomposableEntryLifecycle
 import io.github.samuolis.domposable.screens.DomposableEntryScope
 
+private const val OVERLAY_SNAPSHOT_INDEX = 3
+
 internal val recipeRoots = listOf("Inbox", "Archive")
 
 internal data class RootRoute(
     val root: String,
     val detail: String = "",
+    val overlay: Boolean = false,
 )
 
 internal data class RootEntrySnapshot(
@@ -53,6 +56,10 @@ internal class RootStacks(
         active.add(DomposableEntryScope(RootRoute(selected, detail)))
     }
 
+    fun overlay() {
+        if (!active.last().route.overlay) active.add(DomposableEntryScope(RootRoute(selected, "confirmation", true)))
+    }
+
     fun back() {
         if (active.size > 1) active.removeAt(active.lastIndex)
     }
@@ -73,7 +80,7 @@ internal class RootStacks(
                     listOf(
                         stacks.selected,
                         stacks.snapshot().mapValues { (_, entries) ->
-                            entries.map { listOf(it.route.detail, it.id, it.state) }
+                            entries.map { listOf(it.route.detail, it.id, it.state, it.route.overlay) }
                         },
                     )
                 },
@@ -91,7 +98,7 @@ private fun restoreRoots(value: List<Any>): RootStacks {
         saved.mapValues { (root, entries) ->
             entries.map {
                 RootEntrySnapshot(
-                    RootRoute(root, it[0] as String),
+                    RootRoute(root, it[0] as String, it.getOrNull(OVERLAY_SNAPSHOT_INDEX) as? Boolean ?: false),
                     it[1] as String,
                     it[2] as Map<String, List<Any?>>,
                 )

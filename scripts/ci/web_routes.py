@@ -10,7 +10,7 @@ def assemble_routes(bundle: Path, output: Path, base: str):
     (target/'web-assets.json').unlink(missing_ok=True)
     index = (target/'index.html').read_text().replace('<head>', f'<head><base href="{base}">').replace('<body>', f'<body data-route-base="{base}">')
     (target/'index.html').write_text(index)
-    for route in ['tasks', 'catalog', 'components', 'recipes', 'roots', 'collections', 'collection-recipes', 'inputs', 'tasks/welcome', 'tasks/adaptive', 'tasks/customize']:
+    for route in ['tasks', 'catalog', 'components', 'recipes', 'navigation-policies', 'roots', 'collections', 'collection-recipes', 'inputs', 'tasks/welcome', 'tasks/adaptive', 'tasks/customize']:
         page = target/route/'index.html'
         page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text(index)

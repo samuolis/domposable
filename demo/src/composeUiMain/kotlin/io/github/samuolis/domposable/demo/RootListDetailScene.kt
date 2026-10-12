@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.ui.NavDisplay
@@ -50,10 +53,16 @@ internal actual fun RootRecipeDisplay(
 ) {
     val strategy = remember(wide) { SceneStrategy<DomposableEntryScope<RootRoute>> { rootListDetailScene(it, wide) } }
     // Use Navigation 3 directly. It supplies the single-pane fallback when the strategy declines.
-    NavDisplay(
-        entries = entries,
-        modifier = Modifier.fillMaxSize(),
-        sceneStrategies = listOf(strategy),
-        onBack = onBack,
-    )
+    // Each entry below installs its own registry; platform scene/window state stays transient.
+    CompositionLocalProvider(LocalSaveableStateRegistry provides null) {
+        NavDisplay(
+            entries = entries,
+            modifier = Modifier.fillMaxSize(),
+            sceneStrategies = listOf(DialogSceneStrategy(), strategy),
+            onBack = onBack,
+        )
+    }
 }
+
+internal actual fun rootPresentationMetadata(route: RootRoute): Map<String, Any> =
+    if (route.overlay) DialogSceneStrategy.dialog() else emptyMap()

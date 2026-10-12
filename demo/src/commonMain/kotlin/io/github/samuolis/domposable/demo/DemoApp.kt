@@ -20,6 +20,7 @@ import io.github.samuolis.domposable.demo.generated.collectionLabDestination
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
 import io.github.samuolis.domposable.demo.generated.inputLabDestination
+import io.github.samuolis.domposable.demo.generated.navigationPoliciesDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
 import io.github.samuolis.domposable.demo.generated.rootStackRecipeDestination
 import io.github.samuolis.domposable.demo.generated.taskDetailScreenDestination
@@ -103,6 +104,8 @@ sealed interface DemoRoute {
 
     data object Recipes : DemoRoute
 
+    data object Policies : DemoRoute
+
     data object Roots : DemoRoute
 
     data object Collections : DemoRoute
@@ -123,6 +126,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.ExtendedCatalog -> "/components"
             DemoRoute.Catalog -> "/catalog"
             DemoRoute.Recipes -> "/recipes"
+            DemoRoute.Policies -> "/navigation-policies"
             DemoRoute.Roots -> "/roots"
             DemoRoute.Collections -> "/collections"
             DemoRoute.AdvancedCollections -> "/collection-recipes"
@@ -140,6 +144,8 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             path == "/catalog" -> DemoRoute.Catalog
 
             path == "/recipes" -> DemoRoute.Recipes
+
+            path == "/navigation-policies" -> DemoRoute.Policies
 
             path == "/roots" -> DemoRoute.Roots
 
@@ -268,7 +274,15 @@ fun DemoApp(
                     },
                 )
                 register(extendedComponentCatalogDestination())
-                register(navigationRecipesScreenDestination())
+                register(
+                    navigationRecipesScreenDestination {
+                        NavigationRecipesScreen(
+                            onRoots = { stack.add(DomposableEntryScope(DemoRoute.Roots)) },
+                            onPolicies = { stack.add(DomposableEntryScope(DemoRoute.Policies)) },
+                        )
+                    },
+                )
+                register(navigationPoliciesDestination())
                 register(rootStackRecipeDestination())
 
                 register(
@@ -301,7 +315,7 @@ fun DemoApp(
                     DemoRoute.Inputs,
                     -> 1
 
-                    DemoRoute.Recipes, DemoRoute.Roots -> 2
+                    DemoRoute.Recipes, DemoRoute.Roots, DemoRoute.Policies -> 2
 
                     is DemoRoute.NotFound -> -1
 

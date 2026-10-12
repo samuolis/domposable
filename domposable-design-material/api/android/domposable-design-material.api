@@ -4,11 +4,11 @@ public final class io/github/samuolis/domposable/material/ComposableSingletons$E
 	public final fun getLambda$995133508$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class io/github/samuolis/domposable/material/ComposableSingletons$NativeMaterialKt {
-	public static final field INSTANCE Lio/github/samuolis/domposable/material/ComposableSingletons$NativeMaterialKt;
+public final class io/github/samuolis/domposable/material/ComposableSingletons$NativeOverlaysKt {
+	public static final field INSTANCE Lio/github/samuolis/domposable/material/ComposableSingletons$NativeOverlaysKt;
 	public fun <init> ()V
-	public final fun getLambda$-1864907797$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$1703082010$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1951536073$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-75023665$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class io/github/samuolis/domposable/material/MaterialComponentsKt {
