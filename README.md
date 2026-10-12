@@ -131,6 +131,7 @@ HTML and Wasm support optional browser history, hash or path URLs and portable e
 | **Component playground** | Shared controls, theme tokens and renderer customization | [Live app](https://samuolis.github.io/domposable/demo/) · [Components](docs/components.md) |
 | **HTML / Wasm comparison** | The same feature at phone, tablet and desktop widths | [Compare](https://samuolis.github.io/domposable/compare/) |
 | **Browser routes** | Clean paths, deep links and browser navigation | [URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Routing guide](docs/screens.md) |
+| **Saved root stacks** | Independent tabs, restored drafts and caller-owned Navigation 3 scenes | [Recipe source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/RootStackRecipe.kt) · [Guide](docs/recipes.md) |
 
 ### One shopping feature, multiple platforms
 

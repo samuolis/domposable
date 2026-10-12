@@ -19,6 +19,7 @@ import io.github.samuolis.domposable.demo.generated.collectionLabDestination
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
+import io.github.samuolis.domposable.demo.generated.rootStackRecipeDestination
 import io.github.samuolis.domposable.demo.generated.taskDetailScreenDestination
 import io.github.samuolis.domposable.demo.generated.taskListScreenDestination
 import io.github.samuolis.domposable.demo.generated.unavailableScreenDestination
@@ -100,6 +101,8 @@ sealed interface DemoRoute {
 
     data object Recipes : DemoRoute
 
+    data object Roots : DemoRoute
+
     data object Collections : DemoRoute
 
     data class NotFound(
@@ -114,6 +117,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.ExtendedCatalog -> "/components"
             DemoRoute.Catalog -> "/catalog"
             DemoRoute.Recipes -> "/recipes"
+            DemoRoute.Roots -> "/roots"
             DemoRoute.Collections -> "/collections"
             is DemoRoute.NotFound -> route.path
             is DemoRoute.Detail -> "/tasks/${route.taskId}"
@@ -128,6 +132,8 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             path == "/catalog" -> DemoRoute.Catalog
 
             path == "/recipes" -> DemoRoute.Recipes
+
+            path == "/roots" -> DemoRoute.Roots
 
             path == "/collections" -> DemoRoute.Collections
 
@@ -251,6 +257,8 @@ fun DemoApp(
                 )
                 register(extendedComponentCatalogDestination())
                 register(navigationRecipesScreenDestination())
+                register(rootStackRecipeDestination())
+
                 register(collectionLabDestination())
                 register(
                     unavailableScreenDestination {
@@ -268,8 +276,8 @@ fun DemoApp(
             val shell = rememberDomposableAdaptiveInfo(shellSize)
             val selected =
                 when (stack.last().route) {
-                    DemoRoute.Catalog, DemoRoute.ExtendedCatalog -> 1
-                    DemoRoute.Recipes -> 2
+                    DemoRoute.Catalog, DemoRoute.ExtendedCatalog, DemoRoute.Collections -> 1
+                    DemoRoute.Recipes, DemoRoute.Roots -> 2
                     is DemoRoute.NotFound -> -1
                     else -> 0
                 }
