@@ -3,7 +3,7 @@
 | Family | Shared API and native/HTML/Wasm implementations |
 | --- | --- |
 | Layout | Theme, Column, Row, FlowRow, Box, Scaffold, measure, ordered modifiers |
-| Collections | Keyed LazyColumn, LazyRow, LazyGrid |
+| Collections | Keyed LazyColumn, LazyRow, LazyGrid, Table |
 | Content | Text/headings, Image, Icon, Divider, Spacer, Avatar, Badge |
 | Actions | Button, Link, IconButton, FloatingActionButton, Chip, Card, Tooltip |
 | Forms | TextField, Checkbox, Switch, RadioButton, Slider, RangeSlider, Select, SegmentedButtons |
@@ -12,9 +12,9 @@
 | Overlays | Dialog, BottomSheet |
 | Architecture | Route registry, entry resources/saveables, optional Navigation 3, lifecycle and KSP |
 
-The expanded shared API has 41 renderer contracts; the 0.1.x provider has 34. HTML uses native input elements, headings, landmarks, labeled dialog elements, tabs with keyboard navigation and focus restoration. Native providers use Compose UI/Material3 semantics. Browser accessibility checks run in Chromium, Firefox and WebKit. Native demo smoke tests run on an iOS simulator; shared rules are tested on JVM.
+The expanded shared API has 42 renderer contracts on main; 0.2.0 has 41 and 0.1.x has 34. HTML uses native input elements, headings, landmarks, labeled dialog elements, tabs with keyboard navigation and focus restoration. Native providers use Compose UI/Material3 semantics. Browser accessibility checks run in Chromium, Firefox and WebKit. Native demo smoke tests run on an iOS simulator; shared rules are tested on JVM.
 
-HTML keyed collections normally render all items. LazyColumn also supports an optional [fixed-height scroll window](performance.md), with browser tests for bounded DOM size, keyboard focus, keyed drafts and removed rows. Variable-height virtualization, windowed rows/grids, rich text editors, drag/reorder, complex date pickers, fold/hinge APIs, platform camera/maps and product-specific widgets remain outside the provider. Date/time HTML inputs use browser controls; native text fields currently expose text input for those purposes. Scrolling and sizing use each platform's layout model and are not pixel-identical.
+HTML keyed collections normally render all items. Columns offer fixed or measured heights; rows, responsive grids and semantic tables also support [opt-in windows](performance.md), with browser tests for bounded DOM size, keyboard focus, keyed drafts, resizing, RTL and removed rows. Rich text editors, drag/reorder, complex date pickers, fold/hinge APIs, platform camera/maps and product-specific widgets remain outside the provider. Date/time HTML inputs use browser controls; native text fields currently expose text input for those purposes. Scrolling and sizing use each platform's layout model and are not pixel-identical.
 
 The default design provider uses upstream Material3 alpha APIs matching the current Compose release. JVM desktop is experimental. Until 1.0, minor releases may change APIs. KSP generates typed entries and feature entry lists; screen business logic and DI remain application-owned.
 

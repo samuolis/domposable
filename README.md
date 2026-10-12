@@ -36,7 +36,7 @@ Domposable is a Kotlin Multiplatform library built on Compose. Feature teams wri
 Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable.
 
 > [!NOTE]
-> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts; the expanded 41-contract provider requires 0.2.0 or later. Before 1.0, minor releases may change APIs.
+> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts and 0.2.0 has 41. Main adds the 42nd (`Table`) for the next minor release. Before 1.0, minor releases may change APIs.
 
 ## Quick start
 
@@ -119,7 +119,7 @@ The same feature can use different element structures and styling on each platfo
 | JVM desktop | Compose UI + Material 3 | Experimental |
 | Web, Kotlin/Wasm | Compose UI in the browser | Experimental |
 
-HTML and Wasm support optional browser history, hash or path URLs and portable entry-state restoration. HTML collections normally render all keyed items; fixed-height columns can opt into [bounded windowing](https://samuolis.github.io/domposable/performance/).
+HTML and Wasm support optional browser history, hash or path URLs and portable entry-state restoration. HTML collections normally render all keyed items; columns, rows, grids and tables can opt into [bounded windowing](https://samuolis.github.io/domposable/performance/).
 
 [Compatibility, tested versions and platform boundaries →](docs/compatibility.md)
 
@@ -131,7 +131,14 @@ HTML and Wasm support optional browser history, hash or path URLs and portable e
 | **Component playground** | Shared controls, theme tokens and renderer customization | [Live app](https://samuolis.github.io/domposable/demo/) · [Components](docs/components.md) |
 | **HTML / Wasm comparison** | The same feature at phone, tablet and desktop widths | [Compare](https://samuolis.github.io/domposable/compare/) |
 | **Browser routes** | Clean paths, deep links and browser navigation | [URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Routing guide](docs/screens.md) |
+| **Large collections** | Measured lists, horizontal rows, responsive grids and semantic tables | [Gallery](https://samuolis.github.io/domposable/demo/#/collection-recipes) · [Guide](docs/performance.md) |
 | **Saved root stacks** | Independent tabs, restored drafts and caller-owned Navigation 3 scenes | [Recipe source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/RootStackRecipe.kt) · [Guide](docs/recipes.md) |
+
+### Collections with real table semantics
+
+![The same shared table on Android and the web](docs/assets/examples/collection-table.png)
+
+[Explore large collections →](docs/performance.md)
 
 ### One shopping feature, multiple platforms
 

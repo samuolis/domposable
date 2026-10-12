@@ -43,6 +43,10 @@ fun independentProvider(onRender: (String) -> Unit): DomposableComponents =
             onRender("LazyGrid")
             content()
         },
+        table = { props, _, _ ->
+            onRender("Table")
+            props.rows.forEach { row -> row.cells.forEach { cell -> cell() } }
+        },
         text = { _, _, content ->
             onRender("Text")
             content()

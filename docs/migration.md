@@ -24,8 +24,18 @@ Upgrading from the 0.1.x provider expands it from 34 to 41 required contracts. A
 | RangeSlider | DomposableRangeSlider | Two labelled range inputs |
 | TooltipBox / PlainTooltip | DomposableTooltip | Hover/focus help with Escape dismissal |
 
-Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Fixed-height columns can use [opt-in windowing](performance.md). Rich text editing, variable-height and large-table virtualization, complex date pickers and platform camera/maps still require application or provider-specific implementations; this vocabulary does not claim to mirror every Material API.
+Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Columns, rows, grids and tables can use [opt-in windowing](performance.md). Rich text editing, column virtualization, complex date pickers and platform camera/maps still require application or provider-specific implementations; this vocabulary does not claim to mirror every Material API.
 
-## Fixed-height columns after 0.2.0
+## Collections and tables after 0.2.0
 
-The optional `window` parameter keeps existing source calls unchanged, and the existing direct-call binary overloads remain available. It adds a field to `DomposableLazyColumnProps`, changing that data class's constructor and generated `copy` signatures and adding another destructuring component. Consumers compiled against the old props type must recompile when upgrading to the next minor release. Complete custom providers should inspect `props.window` and document whether they honor it. The Material provider implements it on native Compose, HTML and Wasm.
+Existing direct calls keep their defaults and old binary overloads remain available. The next minor adds `Table` as the 42nd required renderer and expands collection props: `DomposableLazyColumnProps.window`, `DomposableLazyRowProps.window`, `DomposableLazyGridProps.window` and `DomposableListWindow.measureRows`. Their constructors and generated `copy` signatures change. Recompile consumers when upgrading; this is a pre-1.0 ABI break even though ordinary source calls still compile.
+
+Complete custom providers must add a `table` renderer and decide how to honor the row/grid/list window contracts. A provider copied from `rememberDomposableMaterialComponents()` inherits the new implementation. The Material provider supports all four collection modes on native Compose, HTML and Wasm. Access provider slots by name, rather than destructuring generated `componentN` functions.
+
+```kotlin
+val defaults = rememberDomposableMaterialComponents()
+val branded = remember(defaults) {
+    defaults.copy(button = MyButtonRenderer) // Table and collection windows retain the defaults.
+}
+DomposableTheme(components = branded) { ProductScreen(model) }
+```
