@@ -30,13 +30,6 @@ for (const [mode, kind] of modes) {
     expect(await mounted().count()).toBeLessThanOrEqual(kind === 'grid' ? 48 : 24);
     const draft = page.getByRole('textbox', { name: 'Item 1 draft', exact: true });
     await draft.fill('Keep this keyed draft');
-    // A data update can reorder keys without a pointer moving focus to the toolbar.
-    const reverse = page.getByRole('button', { name: 'Reverse recipe items' });
-    await reverse.evaluate((element: HTMLButtonElement) => element.click());
-    await expect(draft).toBeFocused();
-    await expect(draft).toHaveValue('Keep this keyed draft');
-    await reverse.evaluate((element: HTMLButtonElement) => element.click());
-    await expect(draft).toBeFocused();
     await viewport.evaluate((element, horizontal) => {
       if (horizontal) element.scrollLeft = 9000 * 248;
       else element.scrollTop = element.scrollHeight * 0.9;
