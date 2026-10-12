@@ -5,6 +5,9 @@ import { createHash } from 'node:crypto';
 test.skip(({ browserName }) => browserName !== 'chromium', 'Visual baselines use pinned Chromium on Ubuntu; behavior/axe checks cover all three engines.');
 
 async function stableCapture(page: Page, platform: string, name: string) {
+  // Canvas fallback fonts load outside document.fonts and may start after the first frame.
+  // These demo fixtures have finite asset requests, so await their completion before hashing.
+  if (platform === 'wasm') await page.waitForLoadState('networkidle');
   await page.evaluate(() => document.fonts.ready);
   let previous = '';
   let capture: Buffer;
