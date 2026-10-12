@@ -28,7 +28,7 @@ Use the [component recipes](components.md) and [call-path guide](how-it-works.md
 
 ## Collections and tables after 0.2.0
 
-Existing direct calls keep their defaults and old binary overloads remain available. The next minor adds `Table` as the 42nd required renderer and expands collection props: `DomposableLazyColumnProps.window`, `DomposableLazyRowProps.window`, `DomposableLazyGridProps.window` and `DomposableListWindow.measureRows`. Their constructors and generated `copy` signatures change. Recompile consumers when upgrading; this is a pre-1.0 ABI break even though ordinary source calls still compile.
+Existing direct calls keep their defaults and old binary overloads remain available. Version 0.3.0 adds `Table` as the 42nd required renderer and expands collection props: `DomposableLazyColumnProps.window`, `DomposableLazyRowProps.window`, `DomposableLazyGridProps.window` and `DomposableListWindow.measureRows`. Their constructors and generated `copy` signatures change. Recompile consumers when upgrading; this is a pre-1.0 ABI break even though ordinary source calls still compile.
 
 Complete custom providers must add a `table` renderer and decide how to honor the row/grid/list window contracts. A provider copied from `rememberDomposableMaterialComponents()` inherits the new implementation. The Material provider supports all four collection modes on native Compose, HTML and Wasm. Access provider slots by name, rather than destructuring generated `componentN` functions.
 

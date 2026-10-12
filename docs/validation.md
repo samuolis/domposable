@@ -4,7 +4,7 @@ The required **CI passed** check combines workflow hygiene, Kotlin quality/cover
 
 - Required ktlint, detekt and Android lint checks enforce source formatting and correctness. Kover line/branch gates and individual core package floors prevent coverage regressions; [test coverage](coverage.md) explains scope and reports.
 - Shared JVM tests cover adaptive rules, modifier ordering, entry lifetime/saveables and optional ViewModels.
-- Android native-graphics Robolectric tests exercise feature input/back navigation and capture four scenes, including the storefront.
+- Android native-graphics Robolectric tests exercise feature input/back navigation and capture the workspace, component menus, storefront and collection layouts.
 - iOS XCUITest verifies native input, rotation and recipe navigation, and captures portrait/landscape scenes on iPad mini A17 Pro with **iOS 26.5**.
 - Browser behavior and axe accessibility checks run in Chromium, Firefox and WebKit. They cover wrapping, semantic landmarks/links, modal focus, tab keyboard behavior, adaptive drafts, hash history, path deep links/reload under a base path, and feature switching on the generated comparison page. Wasm fixture switching is checked in Chromium.
 - Visual comparisons cover **Android, iOS, JVM desktop, semantic HTML and Wasm**. HTML fixtures include phone/tablet/wide views, list/detail and a dialog. Wasm checks startup/errors and phone/wide rendering.
@@ -52,6 +52,6 @@ Generated comparisons stay outside main and feature branches. Approved golden in
 
 ## Collection gallery fixtures
 
-The collection gallery has reviewed fixed-input captures for measured columns, horizontal rows, responsive grids and tables on Android, desktop and HTML; the iOS suite navigates the same app controls and captures all four modes, then edits a table cell. Wasm has a measured-column visual fixture alongside its interaction checks. Live-model diagnostic IDs in navigation policy previews are intentionally outside deterministic golden inputs.
+The visual inventory has 53 fixtures: 9 Android, 9 desktop, 10 iOS, 17 HTML and 8 Wasm. The collection gallery has reviewed fixed-input captures for measured columns, horizontal rows, responsive grids and tables on Android, desktop, iOS and HTML. The iOS suite navigates the same app controls and edits a table cell after capturing all four modes. Wasm has a measured-column visual fixture alongside its interaction checks. Live-model diagnostic IDs in navigation policy previews are intentionally outside deterministic golden inputs.
 
 Open **Components → More components → Large collections lab → More collection recipes** on the native demo. The same menu also opens the input/accessibility lab. Golden candidates must be inspected before committing; the normal PR gate still fails missing or changed baselines.
