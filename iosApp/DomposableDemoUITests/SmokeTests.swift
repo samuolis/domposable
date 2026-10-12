@@ -130,10 +130,9 @@ final class SmokeTests: XCTestCase {
         tapVisible(app, "More collection recipes")
         ready(app, "Collection recipes")
         capture(app, "collection-measured")
-        var current = "Measured column"
         for (layout, name) in [("Horizontal row", "collection-row"), ("Responsive grid", "collection-grid"), ("Semantic table", "collection-table")] {
             // Return to the selector before changing layout; no keyboard is open during goldens.
-            let selector = app.buttons["Collection layout: \(current)"]
+            let selector = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Collection layout,")).firstMatch
             for _ in 0..<6 {
                 if selector.exists && selector.isHittable { break }
                 app.swipeDown()
@@ -143,9 +142,8 @@ final class SmokeTests: XCTestCase {
             let option = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", layout)).firstMatch
             XCTAssertTrue(option.waitForExistence(timeout: 10))
             option.tap()
-            ready(app, "Collection layout: \(layout)")
+            ready(app, "Collection layout, Collection layout: \(layout)")
             capture(app, name)
-            current = layout
         }
         ready(app, "Inventory drafts")
         let draft = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Item 1 draft")).firstMatch
