@@ -42,6 +42,27 @@ DomposableButton("Add", onAdd)
         self.assertEqual([],review.validate_title('Add adaptive storefront and web routes'))
         self.assertTrue(review.validate_title('WIP new stuff'))
 
+    def test_baseline_updates_require_compatibility_migration_and_release_context(self):
+        paths = ['domposable-ui/api/jvm/domposable-ui.api', 'domposable-ui/api/domposable-ui.klib.api']
+        compatibility = '''## API compatibility
+- Classification: additive; existing signatures remain available.
+- Migration: none; the overload is optional.
+- Release: minor; adds a public component.
+'''
+        self.assertEqual([], review.validate_description(self.body + compatibility, paths))
+        self.assertTrue(review.validate_description(self.body, paths))
+        for field in ['Classification', 'Migration', 'Release']:
+            self.assertTrue(review.validate_description(self.body + compatibility.replace(field + ':', 'Other:'), paths))
+        self.assertTrue(review.validate_description(self.body + compatibility.replace('additive;', 'compatible;'), paths))
+        self.assertTrue(review.validate_description(self.body + compatibility.replace('minor;', 'alpha;'), paths))
+        self.assertTrue(review.validate_description(self.body + compatibility.replace('Migration: none; the overload is optional.', 'Migration:'), paths))
+
+    def test_processor_baseline_and_baseline_deletion_require_a_consumer_example(self):
+        body = '## Summary\n- Remove an entry.\n## Verification\n- ABI diff reviewed.'
+        self.assertTrue(review.requires_api_example(['domposable-ksp/api/domposable-ksp.api']))
+        self.assertTrue(review.validate_description(body, ['domposable-ksp/api/domposable-ksp.api']))
+        self.assertFalse(review.is_api_baseline('consumer-fixture/api/sample.api'))
+
     def test_release_previews_require_repository_identity_and_checksum(self):
         old = 'https://raw.githubusercontent.com/samuolis/domposable/' + 'a'*40 + '/previews/android/shop.png'
         new = 'https://github.com/samuolis/domposable/releases/download/visual-evidence/pr-9-run-1234-android-shop-' + 'a'*64 + '.png'

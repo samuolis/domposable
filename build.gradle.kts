@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
@@ -190,7 +192,32 @@ val qualityCheck =
         dependsOn(ktlintCheck, "detekt", androidLint, "koverHtmlReport", "koverVerify", verifyCoverage)
     }
 
-tasks.named("check") { dependsOn(qualityCheck) }
+val binaryApiPolicy = JsonSlurper().parse(file("config/binary-api.json")) as Map<*, *>
+val binaryApiModules =
+    (binaryApiPolicy["runtime_modules"] as List<*>) + (binaryApiPolicy["processor_modules"] as List<*>)
+
+tasks.register("binaryApiCheck") {
+    group = "verification"
+    description = "Validate every published module against its reviewed JVM, Android and Klib ABI baselines"
+    dependsOn(binaryApiModules.map { ":$it:checkKotlinAbi" })
+}
+
+subprojects {
+    if (name in binaryApiModules) {
+        plugins.withId("org.jetbrains.kotlin.multiplatform") {
+            extensions.configure<KotlinMultiplatformExtension> {
+                abiValidation {
+                    // CI runs on macOS so every target is compiled rather than inferred.
+                    keepLocallyUnsupportedTargets.set(
+                        !providers.gradleProperty("domposable.abi.strict").map(String::toBoolean).getOrElse(false),
+                    )
+                }
+            }
+        }
+    }
+}
+
+tasks.named("check") { dependsOn(qualityCheck, "binaryApiCheck") }
 
 detekt {
     source.setFrom(subprojects.map { it.file("src") })

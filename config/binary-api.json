@@ -1,0 +1,13 @@
+{
+  "runtime_modules": [
+    "domposable-foundation",
+    "domposable-ui",
+    "domposable-design-material",
+    "domposable-adaptive",
+    "domposable-screens",
+    "domposable-navigation3",
+    "domposable-lifecycle-viewmodel"
+  ],
+  "processor_modules": ["domposable-ksp"],
+  "klib_targets": ["iosArm64", "iosSimulatorArm64", "js", "wasmJs"]
+}

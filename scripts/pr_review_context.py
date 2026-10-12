@@ -42,6 +42,8 @@ def requires_architecture_context(paths: Iterable[str]) -> bool:
 
 def requires_api_example(paths: Iterable[str]) -> bool:
     for path in paths:
+        if is_api_baseline(path):
+            return True
         parts = PurePosixPath(path).parts
         is_kotlin_source = path.endswith((".kt", ".kts"))
         if not is_kotlin_source or "/src/commonMain/" not in path:
@@ -51,6 +53,10 @@ def requires_api_example(paths: Iterable[str]) -> bool:
         if len(parts) >= 4 and parts[0] == "feature" and parts[2] in {"api", "screen-contract"} and parts[3] == "src":
             return True
     return False
+
+
+def is_api_baseline(path: str) -> bool:
+    return bool(re.fullmatch(r"domposable-[^/]+/api/(?:[^/]+/)?[^/]+\.api", path))
 
 
 def requires_build_example(paths: Iterable[str]) -> bool:
@@ -116,6 +122,16 @@ def validate_description(body: str, changed_paths: Iterable[str]) -> list[str]:
         api_example = section(body, "API example")
         if not api_example or not has_code_example(api_example):
             errors.append("Public API changes need an API/code example under `## API example`.")
+    if any(is_api_baseline(path) for path in paths):
+        compatibility = section(body, "API compatibility") or ""
+        required_fields = {
+            "Classification": r"(?:additive|breaking|tooling-only)\b[^\n]*",
+            "Migration": r"\S[^\n]*",
+            "Release": r"(?:patch|minor|major)\b[^\n]*",
+        }
+        for field, value in required_fields.items():
+            if not re.search(rf"^[ \t]*(?:[-*][ \t]+)?{field}:[ \t]*{value}$", compatibility, re.IGNORECASE | re.MULTILINE):
+                errors.append(f"ABI baseline updates need `{field}: ...` under `## API compatibility` (classification: additive/breaking/tooling-only; release: patch/minor/major).")
     if requires_build_example(paths):
         build_changes = section(body, "Build changes")
         if not build_changes or not has_code_example(build_changes):
