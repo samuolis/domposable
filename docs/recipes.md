@@ -23,7 +23,50 @@ DomposableMeasure { size ->
 
 Measure **feature content**, after the navigation rail and application chrome take their space. `visibleEntries` displays the last N entries; the built-in scene places them in equal-width panes. It is not a metadata-driven Material list/detail scene strategy. The example's three-pane policy requires a large content width and explicitly enables supporting content. Applications own route grouping, pane policy and root navigation.
 
-The demo's top-level navigation replaces the active stack. It does not implement independent saved tab back stacks. Model lifetime comes from `entry.retain`; drafts use `rememberSaveable`. See [screens](screens.md) and [integrations](integrations.md) for application factories, optional ViewModels and Metro.
+The demo's main navigation replaces the active stack. The separate `#/roots` recipe demonstrates independent saved root stacks. Model lifetime comes from `entry.retain`; drafts use `rememberSaveable`. See [screens](screens.md) and [integrations](integrations.md) for application factories, optional ViewModels and Metro.
+
+## Independent root stacks
+
+Open `#/roots`, enter an Inbox draft, switch to Archive and open its message, then return. Both root stacks keep their route strings, entry IDs and portable UI saveables. The application-owned `RootStacks` controller snapshots the departing root before changing hosts and recreates fresh entry scopes when it returns. It uses a Compose Saver to restore both roots after reload.
+
+```kotlin
+val roots = rememberSaveable(saver = RootStacks.saver) { RootStacks() }
+DomposableTabs(listOf("Inbox", "Archive"), selectedIndex, onSelect = {
+    roots.select(listOf("Inbox", "Archive")[it])
+})
+key(roots.selected) {
+    val entries = rememberDomposableNavEntries(roots.active, screens)
+    RootRecipeDisplay(entries, wide, roots::back)
+}
+```
+
+`RootStacks` and `RootRecipeDisplay` are application sample code, not mandatory library APIs. See the [controller](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/RootStacks.kt) and [recipe](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/RootStackRecipe.kt).
+
+This recipe deliberately disposes an inactive root's live sessions when selecting another root, then the departed host releases its decorators. Keying the host by root identity keeps automatic saveable keys stable when returning. Its drafts survive; its models are recreated through the application's normal DI path. Never keep a destroyed `DomposableEntryScope` and attempt to resume it. If your app needs live models across root switches, retain the owning host/decorator or move that resource to an application-owned scope. Each policy has a different memory/lifetime cost.
+
+Back pops only the selected root and never removes its final home entry. Re-selecting the current root does nothing; opening its current message does not duplicate the route. Root history here is internal application state: the URL identifies `/roots`, while its tab and child stacks are saveables. To expose each nested route as a URL, supply an application codec/history policy that represents that root; do not install competing browser-history owners.
+
+## Caller-owned Navigation 3 scenes
+
+On native Compose and Wasm, `RootRecipeDisplay` passes decorated entries directly to Navigation 3's `NavDisplay`. Its scene strategy recognizes an Inbox/Archive home and detail from the same root, displays a one-third list and two-thirds detail at wide content sizes, and returns `null` for single-pane fallback. `previousEntries` defines back to the list. The data-class scene provides value equality so unchanged scenes do not become new transitions.
+
+```kotlin
+// In the application's Compose UI source set:
+val strategy = remember(wide) {
+    SceneStrategy<DomposableEntryScope<RootRoute>> {
+        rootListDetailScene(it, wide)
+    }
+}
+NavDisplay(
+    entries = entries,
+    sceneStrategies = listOf(strategy),
+    onBack = onBack,
+)
+```
+
+The [native implementation](https://github.com/samuolis/domposable/blob/main/demo/src/composeUiMain/kotlin/io/github/samuolis/domposable/demo/RootListDetailScene.kt) is compiled across all Compose UI targets. HTML uses `DomposableNavDisplay` with one or two equal-width semantic panes; the native scene's ratio and transition policy are not an HTML API. Keep Compose UI scenes out of the DOM applier. Applications can use ordinary Navigation 3 keys, providers and decorators without a Domposable registry, navigator or KSP; [direct integration](screens.md) shows that lower-level path.
+
+For broader scene policies, see the [official Navigation 3 scene guide](https://developer.android.com/guide/navigation/navigation-3/scenes). Dialog/overlay strategies, predictive-back animation tuning and live-model retention across inactive roots remain application decisions.
 
 ## Semantic HTML hash routes
 
