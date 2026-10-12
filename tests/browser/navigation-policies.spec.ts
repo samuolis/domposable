@@ -84,7 +84,11 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   await activate('Open Inbox live message');
   const draft = page.getByRole('textbox', { name: /^Inbox message live draft/ });
   await draft.focus();
-  await expect(page.locator('.compose-backing-field')).toBeFocused();
+  const backing = page.locator('.compose-backing-field');
+  await expect(backing).toBeFocused();
+  await expect(backing).toHaveAttribute('inputmode', 'text');
+  await expect(backing).toHaveText('');
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await page.keyboard.insertText('Wasm retained draft');
   await expect(draft).toHaveText('Wasm retained draft');
   await activate('Request back');
