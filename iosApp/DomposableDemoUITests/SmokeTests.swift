@@ -146,11 +146,16 @@ final class SmokeTests: XCTestCase {
             capture(app, name)
         }
         ready(app, "Inventory drafts")
-        let draft = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Item 1 draft")).firstMatch
+        let draft = app.textViews.matching(NSPredicate(format: "label == %@", "Item 1 draft")).firstMatch
         XCTAssertTrue(draft.waitForExistence(timeout: 10))
         draft.tap()
         draft.typeText("iOS table draft")
-        XCTAssertTrue((draft.value as? String)?.contains("iOS table draft") == true)
+        // Compose can paint the typed text before the accessibility snapshot exposes its value.
+        let edited = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            (draft.value as? String)?.contains("iOS table draft") == true
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [edited], timeout: 10), .completed,
+                       "Table draft value: \(String(describing: draft.value))")
     }
 
     func testProductComponents() {
