@@ -24,7 +24,8 @@ Desktop and Wasm support are **experimental**. HTML and Wasm share the optional 
 | KSP | 2.3.12 |
 | Android Gradle plugin / Gradle | 9.4.1 / 9.7.1 |
 | Metro example | 1.4.5 |
-| Kobweb page API example | 0.25.1 |
+| Kobweb application/export example | 0.25.1 |
+| Koin integration example | 4.2.2 |
 | Playwright | 1.64.0 |
 
 These are the versions verified together. Applications adopting older/newer Compose, Kotlin or Kobweb versions must compile and test their own dependency graph. All seven runtime libraries publish six target variants; the optional KSP processor runs on JVM and generates shared declarations. CI compiles both a feature consumer and an independent provider against packaged Maven artifacts.

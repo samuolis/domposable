@@ -31,6 +31,7 @@ include(
     ":androidApp",
     ":metro-example",
     ":kobweb-example",
+    ":koin-example",
     ":catalog-api",
     ":catalog-impl",
     ":checkout-api",
