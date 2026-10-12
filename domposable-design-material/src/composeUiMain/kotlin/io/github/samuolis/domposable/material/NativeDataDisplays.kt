@@ -314,11 +314,16 @@ internal fun NativeDataTable(
         Row(Modifier.fillMaxWidth().horizontalScroll(scroll)) {
             Column(
                 Modifier.width(tableWidth).semantics {
-                    collectionInfo = CollectionInfo(props.rows.size, props.columns.size)
+                    collectionInfo = CollectionInfo(props.rows.size + 1, props.columns.size)
                 },
                 verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
             ) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.fillMaxWidth().semantics {
+                        collectionItemInfo = CollectionItemInfo(0, 1, 0, props.columns.size)
+                    },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     props.columns.forEach { column ->
                         key(column.key) {
                             Text(
@@ -387,11 +392,11 @@ private fun NativeDataTableCell(
     row: DomposableDataTableRow,
     column: DomposableDataTableColumn,
     action: (() -> Unit)?,
-    cellModifier: Modifier,
+    modifier: Modifier,
     compact: Boolean,
 ) {
     Column(
-        cellModifier
+        modifier
             .padding(8.dp)
             .then(if (action != null) Modifier.clickable(onClick = action) else Modifier)
             .semantics {

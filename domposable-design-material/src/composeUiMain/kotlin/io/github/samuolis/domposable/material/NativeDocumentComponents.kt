@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -84,6 +85,14 @@ internal fun NativeDomposableLink(
     val currentOnClick by rememberUpdatedState(props.onClick)
     val uriHandler = LocalUriHandler.current
     val appearance = props.appearance
+    // Keep the existing native link's touch target, typography and spacing for default calls.
+    if (appearance == null && props.textStyle == DomposableTextStyle.Body) {
+        TextButton(
+            onClick = { currentOnClick?.invoke() ?: uriHandler.openUri(props.href) },
+            modifier = modifier.toComposeModifier(),
+        ) { Text(props.label) }
+        return
+    }
     val baseStyle =
         when (props.textStyle) {
             DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
