@@ -28,6 +28,7 @@ Kover instruments **JVM and Android host tests** and reports the eight published
 | --- | ---: | ---: |
 | All library JVM/Android code | 70% | 35% |
 | Each core package: foundation, adaptive, screens, navigation3, lifecycle | 80% | 60% |
+| KSP processor | 90% | 70% |
 
 The policy lives in [`config/coverage.json`](https://github.com/samuolis/domposable/blob/main/config/coverage.json). Both Kover and the package verifier enforce it. Missing reports, missing required packages, empty measured source and coverage below a floor fail validation. Raise floors as tests improve; lowering a floor requires a reviewed justification.
 
@@ -43,6 +44,6 @@ The **Kotlin quality, Android lint and coverage** job summarizes total and per-p
 
 Kover does not instrument Kotlin/JS, Wasm or iOS. Their behavior, accessibility, screenshots and published consumer builds remain required, separate checks. A native screenshot and a browser interaction test exercise different renderers; neither implies the other platform's branch coverage.
 
-KSP currently has no instrumented processor tests. Its generated contracts are validated by compiling real feature and consumer fixtures across all six targets, but those compiler-worker executions do not contribute to Kover. The report displays this as zero coverage rather than excluding the processor. Dedicated processor diagnostic/output tests and instrumentation remain a coverage gap.
+KSP has direct, instrumented JVM tests using the pinned KSP2 analysis engine and the production processor provider. They check route/scope wiring, required and default dependencies, ViewModel-owner placement, aggregate dependency conflicts, component generation and diagnostics for invalid screen declarations. These executions contribute to Kover; the separate generated feature and published-consumer compilations still validate real Compose contracts across all six targets.
 
 Line coverage also does not prove correct behavior. Tests must assert meaningful contracts, including invalid values, state restoration, entry disposal, navigation and API 24 compatibility. See [validation](validation.md) for platform checks and screenshot review.
