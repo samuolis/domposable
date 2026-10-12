@@ -13,6 +13,12 @@ dependencies {
     implementation(libs.ksp.api)
     implementation(libs.kotlinpoet.ksp)
     testImplementation(kotlin("test"))
+    testImplementation("com.google.devtools.ksp:symbol-processing-aa-embeddable:${libs.versions.ksp.get()}")
+    testImplementation("com.google.devtools.ksp:symbol-processing-common-deps:${libs.versions.ksp.get()}")
+}
+
+tasks.test {
+    maxHeapSize = "2g"
 }
 publishing {
     repositories {
