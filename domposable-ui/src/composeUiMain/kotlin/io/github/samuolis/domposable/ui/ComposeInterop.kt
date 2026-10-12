@@ -80,10 +80,10 @@ fun DomposableModifier.toComposeModifier(
                 if (element is NativeModifierElement) {
                     element.modifier
                 } else {
-                    renderApplicationElement(
-                        element,
-                        renderer,
-                    )
+                    renderer?.invoke(element)
+                        ?: error(
+                            "No native renderer handled application modifier element ${element::class.qualifiedName}",
+                        )
                 }
             result = result.then(native)
             continue
@@ -260,13 +260,6 @@ fun DomposableModifier.toComposeModifier(
     }
     return result
 }
-
-private fun renderApplicationElement(
-    element: DomposableModifierElement,
-    operationRenderer: ((DomposableModifierElement) -> Modifier?)?,
-): Modifier =
-    operationRenderer?.invoke(element)
-        ?: error("No native renderer handled application modifier element ${element::class.qualifiedName}")
 
 private fun DomposableShape.nativeShape(): Shape =
     when (this) {
