@@ -97,6 +97,9 @@ test.describe('Wasm input and semantics', () => {
     await expect(dialog).toHaveAttribute('aria-modal', 'true');
     await expect.poll(() => page.locator('#cmp_a11y_root').evaluate(element =>
       [...element.children].map(child => (child as HTMLElement).inert))).toEqual([true, false]);
+    await page.waitForFunction(() => performance.getEntriesByType('resource')
+      .some(resource => resource.name.includes('/notosanssymbols2/')));
+    await page.screenshot({ path: 'build/screenshots/wasm/input-lab-help.png' });
     await activate(dialog.getByRole('button', { name: 'Close help', exact: true }));
     await expect(dialog).toHaveCount(0);
     await expect.poll(() => page.locator('#cmp_a11y_root').evaluate(element =>
@@ -157,6 +160,9 @@ test('HTML input lab uses labelled native controls, validation, masked input and
   await open.click();
   const dialog = page.getByRole('dialog', { name: 'Input help', exact: true });
   await expect(dialog).toBeVisible();
+  if (test.info().project.name === 'chromium') {
+    await page.screenshot({ path: 'build/screenshots/dom/input-lab-help.png' });
+  }
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   await expect(open).toBeFocused();

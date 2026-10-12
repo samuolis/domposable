@@ -63,8 +63,10 @@ internal fun InputLab() {
     }
     if (dialog) {
         DomposableDialog("Input help", onDismiss = { dialog = false }) {
-            DomposableText("Names and drafts remain in this demo on your device.")
-            DomposableButton("Close help", { dialog = false })
+            DomposableColumn(gap = 12.dp) {
+                DomposableText("Names and drafts remain in this demo on your device.")
+                DomposableButton("Close help", { dialog = false })
+            }
         }
     }
 }
