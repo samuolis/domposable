@@ -26,7 +26,7 @@ import io.github.samuolis.domposable.ui.width
 
 @Composable
 @DomposableScreen(DemoRoute.Collections::class)
-fun CollectionLab() {
+fun CollectionLab(onMore: () -> Unit = {}) {
     var count by rememberSaveable { mutableStateOf("10000") }
     var windowed by rememberSaveable { mutableStateOf(true) }
     var reversed by rememberSaveable { mutableStateOf(false) }
@@ -54,5 +54,6 @@ fun CollectionLab() {
                 DomposableTextField(note, { note = it }, "Row ${index + 1} note", DomposableModifier.width(220.dp))
             }
         }
+        DomposableButton("More collection recipes", onMore)
     }
 }

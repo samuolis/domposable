@@ -24,11 +24,12 @@ data class DomposableLazyItem(
     val content: @Composable () -> Unit,
 )
 
-/** Opt-in uniform rows. Variable-height content should keep the default collection renderer. */
+/** Opt-in rows. In measured mode [rowHeight] estimates rows until their actual height is known. */
 data class DomposableListWindow(
     val rowHeight: DomposableLength,
     val viewportHeight: DomposableLength,
     val overscan: Int = 3,
+    val measureRows: Boolean = false,
 ) {
     init {
         require(rowHeight.value.isFinite() && rowHeight.value > 0f)
@@ -94,6 +95,7 @@ data class DomposableLazyColumnProps(
 data class DomposableLazyRowProps(
     val items: List<DomposableLazyItem>,
     val gap: DomposableLength = 0.dp,
+    val window: DomposableRowWindow? = null,
 )
 
 @DomposableComponent("LazyGrid")
@@ -101,6 +103,7 @@ data class DomposableLazyGridProps(
     val items: List<DomposableLazyItem>,
     val columns: Int = 2,
     val gap: DomposableLength = 8.dp,
+    val window: DomposableGridWindow? = null,
 )
 
 private val HTML_HEADING_LEVELS = 1..6

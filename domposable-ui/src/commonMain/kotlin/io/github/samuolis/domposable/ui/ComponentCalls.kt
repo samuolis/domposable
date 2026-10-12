@@ -45,7 +45,17 @@ fun <T> DomposableLazyRow(
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 0.dp,
     itemContent: @Composable (T) -> Unit,
-) = DomposableLazyRow(items.map { item -> DomposableLazyItem(key(item)) { itemContent(item) } }, modifier, gap)
+) = DomposableLazyRow(items, key, modifier, gap, null, itemContent)
+
+@Composable
+fun <T> DomposableLazyRow(
+    items: List<T>,
+    key: (T) -> String,
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    window: DomposableRowWindow?,
+    itemContent: @Composable (T) -> Unit,
+) = DomposableLazyRow(items.map { item -> DomposableLazyItem(key(item)) { itemContent(item) } }, modifier, gap, window)
 
 @Composable
 fun <T> DomposableLazyGrid(
@@ -55,6 +65,17 @@ fun <T> DomposableLazyGrid(
     columns: Int = 2,
     gap: DomposableLength = 8.dp,
     itemContent: @Composable (T) -> Unit,
+) = DomposableLazyGrid(items, key, modifier, columns, gap, null, itemContent)
+
+@Composable
+fun <T> DomposableLazyGrid(
+    items: List<T>,
+    key: (T) -> String,
+    modifier: DomposableModifier = DomposableModifier,
+    columns: Int = 2,
+    gap: DomposableLength = 8.dp,
+    window: DomposableGridWindow?,
+    itemContent: @Composable (T) -> Unit,
 ) = DomposableLazyGrid(
     items.map { item ->
         DomposableLazyItem(key(item)) { itemContent(item) }
@@ -62,6 +83,7 @@ fun <T> DomposableLazyGrid(
     modifier,
     columns,
     gap,
+    window,
 )
 
 @Composable
@@ -93,7 +115,15 @@ fun DomposableLazyRow(
     items: List<DomposableLazyItem>,
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 0.dp,
-) = DomposableLazyRow(DomposableLazyRowProps(items, gap), modifier)
+) = DomposableLazyRow(items, modifier, gap, null)
+
+@Composable
+fun DomposableLazyRow(
+    items: List<DomposableLazyItem>,
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    window: DomposableRowWindow?,
+) = DomposableLazyRow(DomposableLazyRowProps(items, gap, window), modifier)
 
 @Composable
 fun DomposableLazyGrid(
@@ -101,7 +131,16 @@ fun DomposableLazyGrid(
     modifier: DomposableModifier = DomposableModifier,
     columns: Int = 2,
     gap: DomposableLength = 8.dp,
-) = DomposableLazyGrid(DomposableLazyGridProps(items, columns, gap), modifier)
+) = DomposableLazyGrid(items, modifier, columns, gap, null)
+
+@Composable
+fun DomposableLazyGrid(
+    items: List<DomposableLazyItem>,
+    modifier: DomposableModifier = DomposableModifier,
+    columns: Int = 2,
+    gap: DomposableLength = 8.dp,
+    window: DomposableGridWindow?,
+) = DomposableLazyGrid(DomposableLazyGridProps(items, columns, gap, window), modifier)
 
 @Composable
 fun DomposableSwitch(

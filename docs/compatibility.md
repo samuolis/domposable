@@ -32,7 +32,7 @@ These are the versions verified together. Applications adopting older/newer Comp
 
 ## Rendering differences
 
-HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm uses Compose UI rendering and its accessibility layer. They share declarations and behavior intent, not pixels or browser-native text selection. HTML collections are keyed DOM lists; `DomposableLazyColumn` offers an optional [fixed-height scroll window](performance.md). Rows, grids and unwindowed columns render all items. Compose UI collections are lazy. Native date/time purposes currently use text fields. Hinge/fold information, rich text, drag/reorder and large-table virtualization are not bundled.
+HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm uses Compose UI rendering and its accessibility layer. They share declarations and behavior intent, not pixels or browser-native text selection. HTML collections are keyed DOM lists; columns, rows, grids and tables offer optional [bounded scroll windows](performance.md). Unwindowed collections render all items. Compose UI collections are lazy. Native date/time purposes currently use text fields. Hinge/fold information, rich text, drag/reorder and column virtualization are not bundled.
 
 Material 3 1.13.0-alpha02 requires Android API 24. The library modules, demo and published-consumer fixtures use the same minimum; applications upgrading must also set `minSdk = 24` or higher.
 

@@ -90,7 +90,7 @@ DomposableLazyGrid(
 ) { product -> ProductCard(product) }
 ```
 
-`ProductCard` belongs to the feature. Keys must be stable and unique. Compose UI collections virtualize; HTML normally emits all keyed items as lists/CSS grid. For large fixed-height columns, use the optional [scroll window](performance.md). Keep a bounded height when nesting a native lazy collection inside another scroll container. The storefront uses wrapping rows for its small catalogue.
+`ProductCard` belongs to the feature. Keys must be stable and unique. Compose UI collections virtualize; HTML normally emits all keyed items as lists/CSS grid. For large datasets, use optional [column, row, grid and table windows](performance.md). Keep a bounded height when nesting a native lazy collection inside another scroll container. The storefront uses wrapping rows for its small catalogue.
 
 ## Shell and feedback
 
@@ -139,6 +139,7 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 | --- | --- |
 | Theme | Theme |
 | Layout | Column, Row, FlowRow, Box, LazyColumn, LazyRow, LazyGrid, Spacer, Divider, Scaffold |
+| Tables | Table with caption, column headers and keyed cells |
 | Actions | Button, IconButton, FloatingActionButton, Link, Chip, Tooltip |
 | Forms | TextField, Checkbox, Switch, RadioButton, Slider, RangeSlider, Select, SegmentedButtons |
 | Content | Text, Image, Icon, Card, Surface, Avatar, Badge |
@@ -147,4 +148,4 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 
 Every component has direct arguments and a `Props` overload. Keep props for renderer customization or reusable configuration; ordinary feature code can use the calls above. See [design-system customization](design-systems.md), [adaptive examples](adaptive.md) and [platform boundaries](coverage.md).
 
-The additional controls demo shares the same source for native, HTML and Wasm. The 0.1.x provider has 34 renderer contracts; the expanded provider described here has 41 and requires a minor-version upgrade. Check [release versions](https://github.com/samuolis/domposable/releases) when selecting Maven dependencies.
+The additional controls demo shares the same source for native, HTML and Wasm. The 0.1.x provider has 34 renderer contracts; 0.2.0 has 41, and main adds Table as the 42nd for the next minor release. Check [release versions](https://github.com/samuolis/domposable/releases) when selecting Maven dependencies.

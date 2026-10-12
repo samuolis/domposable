@@ -1,42 +1,96 @@
 # Large collections
 
-Native Compose and Wasm use Compose's lazy collections. HTML normally renders every keyed item, which supports variable heights, browser find and printing. For a large fixed-height column, opt into a bounded scroll window:
+Use stable keys with `DomposableLazyColumn`, `DomposableLazyRow`, `DomposableLazyGrid` or `DomposableTable`. Compose UI and Wasm use native lazy layouts. HTML normally renders every item; opt into a bounded scroll window for a large in-memory dataset. Your app still owns loading, paging and business state.
+
+## Fixed or measured column heights
 
 ```kotlin
 DomposableLazyColumn(
     products,
     key = { it.id },
-    gap = 4.dp,
+    gap = 8.dp,
     window = DomposableListWindow(
-        rowHeight = 88.dp,
-        viewportHeight = 352.dp,
-        overscan = 3,
+        rowHeight = 144.dp,
+        viewportHeight = 360.dp,
+        measureRows = true,
     ),
-) { product ->
-    ProductRow(product)
+) { product -> ProductRow(product) }
+```
+
+With `measureRows = true`, `rowHeight` is an initial HTML estimate. A `ResizeObserver` measures mounted rows; a keyed prefix-sum index updates offsets and preserves the first visible item's position when preceding rows resize. Native Compose uses natural item heights. With the default `false`, each row has the supplied height and overflowing content is clipped. Both modes keep a bounded viewport.
+
+Measurements are retained by key while the collection is composed. Dataset changes rebuild the index; measured-height updates and offset lookup take logarithmic time. Offscreen, never-measured rows retain their estimate, so the scrollbar extent can change as you visit them. This is not an exact pre-layout measurement of the whole dataset.
+
+## Horizontal rows and responsive grids
+
+```kotlin
+DomposableLazyRow(
+    products,
+    key = { it.id },
+    gap = 8.dp,
+    window = DomposableRowWindow(
+        itemWidth = 240.dp,
+        itemHeight = 240.dp,
+        viewportWidth = 720.dp,
+    ),
+) { product -> ProductCard(product) }
+
+DomposableMeasure(DomposableModifier.fillMaxWidth()) { size ->
+    DomposableLazyGrid(
+        products,
+        key = { it.id },
+        columns = if (size.width >= 700) 4 else 2,
+        gap = 8.dp,
+        window = DomposableGridWindow(rowHeight = 240.dp, viewportHeight = 360.dp),
+    ) { product -> ProductCard(product) }
 }
 ```
 
-The same declaration works on all targets. The default Material provider fixes each row to `rowHeight` and the list viewport to `viewportHeight`; content exceeding the row height is clipped. HTML mounts the visible rows and neighboring overscan rows in a semantic list, using `aria-posinset` and `aria-setsize` for their positions in the full collection. A focused row remains mounted when it leaves the viewport. Native providers keep their existing Compose lazy layout with the same fixed dimensions.
+Row cells have fixed width/height; the HTML viewport shrinks to its available width. Grid cells share the available width and have a fixed row height. The application chooses the column count from measured content space. HTML observes viewport resizing and uses logical inline offsets for right-to-left rows. These windows clip content that exceeds the cell dimensions.
 
-Use unique, stable string keys and at least one overscan row so keyboard focus can reach the next window. `rememberSaveable` drafts follow keys when scrolling and reordering; HTML evicts saved state when a key leaves the dataset. Ordinary `remember` values are lost when their row is unmounted. Data loading, paging and business state remain application-owned. This is a rendering window over an in-memory list, not a remote-data paging API.
+## Semantic tables
 
-## Choose the right layout
-
-Windowing is optional and currently applies only to `DomposableLazyColumn`. Leave `window = null` for variable-height content, small lists, documents, browser find across every row, or printing the full collection. Offscreen rows are absent from the HTML tree, so browser find, printing and accessibility browsing cannot enumerate them all at once. Automated keyboard and axe checks cover the demo; physical screen-reader review is not part of CI.
-
-Rows and grids retain their existing keyed HTML rendering. Custom providers receive the optional window in `DomposableLazyColumnProps` and decide how to implement it. Do not claim windowing support for a custom provider that ignores this property.
-
-## Reproduce the measurements
-
-Open the playground's `#/collections` route. Compare 1,000 plain rows with a windowed column, scroll 10,000 rows, edit a note, reverse the dataset and reduce its size. The tests record elapsed browser time and mounted row count in `build/benchmarks/collections-{browser}.json`, with screenshots alongside them.
-
-```bash
-./gradlew :demo:jsBrowserDevelopmentWebpack :demo:jvmTest
-python3 scripts/ci/browser_preview.py
-npx playwright test tests/browser/collections.spec.ts
+```kotlin
+val columns = listOf(
+    DomposableTableColumn("name", "Product"),
+    DomposableTableColumn("stock", "Available"),
+)
+DomposableTable(
+    caption = "Warehouse stock",
+    columns = columns,
+    items = products,
+    key = { it.id },
+    window = DomposableListWindow(64.dp, 360.dp, measureRows = true),
+) { product, column ->
+    when (column.key) {
+        "name" -> DomposableText(product.name)
+        "stock" -> DomposableText(product.available.toString())
+    }
+}
 ```
 
-PR CI runs this in Chromium, Firefox and WebKit and retains the measurements in `android-html-evidence` for 30 days. Timing includes interaction and browser scheduling; it is diagnostic evidence, not a hardware-independent performance guarantee. CI gates bounded DOM size, keyed state, focus, keyboard traversal and valid list semantics rather than an arbitrary millisecond threshold.
+HTML emits `table`, `caption`, column-scoped `th` headers and cells. Windowed rows keep full `aria-rowcount`/`aria-colcount` and their actual `aria-rowindex`; hidden spacer rows preserve scroll geometry. Headers remain mounted and sticky. Native renders labelled columns and row/column collection semantics with a lazy body. Sorting, selection and row actions belong to your feature. Column virtualization and spreadsheet editing are outside this API.
 
-This API is unreleased on main after 0.2.0. Existing source calls keep their defaults and direct-call binary overloads remain available. The added props field changes the data class's constructor and generated `copy` signatures; consumers using that type must recompile when upgrading to the next minor release.
+![The shared inventory table on Android and semantic HTML](assets/examples/collection-table.png)
+
+The same table declaration uses a native collection on Android and a real table on the web.
+
+## Keys, focus and state
+
+Use unique, stable string keys and positive dimensions. At least one overscan item/row lets keyboard focus reach the next window. A focused HTML item stays mounted outside the visible range. `rememberSaveable` drafts follow item keys through scrolling and reordering; removed keys discard their saved state. Ordinary `remember` values can be lost when an item unmounts. A new layout mode starts a new collection owner in the demo; business drafts that must survive changing modes should live in your model.
+
+Keep `window = null` for small collections, full-document browser find, printing or accessibility browsing of every item. Windowed HTML omits offscreen items from the DOM; list positions and table coordinates describe the full dataset but do not make absent content searchable. Complete custom providers must honor and document each window contract themselves.
+
+## Run the gallery and checks
+
+Open [collection recipes](https://samuolis.github.io/domposable/demo/#/collection-recipes) or choose **More collection recipes** from the fixed-height lab. Switch layouts, scroll 10,000 items, edit a draft, reverse/reduce the dataset and resize the viewport. Expanded descriptions exercise measured-height updates.
+
+```bash
+./gradlew :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack :demo:jvmTest
+python3 scripts/ci/browser_preview.py
+npx playwright test tests/browser/collections.spec.ts tests/browser/advanced-collections.spec.ts
+```
+
+PR CI runs HTML behavior in Chromium, Firefox and WebKit. Tests gate bounded DOM size, keyed drafts, focus, keyboard traversal, resizing, RTL offsets and table semantics. `build/benchmarks/` records mounted counts and diagnostic timings; `android-html-evidence` retains them for 30 days. Timings include browser scheduling and do not establish a universal speed guarantee. Automated checks do not establish physical screen-reader parity.
+
+See [migration](migration.md) for the next minor release's provider/props ABI changes.

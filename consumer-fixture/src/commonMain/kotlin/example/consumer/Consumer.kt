@@ -198,3 +198,42 @@ fun SharedControls() {
         DomposableIconButton({}, "Help") { DomposableText("?") }
     }
 }
+
+// Windowing is opt-in; existing row/grid calls remain valid without a window.
+@Composable
+fun LargeCollections(items: List<String>) {
+    io.github.samuolis.domposable.ui.DomposableLazyColumn(
+        items,
+        key = { it },
+        window =
+            io.github.samuolis.domposable.ui
+                .DomposableListWindow(80.dp, 320.dp, measureRows = true),
+    ) { DomposableText(it) }
+    io.github.samuolis.domposable.ui.DomposableLazyRow(
+        items,
+        key = { it },
+        window =
+            io.github.samuolis.domposable.ui
+                .DomposableRowWindow(160.dp, 80.dp, 480.dp),
+    ) { DomposableText(it) }
+    io.github.samuolis.domposable.ui.DomposableLazyGrid(
+        items,
+        columns = 2,
+        key = { it },
+        window =
+            io.github.samuolis.domposable.ui
+                .DomposableGridWindow(80.dp, 320.dp),
+    ) { DomposableText(it) }
+    io.github.samuolis.domposable.ui.DomposableTable(
+        "Products",
+        listOf(
+            io.github.samuolis.domposable.ui
+                .DomposableTableColumn("name", "Name"),
+        ),
+        items,
+        key = { it },
+        window =
+            io.github.samuolis.domposable.ui
+                .DomposableListWindow(64.dp, 320.dp),
+    ) { item, _ -> DomposableText(item) }
+}

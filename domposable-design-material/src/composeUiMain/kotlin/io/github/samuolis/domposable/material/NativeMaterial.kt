@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -232,7 +233,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     verticalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                 ) {
                     items(props.items, key = { it.key }) { item ->
-                        if (window == null) {
+                        if (window == null || window.measureRows) {
                             item.content()
                         } else {
                             Box(Modifier.height(window.rowHeight.value.dp).clipToBounds()) { item.content() }
@@ -246,10 +247,26 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 _,
                 ->
                 LazyRow(
-                    modifier.toComposeModifier(),
+                    props.window?.let { modifier.toComposeModifier().width(it.viewportWidth.value.dp) }
+                        ?: modifier.toComposeModifier(),
                     horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                 ) {
-                    items(props.items, key = { it.key }) { it.content() }
+                    items(props.items, key = { it.key }) { item ->
+                        val window = props.window
+                        if (window == null) {
+                            item.content()
+                        } else {
+                            Box(
+                                Modifier
+                                    .width(
+                                        window.itemWidth.value.dp,
+                                    ).height(window.itemHeight.value.dp)
+                                    .clipToBounds(),
+                            ) {
+                                item.content()
+                            }
+                        }
+                    }
                 }
             },
             lazyGrid = {
@@ -259,13 +276,22 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 ->
                 LazyVerticalGrid(
                     GridCells.Fixed(props.columns),
-                    modifier.toComposeModifier(),
+                    props.window?.let { modifier.toComposeModifier().height(it.viewportHeight.value.dp) }
+                        ?: modifier.toComposeModifier(),
                     horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                     verticalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                 ) {
-                    items(props.items, key = { it.key }) { it.content() }
+                    items(props.items, key = { it.key }) { item ->
+                        val window = props.window
+                        if (window == null) {
+                            item.content()
+                        } else {
+                            Box(Modifier.height(window.rowHeight.value.dp).clipToBounds()) { item.content() }
+                        }
+                    }
                 }
             },
+            table = { props, modifier, _ -> NativeTable(props, modifier) },
             text = { props, modifier, _ ->
                 Text(
                     props.text,

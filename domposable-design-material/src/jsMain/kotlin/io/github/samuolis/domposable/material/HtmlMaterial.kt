@@ -148,18 +148,31 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             lazyColumn = { props, modifier, _ ->
                 if (props.window == null) {
                     HtmlCollection(props.items, modifier, props.gap, "column")
+                } else if (props.window?.measureRows == true) {
+                    HtmlMeasuredWindow(props, modifier)
                 } else {
                     HtmlListWindow(props, modifier)
                 }
             },
-            lazyRow = { props, modifier, _ -> HtmlCollection(props.items, modifier, props.gap, "row") },
+            lazyRow = { props, modifier, _ ->
+                if (props.window == null) {
+                    HtmlCollection(props.items, modifier, props.gap, "row")
+                } else {
+                    HtmlRowWindow(props, modifier)
+                }
+            },
             lazyGrid = {
                 props,
                 modifier,
                 _,
                 ->
-                HtmlCollection(props.items, modifier, props.gap, "grid", props.columns)
+                if (props.window == null) {
+                    HtmlCollection(props.items, modifier, props.gap, "grid", props.columns)
+                } else {
+                    HtmlGridWindow(props, modifier)
+                }
             },
+            table = { props, modifier, _ -> HtmlTable(props, modifier) },
             text = { props, modifier, _ ->
                 DomposableHtmlModifiers(modifier) {
                     if (props.style == DomposableTextStyle.Title ||

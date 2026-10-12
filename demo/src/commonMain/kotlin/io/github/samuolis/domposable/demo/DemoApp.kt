@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.adaptive.DomposablePaneRecipe
 import io.github.samuolis.domposable.adaptive.DomposableWidthClass
 import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
+import io.github.samuolis.domposable.demo.generated.advancedCollectionsDestination
 import io.github.samuolis.domposable.demo.generated.collectionLabDestination
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
@@ -106,6 +107,8 @@ sealed interface DemoRoute {
 
     data object Collections : DemoRoute
 
+    data object AdvancedCollections : DemoRoute
+
     data object Inputs : DemoRoute
 
     data class NotFound(
@@ -122,6 +125,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.Recipes -> "/recipes"
             DemoRoute.Roots -> "/roots"
             DemoRoute.Collections -> "/collections"
+            DemoRoute.AdvancedCollections -> "/collection-recipes"
             DemoRoute.Inputs -> "/inputs"
             is DemoRoute.NotFound -> route.path
             is DemoRoute.Detail -> "/tasks/${route.taskId}"
@@ -140,6 +144,8 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             path == "/roots" -> DemoRoute.Roots
 
             path == "/collections" -> DemoRoute.Collections
+
+            path == "/collection-recipes" -> DemoRoute.AdvancedCollections
 
             path == "/inputs" -> DemoRoute.Inputs
 
@@ -265,7 +271,12 @@ fun DemoApp(
                 register(navigationRecipesScreenDestination())
                 register(rootStackRecipeDestination())
 
-                register(collectionLabDestination())
+                register(
+                    collectionLabDestination {
+                        CollectionLab { stack.add(DomposableEntryScope(DemoRoute.AdvancedCollections)) }
+                    },
+                )
+                register(advancedCollectionsDestination())
                 register(inputLabDestination())
                 register(
                     unavailableScreenDestination {
@@ -283,9 +294,17 @@ fun DemoApp(
             val shell = rememberDomposableAdaptiveInfo(shellSize)
             val selected =
                 when (stack.last().route) {
-                    DemoRoute.Catalog, DemoRoute.ExtendedCatalog, DemoRoute.Collections, DemoRoute.Inputs -> 1
+                    DemoRoute.Catalog,
+                    DemoRoute.ExtendedCatalog,
+                    DemoRoute.Collections,
+                    DemoRoute.AdvancedCollections,
+                    DemoRoute.Inputs,
+                    -> 1
+
                     DemoRoute.Recipes, DemoRoute.Roots -> 2
+
                     is DemoRoute.NotFound -> -1
+
                     else -> 0
                 }
 

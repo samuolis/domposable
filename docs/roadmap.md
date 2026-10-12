@@ -12,7 +12,7 @@
 - Continue pre-1.0 API iteration with plain semantic versions. There is no scheduled stable 1.0 release. Ranker adoption remains postponed; application feedback can guide later API decisions.
 - Wasm now exercises Unicode editing, password masking, disabled/error state, modal isolation/dismissal and a bounded axe regression audit. Resolve the documented upstream semantics-bridge findings before claiming a clean accessibility scan; physical review remains deferred.
 - The application-owned root-stack recipe demonstrates snapshot restoration and custom native Navigation 3 list/detail scenes. Extend it for product-specific overlays, predictive-back policy or live models retained across inactive roots when needed.
-- Fixed-height HTML columns have opt-in windowing and reproducible browser measurements; variable-height collections, rows, grids and large tables remain follow-ups.
+- Columns now support measured heights; horizontal rows, responsive grids and semantic tables have opt-in windows and browser regression checks. Column virtualization, remote paging and spreadsheet editing remain application/provider work.
 
 Physical-device assistive-technology review is deferred. Automated semantics, browser accessibility, interaction and simulator checks remain in CI; they do not establish screen-reader parity.
 
