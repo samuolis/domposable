@@ -23,6 +23,10 @@
     "io.github.samuolis.domposable.lifecycle": {
       "line": 80,
       "branch": 60
+    },
+    "io.github.samuolis.domposable.ksp": {
+      "line": 90,
+      "branch": 70
     }
   }
 }
