@@ -19,7 +19,24 @@ fun <T> DomposableLazyColumn(
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 0.dp,
     itemContent: @Composable (T) -> Unit,
-) = DomposableLazyColumn(items.map { item -> DomposableLazyItem(key(item)) { itemContent(item) } }, modifier, gap)
+) = DomposableLazyColumn(items, key, modifier, gap, null, itemContent)
+
+@Composable
+fun <T> DomposableLazyColumn(
+    items: List<T>,
+    key: (T) -> String,
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    window: DomposableListWindow?,
+    itemContent: @Composable (T) -> Unit,
+) = DomposableLazyColumn(
+    items.map { item ->
+        DomposableLazyItem(key(item)) { itemContent(item) }
+    },
+    modifier,
+    gap,
+    window,
+)
 
 @Composable
 fun <T> DomposableLazyRow(
@@ -61,7 +78,15 @@ fun DomposableLazyColumn(
     items: List<DomposableLazyItem>,
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 0.dp,
-) = DomposableLazyColumn(DomposableLazyColumnProps(items, gap), modifier)
+) = DomposableLazyColumn(items, modifier, gap, null)
+
+@Composable
+fun DomposableLazyColumn(
+    items: List<DomposableLazyItem>,
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    window: DomposableListWindow?,
+) = DomposableLazyColumn(DomposableLazyColumnProps(items, gap, window), modifier)
 
 @Composable
 fun DomposableLazyRow(

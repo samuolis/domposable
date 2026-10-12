@@ -145,7 +145,13 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }) { content() }
                 }
             },
-            lazyColumn = { props, modifier, _ -> HtmlCollection(props.items, modifier, props.gap, "column") },
+            lazyColumn = { props, modifier, _ ->
+                if (props.window == null) {
+                    HtmlCollection(props.items, modifier, props.gap, "column")
+                } else {
+                    HtmlListWindow(props, modifier)
+                }
+            },
             lazyRow = { props, modifier, _ -> HtmlCollection(props.items, modifier, props.gap, "row") },
             lazyGrid = {
                 props,

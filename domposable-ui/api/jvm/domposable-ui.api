@@ -13,6 +13,8 @@ public final class io/github/samuolis/domposable/ui/ComponentCallsKt {
 	public static final fun DomposableImage (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableImageScale;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableLazyColumn-Lr4mTfQ (Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;FLandroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableLazyColumn-Zd9uAt0 (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/ui/DomposableModifier;FLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableLazyColumn-lojSCGI (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/ui/DomposableModifier;FLio/github/samuolis/domposable/ui/DomposableListWindow;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableLazyColumn-vjY4qJE (Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;FLio/github/samuolis/domposable/ui/DomposableListWindow;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableLazyGrid-nRDfaWE (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/ui/DomposableModifier;IFLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableLazyGrid-zBrKoJY (Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;IFLandroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableLazyRow-Lr4mTfQ (Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;FLandroidx/compose/runtime/Composer;II)V
@@ -611,15 +613,17 @@ public abstract interface class io/github/samuolis/domposable/ui/DomposableImage
 
 public final class io/github/samuolis/domposable/ui/DomposableLazyColumnProps {
 	public static final field $stable I
-	public synthetic fun <init> (Ljava/util/List;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/util/List;FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;FLio/github/samuolis/domposable/ui/DomposableListWindow;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;FLio/github/samuolis/domposable/ui/DomposableListWindow;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2--zYZv-Q ()F
-	public final fun copy-8jShoPA (Ljava/util/List;F)Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;
-	public static synthetic fun copy-8jShoPA$default (Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;Ljava/util/List;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;
+	public final fun component3 ()Lio/github/samuolis/domposable/ui/DomposableListWindow;
+	public final fun copy-poF2Rhk (Ljava/util/List;FLio/github/samuolis/domposable/ui/DomposableListWindow;)Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;
+	public static synthetic fun copy-poF2Rhk$default (Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;Ljava/util/List;FLio/github/samuolis/domposable/ui/DomposableListWindow;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableLazyColumnProps;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getGap--zYZv-Q ()F
 	public final fun getItems ()Ljava/util/List;
+	public final fun getWindow ()Lio/github/samuolis/domposable/ui/DomposableListWindow;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -698,6 +702,23 @@ public final class io/github/samuolis/domposable/ui/DomposableLinkProps {
 
 public abstract interface class io/github/samuolis/domposable/ui/DomposableLinkRenderer {
 	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableLinkProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableListWindow {
+	public static final field $stable I
+	public synthetic fun <init> (FFIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun component2--zYZv-Q ()F
+	public final fun component3 ()I
+	public final fun copy-oNVR2Y4 (FFI)Lio/github/samuolis/domposable/ui/DomposableListWindow;
+	public static synthetic fun copy-oNVR2Y4$default (Lio/github/samuolis/domposable/ui/DomposableListWindow;FFIILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableListWindow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOverscan ()I
+	public final fun getRowHeight--zYZv-Q ()F
+	public final fun getViewportHeight--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/samuolis/domposable/ui/DomposableMenuItem {

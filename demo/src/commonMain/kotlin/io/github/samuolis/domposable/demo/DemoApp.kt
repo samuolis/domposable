@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.adaptive.DomposablePaneRecipe
 import io.github.samuolis.domposable.adaptive.DomposableWidthClass
 import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
+import io.github.samuolis.domposable.demo.generated.collectionLabDestination
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
@@ -99,6 +100,8 @@ sealed interface DemoRoute {
 
     data object Recipes : DemoRoute
 
+    data object Collections : DemoRoute
+
     data class NotFound(
         val path: String,
     ) : DemoRoute
@@ -111,6 +114,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.ExtendedCatalog -> "/components"
             DemoRoute.Catalog -> "/catalog"
             DemoRoute.Recipes -> "/recipes"
+            DemoRoute.Collections -> "/collections"
             is DemoRoute.NotFound -> route.path
             is DemoRoute.Detail -> "/tasks/${route.taskId}"
         }
@@ -124,6 +128,8 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             path == "/catalog" -> DemoRoute.Catalog
 
             path == "/recipes" -> DemoRoute.Recipes
+
+            path == "/collections" -> DemoRoute.Collections
 
             path.startsWith(
                 "/tasks/",
@@ -245,6 +251,7 @@ fun DemoApp(
                 )
                 register(extendedComponentCatalogDestination())
                 register(navigationRecipesScreenDestination())
+                register(collectionLabDestination())
                 register(
                     unavailableScreenDestination {
                         UnavailableScreen(route.path) {

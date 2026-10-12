@@ -90,7 +90,7 @@ DomposableLazyGrid(
 ) { product -> ProductCard(product) }
 ```
 
-`ProductCard` belongs to the feature. Keys must be stable and unique. Compose UI collections virtualize; HTML currently emits all keyed items as lists/CSS grid. Keep a bounded height when nesting a native lazy collection inside another scroll container. The storefront uses wrapping rows for its small catalogue.
+`ProductCard` belongs to the feature. Keys must be stable and unique. Compose UI collections virtualize; HTML normally emits all keyed items as lists/CSS grid. For large fixed-height columns, use the optional [scroll window](performance.md). Keep a bounded height when nesting a native lazy collection inside another scroll container. The storefront uses wrapping rows for its small catalogue.
 
 ## Shell and feedback
 
