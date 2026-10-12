@@ -4,14 +4,22 @@
     "catalog",
     "recipes",
     "shop",
-    "extended-components"
+    "extended-components",
+    "collection-measured",
+    "collection-row",
+    "collection-grid",
+    "collection-table"
   ],
   "desktop": [
     "tasks",
     "catalog",
     "recipes",
     "shop",
-    "extended-components"
+    "extended-components",
+    "collection-measured",
+    "collection-row",
+    "collection-grid",
+    "collection-table"
   ],
   "ios": [
     "tasks",
@@ -19,7 +27,11 @@
     "recipes",
     "adaptive",
     "shop",
-    "extended-components"
+    "extended-components",
+    "collection-measured",
+    "collection-row",
+    "collection-grid",
+    "collection-table"
   ],
   "dom": [
     "tasks-phone",
@@ -34,7 +46,11 @@
     "shop-wide",
     "shop-collection-wide",
     "shop-cart-phone",
-    "extended-components"
+    "extended-components",
+    "collection-measured",
+    "collection-row",
+    "collection-grid",
+    "collection-table"
   ],
   "wasm": [
     "tasks-phone",
@@ -43,6 +59,7 @@
     "recipes-wide",
     "shop-phone",
     "shop-wide",
-    "extended-components"
+    "extended-components",
+    "collection-measured"
   ]
 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableLazyColumn
@@ -20,8 +21,10 @@ import io.github.samuolis.domposable.ui.DomposableSwitch
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.fillMaxWidth
+import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.verticalScroll
 import io.github.samuolis.domposable.ui.width
 
 @Composable
@@ -31,7 +34,7 @@ fun CollectionLab(onMore: () -> Unit = {}) {
     var windowed by rememberSaveable { mutableStateOf(true) }
     var reversed by rememberSaveable { mutableStateOf(false) }
     val items = remember(count, reversed) { List(count.toInt()) { if (reversed) count.toInt() - it - 1 else it } }
-    DomposableColumn(DomposableModifier.padding(16.dp).fillMaxWidth(), gap = 8.dp) {
+    DomposableColumn(DomposableModifier.padding(16.dp).fillMaxWidth().verticalScroll(), gap = 8.dp) {
         DomposableText("Large collections", headingLevel = 1)
         DomposableSelect(
             count,
@@ -41,17 +44,20 @@ fun CollectionLab(onMore: () -> Unit = {}) {
         )
         DomposableSwitch(windowed, { windowed = it }, "Windowed list")
         DomposableButton("Reverse rows", { reversed = !reversed })
-        DomposableLazyColumn(
-            items,
-            key = { "row-$it" },
-            modifier = DomposableModifier.testId("collection-lab-list").fillMaxWidth(),
-            gap = 4.dp,
-            window = if (windowed) DomposableListWindow(88.dp, 352.dp) else null,
-        ) { index ->
-            var note by rememberSaveable { mutableStateOf("") }
-            DomposableRow(gap = 8.dp) {
-                DomposableText("Row ${index + 1}", DomposableModifier.width(90.dp))
-                DomposableTextField(note, { note = it }, "Row ${index + 1} note", DomposableModifier.width(220.dp))
+        val viewport = DomposableModifier.fillMaxWidth().height(352.dp)
+        DomposableBox(if (windowed) viewport else viewport.verticalScroll()) {
+            DomposableLazyColumn(
+                items,
+                key = { "row-$it" },
+                modifier = DomposableModifier.testId("collection-lab-list").fillMaxWidth().height(352.dp),
+                gap = 4.dp,
+                window = if (windowed) DomposableListWindow(88.dp, 352.dp) else null,
+            ) { index ->
+                var note by rememberSaveable { mutableStateOf("") }
+                DomposableRow(gap = 8.dp) {
+                    DomposableText("Row ${index + 1}", DomposableModifier.width(90.dp))
+                    DomposableTextField(note, { note = it }, "Row ${index + 1} note", DomposableModifier.width(220.dp))
+                }
             }
         }
         DomposableButton("More collection recipes", onMore)
