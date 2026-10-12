@@ -10,7 +10,7 @@
 ## Product follow-ups
 
 - Continue pre-1.0 API iteration with plain semantic versions. There is no scheduled stable 1.0 release. Ranker adoption remains postponed; application feedback can guide later API decisions.
-- Extend Wasm accessibility and input interaction coverage beyond the tested startup, URL navigation and saveable restoration scenarios.
+- Wasm now exercises Unicode editing, password masking, disabled/error state, modal isolation/dismissal and a bounded axe regression audit. Resolve the documented upstream semantics-bridge findings before claiming a clean accessibility scan; physical review remains deferred.
 - The application-owned root-stack recipe demonstrates snapshot restoration and custom native Navigation 3 list/detail scenes. Extend it for product-specific overlays, predictive-back policy or live models retained across inactive roots when needed.
 - Fixed-height HTML columns have opt-in windowing and reproducible browser measurements; variable-height collections, rows, grids and large tables remain follow-ups.
 

@@ -11,7 +11,7 @@ import kotlinx.browser.window
 fun main() {
     val path = window.location.hash.removePrefix("#")
     val route = DemoCodec.decode(path) ?: DemoRoute.Tasks
-    ComposeViewport(document.getElementById("root")!!) {
+    ComposeViewport(document.getElementById("root")!!, configure = { isA11YEnabled = true }) {
         if (path.startsWith("/shop")) {
             ShoppingApp(initialRoute = ShopCodec.decode(path), onArtworkLoaded = {
                 document.body!!.setAttribute("data-shop-artwork-ready", "true")

@@ -31,6 +31,7 @@ nav:
       - Shopping app: shopping.md
       - Modular app and injection: modular-demo.md
       - Compare HTML and Wasm: compare.md
+      - Wasm input and accessibility: wasm.md
       - Playground: https://samuolis.github.io/domposable/demo/
       - Storefront: https://samuolis.github.io/domposable/shop/
   - API: https://samuolis.github.io/domposable/api/

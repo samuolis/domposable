@@ -194,6 +194,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | Integrate Metro or Kobweb | [Integrations](docs/integrations.md) |
 | Follow the API/implementation module example | [Modular app walkthrough](docs/modular-demo.md) |
 | Check supported versions and limitations | [Compatibility](docs/compatibility.md) |
+| Compare Wasm input and accessibility | [Shared input lab and tested boundaries](docs/wasm.md) |
 | Browse generated declarations | [API reference](https://samuolis.github.io/domposable/api/) |
 
 ## Contributing

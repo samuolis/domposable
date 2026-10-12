@@ -32,6 +32,8 @@ class VisualTest {
 
     @Test fun collections() = capture("collections", DemoRoute.Collections)
 
+    @Test fun inputLab() = capture("input-lab", DemoRoute.Inputs)
+
     @Test fun shop() {
         compose.setContent { ShoppingApp() }
         compose.waitUntil(
