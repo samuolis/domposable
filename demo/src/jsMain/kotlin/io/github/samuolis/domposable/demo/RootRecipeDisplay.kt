@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.demo
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation3.runtime.NavEntry
 import io.github.samuolis.domposable.navigation3.DomposableNavDisplay
 import io.github.samuolis.domposable.screens.DomposableEntryScope
@@ -24,7 +25,9 @@ internal actual fun RootRecipeDisplay(
         onBack,
     )
     if (overlay?.overlay == true) {
-        DomposableDialog("Leave this entry?", onDismiss = onBack) { entries.last().Content() }
+        DomposableDialog("Leave this entry?", onDismiss = onBack) {
+            CompositionLocalProvider(LocalRootOverlayTitleProvided provides true) { entries.last().Content() }
+        }
     }
 }
 

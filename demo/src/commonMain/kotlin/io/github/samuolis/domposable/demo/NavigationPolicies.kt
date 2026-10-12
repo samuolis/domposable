@@ -5,6 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation3.runtime.NavEntry
 import io.github.samuolis.domposable.adaptive.DomposablePaneRecipe
 import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
@@ -27,6 +28,8 @@ import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.verticalScroll
+
+internal val LocalRootOverlayTitleProvided = staticCompositionLocalOf { false }
 
 @Composable
 @DomposableScreen(DemoRoute.Policies::class)
@@ -51,7 +54,9 @@ internal fun NavigationPolicyContent(
                     if (route.overlay) {
                         DomposableSurface {
                             DomposableColumn(DomposableModifier.padding(16.dp), gap = 12.dp) {
-                                DomposableText("Leave this entry?", headingLevel = 2)
+                                if (!LocalRootOverlayTitleProvided.current) {
+                                    DomposableText("Leave this entry?", headingLevel = 2)
+                                }
                                 DomposableText("The draft stays in its live model while this recipe is open.")
                                 DomposableButton("Keep editing", policy::request)
                                 DomposableButton("Leave entry", { policy.confirm(id) })

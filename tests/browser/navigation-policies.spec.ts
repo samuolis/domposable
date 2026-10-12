@@ -56,6 +56,7 @@ test('route overlay isolates focus, cancels with Escape and leaves its underlyin
   await page.getByRole('button', { name: 'Request back', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Leave this entry?', exact: true });
   await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: 'Leave this entry?', exact: true })).toHaveCount(1);
   await expect(dialog.getByRole('button', { name: 'Keep editing' })).toBeFocused();
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations).toEqual([]);
   if (browserName === 'chromium') {
