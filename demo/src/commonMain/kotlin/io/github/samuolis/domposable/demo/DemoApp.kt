@@ -18,6 +18,7 @@ import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
+import io.github.samuolis.domposable.demo.generated.rootStackRecipeDestination
 import io.github.samuolis.domposable.demo.generated.taskDetailScreenDestination
 import io.github.samuolis.domposable.demo.generated.taskListScreenDestination
 import io.github.samuolis.domposable.demo.generated.unavailableScreenDestination
@@ -99,6 +100,8 @@ sealed interface DemoRoute {
 
     data object Recipes : DemoRoute
 
+    data object Roots : DemoRoute
+
     data class NotFound(
         val path: String,
     ) : DemoRoute
@@ -111,6 +114,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.ExtendedCatalog -> "/components"
             DemoRoute.Catalog -> "/catalog"
             DemoRoute.Recipes -> "/recipes"
+            DemoRoute.Roots -> "/roots"
             is DemoRoute.NotFound -> route.path
             is DemoRoute.Detail -> "/tasks/${route.taskId}"
         }
@@ -124,6 +128,8 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             path == "/catalog" -> DemoRoute.Catalog
 
             path == "/recipes" -> DemoRoute.Recipes
+
+            path == "/roots" -> DemoRoute.Roots
 
             path.startsWith(
                 "/tasks/",
@@ -245,6 +251,7 @@ fun DemoApp(
                 )
                 register(extendedComponentCatalogDestination())
                 register(navigationRecipesScreenDestination())
+                register(rootStackRecipeDestination())
                 register(
                     unavailableScreenDestination {
                         UnavailableScreen(route.path) {

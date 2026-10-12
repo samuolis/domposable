@@ -4,7 +4,9 @@ import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
@@ -20,6 +22,13 @@ class VisualTest {
     @Test fun extendedComponents() = capture("extended-components", DemoRoute.ExtendedCatalog)
 
     @Test fun recipes() = capture("recipes", DemoRoute.Recipes)
+
+    @Test fun rootStacks() {
+        compose.setContent { DemoApp(initialRoute = DemoRoute.Roots) }
+        compose.onNodeWithText("Open Inbox message").performClick()
+        compose.waitForIdle()
+        save("root-stacks")
+    }
 
     @Test fun shop() {
         compose.setContent { ShoppingApp() }
