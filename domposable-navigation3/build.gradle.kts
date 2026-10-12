@@ -54,13 +54,21 @@ kotlin {
         getByName("jvmMain").dependsOn(composeUiMain)
         getByName("wasmJsMain").dependsOn(composeUiMain)
         iosMain.dependsOn(composeUiMain)
-        jsMain {
-            dependencies {
-                implementation(libs.compose.html)
-                implementation(libs.serialization.json)
-                implementation(libs.kotlinx.browser)
+        val nonWebMain = create("nonWebMain") { dependsOn(composeUiMain) }
+        getByName("androidMain").dependsOn(nonWebMain)
+        getByName("jvmMain").dependsOn(nonWebMain)
+        iosMain.dependsOn(nonWebMain)
+        val webMain =
+            create("webMain") {
+                dependsOn(commonMain)
+                dependencies {
+                    implementation(libs.serialization.json)
+                    implementation(libs.kotlinx.browser)
+                }
             }
-        }
+        getByName("jsMain").dependsOn(webMain)
+        getByName("wasmJsMain").dependsOn(webMain)
+        jsMain.dependencies { implementation(libs.compose.html) }
     }
 }
 

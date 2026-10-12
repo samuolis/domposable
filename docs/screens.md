@@ -24,7 +24,7 @@ DomposableButton("Open product", { navigator.navigate(Product("mug")) })
 
 Define `LocalAppNavigator` with `staticCompositionLocalOf<DomposableNavigator<ShopRoute>> { error("Provide app navigation") }` in your application. A typed local avoids unchecked route casts; callbacks or another router are equally valid.
 
-`navigate` avoids duplicate consecutive routes. `replace` replaces the current entry; `reset` starts a new stack. On HTML, `replace` and `reset` replace the current browser-history record; they do not erase earlier browser history. Routes are ordinary application types. Pass a `DomposableRouteCodec` and `DomposableBrowserUrls` to `rememberDomposableNavigator` to opt into HTML browser history. Without a codec, navigation stays in memory.
+`navigate` avoids duplicate consecutive routes. `replace` replaces the current entry; `reset` starts a new stack. On HTML and Wasm, `replace` and `reset` replace the current browser-history record; they do not erase earlier browser history. Routes are ordinary application types. Pass a `DomposableRouteCodec` and `DomposableBrowserUrls` to `rememberDomposableNavigator` to opt into HTML/Wasm browser history. Without a codec, navigation stays in memory.
 
 The host creates its registry internally. Entries can come from KSP, hand-written `DomposableDestination` values, or a mixture. The [modular storefront](modular-demo.md) combines catalog and checkout entries without registration calls in the app.
 
@@ -104,7 +104,7 @@ You can register generated destinations manually as well. Your registry chooses 
 
 `DomposableEntryScope` supplies route identity, portable saveables and Created/Resumed/Destroyed lifecycle. `retain` owns a resource until its entry is removed; `remember` owns a value while its composition is present. Avoid creating a new model on every recomposition. Models can also live above navigation.
 
-`rememberSaveable` supports scalar values, lists and string-keyed maps, including Compose mutable state. Supply a Saver for custom objects. HTML Back/Forward restores entry saveables and scroll positions and recreates disposed resources. Keep sensitive and transient data out of browser history. Pane-count changes preserve entry IDs and resources.
+`rememberSaveable` supports scalar values, lists and string-keyed maps, including Compose mutable state. Supply a Saver for custom objects. HTML/Wasm Back/Forward restores entry saveables and scroll positions and recreates disposed resources. Keep sensitive and transient data out of browser history. Pane-count changes preserve entry IDs and resources.
 
 ## Use Navigation 3 directly
 
@@ -135,7 +135,7 @@ DomposableNavDisplay(
 
 The DOM display renders already-decorated entry content into HTML sections. It accepts any `NavEntry<T>` key type, does not change the stack and does not install decorators. Content keys must be stable and unique. Decorations must be compatible with the DOM applier; Compose UI layout/animation wrappers cannot render inside HTML. The DOM display supports a visible tail of the entries; native Navigation 3 scene strategies and transitions remain configurable in native `NavDisplay`.
 
-Applications using their own route back stack also own URL integration and restoration. Domposable's browser-history convenience uses `DomposableEntryScope` stacks; it does not replace an application's router. See [URL recipes](recipes.md) for hash/path deployment and [compatibility](compatibility.md) for Wasm's current history limitation.
+Applications using their own route back stack also own URL integration and restoration. Domposable's browser-history convenience uses `DomposableEntryScope` stacks; it does not replace an application's router. See [URL recipes](recipes.md) for hash/path deployment and [compatibility](compatibility.md) for the tested browser boundaries.
 
 For a manually built registry, `rememberDomposableNavEntries(stack, registry, entryDecorators)` provides the entry ownership adapter without a host. Pass its result to native `NavDisplay` or the DOM display. This gives you registry-based screen ownership while retaining control of the display and additional decorators.
 

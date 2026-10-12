@@ -119,7 +119,7 @@ The same feature can use different element structures and styling on each platfo
 | JVM desktop | Compose UI + Material 3 | Experimental |
 | Web, Kotlin/Wasm | Compose UI in the browser | Experimental |
 
-HTML supports browser history and hash or path URLs. Wasm currently selects its initial screen from the URL and then navigates in memory. HTML collections render all keyed items; large data sets may need a custom virtualized renderer.
+HTML and Wasm support optional browser history, hash or path URLs and portable entry-state restoration. HTML collections render all keyed items; large data sets may need a custom virtualized renderer.
 
 [Compatibility, tested versions and platform boundaries →](docs/compatibility.md)
 
@@ -176,7 +176,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | Artifact | Purpose |
 | --- | --- |
 | `domposable-screens` | Typed registration and entry-owned resources/saveables |
-| `domposable-navigation3` | Navigation 3 hosts and HTML browser history |
+| `domposable-navigation3` | Navigation 3 hosts and HTML/Wasm browser history |
 | `domposable-lifecycle-viewmodel` | AndroidX entry ownership and optional state/action helpers |
 | `domposable-ksp` | Generated typed entries and feature entry lists |
 

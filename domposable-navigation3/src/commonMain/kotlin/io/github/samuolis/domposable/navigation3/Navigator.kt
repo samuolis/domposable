@@ -53,7 +53,7 @@ class DomposableNavigator<R : Any>(
     }
 }
 
-/** Without a codec, navigation is entirely in memory. HTML history is an explicit opt-in. */
+/** Without a codec, navigation is entirely in memory. HTML/Wasm history is an explicit opt-in. */
 @Composable
 fun <R : Any> rememberDomposableNavigator(
     initialRoute: R,
@@ -69,7 +69,7 @@ fun <R : Any> rememberDomposableNavigator(
     return navigator
 }
 
-/** Generates an anchor URL using the same rules as the HTML history binding. */
+/** Generates an anchor URL using the same rules as the HTML/Wasm history binding. */
 fun <R : Any> DomposableRouteCodec<R>.urlFor(
     route: R,
     urls: DomposableBrowserUrls = DomposableBrowserUrls.Hash,
