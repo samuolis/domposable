@@ -92,7 +92,7 @@ NavDisplay(
 )
 ```
 
-When this display is nested inside a portable Domposable entry, the sample gives the native scene host a transient saveable boundary. Each decorated entry installs its own feature registry; platform window IDs do not enter browser-restorable state. The Material dialog/sheet renderers use the same separation while preserving their feature content saveables.
+When this display is nested inside a portable Domposable entry, the sample gives the native scene host a transient saveable boundary. Each decorated entry installs its own feature registry; platform window IDs do not enter browser-restorable state. The Material dialog, sheet, menu, select and tooltip renderers use the same separation while preserving their feature content saveables.
 
 The HTML application adapter reads the same app-owned route intent. It displays decorated background entries through `DomposableNavDisplay` and the top overlay through `DomposableDialog`. That preserves browser modal focus, Escape dismissal and the background's keyed state. Do not create a second dialog inside the native `DialogSceneStrategy` entry. See the [HTML adapter](https://github.com/samuolis/domposable/blob/main/demo/src/jsMain/kotlin/io/github/samuolis/domposable/demo/RootRecipeDisplay.kt).
 

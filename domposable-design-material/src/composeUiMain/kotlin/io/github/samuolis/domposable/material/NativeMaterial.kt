@@ -598,12 +598,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
-                DropdownMenu(props.expanded, props.onDismiss, modifier.toComposeModifier()) {
-                    props.items.forEach { item ->
-                        DropdownMenuItem(text = { Text(item.label) }, onClick = {
-                            item.onClick()
-                            props.onDismiss()
-                        }, enabled = item.enabled)
+                NativeWindow {
+                    DropdownMenu(props.expanded, props.onDismiss, modifier.toComposeModifier()) {
+                        props.items.forEach { item ->
+                            DropdownMenuItem(text = { Text(item.label) }, onClick = {
+                                item.onClick()
+                                props.onDismiss()
+                            }, enabled = item.enabled)
+                        }
                     }
                 }
             },
