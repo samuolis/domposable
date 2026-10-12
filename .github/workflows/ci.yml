@@ -111,8 +111,38 @@ jobs:
             build/benchmarks/
             **/build/reports/tests/
           retention-days: 30
+  binary-api:
+    name: Binary API compatibility
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx2g -Dorg.gradle.workers.max=1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - uses: ./.github/actions/setup
+      - name: Validate every published JVM, Android, JS, Wasm and iOS ABI
+        run: ./gradlew binaryApiCheck -Pdomposable.abi.strict=true --console=plain
+      - name: Report baseline changes against the PR base and latest ancestor release
+        if: always()
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
+        run: |
+          if [ "$BASE" = 0000000000000000000000000000000000000000 ]; then BASE=HEAD; fi
+          python scripts/ci/binary_api.py --base "$BASE" --summary "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: binary-api
+          path: |
+            build/reports/binary-api/
+            **/build/reports/abi/
+            **/build/kotlin/abi/
+            domposable-*/api/
+          retention-days: 30
+          if-no-files-found: error
   native:
-    name: iOS, ABI and published consumers
+    name: iOS and published consumers
     runs-on: macos-26
     timeout-minutes: 90
     env:
@@ -121,7 +151,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
-      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 --console=plain
+      - run: ./gradlew publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 --console=plain
       - run: python scripts/ci/package_publications.py --unsigned
       - name: Resolve and compile published artifacts on all six targets
         run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
@@ -147,13 +177,12 @@ jobs:
             build/screenshots/
             build/visual-report/
             build/ios-tests/**/Build/Products/Debug-iphonesimulator/DomposableDemo.app
-            **/build/reports/abi/
             .release/artifacts/maven-bundle.zip
           retention-days: 30
   passed:
     name: CI passed
     if: always()
-    needs: [hygiene, quality, portable, native]
+    needs: [hygiene, quality, portable, native, binary-api]
     runs-on: ubuntu-24.04
     steps:
       - name: Require validation and prevent recording from satisfying branch or release gates
@@ -162,5 +191,6 @@ jobs:
           QUALITY: ${{ needs.quality.result }}
           PORTABLE: ${{ needs.portable.result }}
           NATIVE: ${{ needs.native.result }}
+          BINARY_API: ${{ needs.binary-api.result }}
           RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
-        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$NATIVE" = success && test "$RECORD" != true
+        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$NATIVE" = success && test "$BINARY_API" = success && test "$RECORD" != true

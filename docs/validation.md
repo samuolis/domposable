@@ -1,6 +1,6 @@
 # Validation and visual review
 
-The required **CI passed** check combines workflow hygiene, Kotlin quality/coverage, Android/desktop/browser validation and native/published-consumer validation. Fork PRs run with read-only permissions and no release secrets. Tests exercise behavior, API variants and rendering separately.
+The required **CI passed** check combines workflow hygiene, Kotlin quality/coverage, Android/desktop/browser validation, native/published-consumer validation and the dedicated **Binary API compatibility** job. Fork PRs run with read-only permissions and no release secrets. Tests exercise behavior, API variants and rendering separately.
 
 - Required ktlint, detekt and Android lint checks enforce source formatting and correctness. Kover line/branch gates and individual core package floors prevent coverage regressions; [test coverage](coverage.md) explains scope and reports.
 - Shared JVM tests cover adaptive rules, modifier ordering, entry lifetime/saveables and optional ViewModels.
@@ -8,7 +8,7 @@ The required **CI passed** check combines workflow hygiene, Kotlin quality/cover
 - iOS XCUITest verifies native input, rotation and recipe navigation, and captures portrait/landscape scenes on iPad mini A17 Pro with **iOS 26.5**.
 - Browser behavior and axe accessibility checks run in Chromium, Firefox and WebKit. They cover wrapping, semantic landmarks/links, modal focus, tab keyboard behavior, adaptive drafts, hash history, path deep links/reload under a base path, and feature switching on the generated comparison page. Wasm fixture switching is checked in Chromium.
 - Visual comparisons cover **Android, iOS, JVM desktop, semantic HTML and Wasm**. HTML fixtures include phone/tablet/wide views, list/detail and a dialog. Wasm checks startup/errors and phone/wide rendering.
-- Kotlin ABI baselines and two published consumers cover every runtime artifact's six target variants. Optional Metro graphs compile on every target; the Kobweb page wrapper compiles on JS.
+- Kotlin ABI validation checks 22 baselines across all eight published modules: Android/JVM signatures, JS/Wasm/iOS Klibs and the JVM KSP processor. macOS CI compiles all targets with inference disabled, fails on missing/incomplete inventories, and retains compiled dumps plus PR-base/release diffs for 30 days. Two published consumers also compile every runtime artifact's six target variants. Optional Metro/Koin graphs compile on every target; Kobweb exports and browser routes run separately.
 - Strict MkDocs/Dokka and both production browser distributions build before website packaging. Version/release/Central recovery tests protect publishing behavior.
 
 ## Where images live
@@ -40,7 +40,7 @@ Recording runs deliberately fail **CI passed**, so they cannot satisfy branch pr
 
 For local inspection, build both browser development bundles, run `python scripts/ci/browser_preview.py`, then `npx playwright test`. Native captures run with `:demo:testAndroidHostTest`, `:demo:jvmTest` and `python scripts/ci/ios_test.py`. Compare a platform with `python scripts/ci/screenshots.py dom`; use `--record` to inspect candidates without a comparison. On Linux, run desktop tests under `xvfb-run -a`.
 
-ABI changes require `./gradlew updateKotlinAbi` and review of the generated diff. Follow [CONTRIBUTING](https://github.com/samuolis/domposable/blob/main/CONTRIBUTING.md) for toolchain setup. Automated checks supplement manual keyboard, VoiceOver/TalkBack, touch and real-device reviews; screenshot coverage alone is not accessibility certification.
+ABI changes require a reviewed baseline diff, consumer example and an **API compatibility** explanation. Read [binary compatibility](binary-compatibility.md) for commands, version policy and the limits of these checks. Follow [CONTRIBUTING](https://github.com/samuolis/domposable/blob/main/CONTRIBUTING.md) for toolchain setup. Physical screen-reader review remains deferred; screenshot coverage alone is not accessibility certification.
 
 ## Inline PR evidence
 

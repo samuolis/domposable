@@ -31,6 +31,14 @@ Include concrete commands/configuration when changing Gradle, modules or CI. Oth
 # Replace with the relevant build/validation commands.
 ```
 
+## API compatibility
+
+Include this section when updating or deleting an ABI baseline under `domposable-*/api/`. Review the `binary-api` report and explain the consumer impact. Otherwise remove this section.
+
+- Classification: additive, breaking, or tooling-only; explain which signatures changed.
+- Migration: describe required consumer changes, or `none` with a reason.
+- Release: patch, minor, or major; explain the version impact. Pre-1.0 breaking changes require a minor release and migration notes; stable breaking changes require a major release.
+
 ## Visual evidence
 
 For visual changes, embed descriptive, content-addressed PNG URLs from the visual-evidence release assets. Existing scenarios show Main | Pixel difference | PR; new scenarios show an added preview. Reviewed goldens belong in main; generated comparisons belong in release assets. Artifact links alone are insufficient. Remove this section for nonvisual changes.
