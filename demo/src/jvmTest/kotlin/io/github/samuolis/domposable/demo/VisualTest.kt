@@ -2,6 +2,7 @@ package io.github.samuolis.domposable.demo
 
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -31,6 +32,17 @@ class VisualTest {
     }
 
     @Test fun collections() = capture("collections", DemoRoute.Collections)
+
+    @Test fun inputLab() = capture("input-lab", DemoRoute.Inputs)
+
+    @Test fun inputLabHelp() {
+        compose.setContent { DemoApp(initialRoute = DemoRoute.Inputs) }
+        compose.onNodeWithText("Open help").performClick()
+        compose.waitForIdle()
+        val target = File(System.getProperty("domposable.screenshots"), "desktop/input-lab-help.png")
+        target.parentFile.mkdirs()
+        ImageIO.write(compose.onNode(isDialog()).captureToImage().toAwtImage(), "png", target)
+    }
 
     @Test fun shop() {
         compose.setContent { ShoppingApp() }

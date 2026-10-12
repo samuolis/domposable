@@ -18,6 +18,7 @@ import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
 import io.github.samuolis.domposable.demo.generated.collectionLabDestination
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
+import io.github.samuolis.domposable.demo.generated.inputLabDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
 import io.github.samuolis.domposable.demo.generated.rootStackRecipeDestination
 import io.github.samuolis.domposable.demo.generated.taskDetailScreenDestination
@@ -105,6 +106,8 @@ sealed interface DemoRoute {
 
     data object Collections : DemoRoute
 
+    data object Inputs : DemoRoute
+
     data class NotFound(
         val path: String,
     ) : DemoRoute
@@ -119,6 +122,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.Recipes -> "/recipes"
             DemoRoute.Roots -> "/roots"
             DemoRoute.Collections -> "/collections"
+            DemoRoute.Inputs -> "/inputs"
             is DemoRoute.NotFound -> route.path
             is DemoRoute.Detail -> "/tasks/${route.taskId}"
         }
@@ -136,6 +140,8 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             path == "/roots" -> DemoRoute.Roots
 
             path == "/collections" -> DemoRoute.Collections
+
+            path == "/inputs" -> DemoRoute.Inputs
 
             path.startsWith(
                 "/tasks/",
@@ -260,6 +266,7 @@ fun DemoApp(
                 register(rootStackRecipeDestination())
 
                 register(collectionLabDestination())
+                register(inputLabDestination())
                 register(
                     unavailableScreenDestination {
                         UnavailableScreen(route.path) {
@@ -276,7 +283,7 @@ fun DemoApp(
             val shell = rememberDomposableAdaptiveInfo(shellSize)
             val selected =
                 when (stack.last().route) {
-                    DemoRoute.Catalog, DemoRoute.ExtendedCatalog, DemoRoute.Collections -> 1
+                    DemoRoute.Catalog, DemoRoute.ExtendedCatalog, DemoRoute.Collections, DemoRoute.Inputs -> 1
                     DemoRoute.Recipes, DemoRoute.Roots -> 2
                     is DemoRoute.NotFound -> -1
                     else -> 0
