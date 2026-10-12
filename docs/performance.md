@@ -39,4 +39,4 @@ npx playwright test tests/browser/collections.spec.ts
 
 PR CI runs this in Chromium, Firefox and WebKit and retains the measurements in `android-html-evidence` for 30 days. Timing includes interaction and browser scheduling; it is diagnostic evidence, not a hardware-independent performance guarantee. CI gates bounded DOM size, keyed state, focus, keyboard traversal and valid list semantics rather than an arbitrary millisecond threshold.
 
-This API is unreleased on main after 0.2.0. Existing source calls keep their defaults. Its added function/props parameters change the compiled ABI, so consumers must recompile when upgrading to the next minor release.
+This API is unreleased on main after 0.2.0. Existing source calls keep their defaults and direct-call binary overloads remain available. The added props field changes the data class's constructor and generated `copy` signatures; consumers using that type must recompile when upgrading to the next minor release.
