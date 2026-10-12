@@ -2,8 +2,9 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mkdirSync } from 'node:fs';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1024, height: 1000 });
+  if (testInfo.title.startsWith('Wasm route overlay')) return;
   await page.goto('/#/navigation-policies');
   await expect(page.getByRole('heading', { name: 'Navigation policies' })).toBeVisible();
 });
@@ -78,9 +79,12 @@ test('route overlay isolates focus, cancels with Escape and leaves its underlyin
 test('Wasm route overlay preserves its underlying live draft through assistive activation', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'Wasm interactions are currently verified in Chromium.');
   await page.goto('/wasm/#/navigation-policies');
+  await expect(page.locator('body')).toHaveAttribute('data-domposable-ready', 'true', { timeout: 60000 });
   const activate = async (name: string) => page.getByRole('button', { name, exact: true })
     .evaluate((element: HTMLElement) => element.click());
-  await expect(page.getByRole('button', { name: 'Open Inbox live message', exact: true })).toBeAttached({ timeout: 60000 });
+  // NavDisplay briefly mirrors both outgoing and incoming entries during its
+  // startup transition. Wait for one settled control rather than choosing one.
+  await expect(page.getByRole('button', { name: 'Open Inbox live message', exact: true })).toHaveCount(1, { timeout: 60000 });
   await activate('Open Inbox live message');
   const draft = page.getByRole('textbox', { name: /^Inbox message live draft/ });
   await draft.focus();
