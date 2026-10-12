@@ -133,6 +133,7 @@ val coverageProjects =
         "checkout-api",
         "checkout-impl",
         "metro-example",
+        "koin-example",
     )
 
 subprojects {

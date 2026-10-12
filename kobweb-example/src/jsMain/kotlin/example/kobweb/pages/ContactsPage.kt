@@ -9,21 +9,17 @@ import com.varabyte.kobweb.core.Page
 import com.varabyte.kobweb.core.PageContext
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
-import io.github.samuolis.domposable.material.rememberDomposableMaterialComponents
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
-import io.github.samuolis.domposable.ui.DomposableTheme
 
-/** A compile-checked page boundary. Kobweb owns URL navigation; Domposable owns the feature UI. */
+/** Kobweb owns URL navigation; Domposable renders the feature under the app provider. */
 @Page("/contacts")
 @Composable
 fun ContactsPage(ctx: PageContext) {
     val model = remember { ContactsPageModel() }
-    DomposableTheme(components = rememberDomposableMaterialComponents()) {
-        ContactsFeature(model, onOpen = { ctx.router.navigateTo("/contacts/$it") })
-    }
+    ContactsFeature(model, onOpen = { ctx.router.navigateTo("/contacts/$it") })
 }
 
 class ContactsPageModel {
@@ -36,7 +32,7 @@ fun ContactsFeature(
     onOpen: (String) -> Unit,
 ) {
     DomposableColumn(gap = 12.dp) {
-        DomposableText("Contacts", style = DomposableTextStyle.Title)
+        DomposableText("Contacts", style = DomposableTextStyle.Title, headingLevel = 1)
         DomposableTextField(model.search, { model.search = it }, "Search contacts")
         DomposableButton("Open Alex", { onOpen("alex") })
     }
