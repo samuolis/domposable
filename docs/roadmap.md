@@ -11,7 +11,7 @@
 
 - Decide which APIs to stabilize after using the library in a real feature. Gather migration feedback from a team using its own DI/state architecture.
 - Add Wasm URL-history parity and deeper web accessibility/input interaction coverage. It currently has an initial-route fixture and in-memory navigation.
-- Evaluate independent root back stacks, richer Navigation 3 scene strategies, HTML list virtualization and large-data performance.
+- Evaluate independent root back stacks and richer Navigation 3 scene strategies. Fixed-height HTML columns now have opt-in windowing and reproducible browser measurements; variable-height collections, rows, grids and large tables remain follow-ups.
 - Manually review native assistive technology, browser screen readers, keyboard/touch behavior, dark themes and real-device rendering.
 
 These are explicit remaining boundaries, not prerequisites for every application that wants to use Domposable. Additional platforms should be added through renderer/source-set implementations and published-consumer checks rather than a larger mandatory screen abstraction.

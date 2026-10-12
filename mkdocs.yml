@@ -19,6 +19,7 @@ nav:
       - Components: components.md
       - Design systems: design-systems.md
       - Adaptive layouts: adaptive.md
+      - Large collections: performance.md
       - Screens and navigation: screens.md
       - Navigation recipes and URLs: recipes.md
       - Integrations: integrations.md

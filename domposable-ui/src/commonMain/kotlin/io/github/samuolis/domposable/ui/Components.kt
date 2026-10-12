@@ -24,6 +24,19 @@ data class DomposableLazyItem(
     val content: @Composable () -> Unit,
 )
 
+/** Opt-in uniform rows. Variable-height content should keep the default collection renderer. */
+data class DomposableListWindow(
+    val rowHeight: DomposableLength,
+    val viewportHeight: DomposableLength,
+    val overscan: Int = 3,
+) {
+    init {
+        require(rowHeight.value.isFinite() && rowHeight.value > 0f)
+        require(viewportHeight.value.isFinite() && viewportHeight.value > 0f)
+        require(overscan > 0) { "At least one overscan row is required for keyboard traversal" }
+    }
+}
+
 data class DomposableNavigationItem(
     val label: String,
     val symbol: String = "",
@@ -74,6 +87,7 @@ data class DomposableBoxProps(
 data class DomposableLazyColumnProps(
     val items: List<DomposableLazyItem>,
     val gap: DomposableLength = 0.dp,
+    val window: DomposableListWindow? = null,
 )
 
 @DomposableComponent("LazyRow")

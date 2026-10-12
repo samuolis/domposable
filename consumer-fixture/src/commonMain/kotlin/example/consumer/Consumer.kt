@@ -175,6 +175,9 @@ fun SharedControls() {
     io.github.samuolis.domposable.ui.DomposableLazyColumn(
         items = listOf("one", "two"),
         key = { it },
+        window =
+            io.github.samuolis.domposable.ui
+                .DomposableListWindow(48.dp, 240.dp),
     ) { DomposableText(it) }
     DomposableTopAppBar("Preferences")
     DomposableSelect(

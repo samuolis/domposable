@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.columns
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -62,6 +63,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
@@ -223,11 +225,19 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
+                val window = props.window
                 LazyColumn(
-                    modifier.toComposeModifier(),
+                    window?.let { modifier.toComposeModifier().height(it.viewportHeight.value.dp) }
+                        ?: modifier.toComposeModifier(),
                     verticalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                 ) {
-                    items(props.items, key = { it.key }) { it.content() }
+                    items(props.items, key = { it.key }) { item ->
+                        if (window == null) {
+                            item.content()
+                        } else {
+                            Box(Modifier.height(window.rowHeight.value.dp).clipToBounds()) { item.content() }
+                        }
+                    }
                 }
             },
             lazyRow = {
