@@ -43,6 +43,23 @@ test('document and data controls use browser semantics and shared callbacks', as
   await row.focus();
   await row.press('Enter');
   await expect(page.getByTestId('product-row-status')).toHaveText('Opened order A-101');
+  const shortNote = page.getByRole('textbox', { name: 'One-row note', exact: true });
+  const longNote = page.getByRole('textbox', { name: 'Longer note', exact: true });
+  await expect(shortNote).toHaveAttribute('rows', '1');
+  await expect(longNote).toHaveAttribute('rows', '3');
+  await shortNote.fill('First line\nSecond line');
+  await expect(shortNote).toHaveValue('First line\nSecond line');
+  const bounded = await longNote.evaluate(element => {
+    const field = element as HTMLTextAreaElement;
+    const lineHeight = parseFloat(getComputedStyle(field).lineHeight);
+    field.style.height = '500px';
+    const maximum = field.getBoundingClientRect().height;
+    field.style.height = '1px';
+    const minimum = field.getBoundingClientRect().height;
+    return { lineHeight, maximum, minimum };
+  });
+  expect(bounded.maximum).toBeCloseTo(4 * bounded.lineHeight + 26, 1);
+  expect(bounded.minimum).toBeCloseTo(3 * bounded.lineHeight + 26, 1);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   expect(errors).toEqual([]);
 });

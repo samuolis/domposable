@@ -49,6 +49,8 @@ import kotlinx.coroutines.launch
 @DomposableScreen(DemoRoute.ProductComponents::class)
 internal fun ProductComponentLab() {
     var email by rememberSaveable { mutableStateOf("") }
+    var shortNote by rememberSaveable { mutableStateOf("") }
+    var longNote by rememberSaveable { mutableStateOf("") }
     var message by rememberSaveable { mutableStateOf("No preferences saved") }
     var delivery by rememberSaveable { mutableStateOf("standard") }
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -226,6 +228,23 @@ internal fun ProductComponentLab() {
         DomposableText(
             "Horizontal scroll position: ${horizontalScrollState.value}",
             modifier = DomposableModifier.testId("product-horizontal-scroll-position"),
+        )
+        DomposableText("Multiline input bounds", style = DomposableTextStyle.Title)
+        DomposableTextField(
+            value = shortNote,
+            onValueChange = { shortNote = it },
+            label = "One-row note",
+            multiline = true,
+            minLines = 1,
+            maxLines = 1,
+        )
+        DomposableTextField(
+            value = longNote,
+            onValueChange = { longNote = it },
+            label = "Longer note",
+            multiline = true,
+            minLines = 3,
+            maxLines = 4,
         )
     }
 }

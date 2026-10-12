@@ -12,7 +12,7 @@
 | Overlays | Dialog, BottomSheet |
 | Architecture | Route registry, entry resources/saveables, optional Navigation 3, lifecycle and KSP |
 
-The upcoming 0.4 shared API has 48 renderer contracts on main; 0.2.0 has 41 and 0.1.x has 34. HTML uses native input elements, headings, landmarks, labeled dialog elements, tabs with keyboard navigation and focus restoration. Native providers use Compose UI/Material3 semantics. Browser accessibility checks run in Chromium, Firefox and WebKit. Native demo smoke tests run on an iOS simulator; shared rules are tested on JVM.
+The 0.4 shared API has 48 renderer contracts on main; 0.2.0 has 41 and 0.1.x has 34. HTML uses native input elements, headings, landmarks, labeled dialog elements, tabs with keyboard navigation and focus restoration. Native providers use Compose UI/Material3 semantics. Browser accessibility checks run in Chromium, Firefox and WebKit. Native demo smoke tests run on an iOS simulator; shared rules are tested on JVM.
 
 HTML keyed collections normally render all items. Columns offer fixed or measured heights; rows, responsive grids and semantic tables also support [opt-in windows](performance.md), with browser tests for bounded DOM size, keyboard focus, keyed drafts, resizing, RTL and removed rows. Rich text editors, drag/reorder, complex date pickers, fold/hinge APIs, platform camera/maps and product-specific widgets remain outside the provider. Date/time HTML inputs use browser controls; native text fields currently expose text input for those purposes. Scrolling and sizing use each platform's layout model and are not pixel-identical.
 

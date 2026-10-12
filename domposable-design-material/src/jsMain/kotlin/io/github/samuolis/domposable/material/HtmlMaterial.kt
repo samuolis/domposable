@@ -384,9 +384,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         }
 
                         fun <T : HTMLElement> AttrsScope<T>.applyMultilineBounds() {
-                            attr("rows", props.minLines.toString())
+                            // Preserve the browser's two-row multiline default while honoring tighter bounds.
+                            val initialRows = maxOf(2, props.minLines).coerceAtMost(props.maxLines)
+                            attr("rows", initialRows.toString())
+                            style { property("min-height", "calc(${props.minLines}lh + 26px)") }
                             if (props.maxLines != Int.MAX_VALUE) {
-                                style { property("max-height", "${props.maxLines * 1.5}em") }
+                                style { property("max-height", "calc(${props.maxLines}lh + 26px)") }
                             }
                         }
                         if (props.leadingIcon != null || props.prefix != null || props.trailingIcon != null) {
@@ -1143,7 +1146,7 @@ private const val MATERIAL_CSS = """
 .d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer}.d-segment input{position:absolute;opacity:0;width:1px;height:1px}.d-segment span{display:flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid var(--d-outline)}.d-segment:first-child span{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child span{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+span{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+span{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+span{opacity:.5;cursor:default}
 .d-range{display:flex;flex-direction:column;gap:12px}.d-tooltip-anchor{display:inline-block;position:relative}.d-tooltip{position:absolute;z-index:5;bottom:100%;left:0;min-width:160px;max-width:280px;border-radius:4px;padding:8px 12px;background:var(--d-on-surface);color:var(--d-surface);font-size:var(--d-label)}
 @media(prefers-reduced-motion:reduce){.d-theme *{transition:none!important;animation:none!important}}
-.d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-field select,.d-navigation button,.d-navigation a{font:inherit;accent-color:var(--d-primary);box-sizing:border-box}
+.d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-navigation button,.d-navigation a{font:inherit;accent-color:var(--d-primary);box-sizing:border-box}
 .d-button:focus-visible,.d-chip:focus-visible,.d-icon-button:focus-visible,.d-field :focus-visible,.d-navigation :focus-visible,.d-tabs :focus-visible,.d-toggle :focus-visible,.d-segment :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-field *,.d-toggle *,.d-segments *,.d-tabs *,.d-navigation *,.d-scaffold *,.d-dialog *{box-sizing:border-box}
 @media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}}

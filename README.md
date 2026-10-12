@@ -36,7 +36,7 @@ Domposable is a Kotlin Multiplatform library built on Compose. Feature teams wri
 Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable.
 
 > [!NOTE]
-> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts and 0.2.0 has 41. Published 0.3.0 has 42 contracts. The upcoming 0.4 work adds forms, disclosure, rich HTML, charts and interactive tables, bringing the default provider to 48. Before 1.0, minor releases may change APIs.
+> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts and 0.2.0 has 41. Published 0.3.0 has 42 contracts. The 0.4 API adds forms, disclosure, rich HTML, charts and interactive tables, bringing the default provider to 48. Before 1.0, minor releases may change APIs.
 
 ## Quick start
 

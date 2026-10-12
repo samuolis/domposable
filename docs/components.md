@@ -1,6 +1,6 @@
 # Shared components
 
-Use direct composable calls in shared feature code and install a provider at the app root. The upcoming 0.4 API has **48 renderer contracts** with Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
+Use direct composable calls in shared feature code and install a provider at the app root. The 0.4 API has **48 renderer contracts** with Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
 
 ![Shared components on Android and in a browser](assets/examples/components.png)
 
@@ -149,7 +149,7 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 Every component has direct arguments and a `Props` overload. Keep props for renderer customization or reusable configuration; ordinary feature code can use the calls above. See [design-system customization](design-systems.md), [adaptive examples](adaptive.md) and [platform boundaries](coverage.md).
 
 The additional controls demos share the same source for native, HTML and Wasm. Published 0.3.0 has
-42 renderer contracts; the upcoming 0.4 API adds Form, Disclosure, RichHtml, LineChart, ValueChart
+42 renderer contracts; the 0.4 API adds Form, Disclosure, RichHtml, LineChart, ValueChart
 and DataTable. Check [release versions](https://github.com/samuolis/domposable/releases) before
 selecting Maven dependencies.
 
@@ -190,7 +190,9 @@ Form emits a real browser form and supports native Done/Go/Search/Send actions. 
 always calls the current callback and respects the enclosing form's enabled state. Keep browser
 validation enabled for HTML constraint validation; the application still owns domain validation.
 TextField adds readonly, password visibility, autocomplete, line limits, helper/error text,
-autofocus, explicit IME actions and leading/prefix/trailing slots. Typed segmented choices keep
+autofocus, explicit IME actions and leading/prefix/trailing slots. HTML multiline fields retain
+the browser's two-row initial size by default; `minLines` and `maxLines` bound that initial size
+and the maximum control height. Set both to `1` when a one-row textarea is needed. Typed segmented choices keep
 selection attached to values when options are reordered or labels are translated.
 
 RichHtml parses a fixed markup allowlist on every target. It removes active content and unsafe link

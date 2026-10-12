@@ -41,9 +41,9 @@ DomposableTheme(components = branded) { ProductScreen(model) }
 ```
 
 
-## Product providers and portable layout after 0.3.0
+## Product providers and portable layout in 0.4.0
 
-The next minor version adds a typed extension-provider API, consumer KSP generation in an explicit
+The 0.4 API adds a typed extension-provider API, consumer KSP generation in an explicit
 package, expanded text/input props, and portable layout/shape/scroll operations. Keep existing
 component names and branded rendering while moving feature modifiers to `DomposableModifier`.
 Product renderer implementations may still use native `Modifier` internally; shared feature
