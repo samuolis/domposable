@@ -273,7 +273,14 @@ fun DemoApp(
                         ComponentCatalogScreen { stack.add(DomposableEntryScope(DemoRoute.ExtendedCatalog)) }
                     },
                 )
-                register(extendedComponentCatalogDestination())
+                register(
+                    extendedComponentCatalogDestination {
+                        ExtendedComponentCatalog(
+                            onCollections = { stack.add(DomposableEntryScope(DemoRoute.Collections)) },
+                            onInputs = { stack.add(DomposableEntryScope(DemoRoute.Inputs)) },
+                        )
+                    },
+                )
                 register(
                     navigationRecipesScreenDestination {
                         NavigationRecipesScreen(

@@ -35,7 +35,10 @@ import io.github.samuolis.domposable.ui.verticalScroll
 /** A runnable shared feature. Every control is rendered by the installed platform provider. */
 @Composable
 @DomposableScreen(DemoRoute.ExtendedCatalog::class)
-fun ExtendedComponentCatalog() {
+fun ExtendedComponentCatalog(
+    onCollections: (() -> Unit)? = null,
+    onInputs: (() -> Unit)? = null,
+) {
     var delivery by rememberSaveable { mutableStateOf("standard") }
     var segment by rememberSaveable { mutableIntStateOf(0) }
     var minimum by rememberSaveable { mutableFloatStateOf(20f) }
@@ -99,6 +102,8 @@ fun ExtendedComponentCatalog() {
                 notice = "Preferences reset"
             }, onDismiss = { notice = null })
         }
+        onCollections?.let { DomposableButton("Large collections lab", it) }
+        onInputs?.let { DomposableButton("Input and accessibility lab", it) }
     }
     if (about) {
         DomposableDialog("About preferences", onDismiss = { about = false }) {

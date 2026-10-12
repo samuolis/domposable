@@ -108,4 +108,51 @@ final class SmokeTests: XCTestCase {
         ready(app, "Your bag")
         ready(app, "Canvas weekender")
     }
+    private func tapVisible(_ app: XCUIApplication, _ label: String) {
+        let button = app.buttons[label]
+        for _ in 0..<6 {
+            if button.exists && button.isHittable { button.tap(); return }
+            app.swipeUp()
+        }
+        XCTFail("Could not reach button: \(label)")
+    }
+    func testCollectionLayoutsAndTableInput() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launch()
+        ready(app, "Task workspace")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Components")).firstMatch.tap()
+        ready(app, "Component catalog")
+        tapVisible(app, "More components")
+        ready(app, "More shared components")
+        tapVisible(app, "Large collections lab")
+        ready(app, "Large collections")
+        tapVisible(app, "More collection recipes")
+        ready(app, "Collection recipes")
+        capture(app, "collection-measured")
+        var current = "Measured column"
+        for (layout, name) in [("Horizontal row", "collection-row"), ("Responsive grid", "collection-grid"), ("Semantic table", "collection-table")] {
+            // Return to the selector before changing layout; no keyboard is open during goldens.
+            let selector = app.buttons["Collection layout: \(current)"]
+            for _ in 0..<6 {
+                if selector.exists && selector.isHittable { break }
+                app.swipeDown()
+            }
+            XCTAssertTrue(selector.isHittable)
+            selector.tap()
+            let option = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", layout)).firstMatch
+            XCTAssertTrue(option.waitForExistence(timeout: 10))
+            option.tap()
+            ready(app, "Collection layout: \(layout)")
+            capture(app, name)
+            current = layout
+        }
+        ready(app, "Inventory drafts")
+        let draft = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Item 1 draft")).firstMatch
+        XCTAssertTrue(draft.waitForExistence(timeout: 10))
+        draft.tap()
+        draft.typeText("iOS table draft")
+        XCTAssertTrue((draft.value as? String)?.contains("iOS table draft") == true)
+    }
+
 }
