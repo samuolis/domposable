@@ -2740,6 +2740,9 @@ final val io.github.samuolis.domposable.ui/LocalDomposableHtmlModifierRenderer /
     final fun <get-LocalDomposableHtmlModifierRenderer>(): androidx.compose.runtime/ProvidableCompositionLocal<kotlin/Function1<io.github.samuolis.domposable.ui/DomposableModifierElement, kotlin/Function1<org.jetbrains.compose.web.attributes/AttrsScope<org.w3c.dom/HTMLElement>, kotlin/Unit>?>?> // io.github.samuolis.domposable.ui/LocalDomposableHtmlModifierRenderer.<get-LocalDomposableHtmlModifierRenderer>|<get-LocalDomposableHtmlModifierRenderer>(){}[0]
 
 // Targets: [js]
+final fun (org.jetbrains.compose.web.attributes/AttrsScope<org.w3c.dom/HTMLElement>).io.github.samuolis.domposable.ui/domposableScrollState(io.github.samuolis.domposable.ui/DomposableScrollState, io.github.samuolis.domposable.foundation/DomposableOrientation) // io.github.samuolis.domposable.ui/domposableScrollState|domposableScrollState@org.jetbrains.compose.web.attributes.AttrsScope<org.w3c.dom.HTMLElement>(io.github.samuolis.domposable.ui.DomposableScrollState;io.github.samuolis.domposable.foundation.DomposableOrientation){}[0]
+
+// Targets: [js]
 final fun <#A: org.w3c.dom/HTMLElement> (org.jetbrains.compose.web.attributes/AttrsScope<#A>).io.github.samuolis.domposable.ui/domposableAttributes(io.github.samuolis.domposable.ui/DomposableModifier) // io.github.samuolis.domposable.ui/domposableAttributes|domposableAttributes@org.jetbrains.compose.web.attributes.AttrsScope<0:0>(io.github.samuolis.domposable.ui.DomposableModifier){0§<org.w3c.dom.HTMLElement>}[0]
 
 // Targets: [js]

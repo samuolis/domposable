@@ -2,13 +2,16 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -122,6 +125,27 @@ class NativeDocumentComponentsTest {
 
         compose.onNodeWithTag("ready-input").performClick().performImeAction()
         compose.runOnIdle { kotlin.test.assertEquals(1, submissions.intValue) }
+    }
+
+    @Test
+    fun disclosureLabelExcludesDecorativeArrowWhileStateAndContentUpdate() {
+        val expanded = mutableStateOf(false)
+        compose.setContent {
+            DomposableTheme(components = rememberDomposableMaterialComponents()) {
+                DomposableDisclosure("Shipping details", expanded.value, { expanded.value = !expanded.value }) {
+                    androidx.compose.material3.Text("Shipping content")
+                }
+            }
+        }
+        val disclosure = compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+        disclosure
+            .assertTextEquals("Shipping details")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Collapsed"))
+        disclosure.performClick()
+        disclosure
+            .assertTextEquals("Shipping details")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Expanded"))
+        compose.onNodeWithText("Shipping content").assertIsDisplayed()
     }
 
     @Test fun hostedProviderRetainsMaterialThemeAndUpdatesSubmitCallback() {

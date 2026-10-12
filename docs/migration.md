@@ -71,3 +71,10 @@ Prefer the typed option overload when your feature uses an enum, ID or another t
 has the equivalent callback. Both have changed compiled signatures. Recompile native/HTML custom
 providers, install scoped Row/Column/Box handling for child weight/alignment, and install product
 modifier callbacks at the theme boundary. Unsupported custom elements fail explicitly.
+
+
+Custom HTML scroll renderers should install `domposableScrollState(state, orientation)` in their
+attributes. This JS helper preserves the host's element/CSS and supplies the library's animation,
+position observation and disposal behavior. Replace renderer code that mirrors `state.value`
+into element offsets or calls `scrollTo` from browser scroll events. See the complete
+[custom HTML scroll example](design-systems.md#scroll-state-in-custom-html-renderers).

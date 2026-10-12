@@ -4,15 +4,21 @@ import AxeBuilder from '@axe-core/playwright';
 test('document and data controls use browser semantics and shared callbacks', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/#/product-components');
   await expect(page.getByRole('heading', { name: 'Documents and data lab', exact: true })).toBeVisible();
+  if (test.info().project.name === 'chromium') {
+    await page.screenshot({ path: 'build/screenshots/dom/product-components.png' });
+  }
   const form = page.getByRole('form', { name: 'Delivery preferences', exact: true });
   await expect(form).toHaveJSProperty('tagName', 'FORM');
   const email = page.getByRole('textbox', { name: /^Contact email/ });
   await expect(email).toHaveAttribute('type', 'email');
   await expect(email).toHaveAttribute('placeholder', 'you@example.com');
   await expect(page.getByRole('radio', { name: 'Same day', exact: true })).toBeDisabled();
-  await page.getByRole('radio', { name: 'Express', exact: true }).check();
+  const express = page.getByRole('radio', { name: 'Express', exact: true });
+  await page.locator('label').filter({ has: express }).click();
+  await expect(express).toBeChecked();
   await email.fill('hello@example.com');
   await email.press('Enter');
   await expect(page.getByTestId('product-form-status')).toHaveText('Saved preferences for hello@example.com');
@@ -39,16 +45,15 @@ test('document and data controls use browser semantics and shared callbacks', as
   await expect(page.getByTestId('product-row-status')).toHaveText('Opened order A-101');
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   expect(errors).toEqual([]);
-  if (test.info().project.name === 'chromium') {
-    await page.screenshot({ path: 'build/screenshots/dom/product-components.png', fullPage: true });
-  }
 });
 
 test('Wasm document controls execute the same feature callbacks', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'Wasm interactions are verified in Chromium.');
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/wasm/#/product-components');
   const email = page.getByRole('textbox', { name: /^Contact email/ });
   await expect(email).toHaveCount(1, { timeout: 60000 });
+  await page.screenshot({ path: 'build/screenshots/wasm/product-components.png' });
   await email.focus();
   await expect(page.locator('.compose-backing-field')).toBeFocused();
   await page.keyboard.insertText('hello@example.com');
@@ -59,5 +64,4 @@ test('Wasm document controls execute the same feature callbacks', async ({ page,
   await page.getByRole('button', { name: 'Shipping details', exact: true })
     .evaluate((element: HTMLElement) => element.click());
   await expect(page.getByText('Free shipping', { exact: false })).toHaveCount(1);
-  await page.screenshot({ path: 'build/screenshots/wasm/product-components.png' });
 });

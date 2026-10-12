@@ -1,7 +1,6 @@
 package io.github.samuolis.domposable.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +22,26 @@ typealias DomposableHtmlModifierElementRenderer =
 val LocalDomposableHtmlModifierRenderer =
     staticCompositionLocalOf<DomposableHtmlModifierElementRenderer?> { null }
 
+private data class DomposableScrollBinding(
+    val state: DomposableScrollState,
+    val orientation: DomposableOrientation,
+)
+
+private val domposableScrollBindings = js("new WeakMap()")
+
+private val updateDomposableScrollBinding: (HTMLElement, DomposableScrollBinding) -> Unit = { element, binding ->
+    val previous = domposableScrollBindings.get(element) as? DomposableScrollBinding
+    val unchanged = previous != null && previous.state === binding.state && previous.orientation == binding.orientation
+    if (!unchanged) {
+        previous?.state?.detach(element)
+        domposableScrollBindings.set(element, binding)
+        binding.state.attach(element, binding.orientation)
+    }
+}
+
+private fun domposableScrollBinding(element: HTMLElement): DomposableScrollBinding? =
+    domposableScrollBindings.get(element) as? DomposableScrollBinding
+
 /** Semantic attributes attach to the control, not to its layout wrappers. */
 fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableModifier) {
     modifier.elements.forEach { element ->
@@ -31,6 +50,36 @@ fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableMod
             is DomposableModifierOperation.TestId -> attr("data-testid", element.value)
             else -> Unit
         }
+    }
+}
+
+/** Binds a DOM scrollable element to a shared scroll state, including animated commands. */
+fun AttrsScope<HTMLElement>.domposableScrollState(
+    state: DomposableScrollState,
+    orientation: DomposableOrientation,
+) {
+    attr("tabindex", "0")
+    prop(updateDomposableScrollBinding, DomposableScrollBinding(state, orientation))
+    ref { element ->
+        domposableScrollBinding(element)?.let { it.state.attach(element, it.orientation) }
+        onDispose {
+            domposableScrollBinding(element)?.state?.detach(element)
+            domposableScrollBindings.delete(element)
+        }
+    }
+    onKeyDown { event ->
+        val nativeEvent = event.nativeEvent
+        val hasShortcutModifier = event.ctrlKey || event.altKey || event.metaKey
+        if (nativeEvent.target === nativeEvent.currentTarget && !hasShortcutModifier) {
+            val element = nativeEvent.currentTarget as HTMLElement
+            val handled =
+                domposableScrollBinding(element)?.state?.scrollFromKey(element, event.key, event.shiftKey) == true
+            if (handled) event.preventDefault()
+        }
+    }
+    onScroll { event ->
+        val element = event.nativeEvent.currentTarget as HTMLElement
+        domposableScrollBinding(element)?.let { it.state.updateFromElement(element, it.orientation) }
     }
 }
 
@@ -107,17 +156,6 @@ private fun HtmlModifierBox(
             HtmlModifierBox(elements, index + 1, operationRenderer, content)
         }
         return
-    }
-    var scrollElement: HTMLElement? by remember(operation) { mutableStateOf(null) }
-    if (operation is DomposableModifierOperation.StatefulScroll) {
-        LaunchedEffect(operation.state.value) {
-            val target = scrollElement ?: return@LaunchedEffect
-            if (operation.orientation == DomposableOrientation.Vertical) {
-                target.scrollTop = operation.state.value.toDouble()
-            } else {
-                target.scrollLeft = operation.state.value.toDouble()
-            }
-        }
     }
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
@@ -293,23 +331,7 @@ private fun HtmlModifierBox(
             }
 
             is DomposableModifierOperation.StatefulScroll -> {
-                ref { element ->
-                    scrollElement = element
-                    if (operation.orientation == DomposableOrientation.Vertical) {
-                        element.scrollTop = operation.state.value.toDouble()
-                    } else {
-                        element.scrollLeft = operation.state.value.toDouble()
-                    }
-                    onDispose { scrollElement = null }
-                }
-                onScroll { event ->
-                    val target = event.nativeEvent.currentTarget as HTMLElement
-                    if (operation.orientation == DomposableOrientation.Vertical) {
-                        operation.state.updateFromElement(target.scrollTop.toInt())
-                    } else {
-                        operation.state.updateFromElement(target.scrollLeft.toInt())
-                    }
-                }
+                domposableScrollState(operation.state, operation.orientation)
             }
 
             else -> {

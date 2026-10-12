@@ -161,3 +161,41 @@ Matrix schemas are portable library models. A matrix may use a generic applicati
 the provider resolves it. Specialized diagrams and rich-text editors stay application-owned typed
 extension components. A basic read-only RichHtml control and shared sanitizer are reusable library
 capabilities; diagram layout engines and editor toolbars are outside the default provider.
+
+
+## Scroll state in custom HTML renderers
+
+Use the same `rememberDomposableScrollState()` in feature code on every target. `scrollTo` moves
+immediately; `animateScrollTo` waits for the scroll animation and honors reduced-motion settings
+on HTML. A newer scroll request, coroutine cancellation, user input or disposal interrupts the
+active animation. The state reports the current position while the user or an animation scrolls.
+Targets are clamped to the mounted region's available content, including an empty region. For
+asynchronously loaded content, issue the scroll request after those items have been rendered.
+
+A custom HTML renderer can keep its own element and CSS while installing the library's binding:
+
+```kotlin
+import androidx.compose.runtime.Composable
+import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.ui.domposableScrollState
+import io.github.samuolis.domposable.ui.rememberDomposableScrollState
+import org.jetbrains.compose.web.dom.Div
+
+@Composable
+fun ProductScrollArea(content: @Composable () -> Unit) {
+    val state = rememberDomposableScrollState()
+    Div(attrs = {
+        style {
+            property("max-height", "320px")
+            property("overflow-y", "auto")
+        }
+        domposableScrollState(state, DomposableOrientation.Vertical)
+    }) { content() }
+}
+```
+
+`domposableScrollState` is a Kotlin/JS renderer helper. It owns the element binding, scroll
+observation and cleanup; the renderer owns layout constraints and overflow styles. Avoid copying
+`state.value` back to `scrollTop` during recomposition or calling `scrollTo` from an `onScroll`
+listener: those paths would interrupt animation. Standard Domposable scroll modifiers already
+install this binding. Native renderers use the portable modifier adapter.
