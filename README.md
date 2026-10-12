@@ -200,7 +200,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 
 Bug reports and focused contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, validation and maintainer workflows, or [open an issue](https://github.com/samuolis/domposable/issues).
 
-PR checks cover ktlint, detekt, Android lint, JVM/Android [coverage floors](docs/coverage.md), packaged consumers, and functional/screenshot tests across native, HTML and Wasm targets. CI keeps reports and captures in GitHub Actions artifacts.
+PR checks cover ktlint, detekt, Android lint, JVM/Android [coverage floors](docs/coverage.md), required [binary API checks](docs/binary-compatibility.md), packaged consumers, and functional/screenshot tests across native, HTML and Wasm targets. CI keeps reports and captures in GitHub Actions artifacts. API baseline changes need compatibility, migration and version-impact notes.
 
 ## License
 

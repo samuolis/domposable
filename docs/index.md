@@ -35,6 +35,6 @@ fun ProductActions(name: String, price: String, onAdd: () -> Unit) {
 
 Screens return `Unit`. Pass plain state and callbacks, a model, a ViewModel or a store. Your app owns dependencies: manual factories, Metro, Koin and other DI choices can stay at its boundary. [Screen entries](screens.md) and Navigation 3 are optional; KSP generates registration helpers without creating business logic or injection rules.
 
-The [Metro example](integrations.md) compiles on all six targets. The Kobweb example checks the Compose HTML page boundary; a complete export is a documented follow-up. See the [compatibility table](compatibility.md) for tested versions and platform differences.
+The [Metro and Koin examples](integrations.md) compile on all six targets. The runnable Kobweb example exports static index, contacts and contact-detail pages, tested with browser JavaScript disabled and enabled. See the [compatibility table](compatibility.md) for tested versions and platform differences.
 
 **Before 1.0:** APIs may change in minor releases. Use a published version from [Releases](https://github.com/samuolis/domposable/releases) for Maven dependencies and the signed APK demo. `0.0.0` is the unpublished bootstrap baseline. The repository also includes runnable HTML, Wasm and native examples.

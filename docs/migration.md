@@ -28,4 +28,4 @@ Use the [component recipes](components.md) and [call-path guide](how-it-works.md
 
 ## Fixed-height columns after 0.2.0
 
-The optional `window` parameter keeps existing source calls unchanged. It adds a field to `DomposableLazyColumnProps` and changes the compiled function, constructor, copy and destructuring signatures. Recompile all consumers when upgrading to the next minor release. Complete custom providers should inspect `props.window` and document whether they honor it. The Material provider implements it on native Compose, HTML and Wasm.
+The optional `window` parameter keeps existing source calls unchanged, and the existing direct-call binary overloads remain available. It adds a field to `DomposableLazyColumnProps`, changing that data class's constructor and generated `copy` signatures and adding another destructuring component. Consumers compiled against the old props type must recompile when upgrading to the next minor release. Complete custom providers should inspect `props.window` and document whether they honor it. The Material provider implements it on native Compose, HTML and Wasm.
