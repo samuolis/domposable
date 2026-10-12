@@ -12,6 +12,7 @@
 - Decide which APIs to stabilize after using the library in a real feature. Gather migration feedback from a team using its own DI/state architecture.
 - Add Wasm URL-history parity and deeper web accessibility/input interaction coverage. It currently has an initial-route fixture and in-memory navigation.
 - The application-owned root-stack recipe demonstrates snapshot restoration and custom native Navigation 3 list/detail scenes. Extend it for product-specific overlays, predictive-back policy or live models retained across inactive roots when needed.
+- Fixed-height HTML columns have opt-in windowing and reproducible browser measurements; variable-height collections, rows, grids and large tables remain follow-ups.
 
 Physical-device assistive-technology review is deferred. Automated semantics, browser accessibility, interaction and simulator checks remain in CI; they do not establish screen-reader parity.
 

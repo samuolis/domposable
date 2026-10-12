@@ -108,6 +108,7 @@ jobs:
             build/site/
             build/screenshots/
             build/visual-report/
+            build/benchmarks/
             **/build/reports/tests/
           retention-days: 30
   native:

@@ -24,4 +24,8 @@ Upgrading from the 0.1.x provider expands it from 34 to 41 required contracts. A
 | RangeSlider | DomposableRangeSlider | Two labelled range inputs |
 | TooltipBox / PlainTooltip | DomposableTooltip | Hover/focus help with Escape dismissal |
 
-Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Rich text editing, large-data virtualization, complex date pickers and platform camera/maps still require application or provider-specific implementations; this vocabulary does not claim to mirror every Material API.
+Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Fixed-height columns can use [opt-in windowing](performance.md). Rich text editing, variable-height and large-table virtualization, complex date pickers and platform camera/maps still require application or provider-specific implementations; this vocabulary does not claim to mirror every Material API.
+
+## Fixed-height columns after 0.2.0
+
+The optional `window` parameter keeps existing source calls unchanged. It adds a field to `DomposableLazyColumnProps` and changes the compiled function, constructor, copy and destructuring signatures. Recompile all consumers when upgrading to the next minor release. Complete custom providers should inspect `props.window` and document whether they honor it. The Material provider implements it on native Compose, HTML and Wasm.

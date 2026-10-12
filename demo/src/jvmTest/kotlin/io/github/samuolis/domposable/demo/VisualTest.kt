@@ -30,6 +30,8 @@ class VisualTest {
         save("root-stacks")
     }
 
+    @Test fun collections() = capture("collections", DemoRoute.Collections)
+
     @Test fun shop() {
         compose.setContent { ShoppingApp() }
         compose.waitUntil(

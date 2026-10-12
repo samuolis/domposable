@@ -119,7 +119,7 @@ The same feature can use different element structures and styling on each platfo
 | JVM desktop | Compose UI + Material 3 | Experimental |
 | Web, Kotlin/Wasm | Compose UI in the browser | Experimental |
 
-HTML supports browser history and hash or path URLs. Wasm currently selects its initial screen from the URL and then navigates in memory. HTML collections render all keyed items; large data sets may need a custom virtualized renderer.
+HTML supports browser history and hash or path URLs. Wasm currently selects its initial screen from the URL and then navigates in memory. HTML collections normally render all keyed items; fixed-height columns can opt into [bounded windowing](https://samuolis.github.io/domposable/performance/).
 
 [Compatibility, tested versions and platform boundaries →](docs/compatibility.md)
 
