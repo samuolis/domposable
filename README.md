@@ -36,7 +36,7 @@ Domposable is a Kotlin Multiplatform library built on Compose. Feature teams wri
 Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable.
 
 > [!NOTE]
-> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts and 0.2.0 has 41. The 0.3.0 work adds the 42nd (`Table`) contract. Before 1.0, minor releases may change APIs.
+> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts and 0.2.0 has 41. Published 0.3.0 has 42 contracts. The upcoming 0.4 work adds forms, disclosure, rich HTML, charts and interactive tables, bringing the default provider to 48. Before 1.0, minor releases may change APIs.
 
 ## Quick start
 
@@ -128,6 +128,7 @@ HTML and Wasm support optional browser history, hash or path URLs and portable e
 | Example | What to explore | Open |
 | --- | --- | --- |
 | **Fieldwork shop** | Responsive storefront, product pages, filters, cart and checkout | [Live app](https://samuolis.github.io/domposable/shop/) · [Walkthrough](docs/shopping.md) |
+| **Documents and data** | Rich inputs, typed choices, forms, disclosure, rich text, charts and interactive tables | [Shared source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/ProductComponentLab.kt) · [Recipes](docs/components.md#documents-rich-inputs-and-data) |
 | **Component playground** | Shared controls, theme tokens and renderer customization | [Live app](https://samuolis.github.io/domposable/demo/) · [Components](docs/components.md) |
 | **HTML / Wasm comparison** | The same feature at phone, tablet and desktop widths | [Compare](https://samuolis.github.io/domposable/compare/) |
 | **Browser routes** | Clean paths, deep links and browser navigation | [URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Routing guide](docs/screens.md) |

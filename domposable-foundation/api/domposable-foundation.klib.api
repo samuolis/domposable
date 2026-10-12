@@ -34,6 +34,21 @@ final enum class io.github.samuolis.domposable.foundation/DomposableAlignment : 
     final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableAlignment> // io.github.samuolis.domposable.foundation/DomposableAlignment.values|values#static(){}[0]
 }
 
+final enum class io.github.samuolis.domposable.foundation/DomposableAutocomplete : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableAutocomplete> { // io.github.samuolis.domposable.foundation/DomposableAutocomplete|null[0]
+    enum entry CurrentPassword // io.github.samuolis.domposable.foundation/DomposableAutocomplete.CurrentPassword|null[0]
+    enum entry Email // io.github.samuolis.domposable.foundation/DomposableAutocomplete.Email|null[0]
+    enum entry NewPassword // io.github.samuolis.domposable.foundation/DomposableAutocomplete.NewPassword|null[0]
+    enum entry Off // io.github.samuolis.domposable.foundation/DomposableAutocomplete.Off|null[0]
+    enum entry OneTimeCode // io.github.samuolis.domposable.foundation/DomposableAutocomplete.OneTimeCode|null[0]
+    enum entry Username // io.github.samuolis.domposable.foundation/DomposableAutocomplete.Username|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableAutocomplete.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableAutocomplete> // io.github.samuolis.domposable.foundation/DomposableAutocomplete.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableAutocomplete // io.github.samuolis.domposable.foundation/DomposableAutocomplete.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableAutocomplete> // io.github.samuolis.domposable.foundation/DomposableAutocomplete.values|values#static(){}[0]
+}
+
 final enum class io.github.samuolis.domposable.foundation/DomposableButtonStyle : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableButtonStyle> { // io.github.samuolis.domposable.foundation/DomposableButtonStyle|null[0]
     enum entry Filled // io.github.samuolis.domposable.foundation/DomposableButtonStyle.Filled|null[0]
     enum entry Outlined // io.github.samuolis.domposable.foundation/DomposableButtonStyle.Outlined|null[0]
@@ -44,6 +59,24 @@ final enum class io.github.samuolis.domposable.foundation/DomposableButtonStyle 
 
     final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableButtonStyle // io.github.samuolis.domposable.foundation/DomposableButtonStyle.valueOf|valueOf#static(kotlin.String){}[0]
     final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableButtonStyle> // io.github.samuolis.domposable.foundation/DomposableButtonStyle.values|values#static(){}[0]
+}
+
+final enum class io.github.samuolis.domposable.foundation/DomposableFontWeight : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableFontWeight> { // io.github.samuolis.domposable.foundation/DomposableFontWeight|null[0]
+    enum entry Black // io.github.samuolis.domposable.foundation/DomposableFontWeight.Black|null[0]
+    enum entry Bold // io.github.samuolis.domposable.foundation/DomposableFontWeight.Bold|null[0]
+    enum entry ExtraBold // io.github.samuolis.domposable.foundation/DomposableFontWeight.ExtraBold|null[0]
+    enum entry ExtraLight // io.github.samuolis.domposable.foundation/DomposableFontWeight.ExtraLight|null[0]
+    enum entry Light // io.github.samuolis.domposable.foundation/DomposableFontWeight.Light|null[0]
+    enum entry Medium // io.github.samuolis.domposable.foundation/DomposableFontWeight.Medium|null[0]
+    enum entry Normal // io.github.samuolis.domposable.foundation/DomposableFontWeight.Normal|null[0]
+    enum entry SemiBold // io.github.samuolis.domposable.foundation/DomposableFontWeight.SemiBold|null[0]
+    enum entry Thin // io.github.samuolis.domposable.foundation/DomposableFontWeight.Thin|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableFontWeight.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableFontWeight> // io.github.samuolis.domposable.foundation/DomposableFontWeight.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableFontWeight // io.github.samuolis.domposable.foundation/DomposableFontWeight.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableFontWeight> // io.github.samuolis.domposable.foundation/DomposableFontWeight.values|values#static(){}[0]
 }
 
 final enum class io.github.samuolis.domposable.foundation/DomposableImageScale : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableImageScale> { // io.github.samuolis.domposable.foundation/DomposableImageScale|null[0]
@@ -58,11 +91,30 @@ final enum class io.github.samuolis.domposable.foundation/DomposableImageScale :
     final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableImageScale> // io.github.samuolis.domposable.foundation/DomposableImageScale.values|values#static(){}[0]
 }
 
+final enum class io.github.samuolis.domposable.foundation/DomposableImeAction : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableImeAction> { // io.github.samuolis.domposable.foundation/DomposableImeAction|null[0]
+    enum entry Default // io.github.samuolis.domposable.foundation/DomposableImeAction.Default|null[0]
+    enum entry Done // io.github.samuolis.domposable.foundation/DomposableImeAction.Done|null[0]
+    enum entry Go // io.github.samuolis.domposable.foundation/DomposableImeAction.Go|null[0]
+    enum entry Next // io.github.samuolis.domposable.foundation/DomposableImeAction.Next|null[0]
+    enum entry Previous // io.github.samuolis.domposable.foundation/DomposableImeAction.Previous|null[0]
+    enum entry Search // io.github.samuolis.domposable.foundation/DomposableImeAction.Search|null[0]
+    enum entry Send // io.github.samuolis.domposable.foundation/DomposableImeAction.Send|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableImeAction.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableImeAction> // io.github.samuolis.domposable.foundation/DomposableImeAction.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableImeAction // io.github.samuolis.domposable.foundation/DomposableImeAction.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableImeAction> // io.github.samuolis.domposable.foundation/DomposableImeAction.values|values#static(){}[0]
+}
+
 final enum class io.github.samuolis.domposable.foundation/DomposableInputPurpose : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableInputPurpose> { // io.github.samuolis.domposable.foundation/DomposableInputPurpose|null[0]
     enum entry Date // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Date|null[0]
+    enum entry Decimal // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Decimal|null[0]
     enum entry Email // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Email|null[0]
     enum entry Number // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Number|null[0]
+    enum entry OneTimeCode // io.github.samuolis.domposable.foundation/DomposableInputPurpose.OneTimeCode|null[0]
     enum entry Password // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Password|null[0]
+    enum entry Phone // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Phone|null[0]
     enum entry Search // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Search|null[0]
     enum entry Text // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Text|null[0]
     enum entry Time // io.github.samuolis.domposable.foundation/DomposableInputPurpose.Time|null[0]
@@ -74,6 +126,28 @@ final enum class io.github.samuolis.domposable.foundation/DomposableInputPurpose
     final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableInputPurpose> // io.github.samuolis.domposable.foundation/DomposableInputPurpose.values|values#static(){}[0]
 }
 
+final enum class io.github.samuolis.domposable.foundation/DomposableLayoutAxis : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableLayoutAxis> { // io.github.samuolis.domposable.foundation/DomposableLayoutAxis|null[0]
+    enum entry Horizontal // io.github.samuolis.domposable.foundation/DomposableLayoutAxis.Horizontal|null[0]
+    enum entry Vertical // io.github.samuolis.domposable.foundation/DomposableLayoutAxis.Vertical|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableLayoutAxis.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableLayoutAxis> // io.github.samuolis.domposable.foundation/DomposableLayoutAxis.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableLayoutAxis // io.github.samuolis.domposable.foundation/DomposableLayoutAxis.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableLayoutAxis> // io.github.samuolis.domposable.foundation/DomposableLayoutAxis.values|values#static(){}[0]
+}
+
+final enum class io.github.samuolis.domposable.foundation/DomposableLiveRegion : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableLiveRegion> { // io.github.samuolis.domposable.foundation/DomposableLiveRegion|null[0]
+    enum entry Assertive // io.github.samuolis.domposable.foundation/DomposableLiveRegion.Assertive|null[0]
+    enum entry Polite // io.github.samuolis.domposable.foundation/DomposableLiveRegion.Polite|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableLiveRegion.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableLiveRegion> // io.github.samuolis.domposable.foundation/DomposableLiveRegion.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableLiveRegion // io.github.samuolis.domposable.foundation/DomposableLiveRegion.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableLiveRegion> // io.github.samuolis.domposable.foundation/DomposableLiveRegion.values|values#static(){}[0]
+}
+
 final enum class io.github.samuolis.domposable.foundation/DomposableOrientation : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableOrientation> { // io.github.samuolis.domposable.foundation/DomposableOrientation|null[0]
     enum entry Horizontal // io.github.samuolis.domposable.foundation/DomposableOrientation.Horizontal|null[0]
     enum entry Vertical // io.github.samuolis.domposable.foundation/DomposableOrientation.Vertical|null[0]
@@ -83,6 +157,43 @@ final enum class io.github.samuolis.domposable.foundation/DomposableOrientation 
 
     final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableOrientation // io.github.samuolis.domposable.foundation/DomposableOrientation.valueOf|valueOf#static(kotlin.String){}[0]
     final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableOrientation> // io.github.samuolis.domposable.foundation/DomposableOrientation.values|values#static(){}[0]
+}
+
+final enum class io.github.samuolis.domposable.foundation/DomposableTextAlignment : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableTextAlignment> { // io.github.samuolis.domposable.foundation/DomposableTextAlignment|null[0]
+    enum entry Center // io.github.samuolis.domposable.foundation/DomposableTextAlignment.Center|null[0]
+    enum entry End // io.github.samuolis.domposable.foundation/DomposableTextAlignment.End|null[0]
+    enum entry Justify // io.github.samuolis.domposable.foundation/DomposableTextAlignment.Justify|null[0]
+    enum entry Start // io.github.samuolis.domposable.foundation/DomposableTextAlignment.Start|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableTextAlignment.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableTextAlignment> // io.github.samuolis.domposable.foundation/DomposableTextAlignment.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableTextAlignment // io.github.samuolis.domposable.foundation/DomposableTextAlignment.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableTextAlignment> // io.github.samuolis.domposable.foundation/DomposableTextAlignment.values|values#static(){}[0]
+}
+
+final enum class io.github.samuolis.domposable.foundation/DomposableTextDecoration : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableTextDecoration> { // io.github.samuolis.domposable.foundation/DomposableTextDecoration|null[0]
+    enum entry LineThrough // io.github.samuolis.domposable.foundation/DomposableTextDecoration.LineThrough|null[0]
+    enum entry None // io.github.samuolis.domposable.foundation/DomposableTextDecoration.None|null[0]
+    enum entry Underline // io.github.samuolis.domposable.foundation/DomposableTextDecoration.Underline|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableTextDecoration.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableTextDecoration> // io.github.samuolis.domposable.foundation/DomposableTextDecoration.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableTextDecoration // io.github.samuolis.domposable.foundation/DomposableTextDecoration.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableTextDecoration> // io.github.samuolis.domposable.foundation/DomposableTextDecoration.values|values#static(){}[0]
+}
+
+final enum class io.github.samuolis.domposable.foundation/DomposableTextOverflow : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableTextOverflow> { // io.github.samuolis.domposable.foundation/DomposableTextOverflow|null[0]
+    enum entry Clip // io.github.samuolis.domposable.foundation/DomposableTextOverflow.Clip|null[0]
+    enum entry Ellipsis // io.github.samuolis.domposable.foundation/DomposableTextOverflow.Ellipsis|null[0]
+    enum entry Visible // io.github.samuolis.domposable.foundation/DomposableTextOverflow.Visible|null[0]
+
+    final val entries // io.github.samuolis.domposable.foundation/DomposableTextOverflow.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.foundation/DomposableTextOverflow> // io.github.samuolis.domposable.foundation/DomposableTextOverflow.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.foundation/DomposableTextOverflow // io.github.samuolis.domposable.foundation/DomposableTextOverflow.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.foundation/DomposableTextOverflow> // io.github.samuolis.domposable.foundation/DomposableTextOverflow.values|values#static(){}[0]
 }
 
 final enum class io.github.samuolis.domposable.foundation/DomposableTextStyle : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableTextStyle> { // io.github.samuolis.domposable.foundation/DomposableTextStyle|null[0]
@@ -132,6 +243,77 @@ sealed interface <#A: out kotlin/Any?> io.github.samuolis.domposable.foundation/
         final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableScreenState.Loading.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableScreenState.Loading.toString|toString(){}[0]
     }
+}
+
+sealed interface io.github.samuolis.domposable.foundation/DomposableShape { // io.github.samuolis.domposable.foundation/DomposableShape|null[0]
+    final class Corners : io.github.samuolis.domposable.foundation/DomposableShape { // io.github.samuolis.domposable.foundation/DomposableShape.Corners|null[0]
+        constructor <init>(io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.foundation/DomposableLength = ...) // io.github.samuolis.domposable.foundation/DomposableShape.Corners.<init>|<init>(io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.foundation.DomposableLength){}[0]
+
+        final val bottomEnd // io.github.samuolis.domposable.foundation/DomposableShape.Corners.bottomEnd|{}bottomEnd[0]
+            final fun <get-bottomEnd>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.bottomEnd.<get-bottomEnd>|<get-bottomEnd>(){}[0]
+        final val bottomStart // io.github.samuolis.domposable.foundation/DomposableShape.Corners.bottomStart|{}bottomStart[0]
+            final fun <get-bottomStart>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.bottomStart.<get-bottomStart>|<get-bottomStart>(){}[0]
+        final val topEnd // io.github.samuolis.domposable.foundation/DomposableShape.Corners.topEnd|{}topEnd[0]
+            final fun <get-topEnd>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.topEnd.<get-topEnd>|<get-topEnd>(){}[0]
+        final val topStart // io.github.samuolis.domposable.foundation/DomposableShape.Corners.topStart|{}topStart[0]
+            final fun <get-topStart>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.topStart.<get-topStart>|<get-topStart>(){}[0]
+
+        final fun component1(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.component1|component1(){}[0]
+        final fun component2(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.component2|component2(){}[0]
+        final fun component3(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.component3|component3(){}[0]
+        final fun component4(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Corners.component4|component4(){}[0]
+        final fun copy(io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.foundation/DomposableLength = ...): io.github.samuolis.domposable.foundation/DomposableShape.Corners // io.github.samuolis.domposable.foundation/DomposableShape.Corners.copy|copy(io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.foundation.DomposableLength){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableShape.Corners.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableShape.Corners.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableShape.Corners.toString|toString(){}[0]
+    }
+
+    final class Rounded : io.github.samuolis.domposable.foundation/DomposableShape { // io.github.samuolis.domposable.foundation/DomposableShape.Rounded|null[0]
+        constructor <init>(io.github.samuolis.domposable.foundation/DomposableLength) // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.<init>|<init>(io.github.samuolis.domposable.foundation.DomposableLength){}[0]
+
+        final val radius // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.radius|{}radius[0]
+            final fun <get-radius>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.radius.<get-radius>|<get-radius>(){}[0]
+
+        final fun component1(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.component1|component1(){}[0]
+        final fun copy(io.github.samuolis.domposable.foundation/DomposableLength = ...): io.github.samuolis.domposable.foundation/DomposableShape.Rounded // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.copy|copy(io.github.samuolis.domposable.foundation.DomposableLength){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableShape.Rounded.toString|toString(){}[0]
+    }
+
+    final object Circle : io.github.samuolis.domposable.foundation/DomposableShape { // io.github.samuolis.domposable.foundation/DomposableShape.Circle|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableShape.Circle.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableShape.Circle.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableShape.Circle.toString|toString(){}[0]
+    }
+
+    final object Rectangle : io.github.samuolis.domposable.foundation/DomposableShape { // io.github.samuolis.domposable.foundation/DomposableShape.Rectangle|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableShape.Rectangle.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableShape.Rectangle.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableShape.Rectangle.toString|toString(){}[0]
+    }
+}
+
+final class <#A: kotlin/Any?> io.github.samuolis.domposable.foundation/DomposableChoiceOption { // io.github.samuolis.domposable.foundation/DomposableChoiceOption|null[0]
+    constructor <init>(#A, kotlin/String, kotlin/Boolean = ..., kotlin/String? = ...) // io.github.samuolis.domposable.foundation/DomposableChoiceOption.<init>|<init>(1:0;kotlin.String;kotlin.Boolean;kotlin.String?){}[0]
+
+    final val enabled // io.github.samuolis.domposable.foundation/DomposableChoiceOption.enabled|{}enabled[0]
+        final fun <get-enabled>(): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableChoiceOption.enabled.<get-enabled>|<get-enabled>(){}[0]
+    final val label // io.github.samuolis.domposable.foundation/DomposableChoiceOption.label|{}label[0]
+        final fun <get-label>(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableChoiceOption.label.<get-label>|<get-label>(){}[0]
+    final val testTag // io.github.samuolis.domposable.foundation/DomposableChoiceOption.testTag|{}testTag[0]
+        final fun <get-testTag>(): kotlin/String? // io.github.samuolis.domposable.foundation/DomposableChoiceOption.testTag.<get-testTag>|<get-testTag>(){}[0]
+    final val value // io.github.samuolis.domposable.foundation/DomposableChoiceOption.value|{}value[0]
+        final fun <get-value>(): #A // io.github.samuolis.domposable.foundation/DomposableChoiceOption.value.<get-value>|<get-value>(){}[0]
+
+    final fun component1(): #A // io.github.samuolis.domposable.foundation/DomposableChoiceOption.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableChoiceOption.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableChoiceOption.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // io.github.samuolis.domposable.foundation/DomposableChoiceOption.component4|component4(){}[0]
+    final fun copy(#A = ..., kotlin/String = ..., kotlin/Boolean = ..., kotlin/String? = ...): io.github.samuolis.domposable.foundation/DomposableChoiceOption<#A> // io.github.samuolis.domposable.foundation/DomposableChoiceOption.copy|copy(1:0;kotlin.String;kotlin.Boolean;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableChoiceOption.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableChoiceOption.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableChoiceOption.toString|toString(){}[0]
 }
 
 final class io.github.samuolis.domposable.foundation/DomposableColors { // io.github.samuolis.domposable.foundation/DomposableColors|null[0]
@@ -188,6 +370,22 @@ final class io.github.samuolis.domposable.foundation/DomposableInsets { // io.gi
     final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableInsets.toString|toString(){}[0]
 }
 
+final class io.github.samuolis.domposable.foundation/DomposableOffset { // io.github.samuolis.domposable.foundation/DomposableOffset|null[0]
+    constructor <init>(kotlin/Float = ..., kotlin/Float = ...) // io.github.samuolis.domposable.foundation/DomposableOffset.<init>|<init>(kotlin.Float;kotlin.Float){}[0]
+
+    final val x // io.github.samuolis.domposable.foundation/DomposableOffset.x|{}x[0]
+        final fun <get-x>(): kotlin/Float // io.github.samuolis.domposable.foundation/DomposableOffset.x.<get-x>|<get-x>(){}[0]
+    final val y // io.github.samuolis.domposable.foundation/DomposableOffset.y|{}y[0]
+        final fun <get-y>(): kotlin/Float // io.github.samuolis.domposable.foundation/DomposableOffset.y.<get-y>|<get-y>(){}[0]
+
+    final fun component1(): kotlin/Float // io.github.samuolis.domposable.foundation/DomposableOffset.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // io.github.samuolis.domposable.foundation/DomposableOffset.component2|component2(){}[0]
+    final fun copy(kotlin/Float = ..., kotlin/Float = ...): io.github.samuolis.domposable.foundation/DomposableOffset // io.github.samuolis.domposable.foundation/DomposableOffset.copy|copy(kotlin.Float;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableOffset.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableOffset.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableOffset.toString|toString(){}[0]
+}
+
 final class io.github.samuolis.domposable.foundation/DomposableSize { // io.github.samuolis.domposable.foundation/DomposableSize|null[0]
     constructor <init>(kotlin/Float, kotlin/Float) // io.github.samuolis.domposable.foundation/DomposableSize.<init>|<init>(kotlin.Float;kotlin.Float){}[0]
 
@@ -221,6 +419,43 @@ final class io.github.samuolis.domposable.foundation/DomposableSpacing { // io.g
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableSpacing.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableSpacing.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableSpacing.toString|toString(){}[0]
+}
+
+final class io.github.samuolis.domposable.foundation/DomposableTextAppearance { // io.github.samuolis.domposable.foundation/DomposableTextAppearance|null[0]
+    constructor <init>(kotlin/Float? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableFontWeight? = ..., io.github.samuolis.domposable.foundation/DomposableTextAlignment? = ..., io.github.samuolis.domposable.foundation/DomposableTextDecoration? = ..., kotlin/Int? = ..., io.github.samuolis.domposable.foundation/DomposableTextOverflow = ..., kotlin/Boolean? = ..., io.github.samuolis.domposable.foundation/DomposableLiveRegion? = ...) // io.github.samuolis.domposable.foundation/DomposableTextAppearance.<init>|<init>(kotlin.Float?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableFontWeight?;io.github.samuolis.domposable.foundation.DomposableTextAlignment?;io.github.samuolis.domposable.foundation.DomposableTextDecoration?;kotlin.Int?;io.github.samuolis.domposable.foundation.DomposableTextOverflow;kotlin.Boolean?;io.github.samuolis.domposable.foundation.DomposableLiveRegion?){}[0]
+
+    final val alignment // io.github.samuolis.domposable.foundation/DomposableTextAppearance.alignment|{}alignment[0]
+        final fun <get-alignment>(): io.github.samuolis.domposable.foundation/DomposableTextAlignment? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.alignment.<get-alignment>|<get-alignment>(){}[0]
+    final val decoration // io.github.samuolis.domposable.foundation/DomposableTextAppearance.decoration|{}decoration[0]
+        final fun <get-decoration>(): io.github.samuolis.domposable.foundation/DomposableTextDecoration? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.decoration.<get-decoration>|<get-decoration>(){}[0]
+    final val fontSize // io.github.samuolis.domposable.foundation/DomposableTextAppearance.fontSize|{}fontSize[0]
+        final fun <get-fontSize>(): kotlin/Float? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.fontSize.<get-fontSize>|<get-fontSize>(){}[0]
+    final val fontWeight // io.github.samuolis.domposable.foundation/DomposableTextAppearance.fontWeight|{}fontWeight[0]
+        final fun <get-fontWeight>(): io.github.samuolis.domposable.foundation/DomposableFontWeight? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.fontWeight.<get-fontWeight>|<get-fontWeight>(){}[0]
+    final val lineHeight // io.github.samuolis.domposable.foundation/DomposableTextAppearance.lineHeight|{}lineHeight[0]
+        final fun <get-lineHeight>(): kotlin/Float? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.lineHeight.<get-lineHeight>|<get-lineHeight>(){}[0]
+    final val liveRegion // io.github.samuolis.domposable.foundation/DomposableTextAppearance.liveRegion|{}liveRegion[0]
+        final fun <get-liveRegion>(): io.github.samuolis.domposable.foundation/DomposableLiveRegion? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.liveRegion.<get-liveRegion>|<get-liveRegion>(){}[0]
+    final val maxLines // io.github.samuolis.domposable.foundation/DomposableTextAppearance.maxLines|{}maxLines[0]
+        final fun <get-maxLines>(): kotlin/Int? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.maxLines.<get-maxLines>|<get-maxLines>(){}[0]
+    final val overflow // io.github.samuolis.domposable.foundation/DomposableTextAppearance.overflow|{}overflow[0]
+        final fun <get-overflow>(): io.github.samuolis.domposable.foundation/DomposableTextOverflow // io.github.samuolis.domposable.foundation/DomposableTextAppearance.overflow.<get-overflow>|<get-overflow>(){}[0]
+    final val selectable // io.github.samuolis.domposable.foundation/DomposableTextAppearance.selectable|{}selectable[0]
+        final fun <get-selectable>(): kotlin/Boolean? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.selectable.<get-selectable>|<get-selectable>(){}[0]
+
+    final fun component1(): kotlin/Float? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component1|component1(){}[0]
+    final fun component2(): kotlin/Float? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component2|component2(){}[0]
+    final fun component3(): io.github.samuolis.domposable.foundation/DomposableFontWeight? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component3|component3(){}[0]
+    final fun component4(): io.github.samuolis.domposable.foundation/DomposableTextAlignment? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component4|component4(){}[0]
+    final fun component5(): io.github.samuolis.domposable.foundation/DomposableTextDecoration? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component5|component5(){}[0]
+    final fun component6(): kotlin/Int? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component6|component6(){}[0]
+    final fun component7(): io.github.samuolis.domposable.foundation/DomposableTextOverflow // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component7|component7(){}[0]
+    final fun component8(): kotlin/Boolean? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component8|component8(){}[0]
+    final fun component9(): io.github.samuolis.domposable.foundation/DomposableLiveRegion? // io.github.samuolis.domposable.foundation/DomposableTextAppearance.component9|component9(){}[0]
+    final fun copy(kotlin/Float? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableFontWeight? = ..., io.github.samuolis.domposable.foundation/DomposableTextAlignment? = ..., io.github.samuolis.domposable.foundation/DomposableTextDecoration? = ..., kotlin/Int? = ..., io.github.samuolis.domposable.foundation/DomposableTextOverflow = ..., kotlin/Boolean? = ..., io.github.samuolis.domposable.foundation/DomposableLiveRegion? = ...): io.github.samuolis.domposable.foundation/DomposableTextAppearance // io.github.samuolis.domposable.foundation/DomposableTextAppearance.copy|copy(kotlin.Float?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableFontWeight?;io.github.samuolis.domposable.foundation.DomposableTextAlignment?;io.github.samuolis.domposable.foundation.DomposableTextDecoration?;kotlin.Int?;io.github.samuolis.domposable.foundation.DomposableTextOverflow;kotlin.Boolean?;io.github.samuolis.domposable.foundation.DomposableLiveRegion?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableTextAppearance.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.foundation/DomposableTextAppearance.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableTextAppearance.toString|toString(){}[0]
 }
 
 final class io.github.samuolis.domposable.foundation/DomposableTokens { // io.github.samuolis.domposable.foundation/DomposableTokens|null[0]
@@ -281,6 +516,8 @@ final value class io.github.samuolis.domposable.foundation/DomposableColor { // 
 
     final val argb // io.github.samuolis.domposable.foundation/DomposableColor.argb|{}argb[0]
         final fun <get-argb>(): kotlin/Long // io.github.samuolis.domposable.foundation/DomposableColor.argb.<get-argb>|<get-argb>(){}[0]
+    final val css // io.github.samuolis.domposable.foundation/DomposableColor.css|{}css[0]
+        final fun <get-css>(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableColor.css.<get-css>|<get-css>(){}[0]
 
     final fun css(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableColor.css|css(){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.foundation/DomposableColor.equals|equals(kotlin.Any?){}[0]
@@ -303,22 +540,36 @@ final val io.github.samuolis.domposable.foundation/dp // io.github.samuolis.domp
     final fun (kotlin/Float).<get-dp>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/dp.<get-dp>|<get-dp>@kotlin.Float(){}[0]
 final val io.github.samuolis.domposable.foundation/dp // io.github.samuolis.domposable.foundation/dp|@kotlin.Int{}dp[0]
     final fun (kotlin/Int).<get-dp>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.foundation/dp.<get-dp>|<get-dp>@kotlin.Int(){}[0]
+final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableChoiceOption$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableChoiceOption$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableChoiceOption$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableColors$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableColors$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableColors$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableInsets$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableInsets$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableInsets$stableprop[0]
+final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableOffset$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableOffset$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableOffset$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Content$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Content$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableScreenState_Content$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Error$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Error$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableScreenState_Error$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Loading$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Loading$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableScreenState_Loading$stableprop[0]
+final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Circle$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Circle$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableShape_Circle$stableprop[0]
+final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Corners$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Corners$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableShape_Corners$stableprop[0]
+final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rectangle$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rectangle$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableShape_Rectangle$stableprop[0]
+final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rounded$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rounded$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableShape_Rounded$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSize$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSize$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableSize$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSpacing$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSpacing$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableSpacing$stableprop[0]
+final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTextAppearance$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTextAppearance$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableTextAppearance$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTokens$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTokens$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableTokens$stableprop[0]
 final val io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTypography$stableprop // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTypography$stableprop|#static{}io_github_samuolis_domposable_foundation_DomposableTypography$stableprop[0]
 
+final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableChoiceOption$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableChoiceOption$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableChoiceOption$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableColors$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableColors$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableColors$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableInsets$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableInsets$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableInsets$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableOffset$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableOffset$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableOffset$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Content$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Content$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableScreenState_Content$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Error$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Error$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableScreenState_Error$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Loading$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableScreenState_Loading$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableScreenState_Loading$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Circle$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Circle$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableShape_Circle$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Corners$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Corners$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableShape_Corners$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rectangle$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rectangle$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableShape_Rectangle$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rounded$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableShape_Rounded$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableShape_Rounded$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSize$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSize$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableSize$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSpacing$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableSpacing$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableSpacing$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTextAppearance$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTextAppearance$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableTextAppearance$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTokens$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTokens$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableTokens$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTypography$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.foundation/io_github_samuolis_domposable_foundation_DomposableTypography$stableprop_getter|io_github_samuolis_domposable_foundation_DomposableTypography$stableprop_getter(){}[0]

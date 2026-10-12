@@ -75,3 +75,9 @@ tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMet
     dependsOn("kspCommonMainKotlinMetadata")
     enabled = false
 }
+
+// Consumer-defined renderers live in their own namespace, beside the published default provider.
+ksp {
+    arg("domposable.components.package", "example.consumer.components.generated")
+    arg("domposable.components.provider", "ConsumerComponents")
+}

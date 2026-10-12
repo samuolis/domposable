@@ -7,18 +7,28 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import io.github.samuolis.domposable.foundation.DomposableAlignment
+import io.github.samuolis.domposable.foundation.DomposableAutocomplete
+import io.github.samuolis.domposable.foundation.DomposableFontWeight
 import io.github.samuolis.domposable.foundation.DomposableImageScale
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableLength
+import io.github.samuolis.domposable.foundation.DomposableLiveRegion
 import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.foundation.DomposableTextAlignment
+import io.github.samuolis.domposable.foundation.DomposableTextDecoration
+import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.ui.DomposableComponents
+import io.github.samuolis.domposable.ui.DomposableDataTableProps
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableImageProps
 import io.github.samuolis.domposable.ui.DomposableLazyItem
+import io.github.samuolis.domposable.ui.DomposableLineChartProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableModifierOperation
+import io.github.samuolis.domposable.ui.DomposableValueChartProps
+import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.domposableAttributes
 import io.github.samuolis.domposable.ui.height
@@ -26,6 +36,7 @@ import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.width
 import kotlinx.browser.document
+import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.dom.A
@@ -57,10 +68,36 @@ private fun DomposableAlignment.css() =
         DomposableAlignment.End -> "flex-end"
     }
 
+private fun DomposableFontWeight.css() =
+    when (this) {
+        DomposableFontWeight.Thin -> "100"
+        DomposableFontWeight.ExtraLight -> "200"
+        DomposableFontWeight.Light -> "300"
+        DomposableFontWeight.Normal -> "400"
+        DomposableFontWeight.Medium -> "500"
+        DomposableFontWeight.SemiBold -> "600"
+        DomposableFontWeight.Bold -> "700"
+        DomposableFontWeight.ExtraBold -> "800"
+        DomposableFontWeight.Black -> "900"
+    }
+
+private fun DomposableAutocomplete.htmlValue() =
+    when (this) {
+        DomposableAutocomplete.Off -> "off"
+        DomposableAutocomplete.Email -> "email"
+        DomposableAutocomplete.Username -> "username"
+        DomposableAutocomplete.CurrentPassword -> "current-password"
+        DomposableAutocomplete.NewPassword -> "new-password"
+        DomposableAutocomplete.OneTimeCode -> "one-time-code"
+    }
+
 @Composable
 actual fun rememberDomposableMaterialComponents(): DomposableComponents =
     remember {
         DomposableComponents(
+            form = { props, modifier, content -> HtmlDomposableForm(props, modifier, content) },
+            disclosure = { props, modifier, content -> HtmlDomposableDisclosure(props, modifier, content) },
+            richHtml = { props, modifier, _ -> HtmlDomposableRichHtml(props, modifier) },
             theme = { props, _, content -> HtmlTheme(props.tokens, content) },
             column = {
                 props,
@@ -111,18 +148,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }) { content() }
                 }
             },
-            link = {
-                props,
-                modifier,
-                _,
-                ->
-                DomposableHtmlModifiers(modifier) {
-                    A(href = props.href, attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-link")
-                    }) { Text(props.label) }
-                }
-            },
+            link = { props, modifier, _ -> HtmlDomposableLink(props, modifier) },
             box = {
                 props,
                 modifier,
@@ -173,7 +199,76 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 }
             },
             table = { props, modifier, _ -> HtmlTable(props, modifier) },
+            lineChart = { props, modifier, _ -> HtmlLineChart(props, modifier) },
+            valueChart = { props, modifier, _ -> HtmlValueChart(props, modifier) },
+            dataTable = { props, modifier, _ -> HtmlDataTable(props, modifier) },
             text = { props, modifier, _ ->
+                val appearance = props.appearance
+                val tokens = LocalDomposableTokens.current
+                val baseFontSize =
+                    appearance?.fontSize ?: when (props.style) {
+                        DomposableTextStyle.Body -> tokens.typography.bodySize
+                        DomposableTextStyle.Title -> tokens.typography.titleSize
+                        DomposableTextStyle.Label -> tokens.typography.labelSize
+                    }
+                val effectiveLineHeight = appearance?.lineHeight ?: baseFontSize * tokens.typography.lineHeight
+                val textAlignment =
+                    when (appearance?.alignment) {
+                        DomposableTextAlignment.Start -> "start"
+                        DomposableTextAlignment.Center -> "center"
+                        DomposableTextAlignment.End -> "end"
+                        DomposableTextAlignment.Justify -> "justify"
+                        null -> null
+                    }
+                val textDecoration =
+                    when (appearance?.decoration) {
+                        DomposableTextDecoration.None -> "none"
+                        DomposableTextDecoration.Underline -> "underline"
+                        DomposableTextDecoration.LineThrough -> "line-through"
+                        null -> null
+                    }
+                val liveRegion =
+                    when (appearance?.liveRegion) {
+                        DomposableLiveRegion.Polite -> "polite"
+                        DomposableLiveRegion.Assertive -> "assertive"
+                        null -> null
+                    }
+
+                fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
+                    textAlignment?.let { alignment -> style { property("text-align", alignment) } }
+                    textDecoration?.let { decoration -> style { property("text-decoration", decoration) } }
+                    appearance?.fontSize?.let { size -> style { property("font-size", "${size}px") } }
+                    appearance?.lineHeight?.let { height -> style { property("line-height", "${height}px") } }
+                    appearance?.fontWeight?.let { weight -> style { property("font-weight", weight.css()) } }
+                    appearance?.maxLines?.let { lines ->
+                        when (appearance.overflow) {
+                            DomposableTextOverflow.Clip -> {
+                                style {
+                                    property("max-height", "${effectiveLineHeight * lines}px")
+                                    property("overflow", "hidden")
+                                }
+                            }
+
+                            DomposableTextOverflow.Ellipsis -> {
+                                style {
+                                    property("display", "-webkit-box")
+                                    property("-webkit-line-clamp", lines.toString())
+                                    property("-webkit-box-orient", "vertical")
+                                    property("overflow", "hidden")
+                                }
+                            }
+
+                            DomposableTextOverflow.Visible -> {
+                                style { property("overflow", "visible") }
+                            }
+                        }
+                    }
+                    if (appearance?.selectable == false) style { property("user-select", "none") }
+                    liveRegion?.let {
+                        attr("aria-live", it)
+                        attr("aria-atomic", "true")
+                    }
+                }
                 DomposableHtmlModifiers(modifier) {
                     if (props.style == DomposableTextStyle.Title ||
                         props.headingLevel != null
@@ -182,6 +277,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             domposableAttributes(modifier)
                             classes("d-title")
                             props.color?.let { style { property("color", it.css()) } }
+                            applyAppearance()
                         }) { Text(props.text) }
                     } else {
                         Span(attrs = {
@@ -196,6 +292,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 },
                             )
                             props.color?.let { style { property("color", it.css()) } }
+                            applyAppearance()
                         }) { Text(props.text) }
                     }
                 }
@@ -210,7 +307,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         domposableAttributes(modifier)
                         attr("type", "button")
                         classes("d-button", "d-button-${props.style.name.lowercase()}")
-                        if (!props.enabled) disabled()
+                        if (!props.enabled) attr("disabled", "")
                         onClick {
                             ((it.target as? HTMLElement)?.closest("button") as? HTMLElement)?.focus()
                             props.onClick()
@@ -229,60 +326,174 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         attr("type", "button")
                         attr("aria-label", props.label)
                         classes("d-icon-button")
-                        if (!props.enabled) disabled()
+                        if (!props.enabled) attr("disabled", "")
                         onClick { props.onClick() }
                     }) { content() }
                 }
             },
             textField = { props, modifier, _ ->
                 DomposableHtmlModifiers(modifier) {
-                    val id = remember { "d-input-${nextInputId++}" }
+                    val id = props.id ?: remember { "d-input-${nextInputId++}" }
+                    val supportingText = props.error ?: props.helperText
                     Label(attrs = {
                         classes("d-field")
                         attr("for", id)
                     }) {
-                        Span { Text(props.label) }
-                        if (props.multiline) {
-                            TextArea(value = props.value, attrs = {
-                                id(id)
-                                domposableAttributes(modifier)
-                                if (!props.enabled) disabled()
-                                onInput { props.onValueChange(it.target.value) }
-                                props.error?.let {
-                                    attr("aria-invalid", "true")
-                                    attr("aria-describedby", "$id-error")
+                        if (props.showLabel) Span { Text(props.label) }
+
+                        fun <T : HTMLElement> AttrsScope<T>.applyInputAttributes() {
+                            id(id)
+                            domposableAttributes(modifier)
+                            when (props.purpose) {
+                                DomposableInputPurpose.Phone -> {
+                                    attr("inputmode", "tel")
                                 }
+
+                                DomposableInputPurpose.Decimal -> {
+                                    attr("inputmode", "decimal")
+                                    attr("step", "any")
+                                }
+
+                                DomposableInputPurpose.OneTimeCode -> {
+                                    attr("inputmode", "numeric")
+                                    if (props.autocomplete == null) attr("autocomplete", "one-time-code")
+                                }
+
+                                else -> {
+                                    Unit
+                                }
+                            }
+                            props.onImeAction?.let { submit ->
+                                val imeEnabled = props.enabled && !props.readOnly
+                                onKeyDown { event ->
+                                    if (event.key == "Enter" && props.singleLine && imeEnabled) {
+                                        event.preventDefault()
+                                        submit()
+                                    }
+                                }
+                            }
+                            if (!props.showLabel) attr("aria-label", props.label)
+                            if (props.isError) attr("aria-invalid", "true")
+                            supportingText?.let { attr("aria-describedby", "$id-supporting") }
+                            props.autocomplete?.let { attr("autocomplete", it.htmlValue()) }
+                            props.placeholder?.let { attr("placeholder", it) }
+                            if (props.readOnly) attr("readonly", "")
+                            if (props.autofocus) attr("autofocus", "")
+                            if (!props.enabled) attr("disabled", "")
+                            props.onClick?.let { callback -> onClick { callback() } }
+                        }
+
+                        fun <T : HTMLElement> AttrsScope<T>.applyMultilineBounds() {
+                            attr("rows", props.minLines.toString())
+                            if (props.maxLines != Int.MAX_VALUE) {
+                                style { property("max-height", "${props.maxLines * 1.5}em") }
+                            }
+                        }
+                        if (props.leadingIcon != null || props.prefix != null || props.trailingIcon != null) {
+                            Div(attrs = { classes("d-field-control") }) {
+                                props.leadingIcon?.invoke()
+                                props.prefix?.invoke()
+                                if (props.multiline || !props.singleLine) {
+                                    TextArea(value = props.value, attrs = {
+                                        applyInputAttributes()
+                                        applyMultilineBounds()
+                                        onInput { props.onValueChange(it.target.value) }
+                                    })
+                                } else {
+                                    val type =
+                                        when (props.purpose) {
+                                            DomposableInputPurpose.Email -> {
+                                                InputType.Email
+                                            }
+
+                                            DomposableInputPurpose.Password -> {
+                                                if (props.passwordVisible) InputType.Text else InputType.Password
+                                            }
+
+                                            DomposableInputPurpose.Number, DomposableInputPurpose.Decimal -> {
+                                                InputType.Number
+                                            }
+
+                                            DomposableInputPurpose.Phone -> {
+                                                InputType.Tel
+                                            }
+
+                                            DomposableInputPurpose.Search -> {
+                                                InputType.Search
+                                            }
+
+                                            DomposableInputPurpose.Date -> {
+                                                InputType.Date
+                                            }
+
+                                            DomposableInputPurpose.Time -> {
+                                                InputType.Time
+                                            }
+
+                                            else -> {
+                                                InputType.Text
+                                            }
+                                        }
+                                    Input(type = type, attrs = {
+                                        applyInputAttributes()
+                                        value(props.value)
+                                        onInput { props.onValueChange(it.target.value) }
+                                    })
+                                }
+                                props.trailingIcon?.invoke()
+                            }
+                        } else if (props.multiline || !props.singleLine) {
+                            TextArea(value = props.value, attrs = {
+                                applyInputAttributes()
+                                applyMultilineBounds()
+                                onInput { props.onValueChange(it.target.value) }
                             })
                         } else {
-                            Input(
-                                type =
-                                    when (props.purpose) {
-                                        DomposableInputPurpose.Email -> InputType.Email
-                                        DomposableInputPurpose.Password -> InputType.Password
-                                        DomposableInputPurpose.Number -> InputType.Number
-                                        DomposableInputPurpose.Search -> InputType.Search
-                                        DomposableInputPurpose.Date -> InputType.Date
-                                        DomposableInputPurpose.Time -> InputType.Time
-                                        else -> InputType.Text
-                                    },
-                                attrs = {
-                                    id(id)
-                                    domposableAttributes(modifier)
-                                    value(props.value)
-                                    if (!props.enabled) disabled()
-                                    onInput { props.onValueChange(it.target.value) }
-                                    props.error?.let {
-                                        attr("aria-invalid", "true")
-                                        attr("aria-describedby", "$id-error")
+                            val type =
+                                when (props.purpose) {
+                                    DomposableInputPurpose.Email -> {
+                                        InputType.Email
                                     }
-                                },
-                            )
+
+                                    DomposableInputPurpose.Password -> {
+                                        if (props.passwordVisible) InputType.Text else InputType.Password
+                                    }
+
+                                    DomposableInputPurpose.Number, DomposableInputPurpose.Decimal -> {
+                                        InputType.Number
+                                    }
+
+                                    DomposableInputPurpose.Phone -> {
+                                        InputType.Tel
+                                    }
+
+                                    DomposableInputPurpose.Search -> {
+                                        InputType.Search
+                                    }
+
+                                    DomposableInputPurpose.Date -> {
+                                        InputType.Date
+                                    }
+
+                                    DomposableInputPurpose.Time -> {
+                                        InputType.Time
+                                    }
+
+                                    else -> {
+                                        InputType.Text
+                                    }
+                                }
+                            Input(type = type, attrs = {
+                                applyInputAttributes()
+                                value(props.value)
+                                onInput { props.onValueChange(it.target.value) }
+                            })
                         }
-                        props.error?.let { error ->
+                        supportingText?.let { message ->
                             Span(attrs = {
-                                id("$id-error")
-                                classes("d-error")
-                            }) { Text(error) }
+                                id("$id-supporting")
+                                if (props.error != null) classes("d-error") else classes("d-helper")
+                            }) { Text(message) }
                         }
                     }
                 }
@@ -694,7 +905,8 @@ private fun HtmlImage(
     val failed by rememberUpdatedState(props.onError)
     // A sized leaf must fit inside the ordered layout boxes, including inner padding.
     var imageHeight: Float? = null
-    modifier.operations.forEach { operation ->
+    modifier.elements.forEach { element ->
+        val operation = element as? DomposableModifierOperation ?: return@forEach
         when (operation) {
             is DomposableModifierOperation.Height -> {
                 imageHeight = operation.length.value
@@ -745,7 +957,7 @@ private fun HtmlImage(
                     },
                 )
                 imageHeight?.let { property("height", "${it}px") }
-                if (modifier.operations.any {
+                if (modifier.elements.any {
                         it is DomposableModifierOperation.Width ||
                             it == DomposableModifierOperation.FillWidth
                     }
@@ -867,33 +1079,43 @@ private fun HtmlTheme(
     tokens: DomposableTokens,
     content: @Composable () -> Unit,
 ) {
+    InstallDomposableMaterialStyles()
+    Div(attrs = {
+        classes("d-theme")
+        domposableTokenVariables(tokens)
+    }) { content() }
+}
+
+@Composable
+internal fun InstallDomposableMaterialStyles() {
     DisposableEffect(Unit) {
         val style = document.createElement("style")
         style.textContent = MATERIAL_CSS
         document.head!!.appendChild(style)
         onDispose { style.remove() }
     }
-    Div(attrs = {
-        classes("d-theme")
-        style {
-            property("--d-primary", tokens.colors.primary.css())
-            property("--d-on-primary", tokens.colors.onPrimary.css())
-            property("--d-surface", tokens.colors.surface.css())
-            property("--d-on-surface", tokens.colors.onSurface.css())
-            property("--d-variant", tokens.colors.surfaceVariant.css())
-            property("--d-outline", tokens.colors.outline.css())
-            property("--d-error", tokens.colors.error.css())
-            property("--d-font", tokens.typography.fontFamily)
-            property("--d-body", "${tokens.typography.bodySize}px")
-            property("--d-title", "${tokens.typography.titleSize}px")
-            property("--d-label", "${tokens.typography.labelSize}px")
-            property("--d-line-height", tokens.typography.lineHeight.toString())
-            property("--d-spacing", "${tokens.spacing.medium.value}px")
-            property("--d-radius", "${tokens.radius.value}px")
-            property("--d-elevation", "${tokens.elevation.value}px")
-            property("--d-motion", "${tokens.motionDurationMillis}ms")
-        }
-    }) { content() }
+}
+
+/** Applies only Domposable token custom properties to an existing HTML host element. */
+fun AttrsScope<HTMLElement>.domposableTokenVariables(tokens: DomposableTokens) {
+    style {
+        property("--d-primary", tokens.colors.primary.css())
+        property("--d-on-primary", tokens.colors.onPrimary.css())
+        property("--d-surface", tokens.colors.surface.css())
+        property("--d-on-surface", tokens.colors.onSurface.css())
+        property("--d-variant", tokens.colors.surfaceVariant.css())
+        property("--d-outline", tokens.colors.outline.css())
+        property("--d-error", tokens.colors.error.css())
+        property("--d-font", tokens.typography.fontFamily)
+        property("--d-body", "${tokens.typography.bodySize}px")
+        property("--d-title", "${tokens.typography.titleSize}px")
+        property("--d-label", "${tokens.typography.labelSize}px")
+        property("--d-line-height", tokens.typography.lineHeight.toString())
+        property("--d-spacing", "${tokens.spacing.medium.value}px")
+        property("--d-radius", "${tokens.radius.value}px")
+        property("--d-elevation", "${tokens.elevation.value}px")
+        property("--d-motion", "${tokens.motionDurationMillis}ms")
+    }
 }
 
 private const val MATERIAL_CSS = """
@@ -907,7 +1129,7 @@ private const val MATERIAL_CSS = """
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}
 .d-icon-button{border-radius:50%;padding:10px}.d-chip{background:var(--d-variant);color:var(--d-on-surface)}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}
 .d-card{padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}
-.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{padding:12px;border:1px solid var(--d-outline);border-radius:var(--d-radius);color:var(--d-on-surface);background:var(--d-surface)}
+.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{padding:12px;border:1px solid var(--d-outline);border-radius:var(--d-radius);color:var(--d-on-surface);background:var(--d-surface)}.d-field-control{display:flex;align-items:center;gap:8px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0}
 .d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}
 .d-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{border-radius:12px;padding:2px 8px;background:var(--d-primary);color:var(--d-on-primary)}
 .d-divider{border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
@@ -921,4 +1143,8 @@ private const val MATERIAL_CSS = """
 .d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer}.d-segment input{position:absolute;opacity:0;width:1px;height:1px}.d-segment span{display:flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid var(--d-outline)}.d-segment:first-child span{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child span{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+span{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+span{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+span{opacity:.5;cursor:default}
 .d-range{display:flex;flex-direction:column;gap:12px}.d-tooltip-anchor{display:inline-block;position:relative}.d-tooltip{position:absolute;z-index:5;bottom:100%;left:0;min-width:160px;max-width:280px;border-radius:4px;padding:8px 12px;background:var(--d-on-surface);color:var(--d-surface);font-size:var(--d-label)}
 @media(prefers-reduced-motion:reduce){.d-theme *{transition:none!important;animation:none!important}}
+.d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-field select,.d-navigation button,.d-navigation a{font:inherit;accent-color:var(--d-primary);box-sizing:border-box}
+.d-button:focus-visible,.d-chip:focus-visible,.d-icon-button:focus-visible,.d-field :focus-visible,.d-navigation :focus-visible,.d-tabs :focus-visible,.d-toggle :focus-visible,.d-segment :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
+.d-field *,.d-toggle *,.d-segments *,.d-tabs *,.d-navigation *,.d-scaffold *,.d-dialog *{box-sizing:border-box}
+@media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}}
 """

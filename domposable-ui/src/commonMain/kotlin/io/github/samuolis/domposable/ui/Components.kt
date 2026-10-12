@@ -5,16 +5,19 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.foundation.DomposableAlignment
+import io.github.samuolis.domposable.foundation.DomposableAutocomplete
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponent
 import io.github.samuolis.domposable.foundation.DomposableImageScale
+import io.github.samuolis.domposable.foundation.DomposableImeAction
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableScreenState
 import io.github.samuolis.domposable.foundation.DomposableSize
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
@@ -77,6 +80,9 @@ data class DomposableFlowRowProps(
 data class DomposableLinkProps(
     val label: String,
     val href: String,
+    val onClick: (() -> Unit)? = null,
+    val textStyle: DomposableTextStyle = DomposableTextStyle.Body,
+    val appearance: DomposableTextAppearance? = null,
 )
 
 @DomposableComponent("Box")
@@ -108,12 +114,17 @@ data class DomposableLazyGridProps(
 
 private val HTML_HEADING_LEVELS = 1..6
 
+/**
+ * Renderer-neutral text content and appearance. New primary-constructor parameters preserve
+ * existing Kotlin source calls through defaults; binary consumers should use the next 0.x minor.
+ */
 @DomposableComponent("Text")
 data class DomposableTextProps(
     val text: String,
     val style: DomposableTextStyle = DomposableTextStyle.Body,
     val color: DomposableColor? = null,
     val headingLevel: Int? = null,
+    val appearance: DomposableTextAppearance? = null,
 ) {
     init {
         require(headingLevel == null || headingLevel in HTML_HEADING_LEVELS)
@@ -134,6 +145,11 @@ data class DomposableIconButtonProps(
     val enabled: Boolean = true,
 )
 
+/**
+ * Renderer-neutral text input behavior and content. New primary-constructor parameters preserve
+ * existing Kotlin source calls through defaults; binary consumers should use the next 0.x minor.
+ */
+@Suppress("LongParameterList")
 @DomposableComponent("TextField")
 data class DomposableTextFieldProps(
     val value: String,
@@ -143,7 +159,30 @@ data class DomposableTextFieldProps(
     val enabled: Boolean = true,
     val multiline: Boolean = false,
     val error: String? = null,
-)
+    val readOnly: Boolean = false,
+    val placeholder: String? = null,
+    val id: String? = null,
+    val passwordVisible: Boolean = false,
+    val autocomplete: DomposableAutocomplete? = null,
+    val showLabel: Boolean = true,
+    val singleLine: Boolean = !multiline,
+    val minLines: Int = 1,
+    val maxLines: Int = Int.MAX_VALUE,
+    val helperText: String? = null,
+    val isError: Boolean = error != null,
+    val autofocus: Boolean = false,
+    val imeAction: DomposableImeAction = DomposableImeAction.Default,
+    val onClick: (() -> Unit)? = null,
+    val onImeAction: (() -> Unit)? = null,
+    val leadingIcon: (@Composable () -> Unit)? = null,
+    val prefix: (@Composable () -> Unit)? = null,
+    val trailingIcon: (@Composable () -> Unit)? = null,
+) {
+    init {
+        require(minLines > 0)
+        require(maxLines >= minLines)
+    }
+}
 
 @DomposableComponent("Checkbox")
 data class DomposableCheckboxProps(
@@ -316,7 +355,8 @@ fun DomposableTheme(
     style: DomposableTextStyle = DomposableTextStyle.Body,
     color: DomposableColor? = null,
     headingLevel: Int? = null,
-) = DomposableText(DomposableTextProps(text, style, color, headingLevel), modifier)
+    appearance: DomposableTextAppearance? = null,
+) = DomposableText(DomposableTextProps(text, style, color, headingLevel, appearance), modifier)
 
 @Composable fun DomposableButton(
     onClick: () -> Unit,
@@ -357,7 +397,10 @@ fun DomposableTheme(
     label: String,
     href: String,
     modifier: DomposableModifier = DomposableModifier,
-) = DomposableLink(DomposableLinkProps(label, href), modifier)
+    onClick: (() -> Unit)? = null,
+    textStyle: DomposableTextStyle = DomposableTextStyle.Body,
+    appearance: DomposableTextAppearance? = null,
+) = DomposableLink(DomposableLinkProps(label, href, onClick, textStyle, appearance), modifier)
 
 @Composable fun DomposableBox(
     modifier: DomposableModifier = DomposableModifier,
@@ -380,8 +423,52 @@ fun DomposableTheme(
     enabled: Boolean = true,
     multiline: Boolean = false,
     error: String? = null,
+    readOnly: Boolean = false,
+    placeholder: String? = null,
+    id: String? = null,
+    passwordVisible: Boolean = false,
+    autocomplete: DomposableAutocomplete? = null,
+    showLabel: Boolean = true,
+    singleLine: Boolean = !multiline,
+    minLines: Int = 1,
+    maxLines: Int = Int.MAX_VALUE,
+    helperText: String? = null,
+    isError: Boolean = error != null,
+    autofocus: Boolean = false,
+    imeAction: DomposableImeAction = DomposableImeAction.Default,
+    onClick: (() -> Unit)? = null,
+    onImeAction: (() -> Unit)? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    prefix: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
 ) = DomposableTextField(
-    DomposableTextFieldProps(value, onValueChange, label, purpose, enabled, multiline, error),
+    DomposableTextFieldProps(
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        purpose = purpose,
+        enabled = enabled,
+        multiline = multiline,
+        error = error,
+        readOnly = readOnly,
+        placeholder = placeholder,
+        id = id,
+        passwordVisible = passwordVisible,
+        autocomplete = autocomplete,
+        showLabel = showLabel,
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = maxLines,
+        helperText = helperText,
+        isError = isError,
+        autofocus = autofocus,
+        imeAction = imeAction,
+        onClick = onClick,
+        onImeAction = onImeAction,
+        leadingIcon = leadingIcon,
+        prefix = prefix,
+        trailingIcon = trailingIcon,
+    ),
     modifier,
 )
 

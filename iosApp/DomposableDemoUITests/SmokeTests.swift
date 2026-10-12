@@ -153,4 +153,18 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue((draft.value as? String)?.contains("iOS table draft") == true)
     }
 
+    func testProductComponents() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launch()
+        ready(app, "Task workspace")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Components")).firstMatch.tap()
+        ready(app, "Component catalog")
+        tapVisible(app, "More components")
+        ready(app, "More shared components")
+        tapVisible(app, "Documents and data lab")
+        ready(app, "Documents and data lab")
+        capture(app, "product-components")
+    }
+
 }

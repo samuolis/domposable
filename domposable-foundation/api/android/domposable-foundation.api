@@ -7,6 +7,18 @@ public final class io/github/samuolis/domposable/foundation/DomposableAlignment 
 	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableAlignment;
 }
 
+public final class io/github/samuolis/domposable/foundation/DomposableAutocomplete : java/lang/Enum {
+	public static final field CurrentPassword Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static final field Email Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static final field NewPassword Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static final field Off Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static final field OneTimeCode Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static final field Username Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableButtonStyle : java/lang/Enum {
 	public static final field Filled Lio/github/samuolis/domposable/foundation/DomposableButtonStyle;
 	public static final field Outlined Lio/github/samuolis/domposable/foundation/DomposableButtonStyle;
@@ -14,6 +26,25 @@ public final class io/github/samuolis/domposable/foundation/DomposableButtonStyl
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableButtonStyle;
 	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableButtonStyle;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableChoiceOption {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Object;Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/String;ZLjava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableChoiceOption;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/foundation/DomposableChoiceOption;Ljava/lang/Object;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableChoiceOption;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnabled ()Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getTestTag ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/samuolis/domposable/foundation/DomposableColor {
@@ -24,6 +55,7 @@ public final class io/github/samuolis/domposable/foundation/DomposableColor {
 	public static fun equals-impl (JLjava/lang/Object;)Z
 	public static final fun equals-impl0 (JJ)Z
 	public final fun getArgb ()J
+	public static final fun getCss-impl (J)Ljava/lang/String;
 	public fun hashCode ()I
 	public static fun hashCode-impl (J)I
 	public fun toString ()Ljava/lang/String;
@@ -61,6 +93,21 @@ public abstract interface annotation class io/github/samuolis/domposable/foundat
 	public abstract fun name ()Ljava/lang/String;
 }
 
+public final class io/github/samuolis/domposable/foundation/DomposableFontWeight : java/lang/Enum {
+	public static final field Black Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field Bold Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field ExtraBold Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field ExtraLight Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field Light Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field Medium Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field Normal Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field SemiBold Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static final field Thin Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableImageScale : java/lang/Enum {
 	public static final field Crop Lio/github/samuolis/domposable/foundation/DomposableImageScale;
 	public static final field Fill Lio/github/samuolis/domposable/foundation/DomposableImageScale;
@@ -70,11 +117,27 @@ public final class io/github/samuolis/domposable/foundation/DomposableImageScale
 	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableImageScale;
 }
 
+public final class io/github/samuolis/domposable/foundation/DomposableImeAction : java/lang/Enum {
+	public static final field Default Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static final field Done Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static final field Go Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static final field Next Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static final field Previous Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static final field Search Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static final field Send Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableImeAction;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableInputPurpose : java/lang/Enum {
 	public static final field Date Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
+	public static final field Decimal Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
 	public static final field Email Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
 	public static final field Number Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
+	public static final field OneTimeCode Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
 	public static final field Password Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
+	public static final field Phone Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
 	public static final field Search Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
 	public static final field Text Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
 	public static final field Time Lio/github/samuolis/domposable/foundation/DomposableInputPurpose;
@@ -104,6 +167,14 @@ public final class io/github/samuolis/domposable/foundation/DomposableInsets {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/samuolis/domposable/foundation/DomposableLayoutAxis : java/lang/Enum {
+	public static final field Horizontal Lio/github/samuolis/domposable/foundation/DomposableLayoutAxis;
+	public static final field Vertical Lio/github/samuolis/domposable/foundation/DomposableLayoutAxis;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableLayoutAxis;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableLayoutAxis;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableLength {
 	public static final synthetic fun box-impl (F)Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public static fun constructor-impl (F)F
@@ -116,6 +187,30 @@ public final class io/github/samuolis/domposable/foundation/DomposableLength {
 	public fun toString ()Ljava/lang/String;
 	public static fun toString-impl (F)Ljava/lang/String;
 	public final synthetic fun unbox-impl ()F
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableLiveRegion : java/lang/Enum {
+	public static final field Assertive Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
+	public static final field Polite Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableOffset {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (FF)V
+	public synthetic fun <init> (FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun copy (FF)Lio/github/samuolis/domposable/foundation/DomposableOffset;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/foundation/DomposableOffset;FFILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableOffset;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getX ()F
+	public final fun getY ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/samuolis/domposable/foundation/DomposableOrientation : java/lang/Enum {
@@ -169,6 +264,57 @@ public final class io/github/samuolis/domposable/foundation/DomposableScreenStat
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class io/github/samuolis/domposable/foundation/DomposableShape {
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableShape$Circle : io/github/samuolis/domposable/foundation/DomposableShape {
+	public static final field $stable I
+	public static final field INSTANCE Lio/github/samuolis/domposable/foundation/DomposableShape$Circle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableShape$Corners : io/github/samuolis/domposable/foundation/DomposableShape {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun <init> (FFFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun component2--zYZv-Q ()F
+	public final fun component3--zYZv-Q ()F
+	public final fun component4--zYZv-Q ()F
+	public final fun copy-UbvL9Oo (FFFF)Lio/github/samuolis/domposable/foundation/DomposableShape$Corners;
+	public static synthetic fun copy-UbvL9Oo$default (Lio/github/samuolis/domposable/foundation/DomposableShape$Corners;FFFFILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableShape$Corners;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBottomEnd--zYZv-Q ()F
+	public final fun getBottomStart--zYZv-Q ()F
+	public final fun getTopEnd--zYZv-Q ()F
+	public final fun getTopStart--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableShape$Rectangle : io/github/samuolis/domposable/foundation/DomposableShape {
+	public static final field $stable I
+	public static final field INSTANCE Lio/github/samuolis/domposable/foundation/DomposableShape$Rectangle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableShape$Rounded : io/github/samuolis/domposable/foundation/DomposableShape {
+	public static final field $stable I
+	public synthetic fun <init> (FLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun copy-LPHLHEo (F)Lio/github/samuolis/domposable/foundation/DomposableShape$Rounded;
+	public static synthetic fun copy-LPHLHEo$default (Lio/github/samuolis/domposable/foundation/DomposableShape$Rounded;FILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableShape$Rounded;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRadius--zYZv-Q ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableSize {
 	public static final field $stable I
 	public fun <init> (FF)V
@@ -199,6 +345,64 @@ public final class io/github/samuolis/domposable/foundation/DomposableSpacing {
 	public final fun getSmall--zYZv-Q ()F
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableTextAlignment : java/lang/Enum {
+	public static final field Center Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+	public static final field End Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+	public static final field Justify Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+	public static final field Start Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableTextAppearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;)V
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Float;
+	public final fun component2 ()Ljava/lang/Float;
+	public final fun component3 ()Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public final fun component4 ()Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+	public final fun component5 ()Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
+	public final fun component6 ()Ljava/lang/Integer;
+	public final fun component7 ()Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component9 ()Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
+	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;)Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlignment ()Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
+	public final fun getDecoration ()Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
+	public final fun getFontSize ()Ljava/lang/Float;
+	public final fun getFontWeight ()Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public final fun getLineHeight ()Ljava/lang/Float;
+	public final fun getLiveRegion ()Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
+	public final fun getMaxLines ()Ljava/lang/Integer;
+	public final fun getOverflow ()Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
+	public final fun getSelectable ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableTextDecoration : java/lang/Enum {
+	public static final field LineThrough Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
+	public static final field None Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
+	public static final field Underline Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableTextOverflow : java/lang/Enum {
+	public static final field Clip Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
+	public static final field Ellipsis Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
+	public static final field Visible Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
+	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
 }
 
 public final class io/github/samuolis/domposable/foundation/DomposableTextStyle : java/lang/Enum {

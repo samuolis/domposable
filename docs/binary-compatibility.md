@@ -51,4 +51,7 @@ Updating the dump makes the compiler check pass; it does not make a change compa
 
 ## Current unreleased difference
 
-After 0.2.0, collection windowing adds a field to `DomposableLazyColumnProps`. Existing direct-call overloads were retained, but the props constructor and generated `copy` signatures changed. Consumers using that type must recompile; these previously reviewed changes require the next minor release. See [migration](migration.md) for the caller-facing details. This CI change adds no library API or baseline changes.
+After 0.3.0, portable product modifiers and typed component extensions add public contracts.
+The provider adds six required renderer fields. Expanded text/input/choice props retain source defaults but change their constructor and generated copy
+signatures. Consumers must recompile when adopting the next minor version. Review the exact PR
+and latest-release ABI reports and the [migration guide](migration.md) before publication.

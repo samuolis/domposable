@@ -16,7 +16,7 @@ kotlin {
         namespace = "io.github.samuolis.domposable.design.material"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 24
-        withHostTest {}
+        withHostTest { isIncludeAndroidResources = true }
     }
     jvm()
     js {
@@ -36,6 +36,15 @@ kotlin {
                 }
             }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.robolectric)
+                implementation(libs.junit)
+                implementation(libs.androidx.test.runner)
+                implementation(libs.android.compose.ui.test)
+                implementation(libs.android.compose.ui.test.manifest)
+            }
+        }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
@@ -75,4 +84,9 @@ publishing {
             url = uri(rootProject.layout.buildDirectory.dir("repository"))
         }
     }
+}
+
+// Robolectric API 36 accesses FileDescriptor internals; these exports apply only to host tests.
+tasks.withType<Test>().matching { it.name == "testAndroidHostTest" }.configureEach {
+    jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
 }

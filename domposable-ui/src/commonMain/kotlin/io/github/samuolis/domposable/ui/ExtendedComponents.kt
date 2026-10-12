@@ -58,10 +58,19 @@ data class DomposableSegmentedButtonsProps(
     val onSelect: (Int) -> Unit,
     val label: String,
     val enabled: Boolean = true,
+    val optionEnabled: List<Boolean> = labels.map { true },
+    val optionTestTags: List<String?> = labels.map { null },
+    val groupName: String? = null,
+    val showSelectedIcon: Boolean = true,
+    val allowReselect: Boolean = true,
 ) {
     init {
+        require(optionEnabled.size == labels.size && optionTestTags.size == labels.size) {
+            "Supply one enabled state and test tag for each segment"
+        }
+        require(groupName == null || groupName.isNotBlank()) { "Choice group names must not be blank" }
         require(labels.isNotEmpty()) { "Supply at least one segment" }
-        require(selectedIndex in labels.indices) { "The selected segment must exist" }
+        require(selectedIndex == -1 || selectedIndex in labels.indices) { "The selected segment must exist" }
     }
 }
 

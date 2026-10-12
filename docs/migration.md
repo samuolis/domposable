@@ -39,3 +39,35 @@ val branded = remember(defaults) {
 }
 DomposableTheme(components = branded) { ProductScreen(model) }
 ```
+
+
+## Product providers and portable layout after 0.3.0
+
+The next minor version adds a typed extension-provider API, consumer KSP generation in an explicit
+package, expanded text/input props, and portable layout/shape/scroll operations. Keep existing
+component names and branded rendering while moving feature modifiers to `DomposableModifier`.
+Product renderer implementations may still use native `Modifier` internally; shared feature
+signatures must use the portable type.
+
+`DomposableModifier.elements` is the authoritative ordered view, including application elements.
+`operations` remains a legacy view of built-in operations. Custom providers that iterate the old
+view must migrate to `elements`; otherwise they would omit product behavior. Handle custom
+elements explicitly with the platform adapter callback. The library's adapters reject unsupported
+custom elements.
+
+New optional fields change data-class constructor/copy signatures in text and input props.
+Existing Kotlin calls retain defaults after recompilation, but previously compiled consumers must
+rebuild. This is an intentional pre-1.0 ABI change requiring a minor release; do not publish it as
+a patch. Complete providers and packaged consumers are compiled as separate verification gates.
+
+Complete 0.4 providers must add `form`, `disclosure`, `richHtml`, `lineChart`, `valueChart` and
+`dataTable`. Copying the Material defaults inherits these renderers. Constructor, `copy` and
+component indexes of `DomposableComponents` change; rebuild providers and access slots by name.
+`DomposableSegmentedButtonsProps` now carries per-option enabled state/test tags, a group name,
+selected-icon behavior and reselect policy. Its selected index may be `-1` when no value matches.
+Prefer the typed option overload when your feature uses an enum, ID or another typed value.
+
+`toComposeModifier` now accepts an optional application-element renderer, and the HTML adapter
+has the equivalent callback. Both have changed compiled signatures. Recompile native/HTML custom
+providers, install scoped Row/Column/Box handling for child weight/alignment, and install product
+modifier callbacks at the theme boundary. Unsupported custom elements fail explicitly.
