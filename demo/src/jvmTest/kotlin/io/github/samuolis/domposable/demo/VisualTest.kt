@@ -21,6 +21,8 @@ class VisualTest {
 
     @Test fun recipes() = capture("recipes", DemoRoute.Recipes)
 
+    @Test fun collections() = capture("collections", DemoRoute.Collections)
+
     @Test fun shop() {
         compose.setContent { ShoppingApp() }
         compose.waitUntil(

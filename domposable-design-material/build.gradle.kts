@@ -62,6 +62,7 @@ kotlin {
             dependencies {
                 implementation(libs.compose.html)
                 implementation(libs.kotlinx.browser)
+                implementation(libs.compose.runtime.saveable)
             }
         }
     }

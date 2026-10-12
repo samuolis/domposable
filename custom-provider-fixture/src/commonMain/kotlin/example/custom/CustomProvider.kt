@@ -30,8 +30,9 @@ fun independentProvider(onRender: (String) -> Unit): DomposableComponents =
             onRender("Box")
             content()
         },
-        lazyColumn = { _, _, content ->
+        lazyColumn = { props, _, content ->
             onRender("LazyColumn")
+            props.window?.let { onRender("Window: ${it.rowHeight.value}/${it.viewportHeight.value}/${it.overscan}") }
             content()
         },
         lazyRow = { _, _, content ->
