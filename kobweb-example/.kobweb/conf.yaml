@@ -1,0 +1,11 @@
+site:
+  title: Domposable with Kobweb
+server:
+  files:
+    dev:
+      contentRoot: build/processedResources/js/main/public
+      script: build/kotlin-webpack/js/developmentExecutable/domposable-kobweb.js
+    prod:
+      script: build/kotlin-webpack/js/productionExecutable/domposable-kobweb.js
+      siteRoot: .kobweb/site
+  port: 8087

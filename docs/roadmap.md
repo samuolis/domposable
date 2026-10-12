@@ -11,7 +11,6 @@
 
 - Decide which APIs to stabilize after using the library in a real feature. Gather migration feedback from a team using its own DI/state architecture.
 - Add Wasm URL-history parity and deeper web accessibility/input interaction coverage. It currently has an initial-route fixture and in-memory navigation.
-- Test a complete Kobweb application/export, beyond the compiled page wrapper, before claiming full Kobweb-version support.
 - Evaluate independent root back stacks, richer Navigation 3 scene strategies, HTML list virtualization and large-data performance.
 - Manually review native assistive technology, browser screen readers, keyboard/touch behavior, dark themes and real-device rendering.
 

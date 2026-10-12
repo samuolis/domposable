@@ -64,9 +64,13 @@ jobs:
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
       - run: python -m unittest discover -s scripts/tests -v
-      - run: xvfb-run -a ./gradlew jvmTest :demo:testAndroidHostTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs dokkaGenerate --console=plain
+      - run: xvfb-run -a ./gradlew jvmTest :demo:testAndroidHostTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs dokkaGenerate --console=plain
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Export the complete Kobweb application and test its static routes
+        run: |
+          python scripts/ci/kobweb_export.py
+          npx playwright test --config playwright.integrations.config.ts
       - run: python scripts/ci/browser_preview.py
       - run: npx playwright test
       - name: Compare or export reviewed-platform visual captures
@@ -96,6 +100,10 @@ jobs:
             test-results/
             playwright-report/
             production-test-results/
+            integration-test-results/
+            integration-playwright-report/
+            build/integration-captures/
+            kobweb-example/.kobweb/site/
             playwright-production-report/
             build/site/
             build/screenshots/
@@ -112,7 +120,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
-      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 --console=plain
+      - run: ./gradlew checkKotlinAbi publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 --console=plain
       - run: python scripts/ci/package_publications.py --unsigned
       - name: Resolve and compile published artifacts on all six targets
         run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
