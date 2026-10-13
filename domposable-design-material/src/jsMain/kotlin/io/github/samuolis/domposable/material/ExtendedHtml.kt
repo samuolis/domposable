@@ -141,7 +141,8 @@ internal fun HtmlSegmentedButtons(
     props: DomposableSegmentedButtonsProps,
     modifier: DomposableModifier,
 ) {
-    val group = remember { "d-segments-${nextControlId++}" }
+    val generatedGroup = remember { "d-segments-${nextControlId++}" }
+    val group = props.groupName ?: generatedGroup
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
@@ -154,8 +155,15 @@ internal fun HtmlSegmentedButtons(
                     Input(InputType.Radio, attrs = {
                         attr("name", group)
                         checked(index == props.selectedIndex)
-                        if (!props.enabled) disabled()
-                        onChange { if (it.value) props.onSelect(index) }
+                        if (!props.enabled || !props.optionEnabled[index]) disabled()
+                        props.optionTestTags[index]?.let { attr("data-testid", it) }
+                        onChange {
+                            if (it.value &&
+                                (props.allowReselect || index != props.selectedIndex)
+                            ) {
+                                props.onSelect(index)
+                            }
+                        }
                     })
                     Span { Text(label) }
                 }

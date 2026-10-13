@@ -27,6 +27,14 @@ value class DomposableColor(
         require(argb in 0..0xFFFFFFFFL)
     }
 
+    /** Hex CSS form for product token tables; [css] also has an RGBA function form. */
+    val css: String
+        get() {
+            val rgb = (argb and 0xFFFFFF).toString(16).padStart(6, '0')
+            val alpha = (argb shr 24).toString(16).padStart(2, '0')
+            return "#" + rgb + if (alpha == "ff") "" else alpha
+        }
+
     fun css(): String {
         val red = (argb shr 16) and 255
         val green = (argb shr 8) and 255
@@ -43,6 +51,37 @@ data class DomposableInsets(
     val start: DomposableLength = 0.dp,
 ) {
     constructor(all: DomposableLength) : this(all, all, all, all)
+}
+
+/** A signed density-independent position used by portable offset operations. */
+@Immutable
+data class DomposableOffset(
+    val x: Float = 0f,
+    val y: Float = 0f,
+) {
+    init {
+        require(x.isFinite() && y.isFinite()) { "Offset must be finite" }
+    }
+}
+
+/** A closed, renderer-neutral shape vocabulary for clipping and borders. */
+@Immutable
+sealed interface DomposableShape {
+    data object Rectangle : DomposableShape
+
+    data object Circle : DomposableShape
+
+    data class Rounded(
+        val radius: DomposableLength,
+    ) : DomposableShape
+
+    /** Logical corner radii follow layout direction, matching Compose's top-start/end model. */
+    data class Corners(
+        val topStart: DomposableLength = 0.dp,
+        val topEnd: DomposableLength = 0.dp,
+        val bottomEnd: DomposableLength = 0.dp,
+        val bottomStart: DomposableLength = 0.dp,
+    ) : DomposableShape
 }
 
 @Immutable
@@ -98,11 +137,13 @@ enum class DomposableTextStyle { Body, Title, Label }
 
 enum class DomposableAlignment { Start, Center, End }
 
+enum class DomposableLayoutAxis { Horizontal, Vertical }
+
 enum class DomposableOrientation { Vertical, Horizontal }
 
 enum class DomposableButtonStyle { Filled, Outlined, Text }
 
-enum class DomposableInputPurpose { Text, Email, Password, Number, Search, Date, Time }
+enum class DomposableInputPurpose { Text, Email, Password, Number, Search, Date, Time, Phone, Decimal, OneTimeCode }
 
 /** Declaration analysis only: generators never rewrite a composable's body. */
 @Target(AnnotationTarget.FUNCTION)

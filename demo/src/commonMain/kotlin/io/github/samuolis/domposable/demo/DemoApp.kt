@@ -22,6 +22,7 @@ import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDest
 import io.github.samuolis.domposable.demo.generated.inputLabDestination
 import io.github.samuolis.domposable.demo.generated.navigationPoliciesDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
+import io.github.samuolis.domposable.demo.generated.productComponentLabDestination
 import io.github.samuolis.domposable.demo.generated.rootStackRecipeDestination
 import io.github.samuolis.domposable.demo.generated.taskDetailScreenDestination
 import io.github.samuolis.domposable.demo.generated.taskListScreenDestination
@@ -112,6 +113,8 @@ sealed interface DemoRoute {
 
     data object AdvancedCollections : DemoRoute
 
+    data object ProductComponents : DemoRoute
+
     data object Inputs : DemoRoute
 
     data class NotFound(
@@ -130,6 +133,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.Roots -> "/roots"
             DemoRoute.Collections -> "/collections"
             DemoRoute.AdvancedCollections -> "/collection-recipes"
+            DemoRoute.ProductComponents -> "/product-components"
             DemoRoute.Inputs -> "/inputs"
             is DemoRoute.NotFound -> route.path
             is DemoRoute.Detail -> "/tasks/${route.taskId}"
@@ -152,6 +156,8 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             path == "/collections" -> DemoRoute.Collections
 
             path == "/collection-recipes" -> DemoRoute.AdvancedCollections
+
+            path == "/product-components" -> DemoRoute.ProductComponents
 
             path == "/inputs" -> DemoRoute.Inputs
 
@@ -278,6 +284,7 @@ fun DemoApp(
                         ExtendedComponentCatalog(
                             onCollections = { stack.add(DomposableEntryScope(DemoRoute.Collections)) },
                             onInputs = { stack.add(DomposableEntryScope(DemoRoute.Inputs)) },
+                            onProductComponents = { stack.add(DomposableEntryScope(DemoRoute.ProductComponents)) },
                         )
                     },
                 )
@@ -299,6 +306,7 @@ fun DemoApp(
                 )
                 register(advancedCollectionsDestination())
                 register(inputLabDestination())
+                register(productComponentLabDestination())
                 register(
                     unavailableScreenDestination {
                         UnavailableScreen(route.path) {
@@ -320,6 +328,7 @@ fun DemoApp(
                     DemoRoute.Collections,
                     DemoRoute.AdvancedCollections,
                     DemoRoute.Inputs,
+                    DemoRoute.ProductComponents,
                     -> 1
 
                     DemoRoute.Recipes, DemoRoute.Roots, DemoRoute.Policies -> 2

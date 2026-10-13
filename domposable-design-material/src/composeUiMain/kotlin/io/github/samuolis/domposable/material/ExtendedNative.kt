@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
@@ -44,6 +45,7 @@ import io.github.samuolis.domposable.ui.DomposableSelectProps
 import io.github.samuolis.domposable.ui.DomposableSnackbarProps
 import io.github.samuolis.domposable.ui.DomposableTooltipProps
 import io.github.samuolis.domposable.ui.DomposableTopAppBarProps
+import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.toComposeModifier
 
 @Composable
@@ -101,7 +103,7 @@ internal fun NativeSelect(
     Box(modifier.toComposeModifier()) {
         OutlinedButton(
             { expanded = true },
-            enabled = props.enabled,
+            enabled = props.enabled && domposableFormEnabled(),
             modifier =
                 Modifier.semantics {
                     contentDescription = props.label
@@ -109,7 +111,7 @@ internal fun NativeSelect(
                 },
         ) { Text("${props.label}: ${props.options.first { it.value == props.value }.label}") }
         NativeWindow {
-            DropdownMenu(expanded && props.enabled, { expanded = false }) {
+            DropdownMenu(expanded && props.enabled && domposableFormEnabled(), { expanded = false }) {
                 props.options.forEach { option ->
                     DropdownMenuItem(
                         text = { Text(option.label) },
@@ -117,7 +119,7 @@ internal fun NativeSelect(
                             expanded = false
                             props.onValueChange(option.value)
                         },
-                        enabled = option.enabled,
+                        enabled = option.enabled && props.enabled && domposableFormEnabled(),
                     )
                 }
             }
@@ -135,8 +137,10 @@ internal fun NativeSegmentedButtons(
         props.labels.forEachIndexed { index, label ->
             SegmentedButton(
                 selected = index == props.selectedIndex,
-                onClick = { props.onSelect(index) },
-                enabled = props.enabled,
+                onClick = { if (props.allowReselect || index != props.selectedIndex) props.onSelect(index) },
+                enabled = props.enabled && props.optionEnabled[index] && domposableFormEnabled(),
+                modifier = props.optionTestTags[index]?.let { Modifier.testTag(it) } ?: Modifier,
+                icon = { if (props.showSelectedIcon) SegmentedButtonDefaults.Icon(index == props.selectedIndex) },
                 shape = SegmentedButtonDefaults.itemShape(index, props.labels.size),
             ) { Text(label) }
         }
@@ -160,7 +164,7 @@ internal fun NativeRangeSlider(
         state = state,
         onValueChange = props.onValueChange,
         modifier = modifier.toComposeModifier(),
-        enabled = props.enabled,
+        enabled = props.enabled && domposableFormEnabled(),
         startThumbInteractionSource = startInteraction,
         endThumbInteractionSource = endInteraction,
         startThumb = {
@@ -169,7 +173,7 @@ internal fun NativeRangeSlider(
                 Modifier.semantics {
                     contentDescription = props.startLabel
                 },
-                enabled = props.enabled,
+                enabled = props.enabled && domposableFormEnabled(),
             )
         },
         endThumb = {
@@ -178,7 +182,7 @@ internal fun NativeRangeSlider(
                 Modifier.semantics {
                     contentDescription = props.endLabel
                 },
-                enabled = props.enabled,
+                enabled = props.enabled && domposableFormEnabled(),
             )
         },
     )

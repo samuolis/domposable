@@ -6,7 +6,6 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueParameter
@@ -37,6 +36,7 @@ class DomposableProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
     private val emitted = mutableSetOf<String>()
+    private val componentGenerator = DomposableComponentGenerator(environment)
 
     // KSP symbols cannot be retained into finish(): later rounds invalidate their analysis tokens.
     private val screens = mutableListOf<ScreenGroupMember>()
@@ -74,16 +74,7 @@ class DomposableProcessor(
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val components =
-            resolver
-                .getSymbolsWithAnnotation("io.github.samuolis.domposable.foundation.DomposableComponent")
-                .filterIsInstance<KSClassDeclaration>()
-                .toList()
-        if (environment.options["domposable.internal.components"] == "true" && components.isNotEmpty() &&
-            emitted.add("components")
-        ) {
-            generateComponents(components)
-        }
+        componentGenerator.process(resolver)
         val declarations =
             resolver
                 .getSymbolsWithAnnotation(
@@ -97,60 +88,6 @@ class DomposableProcessor(
             )
         }
         return deferred
-    }
-
-    private fun generateComponents(components: List<KSClassDeclaration>) {
-        val declarations =
-            components
-                .map { declaration ->
-                    val name =
-                        declaration.annotations
-                            .first { it.shortName.asString() == "DomposableComponent" }
-                            .arguments
-                            .first { it.name?.asString() == "name" }
-                            .value as String
-                    require(name.matches(Regex("[A-Z][A-Za-z0-9]*"))) { "Component names must be Kotlin identifiers" }
-                    name to declaration
-                }.sortedBy { it.first }
-        require(declarations.map { it.first }.distinct().size == declarations.size) { "Duplicate component name" }
-        val output =
-            buildString {
-                appendLine("package io.github.samuolis.domposable.ui")
-                appendLine("import androidx.compose.runtime.Composable")
-                for ((name, declaration) in declarations) {
-                    val props = declaration.qualifiedName!!.asString()
-                    appendLine("fun interface Domposable${name}Renderer {")
-                    appendLine(
-                        "    @Composable fun Render(props: $props, modifier: DomposableModifier, " +
-                            "content: @Composable () -> Unit)",
-                    )
-                    appendLine("}")
-                    appendLine(
-                        "@Composable fun Domposable$name(props: $props, modifier: " +
-                            "DomposableModifier = DomposableModifier, content: @Composable () -> Unit = {}) {",
-                    )
-                    appendLine(
-                        "    LocalDomposableComponents.current.${name.replaceFirstChar(
-                            Char::lowercase,
-                        )}.Render(props, modifier, content)",
-                    )
-                    appendLine("}")
-                }
-                appendLine("data class DomposableComponents(")
-                for ((name, _) in declarations) {
-                    appendLine(
-                        "    val ${name.replaceFirstChar(Char::lowercase)}: Domposable${name}Renderer,",
-                    )
-                }
-                appendLine(")")
-            }
-        environment.codeGenerator
-            .createNewFile(
-                Dependencies(true, *components.mapNotNull { it.containingFile }.toTypedArray()),
-                "io.github.samuolis.domposable.ui",
-                "DomposableComponents",
-            ).writer()
-            .use { it.write(output) }
     }
 
     private fun generateScreen(

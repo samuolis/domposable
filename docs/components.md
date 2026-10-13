@@ -1,6 +1,6 @@
 # Shared components
 
-Use direct composable calls in shared feature code and install a provider at the app root. All **41 renderer contracts** have Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
+Use direct composable calls in shared feature code and install a provider at the app root. The 0.4 API has **48 renderer contracts** with Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
 
 ![Shared components on Android and in a browser](assets/examples/components.png)
 
@@ -139,13 +139,83 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 | --- | --- |
 | Theme | Theme |
 | Layout | Column, Row, FlowRow, Box, LazyColumn, LazyRow, LazyGrid, Spacer, Divider, Scaffold |
-| Tables | Table with caption, column headers and keyed cells |
+| Data | Table, DataTable with row/cell actions, LineChart, ValueChart |
 | Actions | Button, IconButton, FloatingActionButton, Link, Chip, Tooltip |
-| Forms | TextField, Checkbox, Switch, RadioButton, Slider, RangeSlider, Select, SegmentedButtons |
-| Content | Text, Image, Icon, Card, Surface, Avatar, Badge |
+| Forms | Form, TextField, Checkbox, Switch, RadioButton, Slider, RangeSlider, Select, SegmentedButtons |
+| Content | Text, RichHtml, Disclosure, Image, Icon, Card, Surface, Avatar, Badge |
 | Feedback | Banner, Progress, Snackbar, Menu, Dialog, BottomSheet |
 | Navigation | TopAppBar, Tabs, NavigationBar |
 
 Every component has direct arguments and a `Props` overload. Keep props for renderer customization or reusable configuration; ordinary feature code can use the calls above. See [design-system customization](design-systems.md), [adaptive examples](adaptive.md) and [platform boundaries](coverage.md).
 
-The additional controls demo shares the same source for native, HTML and Wasm. The 0.1.x provider has 34 renderer contracts; 0.2.0 has 41, and main adds Table as the 42nd for the next minor release. Check [release versions](https://github.com/samuolis/domposable/releases) when selecting Maven dependencies.
+The additional controls demos share the same source for native, HTML and Wasm. Published 0.3.0 has
+42 renderer contracts; the 0.4 API adds Form, Disclosure, RichHtml, LineChart, ValueChart
+and DataTable. Check [release versions](https://github.com/samuolis/domposable/releases) before
+selecting Maven dependencies.
+
+## Documents, rich inputs and data
+
+[ProductComponentLab](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/ProductComponentLab.kt)
+is a complete shared feature. Run `/demo/#/product-components` in HTML or
+`/wasm/#/product-components` after building this branch.
+
+```kotlin
+DomposableForm(onSubmit = onSave, label = "Delivery preferences") {
+    DomposableTextField(
+        email, onEmailChange, "Contact email",
+        purpose = DomposableInputPurpose.Email,
+        placeholder = "you@example.com",
+        helperText = "We only use this for delivery updates",
+        imeAction = DomposableImeAction.Done,
+    )
+    val submit = rememberDomposableFormSubmit()
+    DomposableButton("Save", submit)
+}
+DomposableSegmentedButtons(
+    options = listOf(
+        DomposableChoiceOption("standard", "Standard"),
+        DomposableChoiceOption("express", "Express"),
+        DomposableChoiceOption("same-day", "Same day", enabled = false),
+    ),
+    selectedValue = delivery,
+    onSelectionChange = onDeliveryChange,
+    label = "Delivery speed",
+)
+DomposableDisclosure("Shipping details", expanded, onToggle) {
+    DomposableRichHtml(descriptionHtml, selectable = true, onLinkClick = onOpenLink)
+}
+```
+
+Form emits a real browser form and supports native Done/Go/Search/Send actions. The submit helper
+always calls the current callback and respects the enclosing form's enabled state. Keep browser
+validation enabled for HTML constraint validation; the application still owns domain validation.
+TextField adds readonly, password visibility, autocomplete, line limits, helper/error text,
+autofocus, explicit IME actions and leading/prefix/trailing slots. HTML multiline fields retain
+the browser's two-row initial size by default; `minLines` and `maxLines` bound that initial size
+and the maximum control height. Set both to `1` when a one-row textarea is needed. Typed segmented choices keep
+selection attached to values when options are reordered or labels are translated.
+
+RichHtml parses a fixed markup allowlist on every target. It removes active content and unsafe link
+schemes rather than inserting raw HTML. Native renders annotated text; HTML creates semantic nodes.
+Use an application renderer when you need an editor or a full document engine.
+
+```kotlin
+val orders = listOf(DomposableChartSeries(
+    key = "orders", label = "Orders",
+    values = listOf(DomposableChartValue("Mon", 12f), DomposableChartValue("Tue", 18f)),
+))
+DomposableLineChart(orders, title = "Orders this week", onSelectedIndexChange = onPointSelected)
+DomposableValueChart("Order totals", "Sample data", "Daily values", orders, { it.toInt().toString() })
+DomposableDataTable(
+    columns = listOf(DomposableDataTableColumn("order", "Order")),
+    rows = listOf(DomposableDataTableRow("A-101")),
+    rowHeaderColumnKey = "order",
+    onRowActivate = onOpenOrder,
+) { row, _ -> DomposableText(row.key) }
+```
+
+Chart series and table rows use unique stable keys. Explicit chart axis indexes represent sparse
+data; a series uses either all explicit or all implicit indexes. The caller supplies localized
+labels and formatters. HTML draws the line chart as SVG and the data table as a semantic table;
+native draws the chart with Canvas and supplies collection semantics. Pointer, touch and keyboard
+selection call the same feature callbacks. Cell actions take precedence over row activation.

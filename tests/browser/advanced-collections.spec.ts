@@ -63,7 +63,9 @@ test('measured rows resize and keep the first visible item anchored', async ({ p
   const viewport = await select(page, 'Measured column', 'measured-column');
   await viewport.evaluate(element => { element.scrollTop = 4000; });
   await expect.poll(() => viewport.locator('li').evaluateAll(rows => {
-    const top = rows[0]?.parentElement!.parentElement!.getBoundingClientRect().top;
+    const container = rows[0]?.parentElement?.parentElement;
+    if (!container) return false; // The keyed window can briefly be empty during recomposition.
+    const top = container.getBoundingClientRect().top;
     return rows.some(row => row.getBoundingClientRect().bottom > top && row.getBoundingClientRect().top < top + 360);
   })).toBe(true);
   // Scroll dispatch, composition and ResizeObserver measurements precede the anchor sample.

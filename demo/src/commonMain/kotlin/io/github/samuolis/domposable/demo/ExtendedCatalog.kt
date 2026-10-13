@@ -38,6 +38,7 @@ import io.github.samuolis.domposable.ui.verticalScroll
 fun ExtendedComponentCatalog(
     onCollections: (() -> Unit)? = null,
     onInputs: (() -> Unit)? = null,
+    onProductComponents: (() -> Unit)? = null,
 ) {
     var delivery by rememberSaveable { mutableStateOf("standard") }
     var segment by rememberSaveable { mutableIntStateOf(0) }
@@ -104,6 +105,7 @@ fun ExtendedComponentCatalog(
         }
         onCollections?.let { DomposableButton("Large collections lab", it) }
         onInputs?.let { DomposableButton("Input and accessibility lab", it) }
+        onProductComponents?.let { DomposableButton("Documents and data lab", it) }
     }
     if (about) {
         DomposableDialog("About preferences", onDismiss = { about = false }) {

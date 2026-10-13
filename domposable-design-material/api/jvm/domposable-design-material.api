@@ -19,3 +19,7 @@ public final class io/github/samuolis/domposable/material/NativeMaterialKt {
 	public static final fun rememberDomposableMaterialComponents (Landroidx/compose/runtime/Composer;I)Lio/github/samuolis/domposable/ui/DomposableComponents;
 }
 
+public final class io/github/samuolis/domposable/material/NativeMaterialProviderKt {
+	public static final fun ProvideDomposableMaterialComponents (Lio/github/samuolis/domposable/foundation/DomposableTokens;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+

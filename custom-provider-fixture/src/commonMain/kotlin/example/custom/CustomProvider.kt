@@ -6,6 +6,24 @@ import io.github.samuolis.domposable.ui.DomposableComponents
 @Suppress("LongMethod")
 fun independentProvider(onRender: (String) -> Unit): DomposableComponents =
     DomposableComponents(
+        form = { _, _, content ->
+            onRender("Form")
+            content()
+        },
+        disclosure = { props, _, content ->
+            onRender("Disclosure")
+            if (props.expanded) content()
+        },
+        richHtml = { props, _, _ -> onRender("RichHtml: ${props.rawHtml}") },
+        lineChart = { props, _, _ -> props.series.forEach { onRender("LineChart: ${it.key}") } },
+        valueChart = { props, _, _ -> props.series.forEach { onRender("ValueChart: ${it.key}") } },
+        dataTable = {
+            props,
+            _,
+            _,
+            ->
+            props.rows.forEach { row -> props.columns.forEach { col -> props.cellContent(row, col) } }
+        },
         theme = { _, _, content ->
             onRender("Theme")
             content()

@@ -8,7 +8,8 @@
     "collection-measured",
     "collection-row",
     "collection-grid",
-    "collection-table"
+    "collection-table",
+    "product-components"
   ],
   "desktop": [
     "tasks",
@@ -19,7 +20,8 @@
     "collection-measured",
     "collection-row",
     "collection-grid",
-    "collection-table"
+    "collection-table",
+    "product-components"
   ],
   "ios": [
     "tasks",
@@ -31,7 +33,8 @@
     "collection-measured",
     "collection-row",
     "collection-grid",
-    "collection-table"
+    "collection-table",
+    "product-components"
   ],
   "dom": [
     "tasks-phone",
@@ -50,7 +53,8 @@
     "collection-measured",
     "collection-row",
     "collection-grid",
-    "collection-table"
+    "collection-table",
+    "product-components"
   ],
   "wasm": [
     "tasks-phone",
@@ -60,6 +64,7 @@
     "shop-phone",
     "shop-wide",
     "extended-components",
-    "collection-measured"
+    "collection-measured",
+    "product-components"
   ]
 }

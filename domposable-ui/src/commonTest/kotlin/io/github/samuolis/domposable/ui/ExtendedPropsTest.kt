@@ -14,10 +14,11 @@ class ExtendedPropsTest {
         assertFailsWith<IllegalArgumentException> { props.copy(options = emptyList()) }
     }
 
-    @Test fun segmentSelectionMustReferToAnExistingChoice() {
+    @Test fun segmentSelectionUsesAnExistingChoiceOrExplicitlyHasNoSelection() {
         val props = DomposableSegmentedButtonsProps(listOf("Home", "Office"), 1, {}, "Address")
         assertEquals(1, props.selectedIndex)
-        assertFailsWith<IllegalArgumentException> { props.copy(selectedIndex = -1) }
+        assertEquals(-1, props.copy(selectedIndex = -1).selectedIndex)
+        assertFailsWith<IllegalArgumentException> { props.copy(selectedIndex = -2) }
         assertFailsWith<IllegalArgumentException> { props.copy(selectedIndex = 2) }
         assertFailsWith<IllegalArgumentException> { props.copy(labels = emptyList()) }
     }

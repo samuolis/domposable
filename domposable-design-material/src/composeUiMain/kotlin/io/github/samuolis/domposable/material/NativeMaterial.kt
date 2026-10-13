@@ -25,7 +25,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -58,11 +60,14 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
@@ -79,26 +84,46 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.shape
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
+import io.github.samuolis.domposable.foundation.DomposableFontWeight
 import io.github.samuolis.domposable.foundation.DomposableImageScale
+import io.github.samuolis.domposable.foundation.DomposableImeAction
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
+import io.github.samuolis.domposable.foundation.DomposableLiveRegion
 import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.foundation.DomposableTextAlignment
+import io.github.samuolis.domposable.foundation.DomposableTextDecoration
+import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.ui.DomposableComponents
+import io.github.samuolis.domposable.ui.DomposableDataTableProps
+import io.github.samuolis.domposable.ui.DomposableLineChartProps
+import io.github.samuolis.domposable.ui.DomposableValueChartProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
+import io.github.samuolis.domposable.ui.ProvideDomposableBoxModifierScope
+import io.github.samuolis.domposable.ui.ProvideDomposableColumnModifierScope
+import io.github.samuolis.domposable.ui.ProvideDomposableRowModifierScope
 import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.clickable
 import io.github.samuolis.domposable.ui.contentDescription
+import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.fillMaxHeight
 import io.github.samuolis.domposable.ui.fillMaxWidth
+import io.github.samuolis.domposable.ui.rememberDomposableFormSubmitOrNull
 import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.toComposeModifier
 
@@ -123,10 +148,65 @@ private fun DomposableAlignment.box() =
         DomposableAlignment.End -> Alignment.BottomEnd
     }
 
+private fun DomposableFontWeight.native() =
+    when (this) {
+        DomposableFontWeight.Thin -> FontWeight.Thin
+        DomposableFontWeight.ExtraLight -> FontWeight.ExtraLight
+        DomposableFontWeight.Light -> FontWeight.Light
+        DomposableFontWeight.Normal -> FontWeight.Normal
+        DomposableFontWeight.Medium -> FontWeight.Medium
+        DomposableFontWeight.SemiBold -> FontWeight.SemiBold
+        DomposableFontWeight.Bold -> FontWeight.Bold
+        DomposableFontWeight.ExtraBold -> FontWeight.ExtraBold
+        DomposableFontWeight.Black -> FontWeight.Black
+    }
+
+private fun DomposableTextAlignment.native() =
+    when (this) {
+        DomposableTextAlignment.Start -> TextAlign.Start
+        DomposableTextAlignment.Center -> TextAlign.Center
+        DomposableTextAlignment.End -> TextAlign.End
+        DomposableTextAlignment.Justify -> TextAlign.Justify
+    }
+
+private fun DomposableTextDecoration.native() =
+    when (this) {
+        DomposableTextDecoration.None -> TextDecoration.None
+        DomposableTextDecoration.Underline -> TextDecoration.Underline
+        DomposableTextDecoration.LineThrough -> TextDecoration.LineThrough
+    }
+
+private fun DomposableTextOverflow.native() =
+    when (this) {
+        DomposableTextOverflow.Clip -> TextOverflow.Clip
+        DomposableTextOverflow.Ellipsis -> TextOverflow.Ellipsis
+        DomposableTextOverflow.Visible -> TextOverflow.Visible
+    }
+
+private fun DomposableLiveRegion.native() =
+    when (this) {
+        DomposableLiveRegion.Polite -> LiveRegionMode.Polite
+        DomposableLiveRegion.Assertive -> LiveRegionMode.Assertive
+    }
+
+private fun DomposableImeAction.native() =
+    when (this) {
+        DomposableImeAction.Default -> ImeAction.Default
+        DomposableImeAction.Done -> ImeAction.Done
+        DomposableImeAction.Go -> ImeAction.Go
+        DomposableImeAction.Next -> ImeAction.Next
+        DomposableImeAction.Previous -> ImeAction.Previous
+        DomposableImeAction.Search -> ImeAction.Search
+        DomposableImeAction.Send -> ImeAction.Send
+    }
+
 @Composable
 actual fun rememberDomposableMaterialComponents(): DomposableComponents =
     remember {
         DomposableComponents(
+            form = { props, modifier, content -> NativeDomposableForm(props, modifier, content) },
+            disclosure = { props, modifier, content -> NativeDomposableDisclosure(props, modifier, content) },
+            richHtml = { props, modifier, _ -> NativeDomposableRichHtml(props, modifier) },
             theme = { props, _, content ->
                 val colors = props.tokens.colors
                 val type = props.tokens.typography
@@ -175,7 +255,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     verticalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                     horizontalAlignment = props.alignment.horizontal(),
                 ) {
-                    content()
+                    ProvideDomposableColumnModifierScope { content() }
                 }
             },
             row = {
@@ -188,7 +268,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                     verticalAlignment = props.alignment.vertical(),
                 ) {
-                    content()
+                    ProvideDomposableRowModifierScope { content() }
                 }
             },
             flowRow = {
@@ -201,23 +281,18 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                     verticalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                 ) {
-                    content()
+                    ProvideDomposableRowModifierScope { content() }
                 }
             },
-            link = {
-                props,
-                modifier,
-                _,
-                ->
-                val handler = LocalUriHandler.current
-                TextButton({ handler.openUri(props.href) }, modifier.toComposeModifier()) { Text(props.label) }
-            },
+            link = { props, modifier, _ -> NativeDomposableLink(props, modifier) },
             box = {
                 props,
                 modifier,
                 content,
                 ->
-                Box(modifier.toComposeModifier(), contentAlignment = props.alignment.box()) { content() }
+                Box(modifier.toComposeModifier(), contentAlignment = props.alignment.box()) {
+                    ProvideDomposableBoxModifierScope { content() }
+                }
             },
             lazyColumn = {
                 props,
@@ -290,9 +365,53 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 }
             },
             table = { props, modifier, _ -> NativeTable(props, modifier) },
+            lineChart = { props, modifier, _ -> NativeLineChart(props, modifier) },
+            valueChart = { props, modifier, _ -> NativeValueChart(props, modifier) },
+            dataTable = { props, modifier, _ -> NativeDataTable(props, modifier) },
             text = { props, modifier, _ ->
-                Text(
-                    props.text,
+                val appearance = props.appearance
+                val style =
+                    when (props.style) {
+                        DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
+                        DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
+                        DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
+                    }.copy(
+                        fontSize =
+                            appearance?.fontSize?.sp ?: when (props.style) {
+                                DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.fontSize
+                                DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.fontSize
+                                DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.fontSize
+                            },
+                        lineHeight =
+                            appearance?.lineHeight?.sp
+                                ?: when (props.style) {
+                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.lineHeight
+                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.lineHeight
+                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.lineHeight
+                                },
+                        fontWeight =
+                            appearance?.fontWeight?.native()
+                                ?: when (props.style) {
+                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.fontWeight
+                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.fontWeight
+                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.fontWeight
+                                },
+                        textAlign =
+                            appearance?.alignment?.native()
+                                ?: when (props.style) {
+                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.textAlign
+                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.textAlign
+                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.textAlign
+                                },
+                        textDecoration =
+                            appearance?.decoration?.native()
+                                ?: when (props.style) {
+                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.textDecoration
+                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.textDecoration
+                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.textDecoration
+                                },
+                    )
+                val textModifier =
                     modifier.toComposeModifier().semantics {
                         if (props.headingLevel !=
                             null ||
@@ -300,16 +419,20 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         ) {
                             heading()
                         }
-                    },
-                    color =
-                        props.color?.let { Color(it.argb) } ?: Color.Unspecified,
-                    style =
-                        when (props.style) {
-                            DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
-                            DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
-                            DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
-                        },
-                )
+                        appearance?.liveRegion?.let { liveRegion = it.native() }
+                    }
+
+                val renderText: @Composable () -> Unit = {
+                    Text(
+                        props.text,
+                        textModifier,
+                        color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
+                        style = style,
+                        maxLines = appearance?.maxLines ?: Int.MAX_VALUE,
+                        overflow = appearance?.overflow?.native() ?: TextOverflow.Clip,
+                    )
+                }
+                if (appearance?.selectable == true) SelectionContainer { renderText() } else renderText()
             },
             button = { props, modifier, content ->
                 when (props.style) {
@@ -317,7 +440,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         Button(
                             props.onClick,
                             modifier.toComposeModifier(),
-                            enabled = props.enabled,
+                            enabled = props.enabled && domposableFormEnabled(),
                         ) {
                             content()
                         }
@@ -327,7 +450,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         OutlinedButton(
                             props.onClick,
                             modifier.toComposeModifier(),
-                            enabled = props.enabled,
+                            enabled = props.enabled && domposableFormEnabled(),
                         ) {
                             content()
                         }
@@ -337,7 +460,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         TextButton(
                             props.onClick,
                             modifier.toComposeModifier(),
-                            enabled = props.enabled,
+                            enabled = props.enabled && domposableFormEnabled(),
                         ) {
                             content()
                         }
@@ -351,34 +474,87 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         contentDescription =
                             props.label
                     },
-                    enabled = props.enabled,
+                    enabled = props.enabled && domposableFormEnabled(),
                     content = content,
                 )
             },
             textField = { props, modifier, _ ->
+                val focusRequester = remember { FocusRequester() }
+                val formEnabled = domposableFormEnabled()
+                val shouldAutofocus = props.autofocus && props.enabled && formEnabled
+                val submit = props.onImeAction ?: rememberDomposableFormSubmitOrNull()
+                val onClick = props.onClick
+                LaunchedEffect(shouldAutofocus) {
+                    if (shouldAutofocus) focusRequester.requestFocus()
+                }
+                val clickModifier =
+                    modifier
+                        .toComposeModifier()
+                        .then(if (shouldAutofocus) Modifier.focusRequester(focusRequester) else Modifier)
+                        .then(
+                            if (props.onClick != null) {
+                                Modifier.clickable(
+                                    enabled = props.enabled && formEnabled,
+                                    onClick = requireNotNull(onClick),
+                                )
+                            } else {
+                                Modifier
+                            },
+                        ).semantics {
+                            props.id?.let { testTag = it }
+                            if (!props.showLabel) contentDescription = props.label
+                            if (props.isError) props.error?.let { error(it) }
+                        }
+                val supporting = props.error ?: props.helperText
                 OutlinedTextField(
-                    props.value,
-                    props.onValueChange,
-                    modifier.toComposeModifier(),
-                    enabled = props.enabled,
-                    label = { Text(props.label) },
-                    singleLine = !props.multiline,
-                    isError = props.error != null,
-                    supportingText = props.error?.let { message -> { Text(message) } },
+                    value = props.value,
+                    onValueChange = props.onValueChange,
+                    modifier = clickModifier,
+                    enabled = props.enabled && domposableFormEnabled(),
+                    readOnly = props.readOnly,
+                    label = if (props.showLabel) ({ Text(props.label) }) else null,
+                    placeholder = props.placeholder?.let { value -> { Text(value) } },
+                    leadingIcon = props.leadingIcon,
+                    prefix = props.prefix,
+                    trailingIcon = props.trailingIcon,
+                    singleLine = props.singleLine,
+                    minLines = props.minLines,
+                    maxLines = props.maxLines,
+                    isError = props.isError,
+                    supportingText = supporting?.let { message -> { Text(message) } },
                     keyboardOptions =
                         KeyboardOptions(
                             keyboardType =
                                 when (props.purpose) {
                                     DomposableInputPurpose.Email -> KeyboardType.Email
+
                                     DomposableInputPurpose.Password -> KeyboardType.Password
-                                    DomposableInputPurpose.Number -> KeyboardType.Number
+
+                                    DomposableInputPurpose.Number,
+                                    DomposableInputPurpose.OneTimeCode,
+                                    -> KeyboardType.Number
+
+                                    DomposableInputPurpose.Phone -> KeyboardType.Phone
+
+                                    DomposableInputPurpose.Decimal -> KeyboardType.Decimal
+
                                     else -> KeyboardType.Text
                                 },
+                            imeAction = props.imeAction.native(),
                         ),
+                    keyboardActions =
+                        if (submit == null) {
+                            KeyboardActions.Default
+                        } else {
+                            KeyboardActions(
+                                onDone = { submit() },
+                                onGo = { submit() },
+                                onSearch = { submit() },
+                                onSend = { submit() },
+                            )
+                        },
                     visualTransformation =
-                        if (props.purpose ==
-                            DomposableInputPurpose.Password
-                        ) {
+                        if (props.purpose == DomposableInputPurpose.Password && !props.passwordVisible) {
                             PasswordVisualTransformation()
                         } else {
                             VisualTransformation.None
@@ -395,14 +571,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         .toComposeModifier()
                         .toggleable(
                             props.checked,
-                            enabled = props.enabled,
+                            enabled = props.enabled && domposableFormEnabled(),
                             role = Role.Checkbox,
                             onValueChange = props.onCheckedChange,
                         ).semantics(mergeDescendants = true) {
                         },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Checkbox(props.checked, null, enabled = props.enabled)
+                    Checkbox(props.checked, null, enabled = props.enabled && domposableFormEnabled())
                     Text(props.label)
                 }
             },
@@ -416,14 +592,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         .toComposeModifier()
                         .toggleable(
                             props.checked,
-                            enabled = props.enabled,
+                            enabled = props.enabled && domposableFormEnabled(),
                             role = Role.Switch,
                             onValueChange = props.onCheckedChange,
                         ).semantics(mergeDescendants = true) {
                         },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Switch(props.checked, null, enabled = props.enabled)
+                    Switch(props.checked, null, enabled = props.enabled && domposableFormEnabled())
                     Text(props.label)
                 }
             },
@@ -432,7 +608,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     modifier
                         .toComposeModifier()
                         .clickable(
-                            enabled = props.enabled,
+                            enabled = props.enabled && domposableFormEnabled(),
                             role = Role.RadioButton,
                             onClick = props.onClick,
                         ).semantics(mergeDescendants = true) {
@@ -441,7 +617,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    RadioButton(props.selected, null, enabled = props.enabled)
+                    RadioButton(props.selected, null, enabled = props.enabled && domposableFormEnabled())
                     Text(props.label)
                 }
             },
@@ -453,7 +629,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         contentDescription =
                             props.label
                     },
-                    enabled = props.enabled,
+                    enabled = props.enabled && domposableFormEnabled(),
                     valueRange = props.range,
                     steps = props.steps,
                 )
@@ -521,7 +697,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 ->
                 FilterChip(props.selected, props.onClick, label = {
                     Text(props.label)
-                }, modifier.toComposeModifier(), enabled = props.enabled)
+                }, modifier.toComposeModifier(), enabled = props.enabled && domposableFormEnabled())
             },
             avatar = { props, modifier, _ ->
                 Surface(

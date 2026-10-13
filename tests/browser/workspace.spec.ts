@@ -8,6 +8,7 @@ test('HTML feature supports input, adaptive panes and browser history', async ({
   await page.goto('/#/tasks');
   await expect(page.getByRole('heading', { name: 'Task workspace' })).toBeVisible();
   await page.getByTestId('task-welcome').click();
+  await expect(page.getByTestId('task-notes')).toHaveAttribute('rows', '2');
   await page.getByTestId('task-notes').fill('Preserve this draft');
   await expect(page.locator('[data-entry-id]')).toHaveCount(2);
   const detailId = await page.locator('[data-entry-id]').last().getAttribute('data-entry-id');

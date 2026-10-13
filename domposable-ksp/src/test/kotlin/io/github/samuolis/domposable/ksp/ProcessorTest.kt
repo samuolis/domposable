@@ -54,6 +54,7 @@ class ProcessorTest {
         source: String,
         lifecycle: Boolean = false,
         components: Boolean = false,
+        options: Map<String, String> = emptyMap(),
     ): Result {
         val root = Files.createTempDirectory("domposable-ksp-test").toFile()
         try {
@@ -84,7 +85,8 @@ class ProcessorTest {
                                 ),
                             )
                         processorOptions =
-                            if (components) mapOf("domposable.internal.components" to "true") else emptyMap()
+                            (if (components) mapOf("domposable.internal.components" to "true") else emptyMap()) +
+                            options
                     }.build()
             val logger = Logger()
             val exit = KotlinSymbolProcessing(config, listOf(DomposableProcessorProvider()), logger).execute()
@@ -287,5 +289,142 @@ class ProcessorTest {
         assertContains(components, "fun interface DomposableButtonRenderer")
         assertContains(components, "LocalDomposableComponents.current.text.Render(props, modifier, content)")
         assertTrue(components.indexOf("val button:") < components.indexOf("val text:"))
+    }
+
+    @Test
+    fun consumerComponentsUseTypedKeysWithoutReplacingThePublishedProvider() {
+        val result =
+            process(
+                "@DomposableComponent(\"ProductCard\") class ProductCardProps(val title: String)",
+                options =
+                    mapOf(
+                        "domposable.components.package" to "feature.generated",
+                        "domposable.components.provider" to "FeatureComponents",
+                        "domposable.components.visibility" to "internal",
+                    ),
+            )
+        assertTrue(result.success, result.errors.toString())
+        assertFalse("DomposableComponents.kt" in result.files)
+        val generated = result.files.getValue("FeatureComponents.kt")
+        assertContains(generated, "package feature.generated")
+        assertContains(generated, "internal object FeatureComponentsKeys")
+        assertContains(generated, "DomposableComponentKey<feature.ProductCardProps>")
+        assertContains(generated, "DomposableComponent(FeatureComponentsKeys.ProductCard, props, modifier, content)")
+        assertContains(generated, "register(FeatureComponentsKeys.ProductCard, productCard)")
+    }
+
+    @Test
+    fun invalidConsumerProviderOptionsFailWithDiagnostics() {
+        val result =
+            process(
+                "@DomposableComponent(\"ProductCard\") class ProductCardProps",
+                options = mapOf("domposable.components.package" to "feature.invalid-package"),
+            )
+        assertFalse(result.success)
+        assertTrue(result.errors.any { "Invalid Domposable component package" in it })
+        assertTrue(result.files.isEmpty())
+
+        val keywordPackage =
+            process(
+                "@DomposableComponent(\"ProductCard\") class ProductCardProps",
+                options = mapOf("domposable.components.package" to "feature.class"),
+            )
+        assertFalse(keywordPackage.success)
+        assertTrue(keywordPackage.errors.any { "non-keyword Kotlin package/name" in it })
+        assertTrue(keywordPackage.files.isEmpty())
+
+        val keywordProvider =
+            process(
+                "@DomposableComponent(\"ProductCard\") class ProductCardProps",
+                options =
+                    mapOf(
+                        "domposable.components.package" to "feature.generated",
+                        "domposable.components.provider" to "when",
+                    ),
+            )
+        assertFalse(keywordProvider.success)
+        assertTrue(keywordProvider.errors.any { "non-keyword Kotlin package/name" in it })
+        assertTrue(keywordProvider.files.isEmpty())
+    }
+
+    @Test
+    fun unsupportedConsumerPropsDeclarationsFailWithKspDiagnostics() {
+        val duplicate =
+            process(
+                "@DomposableComponent(\"ProductCard\") class FirstProps\n" +
+                    "@DomposableComponent(\"ProductCard\") class SecondProps",
+                options = mapOf("domposable.components.package" to "feature.generated"),
+            )
+        assertFalse(duplicate.success)
+        assertTrue(duplicate.errors.any { "Duplicate Domposable component name 'ProductCard'" in it })
+        assertTrue(duplicate.files.isEmpty())
+
+        val invalidName =
+            process(
+                "@DomposableComponent(\"bad-name\") class ProductCardProps",
+                options = mapOf("domposable.components.package" to "feature.generated"),
+            )
+        assertFalse(invalidName.success)
+        assertTrue(invalidName.errors.any { "non-keyword Kotlin type identifiers" in it })
+        assertTrue(invalidName.files.isEmpty())
+
+        val generic =
+            process(
+                "@DomposableComponent(\"ProductCard\") class ProductCardProps<T>",
+                options = mapOf("domposable.components.package" to "feature.generated"),
+            )
+        assertFalse(generic.success)
+        assertTrue(generic.errors.any { "Generic Domposable component Props are unsupported" in it })
+        assertTrue(generic.files.isEmpty())
+
+        // KSP2 does not report local classes through getSymbolsWithAnnotation, so generation cannot diagnose them.
+        // Keep the qualified-name guard for any future KSP version that does surface one.
+        val local =
+            process(
+                "fun declarations() { @DomposableComponent(\"ProductCard\") class ProductCardProps }",
+                options = mapOf("domposable.components.package" to "feature.generated"),
+            )
+        assertTrue(local.success, local.errors.toString())
+        assertTrue(local.files.isEmpty())
+    }
+
+    @Test
+    fun consumerProviderVisibilityMustExposeItsPropsType() {
+        val publicProvider =
+            process(
+                "@DomposableComponent(\"ProductCard\") internal class ProductCardProps",
+                options = mapOf("domposable.components.package" to "feature.generated"),
+            )
+        assertFalse(publicProvider.success)
+        assertTrue(publicProvider.errors.any { "cannot expose internal Props" in it })
+        assertTrue(publicProvider.files.isEmpty())
+
+        val internalProvider =
+            process(
+                "@DomposableComponent(\"ProductCard\") internal class ProductCardProps",
+                options =
+                    mapOf(
+                        "domposable.components.package" to "feature.generated",
+                        "domposable.components.visibility" to "internal",
+                    ),
+            )
+        assertTrue(internalProvider.success, internalProvider.errors.toString())
+        assertContains(
+            internalProvider.files.getValue("GeneratedComponents.kt"),
+            "internal typealias ProductCardRenderer",
+        )
+
+        val privateProps =
+            process(
+                "@DomposableComponent(\"ProductCard\") private class ProductCardProps",
+                options =
+                    mapOf(
+                        "domposable.components.package" to "feature.generated",
+                        "domposable.components.visibility" to "internal",
+                    ),
+            )
+        assertFalse(privateProps.success)
+        assertTrue(privateProps.errors.any { "cannot be private or protected" in it })
+        assertTrue(privateProps.files.isEmpty())
     }
 }
