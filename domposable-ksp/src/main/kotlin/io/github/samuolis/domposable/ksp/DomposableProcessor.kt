@@ -10,7 +10,6 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
-import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -28,6 +27,8 @@ import com.squareup.kotlinpoet.UNIT
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 
+private const val DOMPOSABLE_SCREEN = "io.github.samuolis.domposable.foundation.DomposableScreen"
+
 class DomposableProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = DomposableProcessor(environment)
 }
@@ -35,8 +36,12 @@ class DomposableProcessorProvider : SymbolProcessorProvider {
 class DomposableProcessor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
-    private val emitted = mutableSetOf<String>()
     private val componentGenerator = DomposableComponentGenerator(environment)
+    private val screenProcessor =
+        DomposableFunctionProcessor(
+            environment,
+            mapOf(DOMPOSABLE_SCREEN to DomposableFunctionGenerator(::generateScreen)),
+        )
 
     // KSP symbols cannot be retained into finish(): later rounds invalidate their analysis tokens.
     private val screens = mutableListOf<ScreenGroupMember>()
@@ -75,28 +80,14 @@ class DomposableProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         componentGenerator.process(resolver)
-        val declarations =
-            resolver
-                .getSymbolsWithAnnotation(
-                    "io.github.samuolis.domposable.foundation.DomposableScreen",
-                ).toList()
-        val deferred = declarations.filterNot { it.validate() }
-        declarations.filter { it.validate() }.filterIsInstance<KSFunctionDeclaration>().forEach {
-            generateScreen(
-                it,
-                resolver,
-            )
-        }
-        return deferred
+        return screenProcessor.process(resolver)
     }
 
     private fun generateScreen(
         screen: KSFunctionDeclaration,
         resolver: Resolver,
-    ) {
-        val qualifiedName = screen.qualifiedName?.asString() ?: return
-        if (!emitted.add(qualifiedName)) return
-        if (!validateScreenDeclaration(screen)) return
+    ): List<DomposableGeneratedSource> {
+        if (!validateScreenDeclaration(screen)) return emptyList()
         val annotation = screen.annotations.first { it.shortName.asString() == "DomposableScreen" }
         val route = annotation.arguments.first { it.name?.asString() == "route" }.value as KSType
         val viewModel = annotation.arguments.firstOrNull { it.name?.asString() == "viewModel" }?.value == true
@@ -110,14 +101,14 @@ class DomposableProcessor(
                 "viewModel = true requires the optional domposable-lifecycle-viewmodel dependency",
                 screen,
             )
-            return
+            return emptyList()
         }
         val legacy = legacyDestination(screen, route, viewModel)
-        FileSpec
-            .builder(screen.packageName.asString() + ".generated", legacy.name)
-            .addFunction(legacy)
-            .build()
-            .writeTo(environment.codeGenerator, Dependencies(false, screen.containingFile!!))
+        val legacyFile =
+            FileSpec
+                .builder(screen.packageName.asString() + ".generated", legacy.name)
+                .addFunction(legacy)
+                .build()
         val model = Screen(screen, route, viewModel)
         screens +=
             ScreenGroupMember(
@@ -138,7 +129,11 @@ class DomposableProcessor(
         ) {
             file.addFunction(entryFactory(model, model.dependencies.filterNot { it.hasDefault }))
         }
-        file.build().writeTo(environment.codeGenerator, Dependencies(false, screen.containingFile!!))
+        val entryFile = file.build()
+        return listOf(
+            DomposableGeneratedSource(legacyFile.packageName, legacyFile.name, legacyFile.toString()),
+            DomposableGeneratedSource(entryFile.packageName, entryFile.name, entryFile.toString()),
+        )
     }
 
     private fun validateScreenDeclaration(screen: KSFunctionDeclaration): Boolean {

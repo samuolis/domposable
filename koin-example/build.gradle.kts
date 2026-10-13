@@ -33,9 +33,15 @@ kotlin {
     iosSimulatorArm64()
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":domposable-design-material"))
-            implementation(project(":domposable-lifecycle-viewmodel"))
-            implementation(project(":domposable-navigation3"))
+            if (providers.gradleProperty("domposable.consumer.repository").isPresent) {
+                listOf("design-material", "lifecycle-viewmodel", "navigation3").forEach {
+                    implementation("io.github.samuolis.domposable:domposable-$it:${project.version}")
+                }
+            } else {
+                implementation(project(":domposable-design-material"))
+                implementation(project(":domposable-lifecycle-viewmodel"))
+                implementation(project(":domposable-navigation3"))
+            }
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
         }
@@ -49,7 +55,13 @@ kotlin {
 }
 
 kotlin.sourceSets.commonMain { kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin") }
-dependencies { add("kspCommonMainMetadata", project(":domposable-ksp")) }
+dependencies {
+    if (providers.gradleProperty("domposable.consumer.repository").isPresent) {
+        add("kspCommonMainMetadata", "io.github.samuolis.domposable:domposable-ksp:${project.version}")
+    } else {
+        add("kspCommonMainMetadata", project(":domposable-ksp"))
+    }
+}
 tasks
     .matching {
         (it.name.startsWith("compile") || it.name.contains("sourcesJar", ignoreCase = true)) &&

@@ -3,6 +3,9 @@ package io.github.samuolis.domposable.ksp
 import com.google.devtools.ksp.impl.KotlinSymbolProcessing
 import com.google.devtools.ksp.processing.KSPJvmConfig
 import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSNode
 import java.io.File
 import java.nio.file.Files
@@ -55,6 +58,7 @@ class ProcessorTest {
         lifecycle: Boolean = false,
         components: Boolean = false,
         options: Map<String, String> = emptyMap(),
+        processorProviders: List<SymbolProcessorProvider> = listOf(DomposableProcessorProvider()),
     ): Result {
         val root = Files.createTempDirectory("domposable-ksp-test").toFile()
         try {
@@ -89,7 +93,7 @@ class ProcessorTest {
                             options
                     }.build()
             val logger = Logger()
-            val exit = KotlinSymbolProcessing(config, listOf(DomposableProcessorProvider()), logger).execute()
+            val exit = KotlinSymbolProcessing(config, processorProviders, logger).execute()
             val files =
                 config.kotlinOutputDir
                     .walkTopDown()
@@ -116,6 +120,8 @@ class ProcessorTest {
             import kotlin.reflect.KClass
             annotation class DomposableScreen(val route: KClass<*>, val viewModel: Boolean = false)
             annotation class DomposableComponent(val name: String)
+            @Target(AnnotationTarget.FUNCTION) annotation class TestGenerateDependency
+            @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION) annotation class TestFunction
             """.trimIndent(),
         )
         File(sources, "Screens.kt").writeText(
@@ -266,6 +272,139 @@ class ProcessorTest {
         assertTrue(returnsModel.errors.any { "A screen returns Unit" in it })
         assertTrue(missing.files.isEmpty() && returnsModel.files.isEmpty())
     }
+
+    @Test
+    fun functionProcessorDefersUnresolvedFunctionsAndEmitsOnce() {
+        val calls = mutableMapOf<String, Int>()
+        val provider =
+            functionProcessorProvider(
+                mapOf(
+                    "io.github.samuolis.domposable.foundation.TestGenerateDependency" to
+                        DomposableFunctionGenerator { _, _ ->
+                            listOf(
+                                DomposableGeneratedSource(
+                                    "feature",
+                                    "GeneratedDependency",
+                                    "package feature\nclass GeneratedDependency",
+                                ),
+                            )
+                        },
+                    "io.github.samuolis.domposable.foundation.TestFunction" to
+                        DomposableFunctionGenerator { function, _ ->
+                            val name = function.simpleName.asString()
+                            calls[name] = (calls[name] ?: 0) + 1
+                            listOf(
+                                DomposableGeneratedSource(
+                                    "feature",
+                                    "${name}Generated",
+                                    "package feature\nfun ${name.lowercase()}Generated() = Unit",
+                                ),
+                            )
+                        },
+                ),
+            )
+        val result =
+            process(
+                """
+                @io.github.samuolis.domposable.foundation.TestGenerateDependency
+                fun createDependency() {}
+                @io.github.samuolis.domposable.foundation.TestFunction
+                fun screen(value: GeneratedDependency) {}
+                """.trimIndent(),
+                processorProviders = listOf(provider),
+            )
+
+        assertTrue(result.success, result.errors.toString())
+        assertEquals(1, calls["screen"])
+        assertContains(result.files.getValue("screenGenerated.kt"), "fun screenGenerated()")
+    }
+
+    @Test
+    fun functionProcessorGeneratesBothAnnotatedOverloads() {
+        val calls = mutableListOf<String>()
+        val provider =
+            functionProcessorProvider(
+                mapOf(
+                    "io.github.samuolis.domposable.foundation.TestFunction" to
+                        DomposableFunctionGenerator { function, _ ->
+                            val parameterType =
+                                function.parameters
+                                    .single()
+                                    .type
+                                    .resolve()
+                                    .declaration.simpleName
+                                    .asString()
+                            calls += parameterType
+                            listOf(
+                                DomposableGeneratedSource(
+                                    "feature",
+                                    "screen$parameterType",
+                                    "package feature\nfun screen$parameterType() = Unit",
+                                ),
+                            )
+                        },
+                ),
+            )
+        val result =
+            process(
+                """
+                @io.github.samuolis.domposable.foundation.TestFunction
+                fun screen(value: String) {}
+                @io.github.samuolis.domposable.foundation.TestFunction
+                fun screen(value: Int) {}
+                """.trimIndent(),
+                processorProviders = listOf(provider),
+            )
+
+        assertTrue(result.success, result.errors.toString())
+        assertEquals(setOf("String", "Int"), calls.toSet())
+        assertContains(result.files.getValue("screenString.kt"), "fun screenString()")
+        assertContains(result.files.getValue("screenInt.kt"), "fun screenInt()")
+    }
+
+    @Test
+    fun domposableScreenOverloadOutputCollisionIsReported() {
+        val result =
+            process(
+                """
+                @Composable @DomposableScreen(Route::class) fun Detail(value: String) {}
+                @Composable @DomposableScreen(Route::class) fun Detail(value: Int) {}
+                """.trimIndent(),
+            )
+
+        assertFalse(result.success)
+        assertTrue(
+            result.errors.any { "feature.generated.detailDestination" in it && "generated" in it },
+            result.errors.toString(),
+        )
+    }
+
+    @Test
+    fun functionProcessorReportsNonFunctionAnnotationTargets() {
+        val provider =
+            functionProcessorProvider(
+                mapOf(
+                    "io.github.samuolis.domposable.foundation.TestFunction" to
+                        DomposableFunctionGenerator { _, _ -> emptyList() },
+                ),
+            )
+        val result =
+            process(
+                "@io.github.samuolis.domposable.foundation.TestFunction class InvalidTarget",
+                processorProviders = listOf(provider),
+            )
+
+        assertFalse(result.success)
+        assertTrue(result.errors.any { it.contains("can only annotate a function") }, result.errors.toString())
+    }
+
+    private fun functionProcessorProvider(
+        generators: Map<String, DomposableFunctionGenerator>,
+    ): SymbolProcessorProvider =
+        object : SymbolProcessorProvider {
+            override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
+                DomposableFunctionProcessor(environment, generators)
+        }
 
     @Test
     fun legacyDestinationUsesDefaultsOnlyWhenAllArgumentsAreOptional() {

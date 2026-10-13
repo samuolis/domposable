@@ -5,7 +5,10 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import example.koin.generated.contactsScreenEntry
 import io.github.samuolis.domposable.lifecycle.DomposableViewModelEntry
+import io.github.samuolis.domposable.material.DomposableMaterialTheme
+import io.github.samuolis.domposable.navigation3.DomposableNavHost
 import io.github.samuolis.domposable.navigation3.DomposableNavigator
 import io.github.samuolis.domposable.screens.DomposableEntryLifecycle
 import io.github.samuolis.domposable.screens.DomposableEntryScope
@@ -40,6 +43,18 @@ class InjectionTest {
         compose.runOnIdle { navigator.navigate(ContactsRoute("sam")) }
         compose.onNodeWithText("Sam").assertExists()
         compose.runOnIdle { navigator.goBack() }
+        compose.onNodeWithText("Alex").assertExists()
+    }
+
+    @Test
+    fun generatedEntryAcceptsAnExplicitModelWithoutStartingKoin() {
+        val navigator = DomposableNavigator(ContactsRoute("alex"))
+        val model = ContactsViewModel("alex", ContactsRepository())
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableNavHost(navigator, listOf(contactsScreenEntry(model)))
+            }
+        }
         compose.onNodeWithText("Alex").assertExists()
     }
 
