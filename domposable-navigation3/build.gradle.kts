@@ -47,7 +47,7 @@ kotlin {
                 dependencies {
                     api(libs.compose.ui)
                     api(libs.compose.foundation)
-                    implementation(libs.navigation3.ui)
+                    api(libs.navigation3.ui)
                 }
             }
         getByName("androidMain").dependsOn(composeUiMain)

@@ -14,6 +14,37 @@ DomposableMeasure { size ->
 
 Recipes change presentation, not route identity or model ownership. The demo keeps list/detail entries when changing between a bottom navigation shell and a rail, or one/two feature panes.
 
+## Shared list/detail relationships
+
+`DomposablePane` describes relationships between your own routes. `resolveDomposablePaneLayout`
+selects a related list/detail pair at wide sizes and the active entry at compact sizes. An unrelated
+task stays single-pane. The result retains the original entry objects and never changes the stack.
+
+```kotlin
+fun pane(route: Route): DomposablePane<Route>? = when (route) {
+    Route.Catalog -> DomposablePane.List("catalog")
+    is Route.Product -> DomposablePane.Detail("catalog", Route.Catalog)
+    else -> null
+}
+
+val layout = resolveDomposablePaneLayout(entries, wide) { pane(it.route) }
+when (layout) {
+    is DomposablePaneLayout.Single -> RenderEntry(layout.entry)
+    is DomposablePaneLayout.ListDetail -> BrandedPanes(layout.list, layout.detail)
+}
+```
+
+For a direct link, `ensureDomposablePaneParent(entries, entryRoute, ::pane, createEntry)` returns
+a stack containing the declared list parent once, retaining the detail's identity. The application
+decides when to apply it. `domposablePaneShouldReplaceDetail` and
+`domposablePaneShouldReplaceSiblingDetail` provide selection policy without performing navigation.
+The latter uses an optional stable `siblingKey` for tabs belonging to the same selected item.
+
+Renderers can provide `LocalDomposablePaneRole` with `List`, `Detail` or `Supporting` while
+composing a paired layout; its default is `null` for standalone presentation. Pane proportions,
+chrome and transitions remain configurable in the product renderer. The same relationship helpers
+work with native Nav3 scenes and semantic HTML without requiring KSP, a registry or a navigator.
+
 Reduced motion follows browser media queries, Android animator duration settings and iOS accessibility notifications. Pointer precision follows browser media queries and Android connected mouse/touchpad devices. iOS defaults to touch and desktop to precise; applications may override either preference through the adaptive API when they have more precise input information. Preference information is advisory; providers/features choose animations and targets.
 
 ## Responsive dimensions and wrapping

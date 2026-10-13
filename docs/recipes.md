@@ -48,7 +48,12 @@ Back pops only the selected root and never removes its final home entry. Re-sele
 
 ## Caller-owned Navigation 3 scenes
 
-On native Compose and Wasm, `RootRecipeDisplay` passes decorated entries directly to Navigation 3's `NavDisplay`. Its scene strategy recognizes an Inbox/Archive home and detail from the same root, displays a one-third list and two-thirds detail at wide content sizes, and returns `null` for single-pane fallback. `previousEntries` defines back to the list. The data-class scene provides value equality so unchanged scenes do not become new transitions.
+On native Compose and Wasm, `RootRecipeDisplay` passes decorated entries through the native
+`DomposableNavDisplay` overload to Navigation 3. Its caller-owned scene strategy uses
+`resolveDomposablePaneLayout` to recognize an Inbox/Archive home and detail from the same root,
+displays a one-third list and two-thirds detail at wide content sizes, and returns `null` for
+single-pane fallback. `previousEntries` defines back to the list. The data-class scene provides
+value equality so unchanged scenes do not become new transitions.
 
 ```kotlin
 // In the application's Compose UI source set:
@@ -57,7 +62,7 @@ val strategy = remember(wide) {
         rootListDetailScene(it, wide)
     }
 }
-NavDisplay(
+DomposableNavDisplay(
     entries = entries,
     sceneStrategies = listOf(strategy),
     onBack = onBack,

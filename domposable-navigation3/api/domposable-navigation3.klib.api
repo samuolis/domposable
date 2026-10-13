@@ -1,5 +1,6 @@
 // Klib ABI Dump
 // Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Alias: ios => [iosArm64, iosSimulatorArm64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -66,3 +67,6 @@ final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/rememberDom
 final fun io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop_getter|io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Hash$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop_getter|io_github_samuolis_domposable_navigation3_DomposableBrowserUrls_Path$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableNavigator$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.navigation3/io_github_samuolis_domposable_navigation3_DomposableNavigator$stableprop_getter|io_github_samuolis_domposable_navigation3_DomposableNavigator$stableprop_getter(){}[0]
+
+// Targets: [ios, wasmJs]
+final fun <#A: kotlin/Any> io.github.samuolis.domposable.navigation3/DomposableNavDisplay(kotlin.collections/List<androidx.navigation3.runtime/NavEntry<#A>>, kotlin.collections/List<androidx.navigation3.scene/SceneStrategy<#A>>, io.github.samuolis.domposable.ui/DomposableModifier?, kotlin.collections/List<androidx.navigation3.scene/SceneDecoratorStrategy<#A>>?, kotlin/Function0<kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.navigation3/DomposableNavDisplay|DomposableNavDisplay(kotlin.collections.List<androidx.navigation3.runtime.NavEntry<0:0>>;kotlin.collections.List<androidx.navigation3.scene.SceneStrategy<0:0>>;io.github.samuolis.domposable.ui.DomposableModifier?;kotlin.collections.List<androidx.navigation3.scene.SceneDecoratorStrategy<0:0>>?;kotlin.Function0<kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any>}[0]

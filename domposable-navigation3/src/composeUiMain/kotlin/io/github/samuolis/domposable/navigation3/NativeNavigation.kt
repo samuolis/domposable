@@ -12,6 +12,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneDecoratorStrategy
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import io.github.samuolis.domposable.screens.DomposableEntryScope
@@ -55,6 +56,26 @@ actual fun <T : Any> DomposableNavDisplay(
         entries = entries,
         modifier = modifier.toComposeModifier(),
         sceneStrategies = listOf(strategy),
+        onBack = onBack,
+    )
+}
+
+/** Native Nav3 integration with caller-owned scenes, chrome, entry decorators and back-stack policy. */
+@Composable
+fun <T : Any> DomposableNavDisplay(
+    entries: List<NavEntry<T>>,
+    sceneStrategies: List<SceneStrategy<T>>,
+    modifier: DomposableModifier = DomposableModifier,
+    sceneDecoratorStrategies: List<SceneDecoratorStrategy<T>> = emptyList(),
+    onBack: () -> Unit,
+) {
+    require(entries.isNotEmpty()) { "Navigation requires at least one entry" }
+    require(entries.map { it.contentKey }.distinct().size == entries.size) { "Navigation content keys must be unique" }
+    NavDisplay(
+        entries = entries,
+        modifier = modifier.toComposeModifier(),
+        sceneStrategies = sceneStrategies,
+        sceneDecoratorStrategies = sceneDecoratorStrategies,
         onBack = onBack,
     )
 }

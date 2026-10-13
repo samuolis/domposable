@@ -8,8 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.NavEntry
+import io.github.samuolis.domposable.adaptive.DomposablePane
+import io.github.samuolis.domposable.adaptive.DomposablePaneLayout
 import io.github.samuolis.domposable.adaptive.DomposablePaneRecipe
 import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
+import io.github.samuolis.domposable.adaptive.resolveDomposablePaneLayout
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
@@ -109,11 +112,16 @@ internal fun rootPaneEntries(
 ): List<RootNavEntry>? {
     val panes = entries.takeLast(2)
     if (!wide || panes.size != 2) return null
-    val list = panes[0].metadata[ROOT_ROUTE_METADATA] as? RootRoute ?: return null
-    val detail = panes[1].metadata[ROOT_ROUTE_METADATA] as? RootRoute ?: return null
-    if (list.overlay || detail.overlay) return null
-    if (list.root != detail.root || list.detail.isNotEmpty() || detail.detail.isEmpty()) return null
-    return panes
+    val layout =
+        resolveDomposablePaneLayout(panes, wide) { entry ->
+            val route = entry.metadata[ROOT_ROUTE_METADATA] as? RootRoute
+            when {
+                route == null || route.overlay -> null
+                route.detail.isEmpty() -> DomposablePane.List(route.root)
+                else -> DomposablePane.Detail(route.root, RootRoute(route.root))
+            }
+        }
+    return (layout as? DomposablePaneLayout.ListDetail)?.let { listOf(it.list, it.detail) }
 }
 
 internal expect fun rootPresentationMetadata(route: RootRoute): Map<String, Any>

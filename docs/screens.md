@@ -123,7 +123,26 @@ val entries = rememberDecoratedNavEntries(
 )
 ```
 
-On native / Compose UI targets, pass `entries` to the published Navigation 3 `NavDisplay` and configure your own scenes, transitions and back handling. In your Kotlin/JS DOM source set, plug the same entries into:
+On native / Compose UI targets, pass `entries` to Navigation 3's `NavDisplay` to configure its full
+scene, transition and back APIs. Alternatively, the native `DomposableNavDisplay` overload accepts
+caller-owned scene strategies and scene decorators without installing another ViewModel owner:
+
+```kotlin
+DomposableNavDisplay(
+    entries = decoratedEntries,
+    sceneStrategies = listOf(myListDetailStrategy),
+    sceneDecoratorStrategies = listOf(myChromeDecorator),
+    modifier = DomposableModifier.fillMaxSize(),
+    onBack = navigator::back,
+)
+```
+
+This overload is available in native Compose UI source sets, including Wasm. Its entries must
+already carry any application-owned saveable/ViewModel decorators. The original overload with
+`visibleEntries` retains its existing behavior. Native scene types and Compose UI chrome belong in
+native source sets; they cannot render inside the DOM applier.
+
+In your Kotlin/JS DOM source set, plug the same entries into:
 
 ```kotlin
 DomposableNavDisplay(

@@ -40,6 +40,67 @@ public final class io/github/samuolis/domposable/adaptive/DomposableBreakpoints 
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class io/github/samuolis/domposable/adaptive/DomposablePane {
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposablePane$Detail : io/github/samuolis/domposable/adaptive/DomposablePane {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)Lio/github/samuolis/domposable/adaptive/DomposablePane$Detail;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposablePane$Detail;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposablePane$Detail;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGroup ()Ljava/lang/String;
+	public final fun getParent ()Ljava/lang/Object;
+	public final fun getSiblingKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposablePane$List : io/github/samuolis/domposable/adaptive/DomposablePane {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/samuolis/domposable/adaptive/DomposablePane$List;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposablePane$List;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposablePane$List;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGroup ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/samuolis/domposable/adaptive/DomposablePaneLayout {
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposablePaneLayout$ListDetail : io/github/samuolis/domposable/adaptive/DomposablePaneLayout {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout$ListDetail;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout$ListDetail;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout$ListDetail;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDetail ()Ljava/lang/Object;
+	public final fun getList ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/adaptive/DomposablePaneLayout$Single : io/github/samuolis/domposable/adaptive/DomposablePaneLayout {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout$Single;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout$Single;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout$Single;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntry ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/github/samuolis/domposable/adaptive/DomposablePaneRecipe {
 	public static final field $stable I
 	public fun <init> ()V
@@ -52,6 +113,7 @@ public final class io/github/samuolis/domposable/adaptive/DomposablePaneRecipe {
 	public final fun getDualPaneFrom ()Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
 	public fun hashCode ()I
 	public final fun isDualPane (Lio/github/samuolis/domposable/adaptive/DomposableAdaptiveInfo;)Z
+	public final fun isDualPane (Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;)Z
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -92,5 +154,13 @@ public final class io/github/samuolis/domposable/adaptive/DomposableWidthClass :
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
 	public static fun values ()[Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
+}
+
+public final class io/github/samuolis/domposable/adaptive/PanesKt {
+	public static final fun domposablePaneShouldReplaceDetail (Lio/github/samuolis/domposable/adaptive/DomposablePane;Lio/github/samuolis/domposable/adaptive/DomposablePane;Z)Z
+	public static final fun domposablePaneShouldReplaceSiblingDetail (Lio/github/samuolis/domposable/adaptive/DomposablePane;Lio/github/samuolis/domposable/adaptive/DomposablePane;)Z
+	public static final fun ensureDomposablePaneParent (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
+	public static final fun getLocalDomposablePaneRole ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun resolveDomposablePaneLayout (Ljava/util/List;ZLkotlin/jvm/functions/Function1;)Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout;
 }
 

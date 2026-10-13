@@ -71,5 +71,7 @@ enum class DomposablePaneRole { List, Detail, Supporting }
 data class DomposablePaneRecipe(
     val dualPaneFrom: DomposableWidthClass = DomposableWidthClass.Expanded,
 ) {
-    fun isDualPane(info: DomposableAdaptiveInfo): Boolean = info.widthClass.ordinal >= dualPaneFrom.ordinal
+    fun isDualPane(info: DomposableAdaptiveInfo): Boolean = isDualPane(info.widthClass)
+
+    fun isDualPane(widthClass: DomposableWidthClass): Boolean = widthClass.ordinal >= dualPaneFrom.ordinal
 }
