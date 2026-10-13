@@ -11,7 +11,7 @@ from PIL import Image, ImageChops
 
 ROOT = Path(__file__).resolve().parents[2]
 
-def compare(actual: Path, baseline: Path, diff: Path) -> tuple[bool, str]:
+def compare(actual: Path, baseline: Path, diff: Path, platform: str | None = None) -> tuple[bool, str]:
     if not baseline.is_file(): return False, 'missing baseline'
     with Image.open(actual) as image: a = image.convert('RGB')
     with Image.open(baseline) as image: b = image.convert('RGB')
@@ -19,6 +19,9 @@ def compare(actual: Path, baseline: Path, diff: Path) -> tuple[bool, str]:
     delta = ImageChops.difference(a, b)
     # Ignore tiny channel rounding, never ignore moved controls or layout differences.
     mask = delta.convert('RGB').point(lambda x: 255 if x > 12 else 0).convert('L').point(lambda x: 255 if x else 0)
+    if platform == 'ios' and a.size in {(1488, 2266), (2266, 1488)}:
+        # Historical iPad captures contain the runner's date; retain checks of the clock and app.
+        mask.paste(0, (150, 16, 340, 48))
     changed = sum(1 for value in mask.getdata() if value)
     ratio = changed / (a.width * a.height)
     if ratio <= 0.0005: return True, f'{ratio:.3%} changed pixels'
@@ -44,7 +47,7 @@ def main():
         else:
             baseline = ROOT/'screenshots'/args.platform/f'{name}.png'
             if baseline.is_file(): shutil.copy2(baseline, report/f'{name}-expected.png')
-            ok, message = compare(source, baseline, report/f'{name}-diff.png')
+            ok, message = compare(source, baseline, report/f'{name}-diff.png', args.platform)
         if source.is_file(): shutil.copy2(source, report/f'{name}-actual.png')
         rows.append({'name':name, 'passed':ok, 'message':message})
         if not ok: failures.append(name)
