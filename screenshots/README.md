@@ -11,6 +11,6 @@ Android, desktop, HTML and Wasm references come from [CI run 38131233383](https:
 | HTML / Wasm | Ubuntu 24.04, Playwright 1.64.0 Chromium |
 | iOS | macOS 26, iOS 26.5, iPad mini A17 Pro simulator |
 
-iOS sets the status-bar date/time and battery, waits for stable display frames, and normalizes orientation metadata. Historical iPad captures contain the runner's date, so comparison excludes only that system date label on the pinned portrait/landscape dimensions; app content and the rest of the status bar remain checked. Browser captures wait for fonts and stable frames; storefront captures also wait for artwork. Captures from a different local OS should not replace hosted references without review.
+iOS pins the status-bar clock and battery, waits for stable display frames, and normalizes orientation metadata. Historical iPad captures contain the runner's date, so comparison excludes only that system date label on the pinned portrait/landscape dimensions; app content and the rest of the status bar remain checked. Browser captures wait for fonts and stable frames; storefront captures also wait for artwork. Captures from a different local OS should not replace hosted references without review.
 
 See [the contributor workflow](../docs/validation.md) for recording, comparison tolerances, artifacts and immutable inline PR previews. Recording runs deliberately cannot satisfy the merge/release gate. Guide illustrations are derived from these reviewed inputs with `python scripts/ci/export_examples.py`.
