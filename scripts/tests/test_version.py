@@ -14,8 +14,8 @@ class VersionTests(unittest.TestCase):
             path = Path(folder) / "version.properties"
             path.write_text("VERSION=0.0.0\nBUILD_NUMBER=0\n")
             output = subprocess.check_output([sys.executable, str(Path(__file__).resolve().parents[1] / "version.py"), "--file", str(path), "--bump", "minor", "--write"], text=True)
-            self.assertEqual(json.loads(output), {"version": "0.1.0", "build": 1000, "marketing": "0.1.0"})
-            self.assertEqual(read_version(path), (Version.parse("0.1.0"), 1000))
+            self.assertEqual(json.loads(output), {"version": "0.1.0", "build": 100, "marketing": "0.1.0"})
+            self.assertEqual(read_version(path), (Version.parse("0.1.0"), 100))
             self.assertNotIn("BUILD_NUMBER", path.read_text())
 
     def test_numeric_order_and_semver_bumps(self):
@@ -29,20 +29,20 @@ class VersionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "version.properties"
             write_version(path, Version.parse("0.1.0"))
-            self.assertEqual(read_version(path), (Version.parse("0.1.0"), 1000))
+            self.assertEqual(read_version(path), (Version.parse("0.1.0"), 100))
             path.write_text("VERSION=0.1.0\nVERSION=0.2.0\nBUILD_NUMBER=1\n")
             with self.assertRaises(ValueError): read_version(path)
             path.write_text("VERSION=0.1.0\nOTHER=1\n")
             with self.assertRaises(ValueError): read_version(path)
 
     def test_android_codes_increase_across_patch_minor_and_major_boundaries(self):
-        versions = ["0.0.1", "0.3.0", "0.4.0", "0.4.1", "0.4.999", "0.5.0", "0.999.999", "1.0.0", "2100.0.0"]
+        versions = ["0.0.1", "0.3.0", "0.4.0", "0.4.1", "0.4.99", "0.5.0", "0.999.99", "1.0.0", "21000.0.0"]
         codes = [Version.parse(value).android_code for value in versions]
-        self.assertEqual(codes, [1, 3000, 4000, 4001, 4999, 5000, 999999, 1000000, 2100000000])
+        self.assertEqual(codes, [1, 300, 400, 401, 499, 500, 99999, 100000, 2100000000])
         self.assertTrue(all(a < b for a, b in zip(codes, codes[1:])))
 
     def test_overflow_and_colliding_components_are_rejected(self):
-        for value in ["0.1000.0", "0.1.1000", "2100.0.1", "2101.0.0"]:
+        for value in ["0.1000.0", "0.1.100", "21000.0.1", "21001.0.0"]:
             with self.subTest(value=value), self.assertRaises(ValueError):
                 Version.parse(value).android_code
 
@@ -50,10 +50,10 @@ class VersionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "version.properties"
             path.write_text("VERSION=0.3.0\nBUILD_NUMBER=4\n")
-            self.assertEqual(read_version(path), (Version.parse("0.3.0"), 3000))
+            self.assertEqual(read_version(path), (Version.parse("0.3.0"), 300))
             self.assertEqual(read_checkpoint_version(path), (Version.parse("0.3.0"), 4))
             write_version(path, Version.parse("0.4.0"))
-            self.assertEqual(read_checkpoint_version(path), (Version.parse("0.4.0"), 4000))
+            self.assertEqual(read_checkpoint_version(path), (Version.parse("0.4.0"), 400))
             path.write_text("VERSION=0.3.0\nBUILD_NUMBER=-1\n")
             with self.assertRaises(ValueError): read_version(path)
 

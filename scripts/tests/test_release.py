@@ -32,7 +32,7 @@ class ReleaseGuardsTest(unittest.TestCase):
         self.git('add', 'version.properties')
         if extra: self.git('add', 'implementation.kt')
         self.git('commit', '-m', 'release')
-        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0', 'build': 1000, 'branch': 'release-candidate/test'}
+        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0', 'build': 100, 'branch': 'release-candidate/test'}
         release.write_state(state); return state
     def test_public_download_inventory_is_android_only(self):
         self.assertEqual(release.asset_names(self.candidate()), ["domposable-0.1.0.apk", "website.zip", "maven-bundle.zip"])

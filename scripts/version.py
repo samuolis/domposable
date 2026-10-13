@@ -36,9 +36,9 @@ class Version:
 
     @property
     def android_code(self):
-        if self.minor >= 1_000 or self.patch >= 1_000:
-            raise ValueError("Android version codes require minor and patch below 1000")
-        code = self.major * 1_000_000 + self.minor * 1_000 + self.patch
+        if self.minor >= 1_000 or self.patch >= 100:
+            raise ValueError("Android version codes require minor below 1000 and patch below 100")
+        code = self.major * 100_000 + self.minor * 100 + self.patch
         if code > 2_100_000_000:
             raise ValueError("Version exceeds Android's versionCode limit")
         return code

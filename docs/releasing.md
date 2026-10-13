@@ -2,7 +2,7 @@
 
 The single **Bump and release** action reads `version.properties`, which contains only `VERSION=MAJOR.MINOR.PATCH`. Choose **patch**, **minor** or **major**; published versions have no suffix or separately managed build number. Normal operation needs one dispatch. The unpublished bootstrap is `0.0.0`; choose **minor** for the first `0.1.0` release.
 
-The Android demo derives its installation `versionCode` as `major × 1,000,000 + minor × 1,000 + patch`: `0.4.0` produces `4000`, and `0.4.1` produces `4001`. Minor and patch must stay below 1000, and the result must not exceed Android's 2,100,000,000 limit; invalid versions fail before a release candidate is pushed. The iOS demo uses the same SemVer string for its marketing and build versions. Release metadata records the derived Android code for artifact verification, but library versions, release names and downloads use SemVer only. Historical checkpoints retain their original installation codes when recovering already-built immutable artifacts.
+The Android demo derives its installation `versionCode` using Ranker's existing encoding: `major × 100,000 + minor × 100 + patch`. Version `0.4.0` produces `400`, and `0.4.1` produces `401`. Minor must stay below 1000 and patch below 100, and the result must not exceed Android's 2,100,000,000 limit; invalid versions fail before a release candidate is pushed. The iOS demo uses the same SemVer string for its marketing and build versions. Release metadata records the derived Android code for artifact verification, but library versions, release names and downloads use SemVer only. Historical checkpoints retain their original installation codes when recovering already-built immutable artifacts.
 
 The action creates a temporary version-only commit, waits for that exact commit's CI, builds a signed Android APK and a signed Maven bundle, stages immutable assets in a draft, validates Central, fast-forwards `main`, publishes Central, verifies consumers, exposes the GitHub release and deploys its preserved website. Implementation changes use PRs. Obtain the owner's approval for the specific version-only `main` push before dispatching a release.
 
@@ -34,7 +34,7 @@ Each distribution contains `web-assets.json`, recording the entry filename and t
 ```json
 {
   "version": "0.4.0",
-  "build": 4000,
+  "build": 400,
   "commit": "<git-commit>",
   "status": "release",
   "web": {
