@@ -31,6 +31,71 @@ final enum class io.github.samuolis.domposable.adaptive/DomposableWidthClass : k
     final fun values(): kotlin/Array<io.github.samuolis.domposable.adaptive/DomposableWidthClass> // io.github.samuolis.domposable.adaptive/DomposableWidthClass.values|values#static(){}[0]
 }
 
+sealed interface <#A: out kotlin/Any> io.github.samuolis.domposable.adaptive/DomposablePane { // io.github.samuolis.domposable.adaptive/DomposablePane|null[0]
+    final class <#A1: kotlin/Any> Detail : io.github.samuolis.domposable.adaptive/DomposablePane<#A1> { // io.github.samuolis.domposable.adaptive/DomposablePane.Detail|null[0]
+        constructor <init>(kotlin/String, #A1, kotlin/String? = ...) // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.<init>|<init>(kotlin.String;1:0;kotlin.String?){}[0]
+
+        final val group // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.group|{}group[0]
+            final fun <get-group>(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.group.<get-group>|<get-group>(){}[0]
+        final val parent // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.parent|{}parent[0]
+            final fun <get-parent>(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.parent.<get-parent>|<get-parent>(){}[0]
+        final val siblingKey // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.siblingKey|{}siblingKey[0]
+            final fun <get-siblingKey>(): kotlin/String? // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.siblingKey.<get-siblingKey>|<get-siblingKey>(){}[0]
+
+        final fun component1(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.component1|component1(){}[0]
+        final fun component2(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.component2|component2(){}[0]
+        final fun component3(): kotlin/String? // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.component3|component3(){}[0]
+        final fun copy(kotlin/String = ..., #A1 = ..., kotlin/String? = ...): io.github.samuolis.domposable.adaptive/DomposablePane.Detail<#A1> // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.copy|copy(kotlin.String;1:0;kotlin.String?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePane.Detail.toString|toString(){}[0]
+    }
+
+    final class List : io.github.samuolis.domposable.adaptive/DomposablePane<kotlin/Nothing> { // io.github.samuolis.domposable.adaptive/DomposablePane.List|null[0]
+        constructor <init>(kotlin/String) // io.github.samuolis.domposable.adaptive/DomposablePane.List.<init>|<init>(kotlin.String){}[0]
+
+        final val group // io.github.samuolis.domposable.adaptive/DomposablePane.List.group|{}group[0]
+            final fun <get-group>(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePane.List.group.<get-group>|<get-group>(){}[0]
+
+        final fun component1(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePane.List.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): io.github.samuolis.domposable.adaptive/DomposablePane.List // io.github.samuolis.domposable.adaptive/DomposablePane.List.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.adaptive/DomposablePane.List.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.adaptive/DomposablePane.List.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePane.List.toString|toString(){}[0]
+    }
+}
+
+sealed interface <#A: out kotlin/Any?> io.github.samuolis.domposable.adaptive/DomposablePaneLayout { // io.github.samuolis.domposable.adaptive/DomposablePaneLayout|null[0]
+    final class <#A1: kotlin/Any?> ListDetail : io.github.samuolis.domposable.adaptive/DomposablePaneLayout<#A1> { // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail|null[0]
+        constructor <init>(#A1, #A1) // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.<init>|<init>(1:0;1:0){}[0]
+
+        final val detail // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.detail|{}detail[0]
+            final fun <get-detail>(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.detail.<get-detail>|<get-detail>(){}[0]
+        final val list // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.list|{}list[0]
+            final fun <get-list>(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.list.<get-list>|<get-list>(){}[0]
+
+        final fun component1(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.component1|component1(){}[0]
+        final fun component2(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.component2|component2(){}[0]
+        final fun copy(#A1 = ..., #A1 = ...): io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail<#A1> // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.copy|copy(1:0;1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.ListDetail.toString|toString(){}[0]
+    }
+
+    final class <#A1: kotlin/Any?> Single : io.github.samuolis.domposable.adaptive/DomposablePaneLayout<#A1> { // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single|null[0]
+        constructor <init>(#A1) // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.<init>|<init>(1:0){}[0]
+
+        final val entry // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.entry|{}entry[0]
+            final fun <get-entry>(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.entry.<get-entry>|<get-entry>(){}[0]
+
+        final fun component1(): #A1 // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.component1|component1(){}[0]
+        final fun copy(#A1 = ...): io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single<#A1> // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.copy|copy(1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePaneLayout.Single.toString|toString(){}[0]
+    }
+}
+
 final class <#A: kotlin/Any?> io.github.samuolis.domposable.adaptive/DomposableResponsive { // io.github.samuolis.domposable.adaptive/DomposableResponsive|null[0]
     constructor <init>(#A, #A = ..., #A = ..., #A = ...) // io.github.samuolis.domposable.adaptive/DomposableResponsive.<init>|<init>(1:0;1:0;1:0;1:0){}[0]
 
@@ -107,16 +172,31 @@ final class io.github.samuolis.domposable.adaptive/DomposablePaneRecipe { // io.
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.adaptive/DomposablePaneRecipe.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.adaptive/DomposablePaneRecipe.hashCode|hashCode(){}[0]
     final fun isDualPane(io.github.samuolis.domposable.adaptive/DomposableAdaptiveInfo): kotlin/Boolean // io.github.samuolis.domposable.adaptive/DomposablePaneRecipe.isDualPane|isDualPane(io.github.samuolis.domposable.adaptive.DomposableAdaptiveInfo){}[0]
+    final fun isDualPane(io.github.samuolis.domposable.adaptive/DomposableWidthClass): kotlin/Boolean // io.github.samuolis.domposable.adaptive/DomposablePaneRecipe.isDualPane|isDualPane(io.github.samuolis.domposable.adaptive.DomposableWidthClass){}[0]
     final fun toString(): kotlin/String // io.github.samuolis.domposable.adaptive/DomposablePaneRecipe.toString|toString(){}[0]
 }
 
+final val io.github.samuolis.domposable.adaptive/LocalDomposablePaneRole // io.github.samuolis.domposable.adaptive/LocalDomposablePaneRole|{}LocalDomposablePaneRole[0]
+    final fun <get-LocalDomposablePaneRole>(): androidx.compose.runtime/ProvidableCompositionLocal<io.github.samuolis.domposable.adaptive/DomposablePaneRole?> // io.github.samuolis.domposable.adaptive/LocalDomposablePaneRole.<get-LocalDomposablePaneRole>|<get-LocalDomposablePaneRole>(){}[0]
 final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableAdaptiveInfo$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableAdaptiveInfo$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposableAdaptiveInfo$stableprop[0]
 final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableBreakpoints$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableBreakpoints$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposableBreakpoints$stableprop[0]
+final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_ListDetail$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_ListDetail$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposablePaneLayout_ListDetail$stableprop[0]
+final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_Single$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_Single$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposablePaneLayout_Single$stableprop[0]
 final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneRecipe$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneRecipe$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposablePaneRecipe$stableprop[0]
+final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_Detail$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_Detail$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposablePane_Detail$stableprop[0]
+final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_List$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_List$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposablePane_List$stableprop[0]
 final val io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableResponsive$stableprop // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableResponsive$stableprop|#static{}io_github_samuolis_domposable_adaptive_DomposableResponsive$stableprop[0]
 
+final fun <#A: kotlin/Any?, #B: kotlin/Any> io.github.samuolis.domposable.adaptive/ensureDomposablePaneParent(kotlin.collections/List<#A>, kotlin/Function1<#A, #B>, kotlin/Function1<#B, io.github.samuolis.domposable.adaptive/DomposablePane<#B>?>, kotlin/Function1<#B, #A>): kotlin.collections/List<#A> // io.github.samuolis.domposable.adaptive/ensureDomposablePaneParent|ensureDomposablePaneParent(kotlin.collections.List<0:0>;kotlin.Function1<0:0,0:1>;kotlin.Function1<0:1,io.github.samuolis.domposable.adaptive.DomposablePane<0:1>?>;kotlin.Function1<0:1,0:0>){0§<kotlin.Any?>;1§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any?> io.github.samuolis.domposable.adaptive/resolveDomposablePaneLayout(kotlin.collections/List<#A>, kotlin/Boolean, kotlin/Function1<#A, io.github.samuolis.domposable.adaptive/DomposablePane<*>?>): io.github.samuolis.domposable.adaptive/DomposablePaneLayout<#A> // io.github.samuolis.domposable.adaptive/resolveDomposablePaneLayout|resolveDomposablePaneLayout(kotlin.collections.List<0:0>;kotlin.Boolean;kotlin.Function1<0:0,io.github.samuolis.domposable.adaptive.DomposablePane<*>?>){0§<kotlin.Any?>}[0]
+final fun io.github.samuolis.domposable.adaptive/domposablePaneShouldReplaceDetail(io.github.samuolis.domposable.adaptive/DomposablePane<*>?, io.github.samuolis.domposable.adaptive/DomposablePane<*>?, kotlin/Boolean): kotlin/Boolean // io.github.samuolis.domposable.adaptive/domposablePaneShouldReplaceDetail|domposablePaneShouldReplaceDetail(io.github.samuolis.domposable.adaptive.DomposablePane<*>?;io.github.samuolis.domposable.adaptive.DomposablePane<*>?;kotlin.Boolean){}[0]
+final fun io.github.samuolis.domposable.adaptive/domposablePaneShouldReplaceSiblingDetail(io.github.samuolis.domposable.adaptive/DomposablePane<*>?, io.github.samuolis.domposable.adaptive/DomposablePane<*>?): kotlin/Boolean // io.github.samuolis.domposable.adaptive/domposablePaneShouldReplaceSiblingDetail|domposablePaneShouldReplaceSiblingDetail(io.github.samuolis.domposable.adaptive.DomposablePane<*>?;io.github.samuolis.domposable.adaptive.DomposablePane<*>?){}[0]
 final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableAdaptiveInfo$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableAdaptiveInfo$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposableAdaptiveInfo$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableBreakpoints$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableBreakpoints$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposableBreakpoints$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_ListDetail$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_ListDetail$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposablePaneLayout_ListDetail$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_Single$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneLayout_Single$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposablePaneLayout_Single$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneRecipe$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePaneRecipe$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposablePaneRecipe$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_Detail$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_Detail$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposablePane_Detail$stableprop_getter(){}[0]
+final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_List$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposablePane_List$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposablePane_List$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableResponsive$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.adaptive/io_github_samuolis_domposable_adaptive_DomposableResponsive$stableprop_getter|io_github_samuolis_domposable_adaptive_DomposableResponsive$stableprop_getter(){}[0]
 final fun io.github.samuolis.domposable.adaptive/rememberDomposableAdaptiveInfo(io.github.samuolis.domposable.foundation/DomposableSize, io.github.samuolis.domposable.adaptive/DomposableBreakpoints?, kotlin/Boolean?, kotlin/Boolean?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int): io.github.samuolis.domposable.adaptive/DomposableAdaptiveInfo // io.github.samuolis.domposable.adaptive/rememberDomposableAdaptiveInfo|rememberDomposableAdaptiveInfo(io.github.samuolis.domposable.foundation.DomposableSize;io.github.samuolis.domposable.adaptive.DomposableBreakpoints?;kotlin.Boolean?;kotlin.Boolean?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]

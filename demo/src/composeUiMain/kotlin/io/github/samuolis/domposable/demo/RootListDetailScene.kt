@@ -14,8 +14,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
-import androidx.navigation3.ui.NavDisplay
+import io.github.samuolis.domposable.navigation3.DomposableNavDisplay
 import io.github.samuolis.domposable.screens.DomposableEntryScope
+import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.fillMaxSize
 
 /** Caller-owned scene policy: a one-third list and two-thirds detail on wide content. */
 internal data class RootListDetailScene(
@@ -52,12 +54,12 @@ internal actual fun RootRecipeDisplay(
     onBack: () -> Unit,
 ) {
     val strategy = remember(wide) { SceneStrategy<DomposableEntryScope<RootRoute>> { rootListDetailScene(it, wide) } }
-    // Use Navigation 3 directly. It supplies the single-pane fallback when the strategy declines.
+    // Caller-owned scenes retain Navigation 3's single-pane fallback when the strategy declines.
     // Each entry below installs its own registry; platform scene/window state stays transient.
     CompositionLocalProvider(LocalSaveableStateRegistry provides null) {
-        NavDisplay(
+        DomposableNavDisplay(
             entries = entries,
-            modifier = Modifier.fillMaxSize(),
+            modifier = DomposableModifier.fillMaxSize(),
             sceneStrategies = listOf(DialogSceneStrategy(), strategy),
             onBack = onBack,
         )

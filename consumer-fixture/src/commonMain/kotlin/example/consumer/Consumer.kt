@@ -78,6 +78,28 @@ fun BrandedApp(components: DomposableComponents) {
 
 object FixtureRoute
 
+// Shared pane selection accepts app-owned routes and entries on every published target.
+fun paneConsumer(
+    routes: List<String>,
+    wide: Boolean,
+) = io.github.samuolis.domposable.adaptive.resolveDomposablePaneLayout(routes, wide) { route ->
+    when (route) {
+        "home" -> {
+            io.github.samuolis.domposable.adaptive.DomposablePane
+                .List("catalog")
+        }
+
+        "detail" -> {
+            io.github.samuolis.domposable.adaptive.DomposablePane
+                .Detail("catalog", "home")
+        }
+
+        else -> {
+            null
+        }
+    }
+}
+
 @Composable
 @DomposableScreen(FixtureRoute::class)
 fun InjectedScreen(model: FeatureModel) {

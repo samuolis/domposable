@@ -32,6 +32,11 @@ kotlin {
             }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
+        val composeUiMain = create("composeUiMain") { dependsOn(commonMain) }
+        getByName("androidMain").dependsOn(composeUiMain)
+        getByName("jvmMain").dependsOn(composeUiMain)
+        getByName("wasmJsMain").dependsOn(composeUiMain)
+        iosMain.dependsOn(composeUiMain)
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
         commonMain {

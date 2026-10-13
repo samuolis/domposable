@@ -7,6 +7,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.get
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneDecoratorStrategy
 import io.github.samuolis.domposable.material.DomposableMaterialTheme
 import io.github.samuolis.domposable.navigation3.DomposableNavDisplay
 import io.github.samuolis.domposable.navigation3.rememberDomposableNavEntries
@@ -21,6 +23,43 @@ import kotlin.test.assertTrue
 
 class NavigationInteropTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun callerSceneDecoratorWrapsTheNativeFallbackWithoutChangingEntryOwnership() {
+        val stack = mutableStateListOf("home")
+        val popped = mutableListOf<Any>()
+        val decorator = NavEntryDecorator<String>(onPop = { popped += it }) { it.Content() }
+        val chrome =
+            SceneDecoratorStrategy<String> { scene ->
+                object : Scene<String> by scene {
+                    override val content: @androidx.compose.runtime.Composable () -> Unit = {
+                        DomposableText("Caller chrome")
+                        scene.content()
+                    }
+                }
+            }
+        compose.setContent {
+            DomposableMaterialTheme {
+                val entries =
+                    rememberDecoratedNavEntries(stack, listOf(decorator)) { route ->
+                        NavEntry(route, contentKey = route) { DomposableText(it) }
+                    }
+                DomposableNavDisplay(
+                    entries = entries,
+                    sceneStrategies = emptyList(),
+                    sceneDecoratorStrategies = listOf(chrome),
+                    onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
+                )
+            }
+        }
+        compose.onNodeWithText("Caller chrome").assertExists()
+        compose.onNodeWithText("home").assertExists()
+        compose.runOnIdle { stack.add("detail") }
+        compose.onNodeWithText("detail").assertExists()
+        compose.runOnIdle { stack.removeAt(stack.lastIndex) }
+        compose.waitForIdle()
+        compose.onNodeWithText("home").assertExists()
+        assertEquals(listOf<Any>("detail"), popped)
+    }
 
     @Test fun directNavigation3PreservesCallerKeysAndDecorators() {
         val stack = mutableStateListOf("home")
