@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 
-from version import Version, read_version, write_version
+from version import Version, read_checkpoint_version, read_version, write_version
 
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / ".release/state.json"
@@ -135,7 +135,7 @@ def validate_candidate(state):
     changed = run("git", "diff", "--name-only", state["base"], state["commit"], capture=True).splitlines()
     if len(parents) != 2 or parent != state["base"] or changed != ["version.properties"]:
         raise RuntimeError("Release candidate must be one commit changing only version.properties")
-    version, build = read_version(ROOT / "version.properties")
+    version, build = read_checkpoint_version(ROOT / "version.properties")
     if str(version) != state["version"] or build != state["build"]: raise RuntimeError("Version file disagrees with release state")
 
 def verify_assets():
@@ -186,6 +186,8 @@ def prepare(operation):
         raise RuntimeError("Current version has no release checkpoint. Recover its saved candidate artifact; do not bump again")
     version = current.bump(operation)
     if version.order <= current.order: raise RuntimeError("Release versions must increase")
+    candidate_build = version.android_code
+    if candidate_build <= build: raise RuntimeError("Android version codes must increase")
     if any(release["tag_name"] == f"v{version}" and not is_abandoned_draft(release) for release in releases): raise RuntimeError("Version already reserved")
     base = run("git", "rev-parse", "HEAD", capture=True)
     branch = f"release-candidate/v{version}-{os.environ['GITHUB_RUN_ID']}"
@@ -193,18 +195,18 @@ def prepare(operation):
     if existing:
         commit = existing.split()[0]
         run("git", "fetch", "origin", branch); run("git", "checkout", "--detach", commit)
-        candidate_version, candidate_build = read_version(ROOT / "version.properties")
+        candidate_version, candidate_build = read_checkpoint_version(ROOT / "version.properties")
         state = {"repository": REPOSITORY, "base": run("git", "rev-parse", commit + "^", capture=True), "commit": commit, "version": str(candidate_version), "build": candidate_build, "branch": branch, "phase": "candidate", "run_id": os.environ["GITHUB_RUN_ID"]}
         write_state(state); validate_candidate(state)
         output(commit=commit, version=str(candidate_version), resume=False, branch=branch)
         return
     run("git", "config", "user.name", "Domposable Release")
     run("git", "config", "user.email", "domposable-release[bot]@users.noreply.github.com")
-    write_version(ROOT / "version.properties", version, build + 1)
+    write_version(ROOT / "version.properties", version)
     run("git", "add", "version.properties")
     run("git", "-c", "commit.gpgSign=false", "commit", "-m", f"chore(release): {version}")
     commit = run("git", "rev-parse", "HEAD", capture=True)
-    state = {"repository": REPOSITORY, "base": base, "commit": commit, "version": str(version), "build": build + 1, "branch": branch, "phase": "candidate", "run_id": os.environ.get("GITHUB_RUN_ID")}
+    state = {"repository": REPOSITORY, "base": base, "commit": commit, "version": str(version), "build": candidate_build, "branch": branch, "phase": "candidate", "run_id": os.environ.get("GITHUB_RUN_ID")}
     write_state(state); validate_candidate(state)
     run("git", "push", "origin", f"HEAD:refs/heads/{branch}")
     output(commit=commit, version=str(version), resume=False, branch=branch)

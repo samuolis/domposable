@@ -27,12 +27,12 @@ class ReleaseGuardsTest(unittest.TestCase):
     def git(self, *args):
         return subprocess.check_output(['git', *args], cwd=self.root, stderr=subprocess.DEVNULL, text=True).strip()
     def candidate(self, extra=False):
-        write_version(self.root / 'version.properties', Version.parse('0.1.0'), 1)
+        write_version(self.root / 'version.properties', Version.parse('0.1.0'))
         if extra: (self.root / 'implementation.kt').write_text('unexpected')
         self.git('add', 'version.properties')
         if extra: self.git('add', 'implementation.kt')
         self.git('commit', '-m', 'release')
-        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0', 'build': 1, 'branch': 'release-candidate/test'}
+        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0', 'build': 1000, 'branch': 'release-candidate/test'}
         release.write_state(state); return state
     def test_public_download_inventory_is_android_only(self):
         self.assertEqual(release.asset_names(self.candidate()), ["domposable-0.1.0.apk", "website.zip", "maven-bundle.zip"])
@@ -88,6 +88,12 @@ class ReleaseGuardsTest(unittest.TestCase):
         self.assertFalse(release.is_abandoned_draft({**archived,'draft':False}))
     def test_version_only_candidate(self):
         release.validate_candidate(self.candidate())
+    def test_historical_candidate_retains_its_immutable_installation_code(self):
+        state = self.candidate()
+        (self.root / 'version.properties').write_text('VERSION=0.1.0\nBUILD_NUMBER=1\n')
+        self.git('add', 'version.properties'); self.git('commit', '--amend', '--no-edit')
+        state.update(commit=self.git('rev-parse', 'HEAD'), build=1)
+        release.validate_candidate(state)
     def test_implementation_change_rejected(self):
         with self.assertRaisesRegex(RuntimeError, 'only version'): release.validate_candidate(self.candidate(extra=True))
     def test_malformed_sha_rejected_before_git(self):

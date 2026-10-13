@@ -34,6 +34,15 @@ class Version:
     def order(self):
         return self.major, self.minor, self.patch
 
+    @property
+    def android_code(self):
+        if self.minor >= 1_000 or self.patch >= 1_000:
+            raise ValueError("Android version codes require minor and patch below 1000")
+        code = self.major * 1_000_000 + self.minor * 1_000 + self.patch
+        if code > 2_100_000_000:
+            raise ValueError("Version exceeds Android's versionCode limit")
+        return code
+
     def bump(self, operation):
         if operation == "patch":
             return Version(self.major, self.minor, self.patch + 1)
@@ -43,7 +52,7 @@ class Version:
             return Version(self.major + 1, 0, 0)
         raise ValueError(f"Unknown bump: {operation}")
 
-def read_version(path):
+def _read_properties(path):
     values = {}
     for line in Path(path).read_text().splitlines():
         if not line.strip() or line.lstrip().startswith("#"):
@@ -52,20 +61,30 @@ def read_version(path):
         if not separator or key in values:
             raise ValueError("Malformed or duplicate version property")
         values[key] = value
-    if set(values) != {"VERSION", "BUILD_NUMBER"}:
-        raise ValueError("version.properties must define exactly VERSION and BUILD_NUMBER")
+    if set(values) not in ({"VERSION"}, {"VERSION", "BUILD_NUMBER"}):
+        raise ValueError("version.properties must define VERSION; only legacy BUILD_NUMBER is also accepted")
+    if "BUILD_NUMBER" in values:
+        if not re.fullmatch(r"0|[1-9]\d*", values["BUILD_NUMBER"]):
+            raise ValueError("Legacy BUILD_NUMBER must be a non-negative integer")
+        if int(values["BUILD_NUMBER"]) > 2_100_000_000:
+            raise ValueError("Legacy BUILD_NUMBER exceeds Android's versionCode limit")
+    return values
+
+def read_version(path):
+    version = Version.parse(_read_properties(path)["VERSION"])
+    return version, version.android_code
+
+def read_checkpoint_version(path):
+    """Recover historical immutable candidates without reinterpreting their APK codes."""
+    values = _read_properties(path)
     version = Version.parse(values["VERSION"])
-    if not re.fullmatch(r"0|[1-9]\d*", values["BUILD_NUMBER"]):
-        raise ValueError("BUILD_NUMBER must be a non-negative integer")
-    build = int(values["BUILD_NUMBER"])
-    if build > 2_100_000_000:
-        raise ValueError("BUILD_NUMBER exceeds Android's versionCode limit")
+    build = int(values["BUILD_NUMBER"]) if "BUILD_NUMBER" in values else version.android_code
     return version, build
 
-def write_version(path, version, build):
-    if build < 1 or build > 2_100_000_000:
-        raise ValueError("Invalid release build number")
-    Path(path).write_text(f"# Single source for Maven, Android, iOS and website versions.\nVERSION={version}\nBUILD_NUMBER={build}\n")
+def write_version(path, version):
+    if version.android_code < 1:
+        raise ValueError("The unpublished 0.0.0 bootstrap is not a release")
+    Path(path).write_text(f"# Single source for Maven, Android, iOS and website versions.\nVERSION={version}\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -75,8 +94,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     version, build = read_version(args.file)
     if args.bump:
-        version, build = version.bump(args.bump), build + 1
+        version = version.bump(args.bump)
+        build = version.android_code
     if args.write:
         if not args.bump: parser.error("--write requires --bump")
-        write_version(args.file, version, build)
+        write_version(args.file, version)
     print(json.dumps({"version": str(version), "build": build, "marketing": version.marketing}))

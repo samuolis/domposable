@@ -2,6 +2,7 @@
 """Build and verify the signed Android demo download with dedicated CI secrets."""
 from __future__ import annotations
 import base64
+import argparse
 import os
 from pathlib import Path
 import shutil
@@ -20,14 +21,28 @@ def run(*args, capture=False, env=None):
     if result.returncode: raise RuntimeError(f"{args[0]} failed; exit {result.returncode}")
     return result.stdout if capture else b""
 
+def verify_apk_metadata(analyzer, apk, version, version_code):
+    if run(str(analyzer), 'manifest', 'version-name', str(apk), capture=True).decode().strip() != str(version): raise RuntimeError("APK version name differs")
+    if run(str(analyzer), 'manifest', 'version-code', str(apk), capture=True).decode().strip() != str(version_code): raise RuntimeError("APK build number differs")
+
 def verify_apk(signer, analyzer, apk, version, build_number):
     verification = run(str(signer), 'verify', '--verbose', '--print-certs', str(apk), capture=True).decode()
     expected = os.environ['ANDROID_CERT_SHA256'].replace(':', '').lower()
     marker = 'certificate sha-256 digest:'
     digests = [line.partition(marker)[2].strip() for line in verification.lower().splitlines() if marker in line]
     if expected not in digests: raise RuntimeError("APK certificate fingerprint differs")
-    if run(str(analyzer), 'manifest', 'version-name', str(apk), capture=True).decode().strip() != str(version): raise RuntimeError("APK version name differs")
-    if run(str(analyzer), 'manifest', 'version-code', str(apk), capture=True).decode().strip() != str(build_number): raise RuntimeError("APK build number differs")
+    verify_apk_metadata(analyzer, apk, version, build_number)
+
+def sdk_analyzer(sdk):
+    analyzer = sdk / 'cmdline-tools/latest/bin/apkanalyzer'
+    return analyzer if analyzer.is_file() else next((sdk / 'cmdline-tools').glob('*/bin/apkanalyzer'))
+
+def verify_debug():
+    version, version_code = read_version(ROOT / 'version.properties')
+    sdk = Path(os.environ.get('ANDROID_HOME', os.environ.get('ANDROID_SDK_ROOT', '')))
+    apk = ROOT / 'androidApp/build/outputs/apk/debug/androidApp-debug.apk'
+    verify_apk_metadata(sdk_analyzer(sdk), apk, version, max(1, version_code))
+    print(f'Verified Android demo {version}: versionCode={max(1, version_code)}')
 
 def build():
     missing = [key for key in REQUIRED if not os.environ.get(key)]
@@ -43,11 +58,12 @@ def build():
         apk = ROOT / 'androidApp/build/outputs/apk/release/androidApp-release.apk'
         sdk = Path(os.environ.get('ANDROID_HOME', os.environ.get('ANDROID_SDK_ROOT', '')))
         signer = sorted((sdk / 'build-tools').glob('*/apksigner'), key=lambda p: tuple(int(n) for n in p.parent.name.split('.') if n.isdigit()))[-1]
-        analyzer = sdk / 'cmdline-tools/latest/bin/apkanalyzer'
-        if not analyzer.is_file(): analyzer = next((sdk / 'cmdline-tools').glob('*/bin/apkanalyzer'))
-        verify_apk(signer, analyzer, apk, version, build_number)
+        verify_apk(signer, sdk_analyzer(sdk), apk, version, build_number)
         shutil.copy2(apk, ASSETS / f'domposable-{version}.apk')
 
 if __name__ == '__main__':
-    try: build()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--verify-debug', action='store_true')
+    args = parser.parse_args()
+    try: verify_debug() if args.verify_debug else build()
     except (RuntimeError, KeyError, ValueError) as error: raise SystemExit(str(error)) from None

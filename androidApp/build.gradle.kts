@@ -4,6 +4,16 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 val release = Properties().apply { rootProject.file("version.properties").inputStream().use(::load) }
+val releaseVersion = release.getProperty("VERSION")
+require(Regex("""(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)""").matches(releaseVersion)) {
+    "VERSION must use MAJOR.MINOR.PATCH"
+}
+val versionParts = releaseVersion.split('.').map { it.toLong() }
+require(versionParts[0] <= 2_100 && versionParts[1] < 1_000 && versionParts[2] < 1_000) {
+    "Version exceeds the supported Android version-code range"
+}
+val releaseVersionCode = versionParts[0] * 1_000_000 + versionParts[1] * 1_000 + versionParts[2]
+require(releaseVersionCode <= 2_100_000_000) { "Version exceeds Android's versionCode limit" }
 android {
     namespace = "io.github.samuolis.domposable.demo"
     compileSdk { version = release(37) { minorApiLevel = 2 } }
@@ -11,8 +21,8 @@ android {
         applicationId = "io.github.samuolis.domposable.demo"
         minSdk = 24
         targetSdk = 37
-        versionCode = maxOf(1, release.getProperty("BUILD_NUMBER").toInt())
-        versionName = release.getProperty("VERSION")
+        versionCode = maxOf(1, releaseVersionCode.toInt())
+        versionName = releaseVersion
     }
     buildFeatures { compose = true }
     signingConfigs {

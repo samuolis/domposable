@@ -27,3 +27,6 @@ class AndroidReleaseVerificationTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'version name'): self.verify(version='0.0.0')
     def test_wrong_build_is_rejected(self):
         with self.assertRaisesRegex(RuntimeError, 'build number'): self.verify(build='2')
+    def test_version_derived_code_is_checked_without_signing_credentials(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(sign_release, 'run', side_effect=[b'0.4.0', b'4000']):
+            sign_release.verify_apk_metadata('apkanalyzer', 'demo.apk', '0.4.0', 4000)
