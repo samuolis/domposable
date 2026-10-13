@@ -33,7 +33,7 @@ Domposable is a Kotlin Multiplatform library built on Compose. Feature teams wri
 - **Shared components** — layout, forms, selection, navigation and feedback controls across both renderers.
 - **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
 
-Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable.
+Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable. [Koin and Metro](docs/screens.md#one-entry-api-for-koin-and-metro) use the same generated entry API; existing frameworks can [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
 
 > [!NOTE]
 > This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts and 0.2.0 has 41. Published 0.3.0 has 42 contracts. The 0.4 API adds forms, disclosure, rich HTML, charts and interactive tables, bringing the default provider to 48. Before 1.0, minor releases may change APIs.
@@ -200,7 +200,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | Adapt a feature to its available space | [Adaptive layouts](docs/adaptive.md) |
 | Build or customize a design system | [Design systems](docs/design-systems.md) |
 | Add screens, Navigation 3 or generated entries | [Screens and navigation](docs/screens.md) |
-| Integrate Metro or Kobweb | [Integrations](docs/integrations.md) |
+| Integrate Koin, Metro or Kobweb | [Integrations](docs/integrations.md) |
 | Follow the API/implementation module example | [Modular app walkthrough](docs/modular-demo.md) |
 | Check supported versions and limitations | [Compatibility](docs/compatibility.md) |
 | Compare Wasm input and accessibility | [Shared input lab and tested boundaries](docs/wasm.md) |

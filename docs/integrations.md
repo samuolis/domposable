@@ -52,7 +52,7 @@ fun ContactsScreen(
 }
 ```
 
-Provide your Koin application at the root and declare the ViewModel in its modules. KSP calls the screen under the entry's AndroidX owner before evaluating the default parameter, so DI uses the current entry store. The [`koin-example`](https://github.com/samuolis/domposable/tree/main/koin-example) uses Koin **4.2.2**, compiles generated entries on all six targets, and tests route parameters, entry-scoped ViewModels, shared repositories and disposal. Run the desktop example with `./gradlew :koin-example:run`. See [Koin Compose injection](https://insert-koin.io/docs/reference/koin-compose/compose/) and [Metro ViewModel Compose](https://zacsweers.github.io/metro/latest/metrox-viewmodel-compose/).
+Provide your Koin application at the root and declare the ViewModel in its modules. KSP calls the screen under the entry's AndroidX owner before evaluating the default parameter, so DI uses the current entry store. The [`koin-example`](https://github.com/samuolis/domposable/tree/main/koin-example) uses Koin **4.2.2**, compiles generated entries from published artifacts on all six targets, and tests route parameters, entry-scoped ViewModels, shared repositories, disposal and explicit model overrides without starting Koin. Run the desktop example with `./gradlew :koin-example:run`. See [Koin Compose injection](https://insert-koin.io/docs/reference/koin-compose/compose/) and [Metro ViewModel Compose](https://zacsweers.github.io/metro/latest/metrox-viewmodel-compose/).
 
 `DomposableMviScreen(model)` optionally replaces repeated state collection/action forwarding when a model implements `DomposableMvi<State, Action>`. It is independent of Metro and Koin; MVVM screens can collect their own flows and call ViewModel methods directly.
 
@@ -97,7 +97,7 @@ Use `DomposableColumn` for an embedded feature rather than the demo's full-windo
 | Metro | Use MetroX injection defaults or explicitly pass a plain-model factory | Compiled six-target example; ownership test |
 | AndroidX ViewModel | Use the optional `domposable-lifecycle-viewmodel` adapter | JVM ownership tests; compiled published consumers |
 | MVI/reducer/store | Use the optional model wrapper or collect a store yourself | Modular shopping demo: StateFlow, reducers, ViewModels and checkout effects |
-| Koin | Use an injection default with the optional entry ViewModel owner | Six-target generated entry compilation; JVM injection and disposal tests |
+| Koin | Use an injection default with the optional entry ViewModel owner | Six-target published-consumer compilation; JVM injection, override and disposal tests |
 | Dagger/custom DI | Resolve dependencies in the application or a Compose default | Architecture-compatible; dedicated integrations not tested |
 | Kobweb | Render a JS feature in `@Page`; let its router own URLs | Full static export; three-browser routing, reload, accessibility and pre-rendered content checks |
 

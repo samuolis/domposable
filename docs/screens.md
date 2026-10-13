@@ -7,6 +7,7 @@ Start with regular composables. A screen can accept values and callbacks, a plai
 | Plain Compose / direct Navigation 3 | Screens, back stack, entry provider, decorators and platform display selection | Shared UI components and a DOM display for ordinary `NavEntry` objects |
 | Manual registry | Route declarations, registrations, dependencies and back stack | Entry identity, portable saveables and resource ownership |
 | KSP + optional navigator | Annotated screens, injection defaults and feature composition | Typed entry factories, feature entry lists and a convenience host |
+| Existing screen framework | Annotations, typed contract validation, DI and host output | Reusable KSP function discovery, deferred rounds and source generation |
 
 ## A small app with the navigator
 
@@ -53,6 +54,70 @@ The processor also generates `domposableEntries(...)` per package. The full over
 The default annotation does **not** install AndroidX ViewModel ownership. `viewModel = true` requires `domposable-lifecycle-viewmodel`. State collection remains in your screen or an application helper. The annotation is needed only for generated entries.
 
 For injected screens, provide your DI environment at the application root. [The modular sample](modular-demo.md) demonstrates MetroX's standard factory and composition local. With Koin, provide the Koin application and use `model: YourViewModel = koinViewModel()` instead. Manual constructors, callbacks and explicit models remain supported.
+
+### One entry API for Koin and Metro
+
+The generated entry does not know which container creates your model. Both integrations use an
+ordinary default parameter, evaluated inside the current entry's owner:
+
+```kotlin
+// Koin
+@Composable
+@DomposableScreen(ProductRoute::class, viewModel = true)
+fun ProductScreen(
+    route: ProductRoute,
+    model: ProductViewModel = koinViewModel(parameters = { parametersOf(route.id) }),
+) {
+    ProductContent(model)
+}
+
+// MetroX: use the same declaration with your Metro injection default.
+model: ProductViewModel = assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> {
+    create(route.id)
+}
+```
+
+With either container, call `productScreenEntry()` or combine `domposableEntries()` at the app root.
+Tests and previews can pass `productScreenEntry(model)` explicitly without starting a container.
+The [Koin example](https://github.com/samuolis/domposable/tree/main/koin-example) compiles from
+published artifacts on all six targets and tests parameter injection, retained entry models,
+Back navigation, disposal and explicit-model overrides. Koin dependencies stay in that optional
+application integration; the UI and screen core do not depend on Koin or Metro.
+
+### Existing annotations and application hosts
+
+An application with its own screen contracts can reuse the generator without changing those
+contracts. The public tooling API in `domposable-ksp` handles annotated-function discovery,
+unresolved KSP rounds, duplicate declarations and source-file emission. Supply callbacks for your
+annotation names; retain your own contract validation, DI registration and host source:
+
+```kotlin
+class AppProcessorProvider : SymbolProcessorProvider {
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
+        DomposableFunctionProcessor(
+            environment,
+            mapOf("com.example.AppScreen" to DomposableFunctionGenerator { function, resolver ->
+                if (!validateAppScreen(function, resolver, environment.logger)) {
+                    emptyList()
+                } else {
+                    listOf(
+                        DomposableGeneratedSource(
+                            packageName = function.packageName.asString(),
+                            fileName = "${function.simpleName.asString()}Entry",
+                            source = generateAppEntry(function),
+                        ),
+                    )
+                }
+            }),
+        )
+}
+```
+
+`validateAppScreen` and `generateAppEntry` are application functions. The callback creates source
+for its one annotated function; cross-function aggregates belong in a separate `finish()` pass.
+Keep the standard KSP provider declaration in your processor artifact and depend on
+`domposable-ksp` there, outside the app runtime. This extension adds no navigator, ViewModel owner,
+DI container or runtime registry. Generated outputs retain the application's existing host.
 
 Apply KSP and add the processor to `kspCommonMainMetadata`:
 
