@@ -1,6 +1,8 @@
 # Release setup and recovery
 
-The single **Bump and release** action reads `version.properties`. Choose **patch**, **minor** or **major**; published versions use `MAJOR.MINOR.PATCH` without a suffix. Normal operation needs one dispatch. The repository starts at the unpublished `0.0.0` / build 0 baseline; choose **minor** for the first `0.1.0` / build 1 release. Subsequent releases increment the selected version component and the build number together.
+The single **Bump and release** action reads `version.properties`, which contains only `VERSION=MAJOR.MINOR.PATCH`. Choose **patch**, **minor** or **major**; published versions have no suffix or separately managed build number. Normal operation needs one dispatch. The unpublished bootstrap is `0.0.0`; choose **minor** for the first `0.1.0` release.
+
+The Android demo derives its installation `versionCode` using Ranker's existing encoding: `major × 100,000 + minor × 100 + patch`. Version `0.4.0` produces `400`, and `0.4.1` produces `401`. Minor must stay below 1000 and patch below 100, and the result must not exceed Android's 2,100,000,000 limit; invalid versions fail before a release candidate is pushed. The iOS demo uses the same SemVer string for its marketing and build versions. Release metadata records the derived Android code for artifact verification, but library versions, release names and downloads use SemVer only. Historical checkpoints retain their original installation codes when recovering already-built immutable artifacts.
 
 The action creates a temporary version-only commit, waits for that exact commit's CI, builds a signed Android APK and a signed Maven bundle, stages immutable assets in a draft, validates Central, fast-forwards `main`, publishes Central, verifies consumers, exposes the GitHub release and deploys its preserved website. Implementation changes use PRs. Obtain the owner's approval for the specific version-only `main` push before dispatching a release.
 
@@ -27,12 +29,12 @@ Public demo downloads currently include the signed Android APK only. The release
 
 Libraries and the APK use the same plain semantic version. The HTML and Wasm distributions also have independent SHA-256 build identifiers. Public demo URLs stay at `/demo/` and `/wasm/`; their HTML loads `demo.<full-content-sha256>.js`. Source maps and licence sidecars receive their own content hashes, while Wasm binaries retain webpack's content-hashed names. Nested task and shopping routes reference the same fingerprinted HTML bundle.
 
-Each distribution contains `web-assets.json`, recording the entry filename and the SHA-256 of every packaged file. Its distribution hash covers the sorted file/checksum inventory, so a resource change also changes the build identifier. `release.json` links both build identifiers to the library version, build number and Git commit:
+Each distribution contains `web-assets.json`, recording the entry filename and the SHA-256 of every packaged file. Its distribution hash covers the sorted file/checksum inventory, so a resource change also changes the build identifier. `release.json` links both build identifiers to the library version, derived Android code and Git commit:
 
 ```json
 {
-  "version": "0.1.0",
-  "build": 1,
+  "version": "0.4.0",
+  "build": 400,
   "commit": "<git-commit>",
   "status": "release",
   "web": {
@@ -48,9 +50,11 @@ CI runs browser tests against the assembled production website at the real `/dom
 
 Dispatch again after fixing configuration or transient service failure. An unfinished release takes precedence over the new bump request. The action restores its original commit/assets and Central deployment ID. It does not manufacture a new version or rebuild already staged binaries. Draft assets and `manifest.json` retain SHA-256 checksums; `release-state.json` identifies progress. Interrupted draft uploads recover the same immutable Actions artifact, retained for 90 days. After draft upload completes, GitHub release assets preserve the bundle permanently.
 
+An unstaged candidate can be rebuilt only when it comes from the current main source, uses VERSION-only metadata and matches the requested next version. An older source or counter-based candidate is rejected; dispatch a fresh run from current main to create the same still-unpublished version with the current policy. Already-staged immutable checkpoints use the recovery path above.
+
 If a Central upload response is lost before its ID is saved, the action stops. Locate the deployment named `domposable-<version>-<bundle hash>` in Central and supply its ID through the recovery input. The action never blindly uploads a duplicate. Central failures remain reserved until the cause is understood; Maven coordinates cannot be overwritten.
 
-For a rejected bundle that needs a packaging fix, restore its draft assets and `release-state.json` into `.release/artifacts/` and `.release/state.json`, configure the existing GitHub/Central credentials, and run `python scripts/release.py abandon` **before merging the fix**. This command requires a staged draft, a fresh Central `FAILED` response, unchanged main and no existing version tag. It retains the original signed assets and deployment record as a failed draft archive. Merge the tested fix, then dispatch **Bump and release** again; because no version commit advanced main, the corrected candidate uses the same unpublished version/build number. Publishing or published deployments cannot use this recovery path.
+For a rejected bundle that needs a packaging fix, restore its draft assets and `release-state.json` into `.release/artifacts/` and `.release/state.json`, configure the existing GitHub/Central credentials, and run `python scripts/release.py abandon` **before merging the fix**. This command requires a staged draft, a fresh Central `FAILED` response, unchanged main and no existing version tag. It retains the original signed assets and deployment record as a failed draft archive. Merge the tested fix, then dispatch **Bump and release** again; because no version commit advanced main, the corrected candidate uses the same unpublished version. Publishing or published deployments cannot use this recovery path.
 
 Packaging verifies signatures for every publication attachment and writes MD5, SHA-1, SHA-256 and SHA-512 checksums for every payload and signature, including Kotlin tooling metadata JSON and Compose resource ZIP files. GitHub publication explicitly selects the tested commit and SemVer tag, even when GitHub assigns a temporary tag to a draft.
 
@@ -62,6 +66,6 @@ A local build can exercise all unsigned artifacts and scripts, but live signing,
 
 ## Initial website preview
 
-Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `0.0.0` / build 0 baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
+Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `0.0.0` baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
 
 The dedicated Maven public key is checked in as `signing-key.asc`; its primary fingerprint is `646AC0FE7F73C347929C825937E5A0EA1E6DA396`. It is also published to `keyserver.ubuntu.com` for Central signature verification. Private identities are held in the protected release environment, never in source control.

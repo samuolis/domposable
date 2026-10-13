@@ -27,12 +27,12 @@ class ReleaseGuardsTest(unittest.TestCase):
     def git(self, *args):
         return subprocess.check_output(['git', *args], cwd=self.root, stderr=subprocess.DEVNULL, text=True).strip()
     def candidate(self, extra=False):
-        write_version(self.root / 'version.properties', Version.parse('0.1.0'), 1)
+        write_version(self.root / 'version.properties', Version.parse('0.1.0'))
         if extra: (self.root / 'implementation.kt').write_text('unexpected')
         self.git('add', 'version.properties')
         if extra: self.git('add', 'implementation.kt')
         self.git('commit', '-m', 'release')
-        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0', 'build': 1, 'branch': 'release-candidate/test'}
+        state = {'repository': release.REPOSITORY, 'base': self.base, 'commit': self.git('rev-parse', 'HEAD'), 'version': '0.1.0', 'build': 100, 'branch': 'release-candidate/test'}
         release.write_state(state); return state
     def test_public_download_inventory_is_android_only(self):
         self.assertEqual(release.asset_names(self.candidate()), ["domposable-0.1.0.apk", "website.zip", "maven-bundle.zip"])
@@ -88,6 +88,43 @@ class ReleaseGuardsTest(unittest.TestCase):
         self.assertFalse(release.is_abandoned_draft({**archived,'draft':False}))
     def test_version_only_candidate(self):
         release.validate_candidate(self.candidate())
+    def test_historical_candidate_retains_its_immutable_installation_code(self):
+        state = self.candidate()
+        (self.root / 'version.properties').write_text('VERSION=0.1.0\nBUILD_NUMBER=1\n')
+        self.git('add', 'version.properties'); self.git('commit', '--amend', '--no-edit')
+        state.update(commit=self.git('rev-parse', 'HEAD'), build=1)
+        release.validate_candidate(state)
+    def prepare_existing_candidate(self, *, legacy=False, older_source=False, candidate_version='0.1.0'):
+        commit = 'a' * 40
+        def git_transport(*args, capture=False):
+            if args[:2] == ('git', 'rev-parse'):
+                return self.base if args[-1] == 'HEAD' or not older_source else 'f' * 40
+            if args[:2] == ('git', 'ls-remote'):
+                return commit + '\t' + args[-1]
+            if args[:3] == ('git', 'checkout', '--detach'):
+                text = 'VERSION=0.0.0\n' if args[-1] == 'origin/main' else f'VERSION={candidate_version}\n'
+                if args[-1] == commit and legacy: text += 'BUILD_NUMBER=1\n'
+                (self.root / 'version.properties').write_text(text)
+            return ''
+        with patch.dict('os.environ', {'GITHUB_REF':'refs/heads/main', 'GITHUB_RUN_ID':'123'}), patch.object(release, 'GitHub') as github, patch.object(release, 'run', side_effect=git_transport), patch.object(release, 'validate_candidate') as validate, patch.object(release, 'output'):
+            github.return_value.request.return_value = []
+            release.prepare('minor')
+            validate.assert_called_once()
+        return release.read_state()
+    def test_unstaged_candidate_rebuild_uses_current_version_derived_code(self):
+        state = self.prepare_existing_candidate()
+        self.assertEqual(state['version'], '0.1.0')
+        self.assertEqual(state['build'], 100)
+        self.assertEqual(state['base'], self.base)
+    def test_unstaged_legacy_counter_cannot_trigger_a_rebuild(self):
+        with self.assertRaisesRegex(ValueError, 'VERSION only'):
+            self.prepare_existing_candidate(legacy=True)
+    def test_unstaged_candidate_from_an_old_policy_cannot_trigger_a_rebuild(self):
+        with self.assertRaisesRegex(RuntimeError, 'older main'):
+            self.prepare_existing_candidate(older_source=True)
+    def test_unstaged_candidate_must_match_the_requested_version(self):
+        with self.assertRaisesRegex(RuntimeError, 'requested version'):
+            self.prepare_existing_candidate(candidate_version='0.2.0')
     def test_implementation_change_rejected(self):
         with self.assertRaisesRegex(RuntimeError, 'only version'): release.validate_candidate(self.candidate(extra=True))
     def test_malformed_sha_rejected_before_git(self):

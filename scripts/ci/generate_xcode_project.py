@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from version import read_version
 
 ROOT = Path(__file__).resolve().parents[2]
-release_version, release_build = read_version(ROOT / "version.properties")
+release_version, _ = read_version(ROOT / "version.properties")
 objects = {}
 def ident(name):
     return hashlib.sha256(name.encode()).hexdigest()[:24].upper()
@@ -41,7 +41,7 @@ for name, file in [("app",app_file),("test",test_file)]:
             "SUPPORTED_PLATFORMS":"iphoneos iphonesimulator","CODE_SIGN_STYLE":"Automatic",
             "PRODUCT_BUNDLE_IDENTIFIER":"io.github.samuolis.domposable.demo"+(".uitests" if name=="test" else ""),
             "MARKETING_VERSION":"$(DOMPOSABLE_MARKETING_VERSION)","CURRENT_PROJECT_VERSION":"$(DOMPOSABLE_BUILD_NUMBER)",
-            "DOMPOSABLE_MARKETING_VERSION":f"{release_version.major}.{release_version.minor}.{release_version.patch}","DOMPOSABLE_BUILD_NUMBER":str(max(1, release_build)),
+            "DOMPOSABLE_MARKETING_VERSION":str(release_version),"DOMPOSABLE_BUILD_NUMBER":str(release_version),
             "SWIFT_OPTIMIZATION_LEVEL":"-Onone" if config=="Debug" else "-O",
             "DEBUG_INFORMATION_FORMAT":"dwarf" if config=="Debug" else "dwarf-with-dsym",
         }
