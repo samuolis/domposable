@@ -1,12 +1,42 @@
 import XCTest
+import Vision
+import ImageIO
 
 final class SmokeTests: XCTestCase {
     private func ready(_ app: XCUIApplication, _ title: String) {
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", title)).firstMatch.waitForExistence(timeout: 30))
     }
-    private func capture(_ app: XCUIApplication, _ name: String) {
+    private func renderedText(_ screenshot: XCUIScreenshot, contains text: String) -> Bool {
+        guard let image = screenshot.image.cgImage else { return false }
+        let orientation: CGImagePropertyOrientation
+        switch screenshot.image.imageOrientation {
+        case .up: orientation = .up
+        case .down: orientation = .down
+        case .left: orientation = .left
+        case .right: orientation = .right
+        case .upMirrored: orientation = .upMirrored
+        case .downMirrored: orientation = .downMirrored
+        case .leftMirrored: orientation = .leftMirrored
+        case .rightMirrored: orientation = .rightMirrored
+        @unknown default: return false
+        }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["en-US"]
+        request.usesLanguageCorrection = false
+        do {
+            try VNImageRequestHandler(cgImage: image, orientation: orientation).perform([request])
+        } catch { return false }
+        let recognized = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: " ")
+        func normalize(_ value: String) -> String {
+            value.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ").lowercased()
+        }
+        return normalize(recognized).contains(normalize(text))
+    }
+    private func capture(_ app: XCUIApplication, _ name: String, renderedText text: String) {
         // App screenshots can crop with portrait coordinates during iPad rotation.
-        // Require a full second of identical rendered frames before capture.
+        // Accessibility can expose the next scene while the GPU still paints the previous one.
+        // Require both the expected visible text and a full second of identical frames.
         var previous: Data?
         var settled: XCUIScreenshot?
         var unchangedSince = Date()
@@ -16,10 +46,12 @@ final class SmokeTests: XCTestCase {
             defer { previous = data }
             guard previous == data else { unchangedSince = Date(); return false }
             guard Date().timeIntervalSince(unchangedSince) >= 1 else { return false }
+            guard self.renderedText(current, contains: text) else { return false }
             settled = current
             return true
         }, object: nil)
-        XCTAssertEqual(XCTWaiter.wait(for: [stable], timeout: 15), .completed)
+        XCTAssertEqual(XCTWaiter.wait(for: [stable], timeout: 15), .completed,
+                       "Capture \(name) did not paint stable text: \(text)")
         let attachment = XCTAttachment(screenshot: settled ?? XCUIScreen.main.screenshot())
         attachment.name = "golden-\(name)"
         attachment.lifetime = .keepAlways
@@ -50,7 +82,7 @@ final class SmokeTests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         ready(app, "Task workspace")
-        capture(app, "tasks")
+        capture(app, "tasks", renderedText: "Task workspace")
         app.buttons["Try one feature on three platforms"].tap()
         let notes = app.textViews["task-notes"]
         XCTAssertTrue(notes.waitForExistence(timeout: 10))
@@ -66,7 +98,7 @@ final class SmokeTests: XCTestCase {
         // Hide the keyboard and leave a stable adaptive scene for the baseline.
         app.buttons["Back to tasks"].tap()
         ready(app, "Task workspace")
-        capture(app, "adaptive")
+        capture(app, "adaptive", renderedText: "Task workspace")
     }
     func testCatalogAndRecipes() {
         XCUIDevice.shared.orientation = .portrait
@@ -75,15 +107,17 @@ final class SmokeTests: XCTestCase {
         ready(app, "Task workspace")
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Components")).firstMatch.tap()
         ready(app, "Component catalog")
-        capture(app, "catalog")
+        capture(app, "catalog", renderedText: "Component catalog")
+        XCTAssertFalse(renderedText(XCUIScreen.main.screenshot(), contains: "More shared components"),
+                       "The rendered-scene guard must reject the previous catalog")
         app.buttons["More components"].tap()
         ready(app, "More shared components")
-        capture(app, "extended-components")
+        capture(app, "extended-components", renderedText: "More shared components")
         app.buttons["Save preferences"].tap()
         ready(app, "Preferences saved")
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Recipes")).firstMatch.tap()
         ready(app, "Navigation recipes")
-        capture(app, "recipes")
+        capture(app, "recipes", renderedText: "Navigation recipes")
         app.buttons["Open message"].tap()
         XCTAssertTrue(app.textViews["recipe-draft"].waitForExistence(timeout: 10))
     }
@@ -100,7 +134,7 @@ final class SmokeTests: XCTestCase {
             self.artworkIsRendered(hero)
         }, object: nil)
         XCTAssertEqual(XCTWaiter.wait(for: [painted], timeout: 30), .completed)
-        capture(app, "shop")
+        capture(app, "shop", renderedText: "FIELDWORK")
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Shop all")).firstMatch.tap()
         ready(app, "Shop the collection")
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Add Canvas weekender to bag")).firstMatch.tap()
@@ -129,7 +163,7 @@ final class SmokeTests: XCTestCase {
         ready(app, "Large collections")
         tapVisible(app, "More collection recipes")
         ready(app, "Collection recipes")
-        capture(app, "collection-measured")
+        capture(app, "collection-measured", renderedText: "Collection layout: Measured column")
         for (layout, name) in [("Horizontal row", "collection-row"), ("Responsive grid", "collection-grid"), ("Semantic table", "collection-table")] {
             // Return to the selector before changing layout; no keyboard is open during goldens.
             let selector = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Collection layout,")).firstMatch
@@ -143,7 +177,7 @@ final class SmokeTests: XCTestCase {
             XCTAssertTrue(option.waitForExistence(timeout: 10))
             option.tap()
             ready(app, "Collection layout, Collection layout: \(layout)")
-            capture(app, name)
+            capture(app, name, renderedText: "Collection layout: \(layout)")
         }
         ready(app, "Inventory drafts")
         let draft = app.textViews.matching(NSPredicate(format: "label == %@", "Item 1 draft")).firstMatch
@@ -169,7 +203,7 @@ final class SmokeTests: XCTestCase {
         ready(app, "More shared components")
         tapVisible(app, "Documents and data lab")
         ready(app, "Documents and data lab")
-        capture(app, "product-components")
+        capture(app, "product-components", renderedText: "Documents and data lab")
     }
 
 }
