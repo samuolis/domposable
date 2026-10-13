@@ -184,12 +184,12 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(draft.waitForExistence(timeout: 10))
         draft.tap()
         draft.typeText("iOS table draft")
-        // Compose can paint the typed text before the accessibility snapshot exposes its value.
-        let edited = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            (draft.value as? String)?.contains("iOS table draft") == true
-        }, object: nil)
-        XCTAssertEqual(XCTWaiter.wait(for: [edited], timeout: 10), .completed,
-                       "Table draft value: \(String(describing: draft.value))")
+        // Match in XCTest's query engine; a Swift value getter can block its expectation timer.
+        let edited = app.textViews.matching(NSPredicate(
+            format: "label == %@ AND value CONTAINS %@", "Item 1 draft", "iOS table draft"
+        )).firstMatch
+        XCTAssertTrue(edited.waitForExistence(timeout: 10),
+                      "Table draft value: \(String(describing: draft.value))")
     }
 
     func testProductComponents() {

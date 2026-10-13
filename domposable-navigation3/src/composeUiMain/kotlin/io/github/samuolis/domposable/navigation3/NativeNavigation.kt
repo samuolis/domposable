@@ -43,16 +43,18 @@ actual fun <T : Any> DomposableNavDisplay(
     visibleEntries: Int,
     onBack: () -> Unit,
 ) {
+    require(entries.isNotEmpty()) { "Navigation requires at least one entry" }
     require(visibleEntries > 0)
+    require(entries.map { it.contentKey }.distinct().size == entries.size) { "Navigation content keys must be unique" }
     val strategy =
         remember(visibleEntries) {
             SceneStrategy<T> { all ->
                 DomposablePaneScene(all.last().contentKey, all.takeLast(visibleEntries), all.dropLast(1))
             }
         }
-    DomposableNavDisplay(
+    NavDisplay(
         entries = entries,
-        modifier = modifier,
+        modifier = modifier.toComposeModifier(),
         sceneStrategies = listOf(strategy),
         onBack = onBack,
     )
