@@ -52,6 +52,8 @@ class VersionTests(unittest.TestCase):
             path.write_text("VERSION=0.3.0\nBUILD_NUMBER=4\n")
             self.assertEqual(read_version(path), (Version.parse("0.3.0"), 300))
             self.assertEqual(read_checkpoint_version(path), (Version.parse("0.3.0"), 4))
+            with self.assertRaisesRegex(ValueError, "VERSION only"):
+                read_version(path, require_version_only=True)
             write_version(path, Version.parse("0.4.0"))
             self.assertEqual(read_checkpoint_version(path), (Version.parse("0.4.0"), 400))
             path.write_text("VERSION=0.3.0\nBUILD_NUMBER=-1\n")

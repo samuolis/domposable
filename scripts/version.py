@@ -70,8 +70,11 @@ def _read_properties(path):
             raise ValueError("Legacy BUILD_NUMBER exceeds Android's versionCode limit")
     return values
 
-def read_version(path):
-    version = Version.parse(_read_properties(path)["VERSION"])
+def read_version(path, *, require_version_only=False):
+    values = _read_properties(path)
+    if require_version_only and "BUILD_NUMBER" in values:
+        raise ValueError("Unstaged release candidates must use VERSION only; dispatch a fresh release from main")
+    version = Version.parse(values["VERSION"])
     return version, version.android_code
 
 def read_checkpoint_version(path):

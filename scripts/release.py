@@ -194,9 +194,15 @@ def prepare(operation):
     existing = run("git", "ls-remote", "origin", f"refs/heads/{branch}", capture=True)
     if existing:
         commit = existing.split()[0]
-        run("git", "fetch", "origin", branch); run("git", "checkout", "--detach", commit)
-        candidate_version, candidate_build = read_checkpoint_version(ROOT / "version.properties")
-        state = {"repository": REPOSITORY, "base": run("git", "rev-parse", commit + "^", capture=True), "commit": commit, "version": str(candidate_version), "build": candidate_build, "branch": branch, "phase": "candidate", "run_id": os.environ["GITHUB_RUN_ID"]}
+        run("git", "fetch", "origin", branch)
+        candidate_base = run("git", "rev-parse", commit + "^", capture=True)
+        if candidate_base != base:
+            raise RuntimeError("Unstaged candidate belongs to older main; dispatch a fresh release from current main")
+        run("git", "checkout", "--detach", commit)
+        candidate_version, candidate_build = read_version(ROOT / "version.properties", require_version_only=True)
+        if candidate_version != version:
+            raise RuntimeError("Unstaged candidate does not match the requested version")
+        state = {"repository": REPOSITORY, "base": base, "commit": commit, "version": str(candidate_version), "build": candidate_build, "branch": branch, "phase": "candidate", "run_id": os.environ["GITHUB_RUN_ID"]}
         write_state(state); validate_candidate(state)
         output(commit=commit, version=str(candidate_version), resume=False, branch=branch)
         return
