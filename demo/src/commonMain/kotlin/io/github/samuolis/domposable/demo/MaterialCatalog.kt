@@ -193,6 +193,13 @@ internal fun MaterialActions() {
         }
     }
     DomposableFlowRow(gap = 8.dp) {
+        DomposableButtonStyle.entries.forEach { style ->
+            DomposableButton(onClick = {}, style = style, enabled = false) {
+                DomposableText("Disabled ${style.name}")
+            }
+        }
+    }
+    DomposableFlowRow(gap = 8.dp) {
         DomposableIconButtonVariant.entries.forEach { variant ->
             DomposableIconToggleButton(checked, {
                 checked = it

@@ -117,7 +117,7 @@ DomposableScaffold(
 }
 ```
 
-Scaffold owns the full-window shell with header/main/footer landmarks on HTML. Embed columns inside its content rather than another full-window scaffold. The app controls whether a snackbar exists and when it expires; Domposable does not create a queue or timer. Supply both `actionLabel` and `onAction` when offering an action. Use Banner for inline status and Progress for determinate or indeterminate work.
+Scaffold owns the full-window shell with header/main/footer landmarks on HTML. Use `DomposableScreenScaffold` for screen chrome inside an application shell. The direct `DomposableSnackbar` call is controlled by the app, as shown above. For serialized requests, timeouts and action results, use the optional [`DomposableSnackbarHostState` and `DomposableSnackbarHost`](material-catalog.md#queued-messages-and-badges). Supply both `actionLabel` and `onAction` when offering a direct snackbar action. Use Banner for inline status and Progress for determinate or indeterminate work.
 
 ```kotlin
 if (confirming) {

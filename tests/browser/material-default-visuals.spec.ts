@@ -115,3 +115,24 @@ test('unchecked filled icon toggles use the neutral Material toggle surface', as
   expect(surfaces.filled).toBe(surfaces.neutral);
   expect(surfaces.tonal).toBe(surfaces.neutral);
 });
+
+
+test('disabled button variants use Material state colors without fading the entire control', async ({ page }) => {
+  await page.goto('/#/material/actions');
+  for (const variant of ['Filled', 'Elevated', 'FilledTonal', 'Outlined', 'Text']) {
+    const button = page.getByRole('button', { name: `Disabled ${variant}`, exact: true });
+    await expect(button).toBeDisabled();
+    await expect(button).toHaveCSS('opacity', '1');
+    const colors = await button.evaluate(element => {
+      const style = getComputedStyle(element);
+      return { background: style.backgroundColor, foreground: style.color, shadow: style.boxShadow };
+    });
+    expect(colors.foreground).toMatch(/0\.38[0-9]*\)$/);
+    if (['Filled', 'Elevated', 'FilledTonal'].includes(variant)) {
+      expect(colors.background).toMatch(/0\.12[0-9]*\)$/);
+    } else {
+      expect(colors.background).toBe('rgba(0, 0, 0, 0)');
+    }
+    if (variant === 'Elevated') expect(colors.shadow).toBe('none');
+  }
+});

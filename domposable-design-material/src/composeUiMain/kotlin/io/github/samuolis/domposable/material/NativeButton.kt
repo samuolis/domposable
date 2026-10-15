@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
@@ -29,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -39,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
@@ -117,42 +120,53 @@ internal fun NativeButton(
         }
         return
     }
-    val colors = MaterialTheme.colorScheme
-    val filled = props.style == DomposableButtonStyle.Filled || props.style == DomposableButtonStyle.Elevated
-    val enabledContainer =
-        appearance.container?.let { Color(it.argb) } ?: when (props.style) {
-            DomposableButtonStyle.Filled, DomposableButtonStyle.Elevated -> colors.primary
-            DomposableButtonStyle.FilledTonal -> colors.secondaryContainer
-            DomposableButtonStyle.Outlined, DomposableButtonStyle.Text -> Color.Transparent
-        }
-    val enabledContent =
-        appearance.content?.let { Color(it.argb) } ?: when (props.style) {
-            DomposableButtonStyle.Filled, DomposableButtonStyle.Elevated -> colors.onPrimary
-            DomposableButtonStyle.FilledTonal -> colors.onSecondaryContainer
-            DomposableButtonStyle.Outlined, DomposableButtonStyle.Text -> colors.primary
+    val defaults =
+        when (props.style) {
+            DomposableButtonStyle.Filled -> ButtonDefaults.buttonColors()
+            DomposableButtonStyle.Elevated -> ButtonDefaults.elevatedButtonColors()
+            DomposableButtonStyle.FilledTonal -> ButtonDefaults.filledTonalButtonColors()
+            DomposableButtonStyle.Outlined -> ButtonDefaults.outlinedButtonColors()
+            DomposableButtonStyle.Text -> ButtonDefaults.textButtonColors()
         }
     val useEnabledColors = (props.enabled && formEnabled) || props.loading
     val containerColor =
         if (useEnabledColors) {
-            enabledContainer
+            appearance.container?.let { Color(it.argb) } ?: defaults.containerColor
         } else {
-            appearance.disabledContainer?.let { Color(it.argb) }
-                ?: if (filled) colors.onSurface.copy(alpha = 0.12f) else Color.Transparent
+            appearance.disabledContainer?.let { Color(it.argb) } ?: defaults.disabledContainerColor
         }
     val contentColor =
         if (useEnabledColors) {
-            enabledContent
+            appearance.content?.let { Color(it.argb) } ?: defaults.contentColor
         } else {
-            appearance.disabledContent?.let { Color(it.argb) }
-                ?: colors.onSurface.copy(alpha = 0.38f)
+            appearance.disabledContent?.let { Color(it.argb) } ?: defaults.disabledContentColor
         }
-    val borderColor =
-        (if (useEnabledColors) appearance.border else appearance.disabledBorder)?.let {
-            Color(
-                it.argb,
-            )
+    val borderColor = (if (useEnabledColors) appearance.border else appearance.disabledBorder)?.let { Color(it.argb) }
+    val defaultBorder =
+        if (props.style ==
+            DomposableButtonStyle.Outlined
+        ) {
+            ButtonDefaults.outlinedButtonBorder(useEnabledColors)
+        } else {
+            null
         }
-            ?: if (props.style == DomposableButtonStyle.Outlined) colors.outline else null
+    val border =
+        when {
+            borderColor != null -> {
+                BorderStroke((appearance.borderWidth?.value ?: 1f).dp, borderColor)
+            }
+
+            defaultBorder != null -> {
+                BorderStroke(
+                    appearance.borderWidth?.value?.dp ?: defaultBorder.width,
+                    defaultBorder.brush,
+                )
+            }
+
+            else -> {
+                null
+            }
+        }
     val shape = appearance.shape?.materialShape() ?: androidx.compose.material3.ButtonDefaults.shape
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
@@ -175,6 +189,8 @@ internal fun NativeButton(
         modifier
             .toComposeModifier()
             .scale(scale)
+            .minimumInteractiveComponentSize()
+            .shadow(if (props.style == DomposableButtonStyle.Elevated && useEnabledColors) 1.dp else 0.dp, shape)
             .heightIn(min = (appearance.minHeight?.value ?: 40f).dp)
             .clip(shape)
             .semantics(mergeDescendants = true) {
@@ -186,7 +202,7 @@ internal fun NativeButton(
                 }
             }.background(containerColor, shape)
             .then(
-                borderColor?.let { Modifier.border(BorderStroke((appearance.borderWidth?.value ?: 1f).dp, it), shape) }
+                border?.let { Modifier.border(it, shape) }
                     ?: Modifier,
             ).clickable(
                 interactionSource = interactionSource,

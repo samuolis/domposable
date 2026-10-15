@@ -93,12 +93,13 @@ internal fun HtmlButton(
                 (if (useEnabledColors) appearance.border else appearance.disabledBorder)?.let {
                     property("border-color", it.css())
                 }
-                if (!useEnabledColors && customAppearance) {
+                if (!useEnabledColors) {
                     val surface = tokens.colors.onSurface.argb and 0xFFFFFFL
                     if (appearance.disabledContainer == null) {
                         val container =
-                            if (props.style ==
-                                DomposableButtonStyle.Filled
+                            if (props.style == DomposableButtonStyle.Filled ||
+                                props.style == DomposableButtonStyle.Elevated ||
+                                props.style == DomposableButtonStyle.FilledTonal
                             ) {
                                 DomposableColor(surface or DISABLED_CONTAINER_ALPHA).css()
                             } else {
@@ -111,6 +112,15 @@ internal fun HtmlButton(
                     ) {
                         property("color", DomposableColor(surface or DISABLED_CONTENT_ALPHA).css())
                     }
+                }
+                if (!useEnabledColors && props.style == DomposableButtonStyle.Elevated) property("box-shadow", "none")
+                if (!useEnabledColors && props.style == DomposableButtonStyle.Outlined &&
+                    appearance.disabledBorder == null
+                ) {
+                    property(
+                        "border-color",
+                        DomposableColor((tokens.colors.onSurface.argb and 0xFFFFFFL) or DISABLED_CONTAINER_ALPHA).css(),
+                    )
                 }
                 appearance.borderWidth?.let { property("border-width", "${it.value}px") }
                 appearance.shape?.let { materialShape(it) }
@@ -130,7 +140,7 @@ internal fun HtmlButton(
                 appearance.indicatorStrokeWidth?.let { property("--d-button-indicator-stroke", "${it.value}px") }
                 property("--d-button-pressed-scale", appearance.pressedScale.toString())
                 property("--d-button-hovered-scale", appearance.hoveredScale.toString())
-                if (customAppearance || props.loading) {
+                if (customAppearance || props.loading || !useEnabledColors) {
                     property("opacity", "1")
                 }
             }
