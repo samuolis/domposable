@@ -8,9 +8,9 @@
 [![Release](https://img.shields.io/github/v/release/samuolis/domposable)](https://github.com/samuolis/domposable/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-[Documentation](https://samuolis.github.io/domposable/) · [Shopping demo](https://samuolis.github.io/domposable/shop/) · [Playground](https://samuolis.github.io/domposable/demo/) · [Compare HTML and Wasm](https://samuolis.github.io/domposable/compare/) · [API reference](https://samuolis.github.io/domposable/api/)
+[Documentation](https://samuolis.github.io/domposable/) · [Shopping demo](https://samuolis.github.io/domposable/shop/) · [Playground](https://samuolis.github.io/domposable/demo/) · [API reference](https://samuolis.github.io/domposable/api/)
 
-Domposable is a Kotlin Multiplatform library built on Compose. Feature teams write regular composables with shared components, modifiers and adaptive layouts. An installed design system provider renders those calls as Compose UI on native targets or semantic HTML on Kotlin/JS.
+Domposable is a Kotlin Multiplatform UI library with optional integration helpers, built on Compose. Feature teams write regular composables with shared components, modifiers and adaptive layouts. An installed design system provider renders those calls as Compose UI on native targets or semantic HTML on Kotlin/JS. The primary web target is HTML; it does not require Wasm.
 
 ## Contents
 
@@ -36,7 +36,7 @@ Domposable is a Kotlin Multiplatform library built on Compose. Feature teams wri
 Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable. [Koin and Metro](docs/screens.md#one-entry-api-for-koin-and-metro) use the same generated entry API; existing frameworks can [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
 
 > [!NOTE]
-> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). The 0.1.x provider has 34 renderer contracts and 0.2.0 has 41. Published 0.3.0 has 42 contracts. The 0.4 API adds forms, disclosure, rich HTML, charts and interactive tables, bringing the default provider to 48. Before 1.0, minor releases may change APIs.
+> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). Before 1.0, minor releases may change APIs; see the [migration guide](docs/migration.md) when upgrading.
 
 ## Quick start
 
@@ -89,7 +89,7 @@ fun App(onAddContact: () -> Unit) {
 
 ### 3. Call it from your platform host
 
-Use Android `setContent`, iOS `ComposeUIViewController`, a desktop Compose window, JS `renderComposable` or Wasm `ComposeViewport`. The feature and its callbacks stay in `commonMain`; the host selects the platform's composition environment.
+Use Android `setContent`, iOS `ComposeUIViewController`, a desktop Compose window or Kotlin/JS `renderComposable` for HTML. The feature and its callbacks stay in `commonMain`; the host selects the platform's composition environment. An optional experimental Wasm host is available for Compose UI comparisons.
 
 [Platform entry-point examples →](docs/getting-started.md#platform-entry-points)
 
@@ -108,6 +108,19 @@ flowchart TB
 The same feature can use different element structures and styling on each platform. Change tokens for colors, typography and spacing, or replace a renderer for a different control implementation. Component use requires no application KSP setup or navigation registry.
 
 [Understand the API →](docs/how-it-works.md) · [Customize a design system →](docs/design-systems.md) · [Build adaptive layouts →](docs/adaptive.md)
+
+### Start where your app is
+
+| Your app | Adopt | Keep in your app |
+| --- | --- | --- |
+| Starting a shared UI | Material provider, components and adaptive helpers | Models, DI and application behaviour |
+| Has a design system | Portable modifiers and [native/HTML adapters](docs/design-systems.md#adopt-inside-an-existing-design-system) behind existing component names | Brand tokens, renderer bodies and custom controls |
+| Has Navigation 3 or another router | Optional entry display, pane and browser helpers | Back stack, entry decorators, route identity and URL policy |
+| Has screen annotations and codegen | Optional KSP function driver | Annotation contract, DI bindings and generated host templates |
+
+Components and adaptive helpers do not depend on the screen registry, navigator or ViewModel adapter. KSP is optional. Your app can use Koin, Metro, another DI container or no DI.
+
+Existing Compose UI widgets cannot run inside an HTML composition. Sharing a feature requires portable component calls or your own native/HTML adapters; this is more than changing imports. [Migrate one feature at a time →](docs/migration.md)
 
 ## Supported platforms
 

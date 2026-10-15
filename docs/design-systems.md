@@ -2,6 +2,70 @@
 
 `DomposableTheme` installs semantic tokens and a complete `DomposableComponents` provider. The Material artifact is optional: a product can supply every renderer without depending on Material.
 
+## Adopt inside an existing design system
+
+Keep your component names, tokens and feature signatures. Use Domposable's portable modifier behind your existing API, with native and HTML implementations at the design-system boundary. A component does not need generated props, a registry or a renderer provider merely to call its own platform implementation.
+
+Shared design-system contract in `commonMain`:
+
+```kotlin
+import androidx.compose.runtime.Composable
+import io.github.samuolis.domposable.ui.DomposableModifier
+
+typealias AppModifier = DomposableModifier
+
+@Composable
+expect fun AppButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: AppModifier = AppModifier,
+)
+```
+
+Native implementation, in a source set shared by Android and iOS:
+
+```kotlin
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import io.github.samuolis.domposable.ui.toComposeModifier
+
+@Composable
+actual fun AppButton(label: String, onClick: () -> Unit, modifier: AppModifier) {
+    Button(onClick = onClick, modifier = modifier.toComposeModifier()) { Text(label) }
+}
+```
+
+Use your existing branded button body in place of Material's `Button`. The native modifier conversion stays at this boundary. The same contract's `jsMain` implementation emits HTML:
+
+```kotlin
+import androidx.compose.runtime.Composable
+import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
+import io.github.samuolis.domposable.ui.domposableAttributes
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Text
+
+@Composable
+actual fun AppButton(label: String, onClick: () -> Unit, modifier: AppModifier) {
+    DomposableHtmlModifiers(modifier) {
+        Button(attrs = {
+            domposableAttributes(modifier)
+            attr("type", "button")
+            classes("app-button")
+            onClick { onClick() }
+        }) { Text(label) }
+    }
+}
+```
+
+The `app-button` CSS belongs to your design system. Your common feature continues to call `AppButton`, with its existing state, callbacks or injected model. Extend the contract for the states and slots your component already supports, including disabled state and accessibility labels. Keep native-only widgets inside native implementations.
+
+Adopt library form, scroll, layout and pane helpers where they replace generic infrastructure. Keep product-specific editor, diagram, camera and routing behaviour in the app. The [platform modifier callbacks](#extend-portable-modifiers) handle your own portable modifier elements without copying the library's built-in operation model.
+
+Use a typed provider when you want to replace `DomposableButton` itself or switch a set of renderers at runtime. That is a separate choice from adding an HTML implementation behind your own design system.
+
+## Supply a component provider
+
 ```kotlin
 DomposableTheme(tokens = productTokens, components = productComponents) {
     FeatureScreen(model)

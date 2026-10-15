@@ -6,6 +6,10 @@ Migration needs more than changing imports: props, units, layout constraints and
 
 Keep your existing ViewModels/state machines and DI containers. Pass values/callbacks or app-owned models through screen signatures. Add screen ownership, Navigation 3 or KSP only where useful; replacing an application's navigation architecture is not required to use the components.
 
+If your app already has shared component names, start with [native/HTML design-system adapters](design-systems.md#adopt-inside-an-existing-design-system). Keep the feature API and branded renderer bodies, alias the portable modifier behind your own modifier name, and delegate generic infrastructure to the library. A second props/provider layer around every application component is unnecessary for this path.
+
+Use Kotlin/JS with Compose HTML for the web host. Wasm is an optional separate Compose UI renderer, not a prerequisite for HTML and not a conversion step for existing native widgets.
+
 Migrate one feature first. Verify semantics, focus/keyboard behavior and measured content breakpoints on each target. Use the [coverage matrix](coverage.md) to identify controls needing a custom renderer.
 
 ## Direct calls and the expanded provider
