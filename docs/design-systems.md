@@ -84,7 +84,7 @@ DomposableTheme(components = product) { FeatureScreen(model) }
 
 `ProductButton` is a platform implementation. It receives the same enabled state, click handler, modifier and composable content. It can replace the element structure, interaction and styling. The demo supplies foundation-based native buttons and dashed DOM buttons to show this.
 
-Tokens cover colors, typography, spacing, radius and motion duration. Theme scope maps values to native Material defaults or CSS variables; nested themes remain local. Product-specific dimensions can be supplied through your own composition locals. Current native typography maps sizes/line height; custom fonts need a provider-specific font mapping.
+Tokens cover colors, typography, spacing, radius and motion duration. Theme scope maps values to native Material defaults or CSS variables; nested themes remain local. Product-specific dimensions can be supplied through your own composition locals. Typography roles map to the native Material type scale and HTML styles. Native font assets remain supplied by the host; CSS font-family names do not register platform fonts.
 
 Modifiers preserve operation order. `padding().background()` and `background().padding()` are different. Shared modifiers contain portable operations; use `toComposeModifier()` in native renderer code and `DomposableHtmlModifiers`/`domposableAttributes` in JS renderers. Native `Modifier` remains outside shared feature signatures.
 
@@ -314,6 +314,9 @@ The types above live in `io.github.samuolis.domposable.foundation`; component ca
 
 A null appearance parameter uses the theme's component defaults. Supplying an appearance replaces those defaults for that call; use `copy` to inherit the settings you want to keep. Unspecified values inside an appearance use the renderer's default. Button colors include separate disabled container, content and border values. Text-field palettes group text, label, placeholder, container, outline, cursor, icon and supporting colors by unfocused, focused, disabled and error state. Field appearance also configures slot typography, inner padding, minimum height and optional multiline autosizing. Loading prevents activation, keeps the content's measured size, and shows the provided accessible loading label without switching to disabled colors.
 
-HTML inner-padding and outline-width overrides complement the native Material field's standard decoration geometry; native fields currently retain Material's built-in padding and stroke widths.
+Field padding and outline-width overrides apply to the inner decoration on HTML and Compose UI. When no overrides are supplied, native fields keep Material's standard decoration path.
 
 These defaults style the standard Material renderers. A custom provider owns its rendering and must explicitly honor the appearance fields. Native rendering uses Compose UI and HTML rendering uses real browser controls; the renderers share configuration without requiring identical DOM and native widget trees.
+
+
+The [Material catalog](material-catalog.md) lists the standard and expressive variants and provides examples for selection controls, queued messages, badge anchors and screen chrome.

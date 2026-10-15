@@ -1,6 +1,8 @@
 # Shared components
 
-Use direct composable calls in shared feature code and install a provider at the app root. The 0.4 API has **48 renderer contracts** with Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
+Use direct composable calls in shared feature code and install a provider at the app root. The shared API has typed renderer contracts with Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
+
+The [Material 3 and expressive catalog](material-catalog.md) maps component families to their shared APIs and shows theme, appearance and screen-scaffold configuration.
 
 ![Shared components on Android and in a browser](assets/examples/components.png)
 

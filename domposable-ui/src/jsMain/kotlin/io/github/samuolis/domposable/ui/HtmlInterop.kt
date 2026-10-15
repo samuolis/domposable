@@ -358,7 +358,7 @@ private fun DomposableAlignment.css(): String =
 private fun org.jetbrains.compose.web.css.StyleScope.applyCssShape(shape: DomposableShape) {
     when (shape) {
         DomposableShape.Rectangle -> Unit
-        DomposableShape.Circle -> property("border-radius", "50%")
+        DomposableShape.Circle -> property("border-radius", "9999px")
         is DomposableShape.Rounded -> property("border-radius", "${shape.radius.value}px")
         is DomposableShape.Corners -> cornerRadii(shape)
     }

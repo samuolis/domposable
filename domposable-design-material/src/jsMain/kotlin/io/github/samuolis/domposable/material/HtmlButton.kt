@@ -41,6 +41,43 @@ internal fun HtmlButton(
                 props.loadingLabel?.let { attr("aria-label", it) }
             }
             style {
+                when (props.style) {
+                    DomposableButtonStyle.Elevated -> {
+                        if (appearance.container ==
+                            null
+                        ) {
+                            property(
+                                "background",
+                                (tokens.colors.surfaceContainerLow ?: tokens.colors.surface).css(),
+                            )
+                        }
+                        if (appearance.content == null) property("color", tokens.colors.primary.css())
+                        property("box-shadow", "0 1px 3px rgb(0 0 0 / .24)")
+                    }
+
+                    DomposableButtonStyle.FilledTonal -> {
+                        if (appearance.container ==
+                            null
+                        ) {
+                            property(
+                                "background",
+                                (
+                                    tokens.colors.secondaryContainer
+                                        ?: tokens.colors.surfaceVariant
+                                ).css(),
+                            )
+                        }
+                        if (appearance.content ==
+                            null
+                        ) {
+                            property("color", (tokens.colors.onSecondaryContainer ?: tokens.colors.onSurface).css())
+                        }
+                    }
+
+                    else -> {
+                        Unit
+                    }
+                }
                 (if (useEnabledColors) appearance.container else appearance.disabledContainer)?.let {
                     property(
                         "background",

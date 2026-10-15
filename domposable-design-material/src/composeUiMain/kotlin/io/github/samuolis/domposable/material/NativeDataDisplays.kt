@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -9,6 +10,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,9 +18,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,6 +32,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -46,6 +52,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.github.samuolis.domposable.foundation.DomposableChartAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.ui.DomposableChartSeries
 import io.github.samuolis.domposable.ui.DomposableChartSize
@@ -78,22 +85,41 @@ internal fun NativeLineChart(
     props: DomposableLineChartProps,
     modifier: DomposableModifier,
 ) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.lineChart
     val gap =
         when (props.sizePreset) {
             DomposableChartSize.Thumbnail, DomposableChartSize.Compact -> 8.dp
             DomposableChartSize.Standard, DomposableChartSize.Expanded -> 12.dp
         }
-    Column(modifier.toComposeModifier().fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(gap)) {
-        if (props.displayTitle) props.title?.let { Text(it, style = MaterialTheme.typography.titleMedium) }
-        props.description?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    Column(
+        modifier
+            .toComposeModifier()
+            .fillMaxWidth()
+            .then(appearance.background?.let { Modifier.background(it.nativeColor()) } ?: Modifier),
+        verticalArrangement = Arrangement.spacedBy(gap),
+    ) {
+        if (props.displayTitle) {
+            props.title?.let {
+                Text(it, style = appearance.titleAppearance.nativeTextStyle(MaterialTheme.typography.titleMedium))
+            }
+        }
+        props.description?.let {
+            Text(
+                it,
+                style = appearance.labelAppearance.nativeTextStyle(MaterialTheme.typography.bodyMedium),
+            )
+        }
         if (props.series.any { it.values.isNotEmpty() }) {
-            NativeLineChartPlot(props)
+            NativeLineChartPlot(props, appearance)
         }
     }
 }
 
 @Composable
-private fun NativeLineChartPlot(props: DomposableLineChartProps) {
+private fun NativeLineChartPlot(
+    props: DomposableLineChartProps,
+    appearance: DomposableChartAppearance,
+) {
     val pointCount = chartPointCount(props.series, props.xAxisLabels)
     val range = chartValueRange(props.series)
     val height = props.sizePreset.materialHeight()
@@ -162,7 +188,12 @@ private fun NativeLineChartPlot(props: DomposableLineChartProps) {
         val inset = NATIVE_CHART_INSET_DP.dp.toPx()
         val plotWidth = (size.width - inset * 2).coerceAtLeast(1f)
         val plotHeight = (size.height - inset * 2).coerceAtLeast(1f)
-        val gridColor = Color(tokens.colors.outline.argb).copy(alpha = NATIVE_CHART_GRID_ALPHA)
+        val gridColor =
+            (
+                appearance.grid?.nativeColor() ?: Color(
+                    tokens.colors.outline.argb,
+                )
+            ).copy(alpha = NATIVE_CHART_GRID_ALPHA)
         repeat(DOMPOSABLE_CHART_GRID_LINE_COUNT) { tick ->
             val y = inset + plotHeight * tick / DOMPOSABLE_CHART_GRID_DIVISION_COUNT
             drawLine(
@@ -175,7 +206,11 @@ private fun NativeLineChartPlot(props: DomposableLineChartProps) {
         selectedIndex.takeIf { it >= 0 }?.let { index ->
             val x = chartX(index, pointCount, inset, plotWidth)
             drawLine(
-                Color(tokens.colors.primary.argb).copy(alpha = NATIVE_CHART_SELECTION_ALPHA),
+                (
+                    appearance.selection?.nativeColor() ?: Color(
+                        tokens.colors.primary.argb,
+                    )
+                ).copy(alpha = NATIVE_CHART_SELECTION_ALPHA),
                 Offset(x, inset),
                 Offset(x, size.height - inset),
                 strokeWidth = NATIVE_CHART_GRID_STROKE_DP.dp.toPx(),
@@ -227,7 +262,12 @@ private fun NativeLineChartPlot(props: DomposableLineChartProps) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             tickIndices.forEach { index ->
                 chartAxisLabel(props.series, props.xAxisLabels, index, pointCount)?.let { label ->
-                    Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                    Text(
+                        label,
+                        color = appearance.axis?.nativeColor() ?: LocalContentColor.current,
+                        style = appearance.labelAppearance.nativeTextStyle(MaterialTheme.typography.labelSmall),
+                        maxLines = 1,
+                    )
                 }
             }
         }
@@ -235,7 +275,10 @@ private fun NativeLineChartPlot(props: DomposableLineChartProps) {
     if (selectedPoints.isNotEmpty()) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             selectedPoints.forEach { point ->
-                Text("${point.value.label}: ${point.series.label} ${props.yAxisFormatter(point.value.value)}")
+                Text(
+                    "${point.value.label}: ${point.series.label} ${props.yAxisFormatter(point.value.value)}",
+                    style = appearance.labelAppearance.nativeTextStyle(MaterialTheme.typography.bodyMedium),
+                )
             }
         }
     }
@@ -247,26 +290,44 @@ internal fun NativeValueChart(
     modifier: DomposableModifier,
 ) {
     val tokens = LocalDomposableTokens.current
+    val appearance = props.appearance ?: tokens.components.valueChart
     val maximum =
         props.series
             .flatMap { it.values }
             .maxOfOrNull { abs(it.value) }
             ?.coerceAtLeast(0.001f) ?: 1f
     val gap = if (props.sizePreset == DomposableChartSize.Compact) 8.dp else 12.dp
-    Column(modifier.toComposeModifier().fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(gap)) {
-        Text(props.title, style = MaterialTheme.typography.titleMedium)
-        Text(props.description, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Column(
+        modifier
+            .toComposeModifier()
+            .fillMaxWidth()
+            .then(appearance.background?.let { Modifier.background(it.nativeColor()) } ?: Modifier),
+        verticalArrangement = Arrangement.spacedBy(gap),
+    ) {
+        Text(props.title, style = appearance.titleAppearance.nativeTextStyle(MaterialTheme.typography.titleMedium))
+        Text(
+            props.description,
+            style = appearance.labelAppearance.nativeTextStyle(MaterialTheme.typography.bodyMedium),
+        )
         Text(
             props.dataTableLabel,
             modifier = Modifier.semantics { heading() },
-            style = MaterialTheme.typography.titleSmall,
+            style = appearance.titleAppearance.nativeTextStyle(MaterialTheme.typography.titleSmall),
         )
         props.series.forEach { series ->
             key(series.key) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(series.label, style = MaterialTheme.typography.bodyMedium)
-                        series.currentValue?.let { Text(props.formatValue(it)) }
+                        Text(
+                            series.label,
+                            style = appearance.labelAppearance.nativeTextStyle(MaterialTheme.typography.bodyMedium),
+                        )
+                        series.currentValue?.let {
+                            Text(
+                                props.formatValue(it),
+                                style = appearance.labelAppearance.nativeTextStyle(MaterialTheme.typography.bodyMedium),
+                            )
+                        }
                     }
                     series.values.forEach { point ->
                         key(point.label) {
@@ -285,14 +346,28 @@ internal fun NativeValueChart(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Text(point.label, Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
+                                Text(
+                                    point.label,
+                                    Modifier.weight(1f),
+                                    style =
+                                        appearance.labelAppearance.nativeTextStyle(
+                                            MaterialTheme.typography.labelMedium,
+                                        ),
+                                )
                                 LinearProgressIndicator(
                                     progress = { (abs(point.value) / maximum).coerceIn(0f, 1f) },
                                     modifier = Modifier.weight(1f),
                                     color = color,
-                                    trackColor = Color(tokens.colors.surfaceVariant.argb),
+                                    trackColor =
+                                        appearance.grid?.nativeColor() ?: Color(tokens.colors.surfaceVariant.argb),
                                 )
-                                Text(props.formatValue(point.value), style = MaterialTheme.typography.labelMedium)
+                                Text(
+                                    props.formatValue(point.value),
+                                    style =
+                                        appearance.labelAppearance.nativeTextStyle(
+                                            MaterialTheme.typography.labelMedium,
+                                        ),
+                                )
                             }
                         }
                     }
@@ -307,6 +382,7 @@ internal fun NativeDataTable(
     props: DomposableDataTableProps,
     modifier: DomposableModifier,
 ) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
     val scroll = rememberScrollState()
     BoxWithConstraints(modifier.toComposeModifier().fillMaxWidth()) {
         val naturalWidth = (props.columns.size.coerceAtLeast(1) * 160).dp
@@ -319,21 +395,33 @@ internal fun NativeDataTable(
                 verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
             ) {
                 Row(
-                    Modifier.fillMaxWidth().semantics {
-                        collectionItemInfo = CollectionItemInfo(0, 1, 0, props.columns.size)
-                    },
+                    Modifier
+                        .fillMaxWidth()
+                        .background(appearance.headerContainer?.nativeColor() ?: Color.Transparent)
+                        .drawBottomBorder(appearance.border?.nativeColor())
+                        .semantics {
+                            collectionItemInfo = CollectionItemInfo(0, 1, 0, props.columns.size)
+                        },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     props.columns.forEach { column ->
                         key(column.key) {
                             Text(
                                 column.label,
-                                Modifier.weight(1f).padding(8.dp).semantics {
-                                    heading()
-                                    contentDescription = column.accessibleLabel
-                                },
+                                Modifier
+                                    .weight(
+                                        1f,
+                                    ).padding(appearance.cellPadding?.nativePadding() ?: PaddingValues(8.dp))
+                                    .semantics {
+                                        heading()
+                                        contentDescription = column.accessibleLabel
+                                    },
                                 textAlign = column.alignment.nativeTextAlign(),
-                                style = MaterialTheme.typography.labelLarge,
+                                color = appearance.headerContent?.nativeColor() ?: LocalContentColor.current,
+                                style =
+                                    appearance.headerTextAppearance.nativeTextStyle(
+                                        appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
+                                    ),
                             )
                         }
                     }
@@ -345,6 +433,10 @@ internal fun NativeDataTable(
                         Column(
                             Modifier
                                 .fillMaxWidth()
+                                .then(
+                                    (if (row.selected) appearance.selectedContainer else appearance.rowContainer)
+                                        ?.let { Modifier.background(it.nativeColor()) } ?: Modifier,
+                                ).drawBottomBorder(appearance.border?.nativeColor())
                                 .semantics {
                                     collectionItemInfo =
                                         CollectionItemInfo(index + 1, 1, 0, props.columns.size.coerceAtLeast(1))
@@ -353,28 +445,37 @@ internal fun NativeDataTable(
                                 }.then(if (rowAction != null) Modifier.clickable { rowAction(row.key) } else Modifier),
                             verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
                         ) {
-                            if (props.sizePreset == DomposableDataTableSize.Compact) {
-                                props.columns.forEach { column ->
-                                    NativeDataTableCell(
-                                        props,
-                                        row,
-                                        column,
-                                        actions[column.key],
-                                        Modifier.fillMaxWidth(),
-                                        compact = true,
-                                    )
-                                }
-                            } else {
-                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            CompositionLocalProvider(
+                                LocalTextStyle provides
+                                    appearance.textAppearance.nativeTextStyle(LocalTextStyle.current),
+                                LocalContentColor provides (
+                                    (if (row.selected) appearance.selectedContent else appearance.rowContent)
+                                        ?.nativeColor() ?: LocalContentColor.current
+                                ),
+                            ) {
+                                if (props.sizePreset == DomposableDataTableSize.Compact) {
                                     props.columns.forEach { column ->
                                         NativeDataTableCell(
                                             props,
                                             row,
                                             column,
                                             actions[column.key],
-                                            Modifier.weight(1f),
-                                            compact = false,
+                                            Modifier.fillMaxWidth(),
+                                            compact = true,
                                         )
+                                    }
+                                } else {
+                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                        props.columns.forEach { column ->
+                                            NativeDataTableCell(
+                                                props,
+                                                row,
+                                                column,
+                                                actions[column.key],
+                                                Modifier.weight(1f),
+                                                compact = false,
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -395,16 +496,23 @@ private fun NativeDataTableCell(
     modifier: Modifier,
     compact: Boolean,
 ) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
     Column(
         modifier
-            .padding(8.dp)
+            .padding(appearance.cellPadding?.nativePadding() ?: PaddingValues(8.dp))
             .then(if (action != null) Modifier.clickable(onClick = action) else Modifier)
             .semantics {
                 if (column.key == props.rowHeaderColumnKey) heading()
                 contentDescription = column.accessibleLabel
             },
     ) {
-        if (compact) Text(column.label, style = MaterialTheme.typography.labelMedium)
+        if (compact) {
+            Text(
+                column.label,
+                color = appearance.headerContent?.nativeColor() ?: LocalContentColor.current,
+                style = appearance.headerTextAppearance.nativeTextStyle(MaterialTheme.typography.labelMedium),
+            )
+        }
         props.cellContent(row, column)
     }
 }
@@ -414,6 +522,15 @@ private fun DomposableDataTableSize.nativeGap() =
         DomposableDataTableSize.Compact -> NATIVE_TABLE_COMPACT_GAP
         DomposableDataTableSize.Standard -> NATIVE_TABLE_STANDARD_GAP
         DomposableDataTableSize.Expanded -> NATIVE_TABLE_EXPANDED_GAP
+    }
+
+private fun Modifier.drawBottomBorder(color: Color?): Modifier =
+    if (color == null) {
+        this
+    } else {
+        drawBehind {
+            drawLine(color, Offset(0f, size.height), Offset(size.width, size.height), strokeWidth = 1.dp.toPx())
+        }
     }
 
 private fun DomposableChartSeries.nativeColor(

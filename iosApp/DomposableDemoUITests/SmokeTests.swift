@@ -150,6 +150,47 @@ final class SmokeTests: XCTestCase {
         }
         XCTFail("Could not reach button: \(label)")
     }
+    private func tapMaterialControl(_ app: XCUIApplication, _ label: String, identifier: String? = nil) {
+        func control() -> XCUIElement {
+            if let identifier {
+                return app.buttons[identifier]
+            }
+            return app.buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
+        }
+        for _ in 0..<24 {
+            let currentControl = control()
+            if visibleInMaterialCatalog(app, currentControl) {
+                currentControl.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+                return
+            }
+            swipeMaterialCatalog(app, upward: identifier == nil)
+        }
+        XCTFail("Could not reach Material catalog control: \(label)")
+    }
+    private func visibleInMaterialCatalog(_ app: XCUIApplication, _ element: XCUIElement) -> Bool {
+        guard element.exists && element.isHittable else { return false }
+        let scroll = app.descendants(matching: .any).matching(identifier: "material-catalog-scroll").firstMatch
+        let viewport = scroll.exists ? scroll.frame.intersection(app.frame) : app.frame
+        return !viewport.isNull && viewport.insetBy(dx: 2, dy: 2).contains(element.frame)
+    }
+    private func scrollToMaterialText(_ app: XCUIApplication, _ text: String) {
+        let element = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", text)).firstMatch
+        for _ in 0..<24 {
+            if visibleInMaterialCatalog(app, element) { return }
+            swipeMaterialCatalog(app, upward: true)
+        }
+        XCTAssertTrue(visibleInMaterialCatalog(app, element), "Material catalog content is not visible: \(text)")
+    }
+    private func swipeMaterialCatalog(_ app: XCUIApplication, upward: Bool) {
+        let scroll = app.descendants(matching: .any).matching(identifier: "material-catalog-scroll").firstMatch
+        let target = scroll.exists ? scroll : app
+        let x: CGFloat = scroll.exists ? 0.985 : 0.88
+        let startY: CGFloat = upward ? 0.82 : 0.25
+        let endY: CGFloat = upward ? 0.25 : 0.82
+        let start = target.coordinate(withNormalizedOffset: CGVector(dx: x, dy: startY))
+        let end = target.coordinate(withNormalizedOffset: CGVector(dx: x, dy: endY))
+        start.press(forDuration: 0.05, thenDragTo: end)
+    }
     func testCollectionLayoutsAndTableInput() {
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication()
@@ -204,6 +245,49 @@ final class SmokeTests: XCTestCase {
         tapVisible(app, "Documents and data lab")
         ready(app, "Documents and data lab")
         capture(app, "product-components", renderedText: "Documents and data lab")
+    }
+
+    func testMaterialCatalogSections() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launch()
+        ready(app, "Task workspace")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Components")).firstMatch.tap()
+        ready(app, "Component catalog")
+        tapMaterialControl(app, "Open the full Material and expressive catalog")
+        ready(app, "Material catalog")
+
+        let sections = [
+            ("Actions", "Choose an action", "material-actions"),
+            ("Selection", "Receive updates", "material-selection"),
+            ("Inputs", "January 1970", "material-inputs"),
+            ("Surfaces", "Local surface override", "material-surfaces"),
+            ("Navigation", "Home", "material-navigation"),
+            ("Feedback", "No queued message", "material-feedback"),
+            ("Gestures", "Swipe or use the dismissal action", "material-gestures"),
+            ("Scaffold", "The app owns its state, injection and navigation.", "material-scaffold"),
+        ]
+        for (section, content, name) in sections {
+            if section != "Actions" {
+                tapMaterialControl(app, section, identifier: "material-section-\(section.lowercased())")
+                let heading = app.descendants(matching: .any).matching(identifier: "material-section-heading").firstMatch
+                XCTAssertTrue(heading.waitForExistence(timeout: 10), "Missing Material section heading after tapping \(section)")
+                let selectedHeading = XCTNSPredicateExpectation(
+                    predicate: NSPredicate(format: "label == %@", section),
+                    object: heading,
+                )
+                XCTAssertEqual(
+                    XCTWaiter.wait(for: [selectedHeading], timeout: 10),
+                    .completed,
+                    "Tapping \(section) did not switch the Material catalog route. Current heading: \(heading.label)",
+                )
+            }
+            if section == "Actions" {
+                ready(app, section)
+            }
+            scrollToMaterialText(app, content)
+            capture(app, name, renderedText: content)
+        }
     }
 
 }

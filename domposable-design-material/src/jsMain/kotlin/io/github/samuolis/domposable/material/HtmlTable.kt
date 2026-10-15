@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import io.github.samuolis.domposable.foundation.DomposableTableAppearance
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTableProps
@@ -66,6 +67,7 @@ internal fun HtmlTable(
     val surface =
         LocalDomposableTokens.current.colors.surface
             .css()
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.table
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
@@ -93,6 +95,7 @@ internal fun HtmlTable(
                     property("border-collapse", "collapse")
                     property("table-layout", "fixed")
                     property("width", "100%")
+                    appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                 }
             }) {
                 Caption { Text(props.caption) }
@@ -101,7 +104,8 @@ internal fun HtmlTable(
                         property("position", "sticky")
                         property("top", "0")
                         property("z-index", "1")
-                        property("background", surface)
+                        property("background", appearance.headerContainer?.css() ?: surface)
+                        appearance.headerContent?.let { property("color", it.css()) }
                     }
                 }) {
                     Tr(attrs = { attr("aria-rowindex", "1") }) {
@@ -112,6 +116,10 @@ internal fun HtmlTable(
                                     style {
                                         property("padding", "8px")
                                         property("text-align", "start")
+                                        appearance.headerContainer?.let { property("background-color", it.css()) }
+                                        appearance.headerContent?.let { property("color", it.css()) }
+                                        appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                        appearance.headerTextAppearance?.let { applyCatalogTextAppearance(it) }
                                     }
                                 }) {
                                     Text(column.label)
@@ -141,7 +149,7 @@ internal fun HtmlTable(
                         }
                         val row = props.rows[index]
                         key(row.key) {
-                            HtmlTableRow(props, row, index, state) { height ->
+                            HtmlTableRow(props, appearance, row, index, state) { height ->
                                 val anchor = geometry.indexAt((state.offset - bodyStart).coerceAtLeast(0.0))
                                 val before = geometry.offset(anchor)
                                 if (geometry.update(index, height.coerceAtLeast(1.0))) {
@@ -193,6 +201,7 @@ private fun TableSpacer(
 @Composable
 private fun HtmlTableRow(
     props: DomposableTableProps,
+    appearance: DomposableTableAppearance,
     row: DomposableTableRow,
     index: Int,
     state: HtmlWindowState,
@@ -204,6 +213,11 @@ private fun HtmlTableRow(
         attr("data-window-owner", state.id)
         attr("data-window-key", row.key)
         attr("aria-rowindex", (index + 2).toString())
+        style {
+            appearance.rowContainer?.let { property("background-color", it.css()) }
+            appearance.rowContent?.let { property("color", it.css()) }
+            appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+        }
         fixed?.let { style { property("height", "${it.rowHeight.value}px") } }
         if (props.window?.measureRows == true) {
             ref { element ->
@@ -218,8 +232,11 @@ private fun HtmlTableRow(
                 key(props.columns[column].key) {
                     Td(attrs = {
                         style {
-                            property("padding", "8px")
+                            property("padding", appearance.cellPadding?.cssPadding() ?: "8px")
                             property("vertical-align", "top")
+                            appearance.rowContainer?.let { property("background-color", it.css()) }
+                            appearance.rowContent?.let { property("color", it.css()) }
+                            appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
                         }
                     }) {
                         Div(attrs = {

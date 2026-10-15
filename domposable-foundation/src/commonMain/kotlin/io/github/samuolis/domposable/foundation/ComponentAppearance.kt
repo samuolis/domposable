@@ -19,6 +19,8 @@ data class DomposableTextAppearance(
     val selectable: Boolean? = null,
     val liveRegion: DomposableLiveRegion? = null,
     val letterSpacing: Float? = null,
+    val role: DomposableTypographyRole? = null,
+    val emphasized: Boolean = false,
 ) {
     init {
         require(fontSize == null || (fontSize.isFinite() && fontSize > 0f))

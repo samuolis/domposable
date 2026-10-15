@@ -1,7 +1,13 @@
 package io.github.samuolis.domposable.ui
 
 import androidx.compose.runtime.Composable
+import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableComponent
+import io.github.samuolis.domposable.foundation.DomposableFabSize
+import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableSliderColors
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
+import io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant
 
 /** App-owned values stay stable when options are reordered or their labels are translated. */
 data class DomposableSelectOption(
@@ -15,12 +21,18 @@ data class DomposableTopAppBarProps(
     val title: String,
     val navigationIcon: @Composable () -> Unit = {},
     val actions: @Composable () -> Unit = {},
+    val appearance: DomposableSurfaceAppearance? = null,
+    val variant: DomposableTopAppBarVariant = DomposableTopAppBarVariant.Small,
+    val subtitle: String? = null,
 )
 
 @DomposableComponent("FloatingActionButton")
 data class DomposableFloatingActionButtonProps(
     val onClick: () -> Unit,
     val label: String,
+    val appearance: DomposableSurfaceAppearance? = null,
+    val size: DomposableFabSize = DomposableFabSize.Standard,
+    val extended: Boolean = false,
 )
 
 /** Presentation only: the app decides when to show, dismiss or replace a message. */
@@ -30,6 +42,7 @@ data class DomposableSnackbarProps(
     val actionLabel: String? = null,
     val onAction: (() -> Unit)? = null,
     val onDismiss: (() -> Unit)? = null,
+    val appearance: DomposableSurfaceAppearance? = null,
 ) {
     init {
         require((actionLabel == null) == (onAction == null)) { "Supply both actionLabel and onAction" }
@@ -44,6 +57,7 @@ data class DomposableSelectProps(
     val options: List<DomposableSelectOption>,
     val enabled: Boolean = true,
     val error: String? = null,
+    val appearance: DomposableButtonAppearance? = null,
 ) {
     init {
         require(options.map { it.value }.distinct().size == options.size) { "Select values must be unique" }
@@ -63,6 +77,7 @@ data class DomposableSegmentedButtonsProps(
     val groupName: String? = null,
     val showSelectedIcon: Boolean = true,
     val allowReselect: Boolean = true,
+    val appearance: DomposableItemAppearance? = null,
 ) {
     init {
         require(optionEnabled.size == labels.size && optionTestTags.size == labels.size) {
@@ -83,6 +98,7 @@ data class DomposableRangeSliderProps(
     val range: ClosedFloatingPointRange<Float> = 0f..1f,
     val steps: Int = 0,
     val enabled: Boolean = true,
+    val colors: DomposableSliderColors? = null,
 ) {
     init {
         require(range.start.isFinite() && range.endInclusive.isFinite() && range.start < range.endInclusive)
@@ -96,4 +112,7 @@ data class DomposableRangeSliderProps(
 @DomposableComponent("Tooltip")
 data class DomposableTooltipProps(
     val text: String,
+    val appearance: DomposableSurfaceAppearance? = null,
+    val title: String? = null,
+    val action: (@Composable () -> Unit)? = null,
 )

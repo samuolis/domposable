@@ -8,16 +8,32 @@ import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableAutocomplete
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
+import io.github.samuolis.domposable.foundation.DomposableCardVariant
+import io.github.samuolis.domposable.foundation.DomposableCheckboxAppearance
+import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponent
+import io.github.samuolis.domposable.foundation.DomposableControlPlacement
+import io.github.samuolis.domposable.foundation.DomposableDividerAppearance
+import io.github.samuolis.domposable.foundation.DomposableIconAppearance
+import io.github.samuolis.domposable.foundation.DomposableIconButtonVariant
 import io.github.samuolis.domposable.foundation.DomposableImageScale
 import io.github.samuolis.domposable.foundation.DomposableImeAction
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableInsets
+import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
+import io.github.samuolis.domposable.foundation.DomposableProgressVariant
+import io.github.samuolis.domposable.foundation.DomposableRadioButtonAppearance
+import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableScreenState
 import io.github.samuolis.domposable.foundation.DomposableSize
+import io.github.samuolis.domposable.foundation.DomposableSliderColors
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
+import io.github.samuolis.domposable.foundation.DomposableSwitchAppearance
+import io.github.samuolis.domposable.foundation.DomposableTabsVariant
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
@@ -47,13 +63,27 @@ data class DomposableNavigationItem(
     val label: String,
     val symbol: String = "",
     val href: String? = null,
+    val icon: (@Composable () -> Unit)? = null,
+    val enabled: Boolean = true,
 )
 
+@DomposableComponent("DropdownMenuItem")
 data class DomposableMenuItem(
     val label: String,
     val onClick: () -> Unit,
     val enabled: Boolean = true,
-)
+    val checked: Boolean? = null,
+    val selected: Boolean? = null,
+    val leadingIcon: (@Composable () -> Unit)? = null,
+    val selectedIcon: (@Composable () -> Unit)? = null,
+    val trailingContent: (@Composable () -> Unit)? = null,
+    val supportingText: (@Composable () -> Unit)? = null,
+    val appearance: DomposableItemAppearance? = null,
+) {
+    init {
+        require(checked == null || selected == null) { "A menu item is checkable or selectable" }
+    }
+}
 
 @DomposableComponent("Theme")
 data class DomposableThemeProps(
@@ -149,6 +179,9 @@ data class DomposableIconButtonProps(
     val onClick: () -> Unit,
     val label: String,
     val enabled: Boolean = true,
+    val appearance: DomposableButtonAppearance? = null,
+    val variant: DomposableIconButtonVariant = DomposableIconButtonVariant.Standard,
+    val checked: Boolean? = null,
 )
 
 /**
@@ -198,6 +231,11 @@ data class DomposableCheckboxProps(
     val onCheckedChange: (Boolean) -> Unit,
     val label: String,
     val enabled: Boolean = true,
+    val appearance: DomposableCheckboxAppearance? = null,
+    val showLabel: Boolean = true,
+    val description: String? = null,
+    val controlPlacement: DomposableControlPlacement = DomposableControlPlacement.Leading,
+    val indeterminate: Boolean = false,
 )
 
 @DomposableComponent("Switch")
@@ -206,6 +244,10 @@ data class DomposableSwitchProps(
     val onCheckedChange: (Boolean) -> Unit,
     val label: String,
     val enabled: Boolean = true,
+    val appearance: DomposableSwitchAppearance? = null,
+    val showLabel: Boolean = true,
+    val description: String? = null,
+    val controlPlacement: DomposableControlPlacement = DomposableControlPlacement.Leading,
 )
 
 @DomposableComponent("RadioButton")
@@ -214,6 +256,10 @@ data class DomposableRadioButtonProps(
     val onClick: () -> Unit,
     val label: String,
     val enabled: Boolean = true,
+    val appearance: DomposableRadioButtonAppearance? = null,
+    val showLabel: Boolean = true,
+    val description: String? = null,
+    val controlPlacement: DomposableControlPlacement = DomposableControlPlacement.Leading,
 )
 
 @DomposableComponent("Slider")
@@ -225,16 +271,25 @@ data class DomposableSliderProps(
         0f..1f,
     val steps: Int = 0,
     val enabled: Boolean = true,
+    val colors: DomposableSliderColors? = null,
+    val orientation: DomposableOrientation = DomposableOrientation.Horizontal,
+    val topToBottom: Boolean = true,
 )
 
 @DomposableComponent("Card")
 data class DomposableCardProps(
     val onClick: (() -> Unit)? = null,
+    val appearance: DomposableSurfaceAppearance? = null,
+    val variant: DomposableCardVariant = DomposableCardVariant.Filled,
+    val enabled: Boolean = true,
+    val href: String? = null,
+    val actionLabel: String? = null,
 )
 
 @DomposableComponent("Surface")
 data class DomposableSurfaceProps(
     val color: DomposableColor? = null,
+    val appearance: DomposableSurfaceAppearance? = null,
 )
 
 @DomposableComponent("Image")
@@ -250,11 +305,13 @@ data class DomposableImageProps(
 data class DomposableIconProps(
     val symbol: String,
     val description: String?,
+    val appearance: DomposableIconAppearance? = null,
 )
 
 @DomposableComponent("Divider")
 data class DomposableDividerProps(
     val orientation: DomposableOrientation = DomposableOrientation.Horizontal,
+    val appearance: DomposableDividerAppearance? = null,
 )
 
 @DomposableComponent("Spacer")
@@ -264,7 +321,9 @@ data class DomposableSpacerProps(
 
 @DomposableComponent("Badge")
 data class DomposableBadgeProps(
-    val text: String,
+    val text: String? = null,
+    val appearance: DomposableSurfaceAppearance? = null,
+    val label: String? = null,
 )
 
 @DomposableComponent("Chip")
@@ -273,25 +332,37 @@ data class DomposableChipProps(
     val onClick: () -> Unit,
     val selected: Boolean = false,
     val enabled: Boolean = true,
+    val appearance: DomposableItemAppearance? = null,
+    val variant: DomposableChipVariant = DomposableChipVariant.Filter,
+    val leadingIcon: (@Composable () -> Unit)? = null,
+    val trailingIcon: (@Composable () -> Unit)? = null,
+    val elevated: Boolean = false,
 )
 
 @DomposableComponent("Avatar")
 data class DomposableAvatarProps(
     val initials: String,
     val description: String,
+    val appearance: DomposableSurfaceAppearance? = null,
 )
 
 @DomposableComponent("Banner")
 data class DomposableBannerProps(
     val message: String,
     val isError: Boolean = false,
+    val appearance: DomposableSurfaceAppearance? = null,
 )
 
 @DomposableComponent("Progress")
 data class DomposableProgressProps(
     val value: Float? = null,
-    val label: String = "Loading",
+    val label: String? = "Loading",
     val circular: Boolean = true,
+    val appearance: DomposableProgressAppearance? = null,
+    val variant: DomposableProgressVariant = DomposableProgressVariant.Standard,
+    val liveRegion: io.github.samuolis.domposable.foundation.DomposableLiveRegion? = null,
+    val semantics: io.github.samuolis.domposable.foundation.DomposableProgressSemantics =
+        io.github.samuolis.domposable.foundation.DomposableProgressSemantics.ProgressBar,
 )
 
 @DomposableComponent("Tabs")
@@ -299,7 +370,17 @@ data class DomposableTabsProps(
     val labels: List<String>,
     val selectedIndex: Int,
     val onSelect: (Int) -> Unit,
-)
+    val appearance: DomposableItemAppearance? = null,
+    val variant: DomposableTabsVariant = DomposableTabsVariant.Primary,
+    val scrollable: Boolean = false,
+    val icons: List<(@Composable () -> Unit)?> = labels.map { null },
+    val leadingIcons: Boolean = false,
+) {
+    init {
+        require(labels.isNotEmpty() && selectedIndex in labels.indices)
+        require(icons.size == labels.size) { "Supply one optional icon for each tab" }
+    }
+}
 
 @DomposableComponent("NavigationBar")
 data class DomposableNavigationBarProps(
@@ -307,6 +388,9 @@ data class DomposableNavigationBarProps(
     val selectedIndex: Int,
     val onSelect: (Int) -> Unit,
     val orientation: DomposableOrientation = DomposableOrientation.Horizontal,
+    val appearance: DomposableItemAppearance? = null,
+    val short: Boolean = false,
+    val label: String = "Application",
 )
 
 @DomposableComponent("Menu")
@@ -314,6 +398,7 @@ data class DomposableMenuProps(
     val expanded: Boolean,
     val onDismiss: () -> Unit,
     val items: List<DomposableMenuItem>,
+    val appearance: DomposableSurfaceAppearance? = null,
 )
 
 @DomposableComponent("Dialog")
@@ -321,12 +406,16 @@ data class DomposableDialogProps(
     val title: String,
     val onDismiss: () -> Unit,
     val actions: @Composable () -> Unit = {},
+    val appearance: DomposableSurfaceAppearance? = null,
+    val variant: DomposableDialogVariant = DomposableDialogVariant.Alert,
 )
 
 @DomposableComponent("BottomSheet")
 data class DomposableBottomSheetProps(
     val title: String,
     val onDismiss: () -> Unit,
+    val appearance: DomposableSurfaceAppearance? = null,
+    val modal: Boolean = true,
 )
 
 @DomposableComponent("Scaffold")
@@ -338,6 +427,8 @@ data class DomposableScaffoldProps(
     val floatingAction: @Composable () -> Unit = {},
     val snackbar: @Composable () -> Unit = {},
     val overlays: @Composable () -> Unit = {},
+    val appearance: DomposableSurfaceAppearance? = null,
+    val floatingActionPosition: DomposableScaffoldFabPosition = DomposableScaffoldFabPosition.End,
 )
 
 val LocalDomposableTokens = staticCompositionLocalOf { DomposableTokens() }
@@ -435,8 +526,24 @@ fun DomposableTheme(
 @Composable fun DomposableCard(
     modifier: DomposableModifier = DomposableModifier,
     onClick: (() -> Unit)? = null,
+    appearance: DomposableSurfaceAppearance? = null,
+    variant: DomposableCardVariant = DomposableCardVariant.Filled,
+    enabled: Boolean = true,
+    href: String? = null,
+    actionLabel: String? = null,
     content: @Composable () -> Unit,
-) = DomposableCard(DomposableCardProps(onClick), modifier, content)
+) = DomposableCard(
+    DomposableCardProps(
+        onClick,
+        appearance = appearance,
+        variant = variant,
+        enabled = enabled,
+        href = href,
+        actionLabel = actionLabel,
+    ),
+    modifier,
+    content,
+)
 
 @Composable fun DomposableTextField(
     value: String,
@@ -465,6 +572,8 @@ fun DomposableTheme(
     leadingIcon: (@Composable () -> Unit)? = null,
     prefix: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    appearance: DomposableTextFieldAppearance? = null,
+    onFocusChange: ((Boolean) -> Unit)? = null,
 ) = DomposableTextField(
     DomposableTextFieldProps(
         value = value,
@@ -492,6 +601,8 @@ fun DomposableTheme(
         leadingIcon = leadingIcon,
         prefix = prefix,
         trailingIcon = trailingIcon,
+        appearance = appearance,
+        onFocusChange = onFocusChange,
     ),
     modifier,
 )
@@ -502,15 +613,35 @@ fun DomposableTheme(
     label: String,
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
-) = DomposableCheckbox(DomposableCheckboxProps(checked, onCheckedChange, label, enabled), modifier)
+    appearance: DomposableCheckboxAppearance? = null,
+    showLabel: Boolean = true,
+    description: String? = null,
+    controlPlacement: DomposableControlPlacement = DomposableControlPlacement.Leading,
+    indeterminate: Boolean = false,
+) = DomposableCheckbox(
+    DomposableCheckboxProps(
+        checked,
+        onCheckedChange,
+        label,
+        enabled,
+        appearance = appearance,
+        showLabel = showLabel,
+        description = description,
+        controlPlacement = controlPlacement,
+        indeterminate = indeterminate,
+    ),
+    modifier,
+)
 
 @Composable fun DomposableSpacer(
     length: DomposableLength = 8.dp,
     modifier: DomposableModifier = DomposableModifier,
 ) = DomposableSpacer(DomposableSpacerProps(length), modifier)
 
-@Composable fun DomposableDivider(modifier: DomposableModifier = DomposableModifier) =
-    DomposableDivider(DomposableDividerProps(), modifier)
+@Composable fun DomposableDivider(
+    modifier: DomposableModifier = DomposableModifier,
+    appearance: DomposableDividerAppearance? = null,
+) = DomposableDivider(DomposableDividerProps(appearance = appearance), modifier)
 
 class DomposableScaffoldScope internal constructor(
     val contentModifier: DomposableModifier,
@@ -527,12 +658,24 @@ fun DomposableScaffold(
     navigation: @Composable () -> Unit = {},
     contextual: @Composable () -> Unit = {},
     floatingAction: @Composable () -> Unit = {},
+    floatingActionPosition: DomposableScaffoldFabPosition = DomposableScaffoldFabPosition.End,
     snackbar: @Composable () -> Unit = {},
     overlays: @Composable () -> Unit = {},
+    appearance: DomposableSurfaceAppearance? = null,
     content: @Composable DomposableScaffoldScope.() -> Unit,
 ) {
     DomposableScaffold(
-        DomposableScaffoldProps(topBar, bottomBar, navigation, contextual, floatingAction, snackbar, overlays),
+        DomposableScaffoldProps(
+            topBar,
+            bottomBar,
+            navigation,
+            contextual,
+            floatingAction,
+            snackbar,
+            overlays,
+            appearance = appearance,
+            floatingActionPosition = floatingActionPosition,
+        ),
         modifier,
     ) {
         DomposableMeasure { size ->
@@ -546,26 +689,79 @@ fun DomposableScaffold(
     }
 }
 
+/** Screen chrome without imposing a state model, ViewModel, DI container, or navigator. */
 @Composable
+@Suppress("LongParameterList")
+fun DomposableScreenScaffold(
+    modifier: DomposableModifier = DomposableModifier,
+    insets: DomposableInsets = DomposableInsets(),
+    topBar: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
+    navigation: @Composable () -> Unit = {},
+    contextual: @Composable () -> Unit = {},
+    floatingAction: @Composable () -> Unit = {},
+    floatingActionPosition: DomposableScaffoldFabPosition = DomposableScaffoldFabPosition.End,
+    snackbar: @Composable () -> Unit = {},
+    overlays: @Composable () -> Unit = {},
+    appearance: DomposableSurfaceAppearance? = null,
+    content: @Composable DomposableScaffoldScope.() -> Unit,
+) = DomposableScaffold(
+    modifier = modifier,
+    insets = insets,
+    topBar = topBar,
+    bottomBar = bottomBar,
+    navigation = navigation,
+    contextual = contextual,
+    floatingAction = floatingAction,
+    floatingActionPosition = floatingActionPosition,
+    snackbar = snackbar,
+    overlays = overlays,
+    appearance = appearance,
+    content = content,
+)
+
+/** Optional loading/error convenience; applications can supply their own state and chrome. */
+@Composable
+@Suppress("LongParameterList")
 fun <T> DomposableScreenScaffold(
     state: DomposableScreenState<T>,
     modifier: DomposableModifier = DomposableModifier,
+    insets: DomposableInsets = DomposableInsets(),
+    topBar: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
+    navigation: @Composable () -> Unit = {},
+    contextual: @Composable () -> Unit = {},
+    floatingAction: @Composable () -> Unit = {},
+    floatingActionPosition: DomposableScaffoldFabPosition = DomposableScaffoldFabPosition.End,
+    snackbar: @Composable () -> Unit = {},
+    overlays: @Composable () -> Unit = {},
+    appearance: DomposableSurfaceAppearance? = null,
+    loading: @Composable DomposableScaffoldScope.() -> Unit = {
+        DomposableProgress(DomposableProgressProps())
+    },
+    error: @Composable DomposableScaffoldScope.(DomposableScreenState.Error) -> Unit = { failure ->
+        DomposableBanner(DomposableBannerProps(failure.message, isError = true))
+        failure.retry?.let { DomposableButton("Retry", it) }
+    },
     content: @Composable DomposableScaffoldScope.(T) -> Unit,
 ) {
-    DomposableScaffold(modifier) {
+    DomposableScreenScaffold(
+        modifier,
+        insets,
+        topBar,
+        bottomBar,
+        navigation,
+        contextual,
+        floatingAction,
+        floatingActionPosition,
+        snackbar,
+        overlays,
+        appearance,
+    ) {
         when (state) {
-            DomposableScreenState.Loading -> {
-                DomposableProgress(DomposableProgressProps())
-            }
-
-            is DomposableScreenState.Error -> {
-                DomposableBanner(DomposableBannerProps(state.message, isError = true))
-                state.retry?.let { DomposableButton("Retry", it) }
-            }
-
-            is DomposableScreenState.Content -> {
-                content(state.value)
-            }
+            DomposableScreenState.Loading -> loading()
+            is DomposableScreenState.Error -> error(state)
+            is DomposableScreenState.Content -> content(state.value)
         }
     }
 }

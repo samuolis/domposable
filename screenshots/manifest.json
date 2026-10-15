@@ -9,7 +9,15 @@
     "collection-row",
     "collection-grid",
     "collection-table",
-    "product-components"
+    "product-components",
+    "material-actions",
+    "material-selection",
+    "material-inputs",
+    "material-surfaces",
+    "material-navigation",
+    "material-feedback",
+    "material-gestures",
+    "material-scaffold"
   ],
   "desktop": [
     "tasks",
@@ -21,7 +29,15 @@
     "collection-row",
     "collection-grid",
     "collection-table",
-    "product-components"
+    "product-components",
+    "material-actions",
+    "material-selection",
+    "material-inputs",
+    "material-surfaces",
+    "material-navigation",
+    "material-feedback",
+    "material-gestures",
+    "material-scaffold"
   ],
   "ios": [
     "tasks",
@@ -34,7 +50,15 @@
     "collection-row",
     "collection-grid",
     "collection-table",
-    "product-components"
+    "product-components",
+    "material-actions",
+    "material-selection",
+    "material-inputs",
+    "material-surfaces",
+    "material-navigation",
+    "material-feedback",
+    "material-gestures",
+    "material-scaffold"
   ],
   "dom": [
     "tasks-phone",
@@ -54,7 +78,15 @@
     "collection-row",
     "collection-grid",
     "collection-table",
-    "product-components"
+    "product-components",
+    "material-actions",
+    "material-selection",
+    "material-inputs",
+    "material-surfaces",
+    "material-navigation",
+    "material-feedback",
+    "material-gestures",
+    "material-scaffold"
   ],
   "wasm": [
     "tasks-phone",
@@ -65,6 +97,14 @@
     "shop-wide",
     "extended-components",
     "collection-measured",
-    "product-components"
+    "product-components",
+    "material-actions",
+    "material-selection",
+    "material-inputs",
+    "material-surfaces",
+    "material-navigation",
+    "material-feedback",
+    "material-gestures",
+    "material-scaffold"
   ]
 }

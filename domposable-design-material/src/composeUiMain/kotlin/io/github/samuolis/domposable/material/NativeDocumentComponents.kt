@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,10 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -43,6 +48,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.samuolis.domposable.foundation.DomposableFontWeight
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
@@ -130,7 +136,8 @@ internal fun NativeDomposableDisclosure(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
-    Card(modifier = modifier.toComposeModifier()) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.disclosure
+    val disclosureContent: @Composable () -> Unit = {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier =
@@ -142,7 +149,12 @@ internal fun NativeDomposableDisclosure(
                         }.clickable(enabled = domposableFormEnabled(), onClick = props.onToggle),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(props.title, style = MaterialTheme.typography.titleSmall)
+                Text(
+                    props.title,
+                    style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.titleSmall),
+                    maxLines = appearance.textAppearance?.maxLines ?: Int.MAX_VALUE,
+                    overflow = appearance.textAppearance?.overflow?.nativeTextOverflow() ?: TextOverflow.Clip,
+                )
                 Spacer(Modifier.width(12.dp))
                 Text(
                     if (props.expanded) "▴" else "▾",
@@ -150,8 +162,33 @@ internal fun NativeDomposableDisclosure(
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
-            props.description?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+            props.description?.let {
+                Text(
+                    it,
+                    style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.bodySmall),
+                    maxLines = appearance.textAppearance?.maxLines ?: Int.MAX_VALUE,
+                    overflow = appearance.textAppearance?.overflow?.nativeTextOverflow() ?: TextOverflow.Clip,
+                )
+            }
             if (props.expanded) content()
+        }
+    }
+    if (appearance == DomposableSurfaceAppearance()) {
+        Card(modifier = modifier.toComposeModifier()) { disclosureContent() }
+    } else {
+        Surface(
+            modifier = modifier.toComposeModifier(),
+            shape = appearance.nativeShape(MaterialTheme.shapes.medium),
+            color = appearance.nativeContainer(MaterialTheme.colorScheme.surfaceContainerLow),
+            contentColor = appearance.nativeContent(MaterialTheme.colorScheme.onSurface),
+            tonalElevation = appearance.tonalElevation?.value?.dp ?: 1.dp,
+            shadowElevation = appearance.shadowElevation?.value?.dp ?: 0.dp,
+            border = appearance.border?.let { BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()) },
+        ) {
+            CompositionLocalProvider(
+                LocalTextStyle provides appearance.textAppearance.nativeTextStyle(LocalTextStyle.current),
+                content = disclosureContent,
+            )
         }
     }
 }
@@ -161,14 +198,18 @@ internal fun NativeDomposableRichHtml(
     props: DomposableRichHtmlProps,
     modifier: DomposableModifier,
 ) {
+    val tokens = LocalDomposableTokens.current
+    val appearance = props.appearance ?: tokens.components.text
     val currentOnLinkClick by rememberUpdatedState(props.onLinkClick)
     val parsed = remember(props.rawHtml) { parseDomposableRichHtml(props.rawHtml) }
     val baseStyle =
-        when (props.style) {
-            DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
-            DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
-            DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
-        }
+        appearance.nativeTextStyle(
+            when (props.style) {
+                DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
+                DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
+                DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
+            },
+        )
     val headlineSize = MaterialTheme.typography.headlineSmall.fontSize
     val titleSize = MaterialTheme.typography.titleMedium.fontSize
     val annotated =
@@ -190,9 +231,16 @@ internal fun NativeDomposableRichHtml(
             if (props.style == DomposableTextStyle.Title) heading()
         }
     val textContent: @Composable () -> Unit = {
-        Text(annotated, modifier = textModifier, style = baseStyle)
+        Text(
+            annotated,
+            modifier = textModifier,
+            color = props.color?.nativeColor() ?: Color.Unspecified,
+            style = baseStyle,
+            maxLines = appearance.maxLines ?: Int.MAX_VALUE,
+            overflow = appearance.overflow.nativeTextOverflow(),
+        )
     }
-    if (props.selectable) SelectionContainer { textContent() } else textContent()
+    if (appearance.selectable ?: props.selectable) SelectionContainer { textContent() } else textContent()
 }
 
 private class NativeRichHtmlWriter(

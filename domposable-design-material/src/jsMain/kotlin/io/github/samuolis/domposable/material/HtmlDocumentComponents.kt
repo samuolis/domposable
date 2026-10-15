@@ -62,6 +62,23 @@ internal fun HtmlDomposableForm(
                     TagElement<HTMLElement>(tagName = "legend", applyAttrs = {}) { Text(it) }
                 }
                 ProvideDomposableFormSubmit(props) { content() }
+                Button(attrs = {
+                    type(ButtonType.Submit)
+                    attr("tabindex", "-1")
+                    attr("aria-hidden", "true")
+                    attr("data-domposable-implicit-submit", "")
+                    style {
+                        property("position", "absolute")
+                        property("width", "1px")
+                        property("height", "1px")
+                        property("padding", "0")
+                        property("margin", "-1px")
+                        property("overflow", "hidden")
+                        property("clip", "rect(0,0,0,0)")
+                        property("white-space", "nowrap")
+                        property("border", "0")
+                    }
+                }) {}
             }
         }
     }
@@ -74,16 +91,24 @@ internal fun HtmlDomposableDisclosure(
     content: @Composable () -> Unit,
 ) {
     val tokens = LocalDomposableTokens.current
+    val appearance = props.appearance ?: tokens.components.disclosure
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-disclosure")
             style {
-                property("border", "1px solid ${tokens.colors.outline.css()}")
-                property("border-radius", "${tokens.radius.value}px")
-                property("background-color", tokens.colors.surface.css())
-                property("color", tokens.colors.onSurface.css())
+                property(
+                    "border",
+                    "${appearance.borderWidth.value}px solid " +
+                        (appearance.border?.css() ?: tokens.colors.outline.css()),
+                )
+                appearance.shape?.let { materialShape(it) } ?: property("border-radius", "${tokens.radius.value}px")
+                property("background-color", appearance.container?.css() ?: tokens.colors.surface.css())
+                property("color", appearance.content?.css() ?: tokens.colors.onSurface.css())
                 property("padding", "${tokens.spacing.medium.value}px")
+                appearance.tonalElevation?.let { surfaceAppearance(appearance) }
+                appearance.shadowElevation?.let { surfaceAppearance(appearance) }
+                appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
             }
         }) {
             Button(attrs = {
@@ -103,6 +128,7 @@ internal fun HtmlDomposableDisclosure(
                     property("font", "inherit")
                     property("text-align", "start")
                     property("cursor", "pointer")
+                    appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                 }
                 onClick { props.onToggle() }
             }) {
@@ -112,9 +138,14 @@ internal fun HtmlDomposableDisclosure(
             props.description?.let { description ->
                 P(attrs = {
                     style {
-                        property("font-size", "${tokens.typography.labelSize}px")
-                        property("line-height", tokens.typography.lineHeight.toString())
+                        property("font-size", "${appearance.textAppearance?.fontSize ?: tokens.typography.labelSize}px")
+                        property(
+                            "line-height",
+                            appearance.textAppearance?.lineHeight?.let { "${it}px" }
+                                ?: tokens.typography.lineHeight.toString(),
+                        )
                         property("margin", "${tokens.spacing.small.value}px 0 0")
+                        appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                     }
                 }) { Text(description) }
             }
@@ -133,8 +164,10 @@ internal fun HtmlDomposableRichHtml(
     val currentOnLinkClick by rememberUpdatedState(props.onLinkClick)
     val nodes = parseDomposableRichHtml(props.rawHtml)
     val tokens = LocalDomposableTokens.current
+    val appearance = props.appearance ?: tokens.components.text
+    val effectiveSelectable = appearance.selectable ?: props.selectable
     val fontSize =
-        when (props.style) {
+        appearance.fontSize ?: when (props.style) {
             DomposableTextStyle.Body -> tokens.typography.bodySize
             DomposableTextStyle.Title -> tokens.typography.titleSize
             DomposableTextStyle.Label -> tokens.typography.labelSize
@@ -143,12 +176,14 @@ internal fun HtmlDomposableRichHtml(
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-rich-html", "d-text", "d-text-${props.style.name.lowercase()}")
-            attr("data-selectable", props.selectable.toString())
+            attr("data-selectable", effectiveSelectable.toString())
             style {
                 property("font-family", tokens.typography.fontFamily)
                 property("font-size", "${fontSize}px")
                 property("line-height", tokens.typography.lineHeight.toString())
-                property("user-select", if (props.selectable) "text" else "none")
+                property("user-select", if (effectiveSelectable) "text" else "none")
+                props.color?.let { property("color", it.css()) }
+                applyCatalogTextAppearance(appearance)
             }
         }) {
             nodes.forEach { RenderHtmlRichNode(it, currentOnLinkClick) }
@@ -236,7 +271,7 @@ internal fun HtmlDomposableLink(
 ) {
     val currentOnClick by rememberUpdatedState(props.onClick)
     val tokens = LocalDomposableTokens.current
-    val appearance = props.appearance
+    val appearance = props.appearance ?: tokens.components.link
     val fontSize =
         appearance?.fontSize ?: when (props.textStyle) {
             DomposableTextStyle.Body -> tokens.typography.bodySize
@@ -248,13 +283,11 @@ internal fun HtmlDomposableLink(
         A(href = props.href, attrs = {
             domposableAttributes(modifier)
             classes("d-link")
-            if (appearance != null) {
-                style {
-                    property("display", "inline")
-                    property("min-height", "0")
-                    property("padding", "0")
-                    property("align-items", "initial")
-                }
+            style {
+                property("display", "inline")
+                property("min-height", "0")
+                property("padding", "0")
+                property("align-items", "initial")
             }
             appearance?.maxLines?.let { maxLines ->
                 style {

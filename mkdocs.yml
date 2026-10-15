@@ -17,6 +17,7 @@ nav:
       - Get started: getting-started.md
       - How the API works: how-it-works.md
       - Components: components.md
+      - Material catalog: material-catalog.md
       - Design systems: design-systems.md
       - Adaptive layouts: adaptive.md
       - Large collections: performance.md

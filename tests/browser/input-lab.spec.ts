@@ -120,13 +120,14 @@ test.describe('Wasm input and semantics', () => {
     })), results.violations);
     // These exact nodes are emitted by the pinned Compose 1.13.0-alpha02 bridge.
     // No axe rule is disabled. A changed/new node or rule requires investigation.
-    expect(findings).toEqual([
+    // Material scaffold slots can change DOM order; retain the exact nodes and counts.
+    expect(findings.map(node => JSON.stringify(node)).sort()).toEqual([
       { rule: 'aria-allowed-attr', tag: 'DIV', role: null, orientation: 'vertical', text: '' },
       { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: '◈ Domposable' },
       { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: 'Input and accessibility lab' },
       ...['Tasks', 'Components', 'Recipes'].map(text => ({ rule: 'aria-required-parent', tag: 'DIV', role: 'tab', orientation: null, text })),
       { rule: 'aria-roles', tag: 'CANVAS', role: 'generic', orientation: null, text: '' },
-    ]);
+    ].map(node => JSON.stringify(node)).sort());
     mkdirSync('build/accessibility', { recursive: true });
     writeFileSync('build/accessibility/wasm-input-lab.json', JSON.stringify({
       source: 'Compose 1.13.0-alpha02 semantics bridge', certification: false, findings, axe: results,

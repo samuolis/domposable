@@ -20,6 +20,7 @@ import io.github.samuolis.domposable.demo.generated.collectionLabDestination
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
 import io.github.samuolis.domposable.demo.generated.inputLabDestination
+import io.github.samuolis.domposable.demo.generated.materialCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.navigationPoliciesDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
 import io.github.samuolis.domposable.demo.generated.productComponentLabDestination
@@ -106,6 +107,10 @@ sealed interface DemoRoute {
 
     data object ExtendedCatalog : DemoRoute
 
+    data class Material(
+        val section: String = "actions",
+    ) : DemoRoute
+
     data object Catalog : DemoRoute
 
     data object Recipes : DemoRoute
@@ -133,6 +138,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.Tasks -> "/tasks"
             DemoRoute.ExtendedCatalog -> "/components"
             DemoRoute.Catalog -> "/catalog"
+            is DemoRoute.Material -> "/material/${route.section}"
             DemoRoute.Recipes -> "/recipes"
             DemoRoute.Policies -> "/navigation-policies"
             DemoRoute.Roots -> "/roots"
@@ -146,25 +152,49 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
 
     override fun decode(path: String): DemoRoute? =
         when {
-            path == "/tasks" || path == "/" || path.isEmpty() -> DemoRoute.Tasks
+            path == "/tasks" || path == "/" || path.isEmpty() -> {
+                DemoRoute.Tasks
+            }
 
-            path == "/components" -> DemoRoute.ExtendedCatalog
+            path == "/components" -> {
+                DemoRoute.ExtendedCatalog
+            }
 
-            path == "/catalog" -> DemoRoute.Catalog
+            path == "/catalog" -> {
+                DemoRoute.Catalog
+            }
 
-            path == "/recipes" -> DemoRoute.Recipes
+            path.startsWith("/material/") && path.removePrefix("/material/") in MaterialSections -> {
+                DemoRoute.Material(path.removePrefix("/material/"))
+            }
 
-            path == "/navigation-policies" -> DemoRoute.Policies
+            path == "/recipes" -> {
+                DemoRoute.Recipes
+            }
 
-            path == "/roots" -> DemoRoute.Roots
+            path == "/navigation-policies" -> {
+                DemoRoute.Policies
+            }
 
-            path == "/collections" -> DemoRoute.Collections
+            path == "/roots" -> {
+                DemoRoute.Roots
+            }
 
-            path == "/collection-recipes" -> DemoRoute.AdvancedCollections
+            path == "/collections" -> {
+                DemoRoute.Collections
+            }
 
-            path == "/product-components" -> DemoRoute.ProductComponents
+            path == "/collection-recipes" -> {
+                DemoRoute.AdvancedCollections
+            }
 
-            path == "/inputs" -> DemoRoute.Inputs
+            path == "/product-components" -> {
+                DemoRoute.ProductComponents
+            }
+
+            path == "/inputs" -> {
+                DemoRoute.Inputs
+            }
 
             path.startsWith(
                 "/tasks/",
@@ -173,9 +203,13 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
                     .removePrefix(
                         "/tasks/",
                     ).matches(Regex("[a-z0-9-]+"))
-            -> DemoRoute.Detail(path.removePrefix("/tasks/"))
+            -> {
+                DemoRoute.Detail(path.removePrefix("/tasks/"))
+            }
 
-            else -> DemoRoute.NotFound(path)
+            else -> {
+                DemoRoute.NotFound(path)
+            }
         }
 }
 
@@ -281,7 +315,10 @@ fun DemoApp(
                 )
                 register(
                     componentCatalogScreenDestination {
-                        ComponentCatalogScreen { stack.add(DomposableEntryScope(DemoRoute.ExtendedCatalog)) }
+                        ComponentCatalogScreen(
+                            onMoreComponents = { stack.add(DomposableEntryScope(DemoRoute.ExtendedCatalog)) },
+                            onMaterialCatalog = { stack.add(DomposableEntryScope(DemoRoute.Material())) },
+                        )
                     },
                 )
                 register(
@@ -311,6 +348,13 @@ fun DemoApp(
                 )
                 register(advancedCollectionsDestination())
                 register(inputLabDestination())
+                register(
+                    materialCatalogScreenDestination {
+                        MaterialCatalogScreen(route.section) { section ->
+                            stack[stack.lastIndex] = DomposableEntryScope(DemoRoute.Material(section))
+                        }
+                    },
+                )
                 register(productComponentLabDestination())
                 register(
                     unavailableScreenDestination {
@@ -490,7 +534,10 @@ fun TaskDetailScreen(
 
 @Composable
 @DomposableScreen(route = DemoRoute.Catalog::class)
-fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
+fun ComponentCatalogScreen(
+    onMoreComponents: () -> Unit = {},
+    onMaterialCatalog: () -> Unit = {},
+) {
     var text by rememberSaveable { mutableStateOf("") }
     var checked by rememberSaveable { mutableStateOf(false) }
     var slider by rememberSaveable { mutableFloatStateOf(0.5f) }
@@ -573,6 +620,11 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
             key = { "cell-$it" },
             modifier = DomposableModifier.height(180.dp).fillMaxWidth(),
         ) { number -> DomposableCard { DomposableText("Cell $number") } }
+        DomposableLink(
+            "Open the full Material and expressive catalog",
+            "#/material/actions",
+            onClick = onMaterialCatalog,
+        )
         DomposableText("Nested theme", style = DomposableTextStyle.Title)
         val base = LocalDomposableTokens.current
         DomposableTheme(

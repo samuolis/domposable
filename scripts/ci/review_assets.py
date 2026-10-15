@@ -61,6 +61,14 @@ def asset_name(pr: int, run: int, platform: str, scenario: str, data: bytes) -> 
         raise ValueError('Invalid review asset identity')
     return f'pr-{pr}-run-{run}-{platform}-{scenario}-{hashlib.sha256(data).hexdigest()}.png'
 
+def validate_manifest(manifest):
+    platforms = {'android', 'desktop', 'ios', 'dom', 'wasm'}
+    if set(manifest) != platforms or any(
+        not isinstance(names, list) or not 0 < len(names) <= 64 or len(set(names)) != len(names)
+        for names in manifest.values()
+    ):
+        raise ValueError('Expected five bounded, unique platform screenshot inventories')
+
 def release_assets(release_id):
     assets = []
     for page in range(1, 12):
@@ -130,7 +138,7 @@ def main():
         raise SystemExit('Expected two bounded, available CI evidence artifacts')
     manifest_file = api(f'contents/screenshots/manifest.json?ref={run["head_sha"]}')
     manifest = json.loads(base64.b64decode(manifest_file['content']))
-    if sum(len(names) for names in manifest.values()) > 64: raise SystemExit('Unexpected screenshot inventory size')
+    validate_manifest(manifest)
     files = []
     with tempfile.TemporaryDirectory(prefix='domposable-visual-review-') as directory:
         subprocess.run(['gh','run','download',str(args.run),'--repo',REPO,'--dir',directory,'--name','android-html-evidence','--name','native-evidence'],check=True)

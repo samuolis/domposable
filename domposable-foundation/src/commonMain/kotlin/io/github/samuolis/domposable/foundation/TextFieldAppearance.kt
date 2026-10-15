@@ -32,13 +32,14 @@ data class DomposableTextFieldAppearance(
     val floatingLabelAppearance: DomposableTextAppearance? = null,
     val placeholderAppearance: DomposableTextAppearance? = null,
     val supportingAppearance: DomposableTextAppearance? = null,
-    /** HTML inner geometry; native Material keeps its standard decoration padding. */
+    /** Inner field decoration padding. */
     val contentPadding: DomposableInsets? = null,
     val minHeight: DomposableLength? = null,
-    /** HTML stroke widths; native Material uses its standard focused/unfocused strokes. */
+    /** Unfocused and focused decoration stroke widths. */
     val outlineWidth: DomposableLength? = null,
     val focusedOutlineWidth: DomposableLength? = null,
-    val floatingLabel: Boolean = false,
+    /** Float HTML labels inside the field; native Material manages its label placement. */
+    val floatingLabel: Boolean = true,
     val autoSize: Boolean = false,
     val variant: DomposableTextFieldVariant = DomposableTextFieldVariant.Outlined,
 )

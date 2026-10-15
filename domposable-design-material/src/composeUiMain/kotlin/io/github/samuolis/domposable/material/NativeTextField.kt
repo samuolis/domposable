@@ -4,12 +4,21 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SecureTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
@@ -19,11 +28,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.onClick
@@ -34,6 +45,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableImeAction
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableStateColors
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
@@ -48,6 +60,7 @@ import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.rememberDomposableFormSubmitOrNull
 import io.github.samuolis.domposable.ui.toComposeModifier
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.drop
 
 @Composable
 internal fun NativeTextField(
@@ -189,7 +202,232 @@ internal fun NativeTextField(
         } else {
             VisualTransformation.None
         }
-    if (appearance.variant == DomposableTextFieldVariant.Filled) {
+    val customNativeDecoration =
+        appearance.contentPadding != null || appearance.outlineWidth != null || appearance.focusedOutlineWidth != null
+    val securePassword =
+        props.purpose == DomposableInputPurpose.Password && props.singleLine && !props.readOnly &&
+            !customNativeDecoration
+    if (securePassword) {
+        val secureState = rememberTextFieldState(props.value)
+        val currentValue by rememberUpdatedState(props.value)
+        val currentChange by rememberUpdatedState(props.onValueChange)
+        LaunchedEffect(secureState) {
+            snapshotFlow { secureState.text.toString() }.drop(1).collect { value ->
+                if (value !=
+                    currentValue
+                ) {
+                    currentChange(value)
+                }
+            }
+        }
+        LaunchedEffect(props.value, secureState) {
+            if (secureState.text.toString() != props.value) {
+                secureState.edit { replace(0, length, props.value) }
+            }
+        }
+        val secureModifier = nativeModifier
+        val labelSlot: @Composable androidx.compose.material3.TextFieldLabelScope.() -> Unit = {
+            if (label !=
+                null
+            ) {
+                label()
+            }
+        }
+        val secureKeyboardAction =
+            if (submit != null &&
+                props.imeAction in
+                setOf(
+                    DomposableImeAction.Done,
+                    DomposableImeAction.Go,
+                    DomposableImeAction.Search,
+                    DomposableImeAction.Send,
+                )
+            ) {
+                KeyboardActionHandler { submit() }
+            } else {
+                null
+            }
+        if (appearance.variant == DomposableTextFieldVariant.Filled) {
+            SecureTextField(
+                state = secureState,
+                modifier = secureModifier,
+                enabled = enabled,
+                textStyle = textStyle,
+                label = if (label == null) null else labelSlot,
+                placeholder = placeholder,
+                leadingIcon = leadingIcon,
+                trailingIcon = trailingIcon,
+                prefix = props.prefix,
+                supportingText = supportingText,
+                isError = props.isError,
+                textObfuscationMode =
+                    if (props.passwordVisible) TextObfuscationMode.Visible else TextObfuscationMode.System,
+                keyboardOptions = keyboardOptions,
+                onKeyboardAction = secureKeyboardAction,
+                shape = shape,
+                colors = colors,
+                contentPadding =
+                    appearance.contentPadding?.nativePadding()
+                        ?: if (label ==
+                            null
+                        ) {
+                            TextFieldDefaults.contentPaddingWithoutLabel()
+                        } else {
+                            TextFieldDefaults.contentPaddingWithLabel()
+                        },
+                interactionSource = interactions,
+            )
+        } else {
+            OutlinedSecureTextField(
+                state = secureState,
+                modifier = secureModifier,
+                enabled = enabled,
+                textStyle = textStyle,
+                label = if (label == null) null else labelSlot,
+                placeholder = placeholder,
+                leadingIcon = leadingIcon,
+                trailingIcon = trailingIcon,
+                prefix = props.prefix,
+                supportingText = supportingText,
+                isError = props.isError,
+                textObfuscationMode =
+                    if (props.passwordVisible) TextObfuscationMode.Visible else TextObfuscationMode.System,
+                keyboardOptions = keyboardOptions,
+                onKeyboardAction = secureKeyboardAction,
+                shape = shape,
+                colors = colors,
+                contentPadding =
+                    appearance.contentPadding?.nativePadding()
+                        ?: if (label ==
+                            null
+                        ) {
+                            OutlinedTextFieldDefaults.contentPaddingWithoutLabel()
+                        } else {
+                            OutlinedTextFieldDefaults.contentPaddingWithLabel()
+                        },
+                interactionSource = interactions,
+            )
+        }
+    } else if (customNativeDecoration) {
+        val minWidth =
+            if (appearance.variant ==
+                DomposableTextFieldVariant.Filled
+            ) {
+                TextFieldDefaults.MinWidth
+            } else {
+                OutlinedTextFieldDefaults.MinWidth
+            }
+        val minHeight =
+            if (appearance.variant ==
+                DomposableTextFieldVariant.Filled
+            ) {
+                TextFieldDefaults.MinHeight
+            } else {
+                OutlinedTextFieldDefaults.MinHeight
+            }
+        val defaultPadding =
+            if (appearance.variant == DomposableTextFieldVariant.Filled) {
+                if (label ==
+                    null
+                ) {
+                    TextFieldDefaults.contentPaddingWithoutLabel()
+                } else {
+                    TextFieldDefaults.contentPaddingWithLabel()
+                }
+            } else {
+                if (label ==
+                    null
+                ) {
+                    OutlinedTextFieldDefaults.contentPaddingWithoutLabel()
+                } else {
+                    OutlinedTextFieldDefaults.contentPaddingWithLabel()
+                }
+            }
+        val contentPadding = appearance.contentPadding?.nativePadding() ?: defaultPadding
+        val focusedThickness = appearance.focusedOutlineWidth?.value?.dp
+        val unfocusedThickness = appearance.outlineWidth?.value?.dp
+        BasicTextField(
+            value = props.value,
+            onValueChange = props.onValueChange,
+            modifier = nativeModifier.defaultMinSize(minWidth = minWidth, minHeight = minHeight),
+            enabled = enabled,
+            readOnly = props.readOnly,
+            textStyle = textStyle,
+            cursorBrush = SolidColor(if (props.isError) colors.errorCursorColor else colors.cursorColor),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = props.singleLine,
+            minLines = props.minLines,
+            maxLines = props.maxLines,
+            visualTransformation = visualTransformation,
+            interactionSource = interactions,
+            decorationBox = { innerTextField ->
+                if (appearance.variant == DomposableTextFieldVariant.Filled) {
+                    TextFieldDefaults.DecorationBox(
+                        value = props.value,
+                        innerTextField = innerTextField,
+                        enabled = enabled,
+                        singleLine = props.singleLine,
+                        visualTransformation = visualTransformation,
+                        interactionSource = interactions,
+                        isError = props.isError,
+                        label = label,
+                        placeholder = placeholder,
+                        leadingIcon = leadingIcon,
+                        trailingIcon = trailingIcon,
+                        prefix = props.prefix,
+                        supportingText = supportingText,
+                        colors = colors,
+                        contentPadding = contentPadding,
+                        container = {
+                            TextFieldDefaults.Container(
+                                enabled = enabled,
+                                isError = props.isError,
+                                interactionSource = interactions,
+                                colors = colors,
+                                shape = shape,
+                                focusedIndicatorLineThickness =
+                                    focusedThickness ?: TextFieldDefaults.FocusedIndicatorThickness,
+                                unfocusedIndicatorLineThickness =
+                                    unfocusedThickness ?: TextFieldDefaults.UnfocusedIndicatorThickness,
+                            )
+                        },
+                    )
+                } else {
+                    OutlinedTextFieldDefaults.DecorationBox(
+                        value = props.value,
+                        innerTextField = innerTextField,
+                        enabled = enabled,
+                        singleLine = props.singleLine,
+                        visualTransformation = visualTransformation,
+                        interactionSource = interactions,
+                        isError = props.isError,
+                        label = label,
+                        placeholder = placeholder,
+                        leadingIcon = leadingIcon,
+                        trailingIcon = trailingIcon,
+                        prefix = props.prefix,
+                        supportingText = supportingText,
+                        colors = colors,
+                        contentPadding = contentPadding,
+                        container = {
+                            OutlinedTextFieldDefaults.Container(
+                                enabled = enabled,
+                                isError = props.isError,
+                                interactionSource = interactions,
+                                colors = colors,
+                                shape = shape,
+                                focusedBorderThickness =
+                                    focusedThickness ?: OutlinedTextFieldDefaults.FocusedBorderThickness,
+                                unfocusedBorderThickness =
+                                    unfocusedThickness ?: OutlinedTextFieldDefaults.UnfocusedBorderThickness,
+                            )
+                        },
+                    )
+                }
+            },
+        )
+    } else if (appearance.variant == DomposableTextFieldVariant.Filled) {
         TextField(
             value = props.value,
             onValueChange = onValueChange,
@@ -243,7 +481,7 @@ internal fun NativeTextField(
 }
 
 @Composable
-private fun DomposableTextFieldAppearance.nativeColors(defaults: TextFieldColors): TextFieldColors =
+internal fun DomposableTextFieldAppearance.nativeColors(defaults: TextFieldColors): TextFieldColors =
     colors.nativeColors(defaults)
 
 private fun DomposableTextFieldColors.nativeColors(defaults: TextFieldColors): TextFieldColors =

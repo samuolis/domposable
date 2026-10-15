@@ -28,7 +28,7 @@ Upgrading from the 0.1.x provider expands it from 34 to 41 required contracts. A
 | RangeSlider | DomposableRangeSlider | Two labelled range inputs |
 | TooltipBox / PlainTooltip | DomposableTooltip | Hover/focus help with Escape dismissal |
 
-Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Columns, rows, grids and tables can use [opt-in windowing](performance.md). Rich text editing, column virtualization, complex date pickers and platform camera/maps still require application or provider-specific implementations; this vocabulary does not claim to mirror every Material API.
+Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Columns, rows, grids and tables can use [opt-in windowing](performance.md). Rich text editing, column virtualization and platform camera/maps remain application or provider-specific implementations. The current [Material catalog](material-catalog.md) adds shared date, date-range and time picker families; it maps component variants without copying every upstream overload.
 
 ## Collections and tables after 0.2.0
 
@@ -83,8 +83,17 @@ position observation and disposal behavior. Replace renderer code that mirrors `
 into element offsets or calls `scrollTo` from browser scroll events. See the complete
 [custom HTML scroll example](design-systems.md#scroll-state-in-custom-html-renderers).
 
-## Component theme defaults
+## Material catalog and theme defaults
 
-The next 0.x minor adds button and text-field appearance defaults to `DomposableTokens` and optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
+The next 0.x minor expands the Material 3 and expressive catalog and adds button and text-field appearance defaults to `DomposableTokens` and optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
 
 Keep application component names as thin adapters. Map brand tokens into `DomposableButtonAppearance` or `DomposableTextFieldAppearance`, and call the standard control instead of maintaining another HTML button/input implementation. Preserve custom editor, diagram and camera renderers; they are separate from ordinary control styling.
+
+HTML controls now use Material default geometry, including switch tracks, chip surfaces and floating field labels. Set `floatingLabel = false` explicitly for a separate HTML field label. Existing per-call appearances still override family defaults; keep application-specific geometry and colors in those adapters.
+
+
+The expanded catalog also adds per-family defaults under `DomposableTokens.components`, the Material color/type/shape scales and `designLanguage`. Per-call appearance overrides replace a family default; copy that default when changing only one field. Existing explicit providers must implement the new slots or inherit them from the Material provider. KSP remains optional for component consumers.
+
+This is a pre-1.0 **breaking ABI change**, requiring a minor release and recompilation. Props constructors, `copy`, generated provider signatures and several direct-call signatures changed. Prefer named optional arguments and named provider properties. For example, pass `cellContent = { ... }` by name when constructing data-table props positionally; the direct composable still accepts its content as the trailing lambda. Do not mix old compiled adapters with the new artifacts.
+
+`DomposableScreenScaffold` now has a stateless overload for caller-owned state and chrome. Keep an existing application scaffold when it already handles insets and ownership correctly; delegate the library pieces it needs. The optional loading/error overload is a convenience, not a required screen contract.

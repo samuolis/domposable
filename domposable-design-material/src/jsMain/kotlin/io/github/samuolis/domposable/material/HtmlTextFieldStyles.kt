@@ -54,7 +54,8 @@ internal fun <T : HTMLElement> AttrsScope<T>.inputAppearance(
         } else {
             standaloneInputGeometry(appearance, focused)
         }
-        if (appearance.floatingLabel && props.value.isEmpty() && !focused) {
+        val labelCoversPlaceholder = props.showLabel && props.value.isEmpty() && !focused
+        if (appearance.floatingLabel && labelCoversPlaceholder) {
             property("--d-field-placeholder", "transparent")
         }
     }
@@ -301,16 +302,17 @@ private fun StyleScope.standaloneInputGeometry(
     focused: Boolean,
 ) {
     val activeWidth = if (focused) appearance.focusedOutlineWidth else appearance.outlineWidth
-    activeWidth?.let { property("border-width", "${it.value}px") }
-    appearance.shape?.let { materialShape(it) }
+    val borderWidth = activeWidth?.value ?: if (focused) 2f else 1f
+    property("border-width", "${borderWidth}px")
+    appearance.shape?.let { materialShape(it) } ?: property("border-radius", "4px")
     appearance.contentPadding?.let { padding ->
         property("padding-block", "${padding.top.value}px ${padding.bottom.value}px")
         property("padding-inline", "${padding.start.value}px ${padding.end.value}px")
-    }
-    appearance.minHeight?.let { property("min-height", "${it.value}px") }
+    } ?: property("padding", "${MATERIAL_FIELD_PADDING}px")
+    property("min-height", "${appearance.minHeight?.value ?: MATERIAL_FIELD_MIN_HEIGHT}px")
     if (appearance.variant == DomposableTextFieldVariant.Filled) {
         property("border-style", "solid")
-        if (activeWidth == null) property("border-width", "0 0 1px")
+        if (activeWidth == null) property("border-width", if (focused) "0 0 2px" else "0 0 1px")
         if (appearance.shape == null) property("border-radius", "4px 4px 0 0")
     }
 }

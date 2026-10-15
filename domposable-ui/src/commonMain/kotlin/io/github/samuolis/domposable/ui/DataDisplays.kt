@@ -2,8 +2,10 @@ package io.github.samuolis.domposable.ui
 
 import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableAlignment
+import io.github.samuolis.domposable.foundation.DomposableChartAppearance
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponent
+import io.github.samuolis.domposable.foundation.DomposableTableAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 
 enum class DomposableChartSize {
@@ -81,6 +83,7 @@ data class DomposableLineChartProps(
     val displayTitle: Boolean = true,
     val accessibilityDescription: String? = description,
     val onSelectedIndexChange: ((Int?) -> Unit)? = null,
+    val appearance: DomposableChartAppearance? = null,
 ) {
     init {
         validateChartSeries(series)
@@ -96,6 +99,7 @@ data class DomposableValueChartProps(
     val series: List<DomposableChartSeries>,
     val formatValue: (Float) -> String,
     val sizePreset: DomposableChartSize = DomposableChartSize.Standard,
+    val appearance: DomposableChartAppearance? = null,
 ) {
     init {
         validateChartSeries(series)
@@ -133,6 +137,7 @@ data class DomposableDataTableProps(
     val allowHorizontalOverflow: Boolean = true,
     val onRowActivate: ((String) -> Unit)? = null,
     val cellAction: (rowKey: String, columnKey: String) -> (() -> Unit)? = { _, _ -> null },
+    val appearance: DomposableTableAppearance? = null,
     val cellContent: @Composable (row: DomposableDataTableRow, column: DomposableDataTableColumn) -> Unit,
 ) {
     init {
@@ -160,6 +165,7 @@ fun DomposableLineChart(
     displayTitle: Boolean = true,
     accessibilityDescription: String? = description,
     onSelectedIndexChange: ((Int?) -> Unit)? = null,
+    appearance: DomposableChartAppearance? = null,
 ) = DomposableLineChart(
     DomposableLineChartProps(
         series,
@@ -171,6 +177,7 @@ fun DomposableLineChart(
         displayTitle,
         accessibilityDescription,
         onSelectedIndexChange,
+        appearance = appearance,
     ),
     modifier,
 )
@@ -186,8 +193,17 @@ fun DomposableValueChart(
     formatValue: (Float) -> String,
     modifier: DomposableModifier = DomposableModifier,
     sizePreset: DomposableChartSize = DomposableChartSize.Standard,
+    appearance: DomposableChartAppearance? = null,
 ) = DomposableValueChart(
-    DomposableValueChartProps(title, description, dataTableLabel, series, formatValue, sizePreset),
+    DomposableValueChartProps(
+        title,
+        description,
+        dataTableLabel,
+        series,
+        formatValue,
+        sizePreset,
+        appearance = appearance,
+    ),
     modifier,
 )
 
@@ -203,6 +219,7 @@ fun DomposableDataTable(
     allowHorizontalOverflow: Boolean = true,
     onRowActivate: ((String) -> Unit)? = null,
     cellAction: (rowKey: String, columnKey: String) -> (() -> Unit)? = { _, _ -> null },
+    appearance: DomposableTableAppearance? = null,
     cellContent: @Composable (row: DomposableDataTableRow, column: DomposableDataTableColumn) -> Unit,
 ) = DomposableDataTable(
     DomposableDataTableProps(
@@ -213,7 +230,8 @@ fun DomposableDataTable(
         allowHorizontalOverflow,
         onRowActivate,
         cellAction,
-        cellContent,
+        appearance = appearance,
+        cellContent = cellContent,
     ),
     modifier,
 )

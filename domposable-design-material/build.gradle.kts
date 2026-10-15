@@ -20,7 +20,9 @@ kotlin {
     }
     jvm()
     js {
-        browser()
+        browser {
+            testTask { useKarma { useChromeHeadless() } }
+        }
     }
     wasmJs {
         browser()

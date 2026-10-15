@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 
 test.skip(({ browserName }) => browserName !== 'chromium', 'Visual baselines use pinned Chromium on Ubuntu; behavior/axe checks cover all three engines.');
 
-async function stableCapture(page: Page, platform: string, name: string) {
+async function stableCapture(page: Page, platform: string, name: string, beforeCapture?: () => Promise<void>) {
   // The playground's diamond/checkmark glyphs use a canvas fallback font loaded after the
   // first frame. document.fonts.ready and a previously reached networkidle do not cover it.
   if (platform === 'wasm' && !name.startsWith('shop')) {
@@ -13,6 +13,7 @@ async function stableCapture(page: Page, platform: string, name: string) {
     await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   }
   await page.evaluate(() => document.fonts.ready);
+  await beforeCapture?.();
   let previous = '';
   let capture: Buffer;
   await expect.poll(async () => {
@@ -24,6 +25,23 @@ async function stableCapture(page: Page, platform: string, name: string) {
   }, { timeout: 20000, intervals: [250, 500, 1000] }).toBe(true);
   await mkdir(`build/screenshots/${platform}`, { recursive: true });
   await writeFile(`build/screenshots/${platform}/${name}.png`, capture!);
+}
+
+const materialSections = [
+  ['actions', 'Choose an action'],
+  ['selection', 'Receive updates'],
+  ['inputs', 'Outlined field'],
+  ['surfaces', 'Local surface override'],
+  ['navigation', 'Home'],
+  ['feedback', 'No queued message'],
+  ['gestures', 'Swipe or use the dismissal action'],
+  ['scaffold', 'The app owns its state, injection and navigation.'],
+] as const;
+
+async function pauseMaterialClock(page: Page) {
+  const fixedTime = new Date('2026-10-15T12:00:00Z');
+  await page.clock.install({ time: fixedTime });
+  await page.clock.pauseAt(fixedTime);
 }
 
 for (const [name, width, height, route] of [
@@ -112,3 +130,30 @@ test('DOM visual themed controls', async ({ page }) => {
   await page.getByTestId('themed-action').scrollIntoViewIfNeeded();
   await stableCapture(page, 'dom', 'themed-controls');
 });
+
+for (const [section, content] of materialSections) {
+  test(`DOM visual material-${section}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await page.goto(`/#/material/${section}`);
+    await expect(page.getByRole('heading', { name: 'Material catalog' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: section[0].toUpperCase() + section.slice(1), exact: true })).toBeVisible();
+    const sample = page.locator('main').getByText(content, { exact: true }).first();
+    await sample.scrollIntoViewIfNeeded();
+    await expect(sample).toBeVisible();
+    await stableCapture(page, 'dom', `material-${section}`, () => pauseMaterialClock(page));
+  });
+}
+
+for (const [section] of materialSections) {
+  test(`Wasm visual material-${section}`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.setViewportSize({ width: 1440, height: 1200 });
+    await page.goto(`/wasm/#/material/${section}`);
+    await expect(page.locator('canvas').first()).toBeVisible({ timeout: 60000 });
+    await expect(page.locator('body')).toHaveAttribute('data-domposable-ready', 'true', { timeout: 60000 });
+    await expect(page.locator('body')).toHaveAttribute('data-domposable-initial-route', `/material/${section}`);
+    await stableCapture(page, 'wasm', `material-${section}`, () => pauseMaterialClock(page));
+    expect(errors).toEqual([]);
+  });
+}

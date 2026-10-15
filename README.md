@@ -30,7 +30,7 @@ Domposable is a Kotlin Multiplatform UI library with optional integration helper
 - **Real HTML** — headings, links, forms and header/main/footer landmarks, styled with CSS.
 - **A replaceable design system** — portable theme tokens and typed renderers; customize one control or supply a complete provider.
 - **Adaptive layouts** — measure the space a feature receives and choose breakpoints, panes and layout recipes.
-- **Shared components** — layout, forms, selection, navigation and feedback controls across both renderers.
+- **Shared components** — Material 3 and expressive actions, selection, inputs, navigation and feedback, plus layout, forms and data displays. [Catalog and configuration](docs/material-catalog.md).
 - **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
 
 Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable. [Koin and Metro](docs/screens.md#one-entry-api-for-koin-and-metro) use the same generated entry API; existing frameworks can [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
@@ -142,6 +142,7 @@ HTML and Wasm support optional browser history, hash or path URLs and portable e
 | --- | --- | --- |
 | **Fieldwork shop** | Responsive storefront, product pages, filters, cart and checkout | [Live app](https://samuolis.github.io/domposable/shop/) · [Walkthrough](docs/shopping.md) |
 | **Documents and data** | Rich inputs, typed choices, forms, disclosure, rich text, charts and interactive tables | [Shared source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/ProductComponentLab.kt) · [Recipes](docs/components.md#documents-rich-inputs-and-data) |
+| **Material and expressive catalog** | Theme defaults, local appearance overrides, pickers, menus, expressive actions and screen chrome | [Live catalog](https://samuolis.github.io/domposable/demo/#/material/actions) · [Shared source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/MaterialCatalog.kt) · [API guide](docs/material-catalog.md) |
 | **Component playground** | Shared controls, theme tokens and renderer customization | [Live app](https://samuolis.github.io/domposable/demo/) · [Components](docs/components.md) |
 | **HTML / Wasm comparison** | The same feature at phone, tablet and desktop widths | [Compare](https://samuolis.github.io/domposable/compare/) |
 | **Browser routes** | Clean paths, deep links and browser navigation | [URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Routing guide](docs/screens.md) |
@@ -210,6 +211,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | Install Domposable and set up platform hosts | [Getting started](docs/getting-started.md) |
 | Understand components, props, providers and modifiers | [How the API works](docs/how-it-works.md) |
 | Use shared controls with examples | [Components](docs/components.md) |
+| Configure Material 3 and expressive components | [Material catalog](docs/material-catalog.md) |
 | Adapt a feature to its available space | [Adaptive layouts](docs/adaptive.md) |
 | Build or customize a design system | [Design systems](docs/design-systems.md) |
 | Add screens, Navigation 3 or generated entries | [Screens and navigation](docs/screens.md) |

@@ -1,41 +1,64 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableAutocomplete
+import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableControlPlacement
+import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
 import io.github.samuolis.domposable.foundation.DomposableFontWeight
+import io.github.samuolis.domposable.foundation.DomposableIconButtonVariant
 import io.github.samuolis.domposable.foundation.DomposableImageScale
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableLiveRegion
 import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
+import io.github.samuolis.domposable.foundation.DomposableSelectionColors
+import io.github.samuolis.domposable.foundation.DomposableShape
+import io.github.samuolis.domposable.foundation.DomposableSwitchColors
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
+import io.github.samuolis.domposable.foundation.DomposableTypographyRole
+import io.github.samuolis.domposable.ui.DomposableBadgedBoxProps
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableDataTableProps
+import io.github.samuolis.domposable.ui.DomposableDialogVariant
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableImageProps
+import io.github.samuolis.domposable.ui.DomposableLabelProps
 import io.github.samuolis.domposable.ui.DomposableLazyItem
 import io.github.samuolis.domposable.ui.DomposableLineChartProps
+import io.github.samuolis.domposable.ui.DomposableMenuGroupProps
+import io.github.samuolis.domposable.ui.DomposableMenuItem
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableModifierOperation
+import io.github.samuolis.domposable.ui.DomposableNavigationItem
+import io.github.samuolis.domposable.ui.DomposableScrollFieldProps
+import io.github.samuolis.domposable.ui.DomposableSnackbarHostProps
 import io.github.samuolis.domposable.ui.DomposableValueChartProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.domposableAttributes
+import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
+import io.github.samuolis.domposable.ui.safeDomposableHref
 import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.width
 import kotlinx.browser.document
+import kotlinx.browser.window
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
@@ -43,16 +66,14 @@ import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Aside
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
-import org.jetbrains.compose.web.dom.Footer
 import org.jetbrains.compose.web.dom.H2
-import org.jetbrains.compose.web.dom.Header
 import org.jetbrains.compose.web.dom.Hr
 import org.jetbrains.compose.web.dom.Img
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Label
 import org.jetbrains.compose.web.dom.Li
-import org.jetbrains.compose.web.dom.Main
 import org.jetbrains.compose.web.dom.Nav
+import org.jetbrains.compose.web.dom.Section
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.TagElement
 import org.jetbrains.compose.web.dom.Text
@@ -91,6 +112,14 @@ internal fun DomposableAutocomplete.htmlValue() =
         DomposableAutocomplete.NewPassword -> "new-password"
         DomposableAutocomplete.OneTimeCode -> "one-time-code"
     }
+
+@Composable
+private fun navItemContent(item: DomposableNavigationItem) {
+    item.icon?.invoke() ?: item.symbol.takeIf(String::isNotEmpty)?.let { symbol ->
+        Span(attrs = { attr("aria-hidden", "true") }) { Text(symbol) }
+    }
+    Span { Text(item.label) }
+}
 
 @Composable
 actual fun rememberDomposableMaterialComponents(): DomposableComponents =
@@ -204,8 +233,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             valueChart = { props, modifier, _ -> HtmlValueChart(props, modifier) },
             dataTable = { props, modifier, _ -> HtmlDataTable(props, modifier) },
             text = { props, modifier, _ ->
-                val appearance = props.appearance ?: LocalMaterialButtonTextAppearance.current
                 val tokens = LocalDomposableTokens.current
+                val appearance = props.appearance ?: LocalMaterialButtonTextAppearance.current ?: tokens.components.text
                 val baseFontSize =
                     appearance?.fontSize ?: when (props.style) {
                         DomposableTextStyle.Body -> tokens.typography.bodySize
@@ -305,14 +334,128 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.iconButton
+                val tokens = LocalDomposableTokens.current
+                val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
                     Button(attrs = {
                         domposableAttributes(modifier)
                         attr("type", "button")
                         attr("aria-label", props.label)
                         classes("d-icon-button")
-                        if (!props.enabled) attr("disabled", "")
-                        onClick { props.onClick() }
+                        classes(
+                            "d-icon-button-${props.variant.name.lowercase().replace("filledtonal", "filled-tonal")}",
+                        )
+                        props.checked?.let { attr("aria-pressed", it.toString()) }
+                        if (!enabled) attr("disabled", "")
+                        style {
+                            val checked = props.checked == true
+                            val variantContainer =
+                                when (props.variant) {
+                                    DomposableIconButtonVariant.Standard -> {
+                                        if (checked) {
+                                            tokens.colors.secondaryContainer
+                                                ?: tokens.colors.surfaceVariant
+                                        } else {
+                                            null
+                                        }
+                                    }
+
+                                    DomposableIconButtonVariant.Filled -> {
+                                        if (props.checked == false) {
+                                            tokens.colors.surfaceContainerHighest
+                                                ?: tokens.colors.surfaceVariant
+                                        } else {
+                                            tokens.colors.primary
+                                        }
+                                    }
+
+                                    DomposableIconButtonVariant.FilledTonal -> {
+                                        if (props.checked == false) {
+                                            tokens.colors.surfaceContainerHighest
+                                                ?: tokens.colors.surfaceVariant
+                                        } else {
+                                            tokens.colors.secondaryContainer
+                                                ?: tokens.colors.surfaceVariant
+                                        }
+                                    }
+
+                                    DomposableIconButtonVariant.Outlined -> {
+                                        null
+                                    }
+                                }
+                            val variantContent =
+                                when (props.variant) {
+                                    DomposableIconButtonVariant.Standard -> {
+                                        if (checked) {
+                                            tokens.colors.onSecondaryContainer
+                                                ?: tokens.colors.onSurface
+                                        } else {
+                                            tokens.colors.onSurface
+                                        }
+                                    }
+
+                                    DomposableIconButtonVariant.Filled -> {
+                                        if (props.checked == false) {
+                                            tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
+                                        } else {
+                                            tokens.colors.onPrimary
+                                        }
+                                    }
+
+                                    DomposableIconButtonVariant.FilledTonal -> {
+                                        if (props.checked == false) {
+                                            tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
+                                        } else {
+                                            tokens.colors.onSecondaryContainer
+                                                ?: tokens.colors.onSurface
+                                        }
+                                    }
+
+                                    DomposableIconButtonVariant.Outlined -> {
+                                        tokens.colors.onSurface
+                                    }
+                                }
+                            appearance.container?.let { property("background", it.css()) }
+                                ?: variantContainer?.let { property("background", it.css()) }
+                            appearance.content?.let { property("color", it.css()) }
+                                ?: property("color", variantContent.css())
+                            appearance.border?.let { property("border-color", it.css()) }
+                            if (appearance.border == null &&
+                                props.variant ==
+                                DomposableIconButtonVariant.Outlined
+                            ) {
+                                property("border-color", tokens.colors.outline.css())
+                            }
+                            if (props.variant ==
+                                DomposableIconButtonVariant.Outlined &&
+                                appearance.borderWidth == null
+                            ) {
+                                property("border-width", "1px")
+                            }
+                            (if (enabled) appearance.container else appearance.disabledContainer)?.let {
+                                property(
+                                    "background",
+                                    it.css(),
+                                )
+                            }
+                            (if (enabled) appearance.content else appearance.disabledContent)?.let {
+                                property(
+                                    "color",
+                                    it.css(),
+                                )
+                            }
+                            (if (enabled) appearance.border else appearance.disabledBorder)?.let {
+                                property("border", "${appearance.borderWidth?.value ?: 1f}px solid ${it.css()}")
+                            }
+                            appearance.borderWidth?.let { property("border-width", "${it.value}px") }
+                            appearance.shape?.let { materialShape(it) }
+                            appearance.minHeight?.let { property("min-height", "${it.value}px") }
+                            appearance.minWidth?.let { property("min-width", "${it.value}px") }
+                            appearance.contentPadding?.let { property("padding", it.cssPadding()) }
+                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                        }
+                        onClick { if (enabled) props.onClick() }
                     }) { content() }
                 }
             },
@@ -322,37 +465,159 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
-                HtmlToggle(props.checked, props.onCheckedChange, props.label, props.enabled, modifier, false)
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.checkbox
+                HtmlToggle(
+                    props.checked,
+                    props.onCheckedChange,
+                    props.label,
+                    props.enabled,
+                    modifier,
+                    false,
+                    props.indeterminate,
+                    props.showLabel,
+                    props.description,
+                    props.controlPlacement,
+                    appearance.labelSpacing,
+                    appearance.colors,
+                    appearance.labelAppearance,
+                    appearance.descriptionAppearance,
+                    appearance.checkmark,
+                    appearance.disabledCheckmark,
+                )
             },
             switch = {
                 props,
                 modifier,
                 _,
                 ->
-                HtmlToggle(props.checked, props.onCheckedChange, props.label, props.enabled, modifier, true)
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.switch
+                HtmlToggle(
+                    props.checked,
+                    props.onCheckedChange,
+                    props.label,
+                    props.enabled,
+                    modifier,
+                    true,
+                    false,
+                    props.showLabel,
+                    props.description,
+                    props.controlPlacement,
+                    appearance.labelSpacing,
+                    labelAppearance = appearance.labelAppearance,
+                    descriptionAppearance = appearance.descriptionAppearance,
+                    switchColors = appearance.colors,
+                )
             },
             radioButton = {
                 props,
                 modifier,
                 _,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.radioButton
+                val descriptionId = remember { "d-radio-description-${nextInputId++}" }
+                val labelId = remember { "d-radio-label-${nextInputId++}" }
+                val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
-                    Label(attrs = { classes("d-toggle") }) {
-                        Input(InputType.Radio, attrs = {
-                            domposableAttributes(modifier)
-                            checked(props.selected)
-                            attr("aria-label", props.label)
-                            if (!props.enabled) disabled()
-                            onChange { props.onClick() }
-                        })
-                        Text(props.label)
+                    Label(attrs = {
+                        classes("d-toggle")
+                        onClick { it.stopPropagation() }
+                        style { property("gap", "${appearance.labelSpacing.value.takeIf { it > 0f } ?: 10f}px") }
+                    }) {
+                        @Composable fun control() {
+                            Input(InputType.Radio, attrs = {
+                                domposableAttributes(modifier)
+                                checked(props.selected)
+                                if (props.label.isNotEmpty()) attr("aria-labelledby", labelId)
+                                props.description?.let { attr("aria-describedby", descriptionId) }
+                                if (!enabled) disabled()
+                                style {
+                                    property(
+                                        "--d-control-selected",
+                                        appearance.colors.selected.cssOr("var(--d-primary)"),
+                                    )
+                                    property(
+                                        "--d-control-unselected",
+                                        appearance.colors.unselected.cssOr("var(--d-outline)"),
+                                    )
+                                    property(
+                                        "--d-control-disabled-selected",
+                                        appearance.colors.disabledSelected.cssOr("var(--d-primary)"),
+                                    )
+                                    property(
+                                        "--d-control-disabled-unselected",
+                                        appearance.colors.disabledUnselected.cssOr("var(--d-outline)"),
+                                    )
+                                    if (appearance.colors !=
+                                        io.github.samuolis.domposable.foundation
+                                            .DomposableSelectionColors()
+                                    ) {
+                                        val selectedColor =
+                                            if (enabled) {
+                                                appearance.colors.selected
+                                            } else {
+                                                appearance.colors.disabledSelected
+                                            }
+                                        val unselectedColor =
+                                            if (enabled) {
+                                                appearance.colors.unselected
+                                            } else {
+                                                appearance.colors.disabledUnselected
+                                            }
+                                        property("accent-color", selectedColor.cssOr("var(--d-primary)"))
+                                        property("border-color", unselectedColor.cssOr("var(--d-outline)"))
+                                    }
+                                }
+                                if (appearance.colors != DomposableSelectionColors()) attr("data-custom-colors", "true")
+                                onChange { if (enabled) props.onClick() }
+                            })
+                        }
+
+                        @Composable fun label() {
+                            Span(attrs = {
+                                id(labelId)
+                                if (!props.showLabel) classes("d-visually-hidden")
+                                style { appearance.labelAppearance?.let { applyCatalogTextAppearance(it) } }
+                            }) { Text(props.label) }
+                        }
+                        if (props.controlPlacement == DomposableControlPlacement.Leading) {
+                            control()
+                            label()
+                        } else {
+                            label()
+                            control()
+                        }
+                    }
+                    props.description?.let {
+                        Span(attrs = {
+                            id(descriptionId)
+                            style {
+                                appearance.descriptionAppearance?.let { appearance ->
+                                    applyCatalogTextAppearance(appearance)
+                                }
+                            }
+                        }) { Text(it) }
                     }
                 }
             },
             slider = { props, modifier, _ ->
+                val colors = props.colors ?: LocalDomposableTokens.current.components.slider
+                val enabled = props.enabled && domposableFormEnabled()
+                val percent =
+                    ((props.value - props.range.start) / (props.range.endInclusive - props.range.start) * 100f)
+                        .coerceIn(
+                            0f,
+                            100f,
+                        )
                 DomposableHtmlModifiers(modifier) {
                     Input(InputType.Range, attrs = {
                         domposableAttributes(modifier)
+                        classes("d-slider")
+                        if (props.orientation == DomposableOrientation.Vertical) {
+                            classes("d-slider-vertical")
+                            attr("aria-orientation", "vertical")
+                        } else {
+                            attr("aria-orientation", "horizontal")
+                        }
                         value(props.value.toString())
                         attr("aria-label", props.label)
                         attr("min", props.range.start.toString())
@@ -367,35 +632,178 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 ((props.range.endInclusive - props.range.start) / (props.steps + 1)).toString()
                             },
                         )
-                        if (!props.enabled) disabled()
+                        if (!enabled) disabled()
+                        style {
+                            sliderColors(colors, enabled)
+                            property("--d-slider-progress", "$percent%")
+                            if (props.orientation == DomposableOrientation.Vertical) {
+                                property("writing-mode", "vertical-lr")
+                                property("direction", if (props.topToBottom) "ltr" else "rtl")
+                            }
+                        }
                         onInput {
                             it.target.value
                                 .toFloatOrNull()
+                                ?.takeIf { enabled }
                                 ?.let(props.onValueChange)
                         }
                     })
                 }
             },
             card = { props, modifier, content ->
+                val tokens = LocalDomposableTokens.current
+                val appearance = props.appearance ?: tokens.components.card
+                val enabled = props.enabled && domposableFormEnabled()
+                val cardContentId = remember { "d-card-content-${nextInputId++}" }
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
-                        classes("d-card")
-                        props.onClick?.let { click ->
-                            attr("role", "button")
-                            attr("tabindex", "0")
-                            onClick { click() }
-                            onKeyDown {
-                                if (it.key ==
-                                    "Enter" ||
-                                    it.key == " "
-                                ) {
-                                    it.preventDefault()
-                                    click()
+                        classes("d-card", "d-card-${props.variant.name.lowercase()}")
+                        if (props.href != null) {
+                            style { property("position", "relative") }
+                        }
+                        style {
+                            val container =
+                                when (props.variant) {
+                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
+                                        tokens.colors.surfaceVariant
+                                    }
+
+                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {
+                                        tokens.colors.surfaceContainerLow
+                                            ?: tokens.colors.surface
+                                    }
+
+                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined -> {
+                                        tokens.colors.surface
+                                    }
+                                }
+                            property("background-color", (appearance.container ?: container).css())
+                            appearance.content?.let { property("color", it.css()) }
+                            when (props.variant) {
+                                io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
+                                    Unit
+                                }
+
+                                io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {
+                                    property(
+                                        "box-shadow",
+                                        "0 1px 3px rgb(0 0 0 / .24)",
+                                    )
+                                }
+
+                                io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined -> {
+                                    val borderColor =
+                                        (appearance.border ?: tokens.colors.outlineVariant ?: tokens.colors.outline)
+                                            .css()
+                                    property(
+                                        "border",
+                                        "1px solid $borderColor",
+                                    )
+                                }
+                            }
+                            appearance.border?.let {
+                                property(
+                                    "border",
+                                    "${appearance.borderWidth.value}px solid ${it.css()}",
+                                )
+                            }
+                            appearance.shape?.let { materialShape(it) }
+                                ?: tokens.shapes.medium?.let { materialShape(it) }
+                            if (appearance.shape == null && tokens.shapes.medium == null &&
+                                tokens.designLanguage == DomposableDesignLanguage.Expressive
+                            ) {
+                                property("border-radius", "28px")
+                            }
+                            appearance.shadowElevation?.let {
+                                property(
+                                    "box-shadow",
+                                    if (it.value ==
+                                        0f
+                                    ) {
+                                        "none"
+                                    } else {
+                                        "0 ${it.value}px ${it.value * 2f}px rgb(0 0 0 / .12)"
+                                    },
+                                )
+                            }
+                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                        }
+                        if (props.href != null && !enabled) {
+                            attr("role", "link")
+                            attr("aria-disabled", "true")
+                            attr("tabindex", "-1")
+                        }
+                        if (props.href == null && props.actionLabel.isNullOrEmpty()) {
+                            props.onClick?.let { click ->
+                                attr("role", "button")
+                                if (enabled) attr("tabindex", "0") else attr("aria-disabled", "true")
+                                onClick { event ->
+                                    if (enabled) {
+                                        val target = event.target as? HTMLElement
+                                        val interactive =
+                                            target?.closest(
+                                                "a,button,input,select,textarea,[role=button],[role=link]",
+                                            ) as? HTMLElement
+                                        if (interactive == null ||
+                                            interactive == event.currentTarget as? HTMLElement
+                                        ) {
+                                            click()
+                                        }
+                                    }
+                                }
+                                onKeyDown {
+                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement) && (
+                                            it.key ==
+                                                "Enter" ||
+                                                it.key == " "
+                                        )
+                                    ) {
+                                        it.preventDefault()
+                                        if (enabled) click()
+                                    }
                                 }
                             }
                         }
-                    }) { content() }
+                    }) {
+                        if (props.href == null && !props.actionLabel.isNullOrEmpty()) {
+                            props.onClick?.let { click ->
+                                Button(attrs = {
+                                    attr("type", "button")
+                                    props.actionLabel?.let { label -> attr("aria-label", label) }
+                                    if (!enabled) disabled()
+                                    classes("d-card-stretched-action")
+                                    onClick { if (enabled) click() }
+                                }) { }
+                            }
+                        }
+                        props.href?.let(::safeDomposableHref)?.takeIf { enabled }?.let { href ->
+                            val action = props.onClick
+                            A(href = href, attrs = {
+                                classes("d-card-stretched-link")
+                                props.actionLabel?.takeIf(String::isNotEmpty)?.let { attr("aria-label", it) }
+                                    ?: attr("aria-labelledby", cardContentId)
+                                onClick { event ->
+                                    val modified =
+                                        listOf(
+                                            event.ctrlKey,
+                                            event.metaKey,
+                                            event.shiftKey,
+                                            event.altKey,
+                                        ).any { it }
+                                    val unmodifiedPrimaryClick = !modified && event.button.toInt() == 0
+                                    if (enabled && unmodifiedPrimaryClick && action != null) {
+                                        event.preventDefault()
+                                        action()
+                                    }
+                                }
+                            }) { }
+                        }
+                        Div(attrs = {
+                            id(cardContentId)
+                            classes("d-card-content")
+                        }) { content() }
+                    }
                 }
             },
             surface = {
@@ -403,16 +811,21 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.surface
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
                         classes("d-surface")
-                        props.color?.let { style { property("background", it.css()) } }
+                        style {
+                            surfaceAppearance(appearance)
+                            (appearance.container ?: props.color)?.let { property("background-color", it.css()) }
+                        }
                     }) { content() }
                 }
             },
             image = { props, modifier, _ -> HtmlImage(props, modifier) },
             icon = { props, modifier, _ ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.icon
                 DomposableHtmlModifiers(modifier) {
                     Span(attrs = {
                         domposableAttributes(modifier)
@@ -424,6 +837,10 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             attr("role", "img")
                             attr("aria-label", props.description.orEmpty())
                         }
+                        style {
+                            appearance.color?.let { property("color", it.css()) }
+                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                        }
                     }) { Text(props.symbol) }
                 }
             },
@@ -432,11 +849,28 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.divider
                 DomposableHtmlModifiers(modifier) {
                     Hr(attrs = {
                         domposableAttributes(modifier)
                         attr("aria-orientation", props.orientation.name.lowercase())
                         classes("d-divider")
+                        style {
+                            appearance.color?.let { property("border-color", it.css()) }
+                            appearance.thickness?.let {
+                                if (props.orientation == DomposableOrientation.Horizontal) {
+                                    property("border-top-width", "${it.value}px")
+                                } else {
+                                    property("border-top", "0")
+                                    property(
+                                        "border-left",
+                                        "${it.value}px solid ${appearance.color?.css() ?: "var(--d-outline)"}",
+                                    )
+                                    property("height", "100%")
+                                    property("width", "${it.value}px")
+                                }
+                            }
+                        }
                     })
                 }
             },
@@ -461,11 +895,19 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.badge
                 DomposableHtmlModifiers(modifier) {
                     Span(attrs = {
                         domposableAttributes(modifier)
                         classes("d-badge")
-                    }) { Text(props.text) }
+                        if (props.text == null) classes("d-badge-dot")
+                        props.label?.let {
+                            attr("role", "img")
+                            attr("aria-label", it)
+                        }
+                        if (props.text == null && props.label == null) attr("aria-hidden", "true")
+                        style { surfaceAppearance(appearance) }
+                    }) { props.text?.let { Text(it) } }
                 }
             },
             chip = {
@@ -473,15 +915,29 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.chip
+                val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
                     Button(attrs = {
                         domposableAttributes(modifier)
                         attr("type", "button")
+                        attr("aria-label", props.label)
                         attr("aria-pressed", props.selected.toString())
-                        classes("d-chip")
-                        if (!props.enabled) disabled()
-                        onClick { props.onClick() }
-                    }) { Text(props.label) }
+                        classes("d-chip", "d-chip-${props.variant.name.lowercase()}")
+                        if (appearance.minimumInteractiveSize != null) classes("d-item-hittarget")
+                        if (!enabled) disabled()
+                        style {
+                            itemAppearance(appearance, props.selected)
+                            if (props.elevated) property("box-shadow", "0 2px 6px rgb(0 0 0 / .22)")
+                        }
+                        onClick { if (enabled) props.onClick() }
+                    }) {
+                        Span(attrs = { classes("d-chip-surface") }) {
+                            props.leadingIcon?.let { Span(attrs = { classes("d-chip-icon") }) { it() } }
+                            Span(attrs = { classes("d-chip-label") }) { Text(props.label) }
+                            props.trailingIcon?.let { Span(attrs = { classes("d-chip-icon") }) { it() } }
+                        }
+                    }
                 }
             },
             avatar = {
@@ -489,12 +945,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.avatar
                 DomposableHtmlModifiers(modifier) {
                     Span(attrs = {
                         domposableAttributes(modifier)
                         attr("role", "img")
                         attr("aria-label", props.description.orEmpty())
                         classes("d-avatar")
+                        style { surfaceAppearance(appearance) }
                     }) { Text(props.initials) }
                 }
             },
@@ -503,40 +961,41 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 _,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.banner
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
                         attr("role", if (props.isError) "alert" else "status")
                         classes("d-banner")
+                        style { surfaceAppearance(appearance) }
                     }) { Text(props.message) }
                 }
             },
-            progress = {
-                props,
-                modifier,
-                _,
-                ->
-                DomposableHtmlModifiers(modifier) {
-                    TagElement<HTMLElement>("progress", applyAttrs = {
-                        domposableAttributes(modifier)
-                        attr("aria-label", props.label)
-                        attr("max", "1")
-                        props.value?.let { attr("value", it.toString()) }
-                        classes("d-progress")
-                    }) {}
-                }
+            progress = { props, modifier, _ ->
+                HtmlProgress(props, modifier)
             },
             tabs = { props, modifier, _ ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.tabs
+                val formEnabled = domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
                         attr("role", "tablist")
                         attr("aria-label", "Sections")
-                        classes("d-tabs")
+                        classes("d-tabs", "d-tabs-${props.variant.name.lowercase()}")
+                        if (props.leadingIcons) classes("d-tabs-leading-icons")
+                        style { itemAppearance(appearance) }
+                        if (props.scrollable) {
+                            style {
+                                property("overflow-x", "auto")
+                                property("white-space", "nowrap")
+                            }
+                        }
                     }) {
                         props.labels.forEachIndexed { index, label ->
                             Button(attrs = {
                                 attr("type", "button")
+                                classes("d-tab")
                                 attr("role", "tab")
                                 attr(
                                     "aria-selected",
@@ -555,7 +1014,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                         "-1"
                                     },
                                 )
-                                onClick { props.onSelect(index) }
+                                if (!formEnabled) disabled()
+                                style { itemAppearance(appearance, props.selectedIndex == index) }
+                                onClick { if (formEnabled) props.onSelect(index) }
                                 onKeyDown { event ->
                                     val offset =
                                         when (event.key) {
@@ -563,7 +1024,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                             "ArrowLeft" -> -1
                                             else -> 0
                                         }
-                                    if (offset !=
+                                    if (formEnabled && offset !=
                                         0
                                     ) {
                                         event.preventDefault()
@@ -577,17 +1038,31 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                         )?.focus()
                                     }
                                 }
-                            }) { Text(label) }
+                            }) {
+                                Div(attrs = { classes("d-tab-content") }) {
+                                    props.icons[index]?.let { icon ->
+                                        Span(attrs = {
+                                            attr("aria-hidden", "true")
+                                            classes("d-tab-icon")
+                                        }) { icon() }
+                                    }
+                                    Span(attrs = { classes("d-tab-label") }) { Text(label) }
+                                }
+                            }
                         }
                     }
                 }
             },
             navigationBar = { props, modifier, _ ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationBar
+                val formEnabled = domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
                     Nav(attrs = {
                         domposableAttributes(modifier)
-                        attr("aria-label", "Application")
+                        attr("aria-label", props.label)
                         classes("d-navigation")
+                        if (props.short) classes("d-navigation-short")
+                        style { itemAppearance(appearance) }
                         style {
                             property(
                                 "flex-direction",
@@ -602,9 +1077,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         }
                     }) {
                         props.items.forEachIndexed { index, item ->
-                            if (item.href != null) {
-                                A(href = item.href, attrs = {
+                            val safeHref = item.href?.let(::safeDomposableHref)
+                            if (safeHref != null && formEnabled && item.enabled) {
+                                A(href = safeHref, attrs = {
                                     if (index == props.selectedIndex) attr("aria-current", "page")
+                                    style { itemAppearance(appearance, index == props.selectedIndex) }
                                     onClick { event ->
                                         val modified =
                                             listOf(
@@ -613,22 +1090,24 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                                 event.shiftKey,
                                                 event.altKey,
                                             ).any { it }
-                                        if (event.button.toInt() == 0 && !modified) {
+                                        if (formEnabled && event.button.toInt() == 0 && !modified) {
                                             event.preventDefault()
                                             props.onSelect(index)
                                         }
                                     }
-                                }) { Text("${item.symbol} ${item.label}") }
+                                }) { navItemContent(item) }
                             } else {
                                 Button(attrs = {
                                     attr("type", "button")
+                                    style { itemAppearance(appearance, index == props.selectedIndex) }
+                                    if (!formEnabled || !item.enabled) disabled()
                                     if (index ==
                                         props.selectedIndex
                                     ) {
                                         attr("aria-current", "page")
                                     }
-                                    onClick { props.onSelect(index) }
-                                }) { Text("${item.symbol} ${item.label}") }
+                                    onClick { if (formEnabled && item.enabled) props.onSelect(index) }
+                                }) { navItemContent(item) }
                             }
                         }
                     }
@@ -637,19 +1116,67 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             menu = {
                 props,
                 modifier,
-                _,
+                content,
                 ->
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.menu
                 if (props.expanded) {
-                    HtmlModal("Menu", props.onDismiss, modifier, sheet = false) {
-                        props.items.forEach { item ->
-                            Button(attrs = {
-                                attr("type", "button")
-                                if (!item.enabled) disabled()
-                                onClick {
-                                    item.onClick()
+                    val previousFocus = remember { document.activeElement as? HTMLElement }
+                    TagElement<HTMLElement>("div", applyAttrs = {
+                        domposableAttributes(modifier)
+                        classes("d-menu-backdrop")
+                        attr("aria-label", "Menu")
+                        style {
+                            property("position", "fixed")
+                            property("inset", "0")
+                            property("z-index", "1000")
+                        }
+                        onClick { event -> if (event.target == event.currentTarget) props.onDismiss() }
+                        onKeyDown { event ->
+                            when (event.key) {
+                                "Escape" -> {
+                                    event.preventDefault()
                                     props.onDismiss()
                                 }
-                            }) { Text(item.label) }
+
+                                "ArrowDown", "ArrowUp" -> {
+                                    event.preventDefault()
+                                    val items =
+                                        (event.currentTarget as HTMLElement).querySelectorAll(
+                                            "[role^=menuitem]:not(:disabled)",
+                                        )
+                                    if (items.length > 0) {
+                                        val active = document.activeElement
+                                        val current =
+                                            (0 until items.length).firstOrNull { items.item(it) == active } ?: -1
+                                        val delta = if (event.key == "ArrowDown") 1 else -1
+                                        items
+                                            .item(
+                                                (current + delta + items.length) % items.length,
+                                            )?.let { (it as? HTMLElement)?.focus() }
+                                    }
+                                }
+                            }
+                        }
+                        ref { element ->
+                            window.setTimeout(
+                                { (element.querySelector("[role^=menuitem]:not(:disabled)") as? HTMLElement)?.focus() },
+                                0,
+                            )
+                            onDispose { previousFocus?.takeIf { it.isConnected }?.focus() }
+                        }
+                    }) {
+                        Div(attrs = {
+                            attr("role", "menu")
+                            attr("aria-label", "Menu")
+                            classes("d-menu-popup")
+                            style { surfaceAppearance(appearance) }
+                        }) {
+                            CompositionLocalProvider(LocalHtmlMenuDismiss provides props.onDismiss) {
+                                props.items.forEach { item ->
+                                    HtmlDropdownMenuItem(item, DomposableModifier)
+                                }
+                                content()
+                            }
                         }
                     }
                 }
@@ -659,7 +1186,15 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                HtmlModal(props.title, props.onDismiss, modifier, sheet = false) {
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.dialog
+                HtmlModal(
+                    props.title,
+                    props.onDismiss,
+                    modifier,
+                    sheet = false,
+                    appearance = appearance,
+                    variant = props.variant,
+                ) {
                     content()
                     props.actions()
                 }
@@ -669,46 +1204,274 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                HtmlModal(props.title, props.onDismiss, modifier, sheet = true, content)
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.bottomSheet
+                if (props.modal) {
+                    HtmlModal(
+                        props.title,
+                        props.onDismiss,
+                        modifier,
+                        sheet = true,
+                        appearance = appearance,
+                        content = content,
+                    )
+                } else {
+                    val titleId = remember { "d-nonmodal-sheet-title-${nextInputId++}" }
+                    DomposableHtmlModifiers(modifier) {
+                        Section(attrs = {
+                            domposableAttributes(modifier)
+                            attr("aria-labelledby", titleId)
+                            classes("d-sheet", "d-bottom-sheet-nonmodal")
+                            style { surfaceAppearance(appearance) }
+                        }) {
+                            H2(attrs = { attr("id", titleId) }) { Text(props.title) }
+                            content()
+                            Button(attrs = {
+                                attr("type", "button")
+                                attr("aria-label", "Close ${props.title}")
+                                onClick { props.onDismiss() }
+                            }) { Text("Close") }
+                        }
+                    }
+                }
             },
             topAppBar = { props, modifier, _ -> HtmlTopAppBar(props, modifier) },
             floatingActionButton = { props, modifier, content -> HtmlFloatingActionButton(props, modifier, content) },
             snackbar = { props, modifier, _ -> HtmlSnackbar(props, modifier) },
+            snackbarHost = { props, modifier, _ -> HtmlSnackbarHost(props, modifier) },
+            badgedBox = { props, modifier, content -> HtmlBadgedBox(props, modifier, content) },
+            scrim = { props, modifier, _ -> HtmlScrim(props, modifier) },
+            label = { props, modifier, content -> HtmlLabel(props, modifier, content) },
+            menuGroup = { props, modifier, content -> HtmlMenuGroup(props, modifier, content) },
+            scrollField = { props, modifier, _ -> HtmlScrollField(props, modifier) },
+            dropdownMenuItem = { props, modifier, _ -> HtmlDropdownMenuItem(props, modifier) },
             select = { props, modifier, _ -> HtmlSelect(props, modifier) },
             segmentedButtons = { props, modifier, _ -> HtmlSegmentedButtons(props, modifier) },
             rangeSlider = { props, modifier, _ -> HtmlRangeSlider(props, modifier) },
             tooltip = { props, modifier, content -> HtmlTooltip(props, modifier, content) },
+            toggleButton = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlToggleButton(props, modifier, content) }
+            },
+            buttonGroup = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlButtonGroup(props, modifier) }
+            },
+            appBar = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { HtmlAppBar(props, modifier) } },
+            multiChoiceSegmentedButtons = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlMultiChoiceSegmentedButtons(props, modifier) }
+            },
+            splitButton = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlSplitButton(props, modifier) }
+            },
+            loadingIndicator = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlLoadingIndicator(props, modifier) }
+            },
+            floatingToolbar = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlFloatingToolbar(props, modifier, content) }
+            },
+            floatingActionButtonMenu = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlFloatingActionButtonMenu(props, modifier) }
+            },
+            dragHandle = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlDragHandle(props, modifier) }
+            },
+            listItem = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { HtmlListItem(props, modifier) } },
+            bottomAppBar = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlBottomAppBar(props, modifier, content) }
+            },
+            navigationDrawer = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlNavigationDrawer(props, modifier, content) }
+            },
+            navigationDrawerItem = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlNavigationDrawerItem(props, modifier) }
+            },
+            wideNavigationRail = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlWideNavigationRail(props, modifier, content) }
+            },
+            wideNavigationRailItem = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlWideNavigationRailItem(props, modifier) }
+            },
+            bottomSheetScaffold = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlBottomSheetScaffold(props, modifier, content) }
+            },
+            searchBar = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlSearchBar(props, modifier, content) }
+            },
+            autocomplete = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlAutocomplete(props, modifier) }
+            },
+            datePicker = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlDatePicker(props, modifier) }
+            },
+            dateRangePicker = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlDateRangePicker(props, modifier) }
+            },
+            timePicker = {
+                props,
+                modifier,
+                _,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlTimePicker(props, modifier) }
+            },
+            carousel = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { HtmlCarousel(props, modifier) } },
+            pullToRefresh = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlPullToRefresh(props, modifier, content) }
+            },
+            swipeToDismiss = {
+                props,
+                modifier,
+                content,
+                ->
+                DomposableHtmlModifiers(modifier) { HtmlSwipeToDismiss(props, modifier, content) }
+            },
             scaffold = { props, modifier, content ->
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-scaffold")
-                    }) {
-                        Header {
-                            A(href = "#main-content", attrs = {
-                                classes("d-skip-link")
-                                onClick {
-                                    it.preventDefault()
-                                    (document.getElementById("main-content") as? HTMLElement)?.focus()
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.scaffold
+                val scaffoldDepth = LocalHtmlScaffoldDepth.current
+                val nested = scaffoldDepth > 0
+                val constrained =
+                    nested ||
+                        modifier.elements.any {
+                            it is DomposableModifierOperation.Height || it == DomposableModifierOperation.FillHeight
+                        }
+                CompositionLocalProvider(LocalHtmlScaffoldDepth provides scaffoldDepth + 1) {
+                    DomposableHtmlModifiers(modifier) {
+                        Div(attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-scaffold")
+                            if (nested) classes("d-scaffold-nested")
+                            if (constrained) classes("d-scaffold-constrained")
+                            style { surfaceAppearance(appearance) }
+                        }) {
+                            TagElement<HTMLElement>(if (nested) "div" else "header", applyAttrs = {}) {
+                                if (!nested) {
+                                    A(href = "#main-content", attrs = {
+                                        classes("d-skip-link")
+                                        onClick {
+                                            it.preventDefault()
+                                            (document.getElementById("main-content") as? HTMLElement)?.focus()
+                                        }
+                                    }) { Text("Skip to content") }
                                 }
-                            }) { Text("Skip to content") }
-                            props.topBar()
-                        }
-                        Div(attrs = { classes("d-scaffold-middle") }) {
-                            props.navigation()
-                            Main(attrs = {
-                                id("main-content")
-                                attr("tabindex", "-1")
-                                classes("d-scaffold-body")
-                            }) {
-                                content()
-                                Div(attrs = { classes("d-floating") }) { props.floatingAction() }
-                                Div(attrs = { classes("d-snackbar") }) { props.snackbar() }
+                                props.topBar()
                             }
-                            Aside { props.contextual() }
+                            Div(attrs = { classes("d-scaffold-middle") }) {
+                                props.navigation()
+                                TagElement<HTMLElement>(if (nested) "div" else "main", applyAttrs = {
+                                    if (!nested) {
+                                        id("main-content")
+                                        attr("tabindex", "-1")
+                                    }
+                                    classes("d-scaffold-body")
+                                }) {
+                                    content()
+                                    Div(attrs = {
+                                        classes(
+                                            "d-floating",
+                                            "d-floating-${props.floatingActionPosition.name.lowercase()}",
+                                        )
+                                        style {
+                                            when (props.floatingActionPosition) {
+                                                DomposableScaffoldFabPosition.Start -> {
+                                                    property("inset-inline-start", "16px")
+                                                    property("inset-inline-end", "auto")
+                                                }
+
+                                                DomposableScaffoldFabPosition.Center -> {
+                                                    property("left", "50%")
+                                                    property("right", "auto")
+                                                    property("transform", "translateX(-50%)")
+                                                }
+
+                                                DomposableScaffoldFabPosition.End -> {
+                                                    property("inset-inline-end", "16px")
+                                                    property("inset-inline-start", "auto")
+                                                }
+                                            }
+                                        }
+                                    }) { props.floatingAction() }
+                                    Div(attrs = { classes("d-snackbar") }) { props.snackbar() }
+                                }
+                                Aside { props.contextual() }
+                            }
+                            TagElement<HTMLElement>(if (nested) "div" else "footer", applyAttrs = {}) {
+                                props.bottomBar()
+                            }
+                            props.overlays()
                         }
-                        Footer { props.bottomBar() }
-                        props.overlays()
                     }
                 }
             },
@@ -788,6 +1551,8 @@ private fun HtmlImage(
     }
 }
 
+private val LocalHtmlScaffoldDepth = staticCompositionLocalOf { 0 }
+
 private var nextInputId = 0
 
 internal fun nextMaterialInputId(): String = "d-input-${nextInputId++}"
@@ -800,17 +1565,133 @@ private fun HtmlToggle(
     enabled: Boolean,
     modifier: DomposableModifier,
     switch: Boolean,
+    indeterminate: Boolean,
+    showLabel: Boolean,
+    description: String?,
+    controlPlacement: DomposableControlPlacement,
+    labelSpacing: DomposableLength,
+    colors: DomposableSelectionColors = DomposableSelectionColors(),
+    labelAppearance: DomposableTextAppearance? = null,
+    descriptionAppearance: DomposableTextAppearance? = null,
+    checkmark: DomposableColor? = null,
+    disabledCheckmark: DomposableColor? = null,
+    switchColors: DomposableSwitchColors? = null,
 ) {
+    val effectiveEnabled = enabled && domposableFormEnabled()
+    val descriptionId = remember { "d-toggle-description-${nextInputId++}" }
+    val labelId = remember { "d-toggle-label-${nextInputId++}" }
+    val customColors =
+        if (switch) {
+            switchColors != null && switchColors != DomposableSwitchColors()
+        } else {
+            colors !=
+                DomposableSelectionColors()
+        }
     DomposableHtmlModifiers(modifier) {
-        Label(attrs = { classes("d-toggle") }) {
-            Input(InputType.Checkbox, attrs = {
-                domposableAttributes(modifier)
-                checked(checkedValue)
-                if (switch) attr("role", "switch")
-                if (!enabled) disabled()
-                onChange { onChange(it.value) }
-            })
-            Text(label)
+        Label(attrs = {
+            classes("d-toggle")
+            onClick { it.stopPropagation() }
+            style { property("gap", "${labelSpacing.value.takeIf { it > 0f } ?: 10f}px") }
+        }) {
+            @Composable fun control() {
+                Input(InputType.Checkbox, attrs = {
+                    domposableAttributes(modifier)
+                    checked(checkedValue)
+                    ref { input ->
+                        input.asDynamic().indeterminate = indeterminate
+                        onDispose {}
+                    }
+                    if (switch) attr("role", "switch")
+                    if (!effectiveEnabled) disabled()
+                    if (label.isNotEmpty()) attr("aria-labelledby", labelId)
+                    description?.let { attr("aria-describedby", descriptionId) }
+                    if (customColors) attr("data-custom-colors", "true")
+                    style {
+                        if (switch) {
+                            switchColors?.let {
+                                property("--d-switch-checked-thumb", it.checkedThumb.cssOr("var(--d-on-primary)"))
+                                property("--d-switch-checked-track", it.checkedTrack.cssOr("var(--d-primary)"))
+                                property("--d-switch-checked-border", it.checkedBorder.cssOr("var(--d-primary)"))
+                                property("--d-switch-checked-icon", it.checkedIcon.cssOr("var(--d-on-primary)"))
+                                property("--d-switch-unchecked-thumb", it.uncheckedThumb.cssOr("var(--d-outline)"))
+                                property("--d-switch-unchecked-track", it.uncheckedTrack.cssOr("var(--d-surface)"))
+                                property("--d-switch-unchecked-border", it.uncheckedBorder.cssOr("var(--d-outline)"))
+                                property("--d-switch-unchecked-icon", it.uncheckedIcon.cssOr("var(--d-on-surface)"))
+                                property(
+                                    "--d-switch-disabled-checked-thumb",
+                                    it.disabledCheckedThumb.cssOr("var(--d-on-surface)"),
+                                )
+                                property(
+                                    "--d-switch-disabled-checked-track",
+                                    it.disabledCheckedTrack.cssOr("var(--d-variant)"),
+                                )
+                                property(
+                                    "--d-switch-disabled-checked-border",
+                                    it.disabledCheckedBorder.cssOr("var(--d-variant)"),
+                                )
+                                property(
+                                    "--d-switch-disabled-checked-icon",
+                                    it.disabledCheckedIcon.cssOr("var(--d-on-surface)"),
+                                )
+                                property(
+                                    "--d-switch-disabled-unchecked-thumb",
+                                    it.disabledUncheckedThumb.cssOr("var(--d-on-surface)"),
+                                )
+                                property(
+                                    "--d-switch-disabled-unchecked-track",
+                                    it.disabledUncheckedTrack.cssOr("var(--d-surface)"),
+                                )
+                                property(
+                                    "--d-switch-disabled-unchecked-border",
+                                    it.disabledUncheckedBorder.cssOr("var(--d-outline)"),
+                                )
+                                property(
+                                    "--d-switch-disabled-unchecked-icon",
+                                    it.disabledUncheckedIcon.cssOr("var(--d-on-surface)"),
+                                )
+                            }
+                        } else {
+                            property("--d-control-selected", colors.selected.cssOr("var(--d-primary)"))
+                            property("--d-control-unselected", colors.unselected.cssOr("var(--d-outline)"))
+                            property("--d-control-disabled-selected", colors.disabledSelected.cssOr("var(--d-primary)"))
+                            property(
+                                "--d-control-disabled-unselected",
+                                colors.disabledUnselected.cssOr("var(--d-outline)"),
+                            )
+                            property("--d-control-checkmark", checkmark.cssOr("var(--d-on-primary)"))
+                            property("--d-control-disabled-checkmark", disabledCheckmark.cssOr("var(--d-on-surface)"))
+                            property(
+                                "accent-color",
+                                (if (effectiveEnabled) colors.selected else colors.disabledSelected).cssOr(
+                                    "var(--d-primary)",
+                                ),
+                            )
+                        }
+                    }
+                    onChange { if (effectiveEnabled) onChange(it.value) }
+                })
+            }
+
+            @Composable fun labelText() {
+                Span(attrs = {
+                    id(labelId)
+                    if (!showLabel) classes("d-visually-hidden")
+                    style { labelAppearance?.let { applyCatalogTextAppearance(it) } }
+                }) { Text(label) }
+            }
+            if (controlPlacement == DomposableControlPlacement.Leading) {
+                control()
+                labelText()
+            } else {
+                labelText()
+                control()
+            }
+        }
+        description?.let {
+            Span(attrs = {
+                id(descriptionId)
+                style { descriptionAppearance?.let { applyCatalogTextAppearance(it) } }
+            }) { Text(it) }
         }
     }
 }
@@ -860,6 +1741,8 @@ private fun HtmlModal(
     onDismiss: () -> Unit,
     modifier: DomposableModifier,
     sheet: Boolean,
+    appearance: io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance,
+    variant: DomposableDialogVariant = DomposableDialogVariant.Basic,
     content: @Composable () -> Unit,
 ) {
     val dismiss by rememberUpdatedState(onDismiss)
@@ -868,8 +1751,9 @@ private fun HtmlModal(
         TagElement<HTMLDialogElement>("dialog", applyAttrs = {
             domposableAttributes(modifier)
             attr("aria-labelledby", titleId)
-            classes("d-dialog")
+            classes("d-dialog", "d-dialog-${variant.name.toKebabCase()}")
             if (sheet) classes("d-sheet")
+            style { surfaceAppearance(appearance) }
             ref { element ->
                 val previousFocus = document.activeElement as? HTMLElement
                 val cancel: (org.w3c.dom.events.Event) -> Unit = {
@@ -902,7 +1786,16 @@ private fun HtmlTheme(
 ) {
     InstallDomposableMaterialStyles()
     Div(attrs = {
-        classes("d-theme")
+        classes(
+            "d-theme",
+            if (tokens.designLanguage ==
+                DomposableDesignLanguage.Expressive
+            ) {
+                "d-theme-expressive"
+            } else {
+                "d-theme-standard"
+            },
+        )
         domposableTokenVariables(tokens)
     }) { content() }
 }
@@ -917,28 +1810,6 @@ internal fun InstallDomposableMaterialStyles() {
     }
 }
 
-/** Applies only Domposable token custom properties to an existing HTML host element. */
-fun AttrsScope<HTMLElement>.domposableTokenVariables(tokens: DomposableTokens) {
-    style {
-        property("--d-primary", tokens.colors.primary.css())
-        property("--d-on-primary", tokens.colors.onPrimary.css())
-        property("--d-surface", tokens.colors.surface.css())
-        property("--d-on-surface", tokens.colors.onSurface.css())
-        property("--d-variant", tokens.colors.surfaceVariant.css())
-        property("--d-outline", tokens.colors.outline.css())
-        property("--d-error", tokens.colors.error.css())
-        property("--d-font", tokens.typography.fontFamily)
-        property("--d-body", "${tokens.typography.bodySize}px")
-        property("--d-title", "${tokens.typography.titleSize}px")
-        property("--d-label", "${tokens.typography.labelSize}px")
-        property("--d-line-height", tokens.typography.lineHeight.toString())
-        property("--d-spacing", "${tokens.spacing.medium.value}px")
-        property("--d-radius", "${tokens.radius.value}px")
-        property("--d-elevation", "${tokens.elevation.value}px")
-        property("--d-motion", "${tokens.motionDurationMillis}ms")
-    }
-}
-
 private const val MATERIAL_CSS = """
 .d-theme *{box-sizing:border-box}.d-link{color:var(--d-primary);padding:8px;display:inline-flex;align-items:center;min-height:44px}.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
 .d-theme button,.d-theme input,.d-theme textarea{font:inherit;accent-color:var(--d-primary)}
@@ -946,27 +1817,27 @@ private const val MATERIAL_CSS = """
 .d-theme :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
 .d-theme h1,.d-theme h2,.d-theme h3{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
-.d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:var(--d-radius);min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
+.d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:9999px;min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
 .d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;align-items:center;justify-content:center}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
 @media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}
 .d-button:not(:disabled):active{filter:brightness(.9)}.d-button:not(:disabled):focus-visible{outline:none;box-shadow:var(--d-button-feedback,0 0 0 0 transparent),0 0 0 3px var(--d-primary)}
 .d-button:disabled{cursor:default}
-.d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}
-.d-icon-button{border-radius:50%;padding:10px}.d-chip{background:var(--d-variant);color:var(--d-on-surface)}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}
+.d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}.d-button-elevated{background:var(--d-surface-container-low,var(--d-surface));color:var(--d-primary);box-shadow:0 1px 3px rgb(0 0 0 / .24)}.d-button-filledtonal{background:var(--d-secondary-container,var(--d-variant));color:var(--d-on-secondary-container,var(--d-on-surface))}
+.d-icon-button{border-radius:50%;padding:10px}.d-chip{min-height:var(--d-item-min-height,32px);padding:var(--d-item-padding,6px 12px);border-radius:var(--d-item-radius,var(--d-shape-small,8px));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,var(--d-outline))}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}
 .d-card{padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}
-.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{padding:12px;border:1px solid var(--d-outline);border-radius:var(--d-radius);color:var(--d-on-surface);background:var(--d-surface)}.d-field input::placeholder,.d-field textarea::placeholder{color:var(--d-field-placeholder);font-size:var(--d-field-placeholder-size,inherit);line-height:var(--d-field-placeholder-line,inherit);font-weight:var(--d-field-placeholder-weight,inherit);letter-spacing:var(--d-field-placeholder-spacing,inherit)}
-.d-field-control{display:flex;align-items:center;gap:8px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0}
+.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{box-sizing:border-box;min-height:56px;padding:16px;border:1px solid var(--d-outline);border-radius:4px;color:var(--d-on-surface);background:var(--d-surface);line-height:24px}.d-field input::placeholder,.d-field textarea::placeholder{color:var(--d-field-placeholder);font-size:var(--d-field-placeholder-size,inherit);line-height:var(--d-field-placeholder-line,inherit);font-weight:var(--d-field-placeholder-weight,inherit);letter-spacing:var(--d-field-placeholder-spacing,inherit)}
+.d-field-control{display:flex;align-items:center;gap:8px;min-height:56px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0;height:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent}
 .d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}
-.d-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{border-radius:12px;padding:2px 8px;background:var(--d-primary);color:var(--d-on-primary)}
+.d-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{display:inline-grid;place-items:center;box-sizing:border-box;min-width:16px;width:max-content;height:16px;padding:0 4px;border-radius:999px;background:var(--d-primary);color:var(--d-on-primary);font-size:11px;line-height:16px;font-weight:500;font-variant-numeric:tabular-nums}.d-badge-dot{width:6px;min-width:6px;height:6px;padding:0}
 .d-divider{border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
 .d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button,.d-navigation a{text-decoration:none;display:inline-flex;align-items:center;padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
 .d-tabs [aria-selected=true],.d-navigation [aria-current=page]{color:var(--d-primary);border-bottom:3px solid var(--d-primary)}
 .d-dialog{border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface);max-width:min(600px,90vw)}
 .d-dialog::backdrop{background:#0006}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw)}
-.d-scaffold{display:flex;flex-direction:column;height:100dvh}.d-scaffold-middle{display:flex;flex:1;min-height:0}.d-scaffold-body{flex:1;min-width:0;min-height:0;position:relative;overflow:auto}.d-floating{position:absolute;bottom:16px;right:16px}.d-snackbar{position:absolute;bottom:16px;left:16px}
+.d-scaffold{display:flex;flex-direction:column;height:100dvh}.d-scaffold-constrained{height:100%;min-height:0;min-width:0;overflow:hidden}.d-scaffold-middle{display:flex;flex:1;min-height:0}.d-scaffold-constrained>.d-scaffold-middle{min-height:0;overflow:hidden}.d-scaffold-body{flex:1;min-width:0;min-height:0;position:relative;overflow:auto}.d-scaffold-constrained>.d-scaffold-middle>.d-scaffold-body{height:100%;min-height:0}.d-floating{position:absolute;bottom:16px;right:16px}.d-snackbar{position:absolute;bottom:16px;left:16px}
 .d-app-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;background:var(--d-surface)}.d-app-bar h2{font-size:var(--d-title);flex:1}.d-app-bar-actions{display:flex;gap:8px}.d-fab{min-width:56px;min-height:56px;border-radius:16px;box-shadow:0 3px 8px #0003}
 .d-snackbar-message{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 16px;border-radius:var(--d-radius);background:var(--d-on-surface);color:var(--d-surface)}.d-snackbar-message button{border:0;background:transparent;color:inherit;min-height:44px;padding:8px}
-.d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer}.d-segment input{position:absolute;opacity:0;width:1px;height:1px}.d-segment span{display:flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid var(--d-outline)}.d-segment:first-child span{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child span{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+span{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+span{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+span{opacity:.5;cursor:default}
+.d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer}.d-segment input{position:absolute;opacity:0;width:1px;height:1px}.d-segment-surface{display:flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid var(--d-outline)}.d-segment:first-child .d-segment-surface{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child .d-segment-surface{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+.d-segment-surface{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+.d-segment-surface{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+.d-segment-surface{opacity:.5;cursor:default}
 .d-range{display:flex;flex-direction:column;gap:12px}.d-tooltip-anchor{display:inline-block;position:relative}.d-tooltip{position:absolute;z-index:5;bottom:100%;left:0;min-width:160px;max-width:280px;border-radius:4px;padding:8px 12px;background:var(--d-on-surface);color:var(--d-surface);font-size:var(--d-label)}
 @media(prefers-reduced-motion:reduce){.d-theme *{transition:none!important;animation:none!important}}
 .d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-navigation button,.d-navigation a{font:inherit;accent-color:var(--d-primary);box-sizing:border-box}
@@ -974,4 +1845,103 @@ private const val MATERIAL_CSS = """
 .d-field *,.d-toggle *,.d-segments *,.d-tabs *,.d-navigation *,.d-scaffold *,.d-dialog *{box-sizing:border-box}
 @media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}.d-button-spinner{animation:none!important}}
 @media(forced-colors:active){.d-button:not(:disabled):focus-visible{outline:2px solid Highlight;outline-offset:3px;box-shadow:none}}
+.d-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-outline));border-radius:2px;background:transparent;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
+.d-toggle input[type=checkbox]:not([role=switch]):checked{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary));background-image:linear-gradient(135deg,transparent 43%,var(--d-control-checkmark,var(--d-on-primary)) 44% 56%,transparent 57%),linear-gradient(45deg,transparent 38%,var(--d-control-checkmark,var(--d-on-primary)) 39% 52%,transparent 53%);background-size:9px 9px;background-position:1px 0,3px 4px;background-repeat:no-repeat}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary));background-image:linear-gradient(var(--d-control-checkmark,var(--d-on-primary)),var(--d-control-checkmark,var(--d-on-primary)));background-size:10px 2px;background-position:center;background-repeat:no-repeat}
+.d-toggle input[type=radio]{border-radius:50%;background-color:transparent}.d-toggle input[type=radio]:checked{border-color:var(--d-control-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-selected,var(--d-primary)) 0 42%,transparent 46%)}
+.d-toggle input[type=checkbox]:not([role=switch]):disabled,.d-toggle input[type=radio]:disabled{border-color:var(--d-control-disabled-unselected,var(--d-outline));opacity:.38}
+.d-toggle input[type=checkbox]:not([role=switch]):checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background-color:var(--d-control-disabled-selected,var(--d-primary));background-image:linear-gradient(135deg,transparent 43%,var(--d-control-disabled-checkmark,var(--d-on-surface)) 44% 56%,transparent 57%),linear-gradient(45deg,transparent 38%,var(--d-control-disabled-checkmark,var(--d-on-surface)) 39% 52%,transparent 53%)}
+.d-toggle input[type=radio]:checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-disabled-selected,var(--d-primary)) 0 42%,transparent 46%)}
+.d-toggle input[role=switch]{appearance:none;flex:0 0 52px;width:52px;height:32px;margin:0;border:2px solid var(--d-switch-unchecked-border,var(--d-outline));border-radius:999px;background-color:var(--d-switch-unchecked-track,var(--d-surface));background-image:radial-gradient(circle closest-side,var(--d-switch-unchecked-thumb,var(--d-outline)) 0 98%,transparent 100%);background-size:16px 16px;background-position:6px center;background-repeat:no-repeat;transition:background-color 150ms ease,border-color 150ms ease,background-position 150ms ease,background-size 150ms ease}
+.d-toggle input[role=switch]:checked{border-color:transparent;background-color:var(--d-switch-checked-track,var(--d-primary));background-image:radial-gradient(circle closest-side,var(--d-switch-checked-thumb,var(--d-on-primary)) 0 98%,transparent 100%);background-size:24px 24px;background-position:calc(100% - 2px) center}
+.d-toggle input[role=switch]:disabled{opacity:.38}
+.d-slider{appearance:none;width:100%;height:20px;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
+.d-slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(to right,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) 100%)}
+.d-slider::-moz-range-track{height:4px;border-radius:4px;background:var(--d-slider-inactive-current,var(--d-outline))}
+.d-slider::-moz-range-progress{height:4px;border-radius:4px;background:var(--d-slider-active-current,var(--d-primary))}
+.d-slider-vertical{height:160px;width:20px;touch-action:pan-x}.d-slider-vertical::-webkit-slider-runnable-track{height:100%;width:4px;background:linear-gradient(to bottom,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) 100%)}.d-slider-vertical::-moz-range-track{height:100%;width:4px}.d-slider-vertical::-moz-range-progress{height:var(--d-slider-progress,50%);width:4px}.d-slider-vertical::-webkit-slider-thumb{appearance:none;width:20px;height:20px;margin-top:-8px;border:0;border-radius:50%;background:var(--d-slider-thumb-current,var(--d-primary))}
+.d-slider::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:var(--d-slider-thumb-current,var(--d-primary))}
+.d-slider:disabled{--d-slider-thumb-current:var(--d-slider-disabled-thumb,var(--d-slider-thumb-current));--d-slider-active-current:var(--d-slider-disabled-active,var(--d-slider-active-current));--d-slider-inactive-current:var(--d-slider-disabled-inactive,var(--d-slider-inactive-current))}
+.d-chip{background:var(--d-item-container,var(--d-variant));color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,transparent);border-width:var(--d-item-border-width,1px);border-radius:var(--d-item-radius,var(--d-radius))}
+.d-chip[aria-pressed=true]{background:var(--d-item-selected-container,var(--d-variant));color:var(--d-item-selected-content,var(--d-primary));border-color:var(--d-item-selected-border,var(--d-primary))}
+.d-chip:disabled{background:var(--d-item-disabled-container,var(--d-variant));color:var(--d-item-disabled-content,var(--d-on-surface));border-color:var(--d-item-disabled-border,var(--d-outline))}
+.d-tabs button,.d-navigation button,.d-navigation a{background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));border:0;border-radius:var(--d-item-radius,0)}
+.d-tabs [aria-selected=true],.d-navigation [aria-current=page]{background:var(--d-item-selected-container,transparent);color:var(--d-item-selected-content,var(--d-primary));border-bottom:3px solid var(--d-item-selected-border,var(--d-primary))}
+.d-segment-surface{background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,var(--d-outline));border-width:var(--d-item-border-width,1px)}
+.d-segment:first-child .d-segment-surface{border-top-left-radius:var(--d-item-radius,var(--d-radius));border-bottom-left-radius:var(--d-item-radius,var(--d-radius))}.d-segment:last-child .d-segment-surface{border-top-right-radius:var(--d-item-radius,var(--d-radius));border-bottom-right-radius:var(--d-item-radius,var(--d-radius))}
+.d-segment input:checked+.d-segment-surface{background:var(--d-item-selected-container,var(--d-variant));color:var(--d-item-selected-content,var(--d-primary));border-color:var(--d-item-selected-border,var(--d-outline))}
+.d-segment input:disabled+.d-segment-surface{background:var(--d-item-disabled-container,var(--d-item-container,transparent));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-outline))}
+.d-progress{display:block;appearance:none;accent-color:var(--d-progress-color,var(--d-primary));height:var(--d-progress-stroke,4px);border:0;border-radius:999px;overflow:hidden;background:var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))}.d-progress::-webkit-progress-bar{border-radius:999px;background:var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))}.d-progress::-webkit-progress-value{border-radius:999px;background:var(--d-progress-color,var(--d-primary))}.d-progress::-moz-progress-bar{border-radius:999px;background:var(--d-progress-color,var(--d-primary))}.d-progress-circular{width:48px;height:48px;vertical-align:middle}@keyframes d-progress-spin{to{transform:rotate(360deg)}}@keyframes d-wave-travel{to{stroke-dashoffset:-100}}@keyframes d-wave-circular-travel{to{stroke-dashoffset:-100;transform:rotate(270deg)}}@keyframes d-loading-rotate{to{transform:rotate(360deg)}}@keyframes d-loading-shape-one{0%,100%{opacity:1;transform:rotate(0deg) scale(.78)}33%{opacity:0;transform:rotate(120deg) scale(1)}66%{opacity:0;transform:rotate(240deg) scale(.9)}}@keyframes d-loading-shape-two{0%,33%,100%{opacity:0;transform:rotate(-30deg) scale(.9)}38%,61%{opacity:1;transform:rotate(90deg) scale(1)}68%{opacity:0;transform:rotate(150deg) scale(.8)}}@keyframes d-loading-shape-three{0%,60%,100%{opacity:0;transform:rotate(20deg) scale(.8)}66%,92%{opacity:1;transform:rotate(140deg) scale(1)}96%{opacity:0;transform:rotate(180deg) scale(.9)}}
+.d-theme .d-card{border-radius:var(--d-shape-medium,var(--d-radius))}.d-theme .d-field input,.d-theme .d-field textarea,.d-theme .d-field select,.d-search-control,.d-autocomplete-control{border-radius:var(--d-shape-extra-small,var(--d-radius))}
+.d-theme .d-chip,.d-theme .d-segment-surface,.d-navigation-drawer-item,.d-list-item{border-radius:var(--d-item-radius,var(--d-shape-small,var(--d-radius)))}
+.d-theme-expressive .d-button,.d-theme-expressive .d-chip,.d-theme-expressive .d-loading-indicator,.d-theme-expressive .d-floating-toolbar{transition-timing-function:cubic-bezier(.2,.8,.2,1)}
+.d-card-outlined{box-shadow:none}.d-card-elevated{box-shadow:0 1px 3px rgb(0 0 0 / .24)}.d-card-filled{box-shadow:none}.d-card[aria-disabled=true]{opacity:.5}
+.d-card-stretched-link,.d-card-stretched-action{position:absolute;inset:0;z-index:1;border-radius:inherit}.d-card-stretched-action{width:100%;height:100%;padding:0;border:0;background:transparent;color:transparent}.d-card-content{position:relative;z-index:2;pointer-events:none}.d-card-content a,.d-card-content button,.d-card-content input,.d-card-content select,.d-card-content textarea,.d-card-content [tabindex],.d-card-content [role=button],.d-card-content [role=link]{pointer-events:auto;position:relative;z-index:2}.d-card[aria-disabled=true]{opacity:.5}
+.d-chip-assist,.d-chip-suggestion{border-radius:var(--d-shape-small,var(--d-radius))}.d-chip-input{border-radius:var(--d-shape-small,var(--d-radius))}.d-chip-filter[aria-pressed=true] .d-chip-label::before{content:"✓";margin-inline-end:6px}
+.d-chip-surface{display:contents}.d-chip-label{display:inline-flex;align-items:center;gap:var(--d-item-gap,8px)}.d-chip-icon{display:inline-flex;align-items:center;justify-content:center}.d-chip.d-item-hittarget{min-width:var(--d-item-min-interactive,48px);min-height:var(--d-item-min-interactive,48px);padding:0;border-width:0;border-color:transparent;background:transparent;box-shadow:none}.d-chip.d-item-hittarget .d-chip-surface{display:inline-flex;align-items:center;justify-content:center;gap:var(--d-item-gap,8px);min-height:var(--d-item-min-height,32px);padding:var(--d-item-padding,6px 12px);border:var(--d-item-border-width,1px) solid var(--d-item-border,transparent);border-radius:var(--d-item-radius,var(--d-shape-small,var(--d-radius)));background:var(--d-item-container,var(--d-variant));color:var(--d-item-content,var(--d-on-surface))}.d-chip.d-item-hittarget[aria-pressed=true] .d-chip-surface{border-width:var(--d-item-selected-border-width,var(--d-item-border-width,1px));background:var(--d-item-selected-container,var(--d-variant));color:var(--d-item-selected-content,var(--d-primary));border-color:var(--d-item-selected-border,var(--d-primary))}.d-chip.d-item-hittarget:disabled .d-chip-surface{background:var(--d-item-disabled-container,var(--d-variant));color:var(--d-item-disabled-content,var(--d-on-surface));border-color:var(--d-item-disabled-border,var(--d-outline))}
+.d-icon-button-standard{background:transparent;color:var(--d-on-surface)}.d-icon-button-filled{background:var(--d-primary);color:var(--d-on-primary)}.d-icon-button-filled-tonal{background:var(--d-secondary-container);color:var(--d-on-secondary-container)}.d-icon-button-outlined{background:transparent;color:var(--d-on-surface);border-color:var(--d-outline)}
+.d-tabs-secondary [aria-selected=true]{border-bottom:0;border-top:2px solid var(--d-item-selected-border,var(--d-primary))}.d-tabs-primary [aria-selected=true]{border-bottom-width:var(--d-tabs-indicator-height,3px)}
+.d-navigation-short{min-height:56px}.d-bottom-app-bar-flexible{min-height:120px;padding-bottom:24px}.d-search-fullscreen[role=search]{position:fixed;z-index:40;inset:0;display:flex;flex-direction:column;padding:16px;background:var(--d-surface)}.d-carousel-centeredhero .d-carousel-item{flex-basis:min(80vw,600px);max-width:min(80vw,600px);min-height:420px}
+.d-multi-segments{display:flex;gap:0}.d-multi-segment{min-height:var(--d-item-min-height,44px);padding:var(--d-item-padding,10px 16px);border:var(--d-item-border-width,1px) solid var(--d-item-border,var(--d-outline));border-radius:var(--d-item-radius,0);background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface))}.d-multi-segment[aria-pressed=true]{background:var(--d-item-selected-container,var(--d-variant));color:var(--d-item-selected-content,var(--d-primary));border-color:var(--d-item-selected-border,var(--d-outline))}.d-action-app-bar{position:relative;display:flex;align-items:center}.d-app-bar-overflow{position:absolute;z-index:15;inset-block-start:100%;inset-inline-end:0;display:flex;flex-direction:column;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));background:var(--d-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}.d-app-bar-overflow button{min-height:44px;border:0;background:transparent;color:var(--d-on-surface);text-align:start}.d-wide-navigation-rail-item{display:flex;align-items:center;justify-content:center;gap:12px;min-height:56px;border:0;border-radius:var(--d-item-radius,999px);background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface))}.d-wide-navigation-rail-item[aria-current=page]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-wide-navigation-rail-item-compact{width:56px}
+.d-progress-wavy{display:inline-flex;align-items:center;justify-content:center;overflow:visible;border-radius:0;background:transparent}.d-progress-wavy svg{display:block;overflow:visible}.d-wave-track,.d-wave-active{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}.d-wave-track{stroke:var(--d-progress-track,var(--d-variant));stroke-width:var(--d-progress-stroke,4px)}.d-wave-active{stroke:var(--d-progress-color,var(--d-primary));stroke-width:var(--d-progress-stroke,4px)}.d-progress-wavy-circular .d-wave-active{transform:rotate(-90deg);transform-origin:50% 50%}.d-wave-indeterminate{stroke-dasharray:32 68;animation:d-wave-travel var(--d-wave-duration,1s) linear infinite}.d-wave-static .d-wave-indeterminate{animation:none}.d-progress-wavy-linear .d-wave-indeterminate{stroke-dasharray:none;clip-path:inset(-50% 68% -50% 0);animation-name:d-wave-linear-travel}@keyframes d-wave-linear-travel{from{clip-path:inset(-50% 100% -50% 0)}50%{clip-path:inset(-50% 25% -50% 25%)}to{clip-path:inset(-50% 0 -50% 100%)}}.d-progress-wavy-circular .d-wave-indeterminate{animation-name:d-wave-circular-travel}
+.d-app-bar-center-aligned .d-app-bar-title{position:absolute;left:50%;transform:translateX(-50%);text-align:center}.d-app-bar-medium,.d-app-bar-large,.d-app-bar-mediumflexible,.d-app-bar-largeflexible{align-items:flex-end;padding-bottom:24px}.d-app-bar-large .d-app-bar-title,.d-app-bar-largeflexible .d-app-bar-title{font-size:var(--d-title)}
+.d-fab-small{min-width:40px;min-height:40px;border-radius:var(--d-shape-medium,16px)}.d-fab-medium{min-width:80px;min-height:80px;border-radius:var(--d-shape-large,28px)}.d-fab-large{min-width:96px;min-height:96px;border-radius:var(--d-shape-extra-large,32px)}
+.d-button-group{display:flex;flex-wrap:wrap;align-items:center}.d-button-toggle[aria-pressed=true]{background:var(--d-secondary-container);color:var(--d-on-secondary-container)}.d-split-button>.d-button:first-child{border-start-end-radius:0;border-end-end-radius:0}.d-split-button>.d-button:last-child{border-start-start-radius:0;border-end-start-radius:0;border-inline-start:1px solid color-mix(in srgb,currentColor 20%,transparent)}
+.d-loading-indicator{position:relative;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:var(--d-progress-color,var(--d-primary))}.d-loading-indicator svg{display:block;overflow:visible}.d-loading-contained{background:var(--d-loading-container,var(--d-progress-track,var(--d-secondary-container)));padding:8px}.d-loading-container-shape{fill:var(--d-loading-container,var(--d-progress-track,var(--d-secondary-container)))}.d-loading-morph-shape{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-contained{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-outline{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-shape{transform-box:fill-box;transform-origin:center;animation:d-loading-rotate 3.2s linear infinite}.d-loading-morph-0{animation:d-loading-shape-one 3.2s ease-in-out infinite}.d-loading-morph-1{animation:d-loading-shape-two 3.2s ease-in-out infinite}.d-loading-morph-2{animation:d-loading-shape-three 3.2s ease-in-out infinite}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}
+.d-floating-toolbar{position:relative;z-index:auto;display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}.d-floating-toolbar[data-expanded=false]{gap:0}.d-fab-menu{position:relative;z-index:auto;display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:max-content;max-width:100%}.d-fab-menu-items{display:flex;flex-direction:column;gap:8px;max-width:100%;padding:12px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}
+.d-drag-handle{display:grid;place-items:center;min-width:48px;min-height:24px;touch-action:none;cursor:grab}.d-drag-handle:active{cursor:grabbing}.d-drag-handle-grip{display:block;width:32px;height:4px;border-radius:999px;background:currentColor;opacity:.45}
+.d-list-item{display:flex;width:100%;align-items:center;gap:var(--d-item-gap,16px);min-height:var(--d-item-min-height,56px);padding:var(--d-item-padding,12px 16px);border:0;text-align:start;background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface))}.d-list-item-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}.d-list-item-headline{font-weight:500}.d-list-item-supporting,.d-list-item-overline{font-size:var(--d-label);color:var(--d-on-surface-variant)}.d-list-item[aria-current=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-list-item:disabled{background:var(--d-item-disabled-container,transparent);color:var(--d-item-disabled-content,var(--d-on-surface));opacity:.5}.d-list-item-first{border-end-start-radius:0;border-end-end-radius:0}.d-list-item-middle{border-radius:0}.d-list-item-last{border-start-start-radius:0;border-start-end-radius:0}
+.d-bottom-app-bar{display:flex;align-items:center;gap:12px;min-height:80px;padding:12px 16px;border-radius:var(--d-shape-large,var(--d-radius)) var(--d-shape-large,var(--d-radius)) 0 0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}.d-navigation-drawer{position:absolute;inset-block:0;inset-inline-start:0;width:min(360px,90vw);padding:16px;overflow:auto;border-radius:0 var(--d-shape-large,var(--d-radius)) var(--d-shape-large,var(--d-radius));box-shadow:0 8px 24px rgb(0 0 0 / .24)}.d-drawer-scrim{position:fixed;inset:0;z-index:30;background:rgb(0 0 0 / .32)}.d-navigation-drawer-item{display:flex;width:100%;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border:0;background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));text-align:start}.d-navigation-drawer-item[aria-current=page]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-wide-navigation-rail{display:flex;flex:0 0 88px;flex-direction:column;align-items:center;gap:12px;overflow:hidden}.d-wide-navigation-rail-expanded{flex-basis:280px;align-items:stretch;padding:16px}
+.d-bottom-sheet-scaffold{display:flex;min-height:100%;flex-direction:column}.d-bottom-sheet-content{flex:1}.d-bottom-sheet{position:sticky;bottom:0;max-height:80vh;overflow:auto;border-radius:var(--d-shape-large,var(--d-radius)) var(--d-shape-large,var(--d-radius)) 0 0;padding:16px}.d-bottom-sheet-handle{align-self:center;min-height:44px}
+.d-search-bar,.d-autocomplete{position:relative;display:flex;flex-direction:column;gap:6px}.d-search-control,.d-autocomplete-control{display:flex;align-items:center;gap:8px;min-height:var(--d-input-min-height,56px);padding:var(--d-input-padding,0 16px);border:var(--d-input-outline-width,1px) solid var(--d-input-outline,var(--d-outline));background:var(--d-input-container,var(--d-surface));color:var(--d-input-text,var(--d-on-surface))}.d-search-control:focus-within,.d-autocomplete-control:focus-within{border-width:var(--d-input-outline-focused-width,2px);border-color:var(--d-input-outline-focused,var(--d-primary));background:var(--d-input-container-focused,var(--d-surface))}.d-search-control input,.d-autocomplete-control input{flex:1;min-width:0;min-height:inherit;border:0;outline:0;padding:0;background:transparent;color:inherit;caret-color:var(--d-input-cursor,var(--d-primary))}.d-search-control input::placeholder,.d-autocomplete-control input::placeholder{font-size:var(--d-input-placeholder-size,inherit)}.d-search-results,.d-autocomplete-options{position:absolute;z-index:15;top:100%;inset-inline:0;display:flex;flex-direction:column;max-height:50vh;overflow:auto;padding:8px;border-radius:0 0 var(--d-shape-medium,var(--d-radius)) var(--d-shape-medium,var(--d-radius));background:var(--d-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}.d-search-results:empty{display:none}.d-autocomplete-options button{text-align:start;min-height:44px;border:0;background:transparent;color:var(--d-on-surface)}.d-autocomplete-options button[aria-selected=true]{background:var(--d-secondary-container);color:var(--d-on-secondary-container)}
+.d-date-picker,.d-date-range-picker,.d-time-picker{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:var(--d-shape-medium,var(--d-radius));background:var(--d-surface)}.d-calendar-header{display:flex;align-items:center;justify-content:space-between;gap:8px}.d-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(36px,1fr));gap:4px;text-align:center}.d-calendar-grid>[role=columnheader]{font-size:var(--d-label);padding:8px 0}.d-calendar-day{min-width:36px;min-height:36px;padding:4px;border:0;border-radius:50%;background:transparent;color:var(--d-on-surface)}.d-calendar-day[aria-pressed=true]{background:var(--d-primary);color:var(--d-on-primary)}.d-calendar-day:disabled{opacity:.4}.d-date-range-picker input,.d-date-picker input,.d-time-picker input{min-height:48px;padding:8px;border:1px solid var(--d-outline);border-radius:var(--d-shape-extra-small,var(--d-radius));background:var(--d-surface);color:var(--d-on-surface)}
+.d-carousel{position:relative;min-width:0}.d-carousel-track{display:flex;gap:var(--d-carousel-gap,8px);overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain}.d-carousel-item{flex:0 0 var(--d-carousel-item-width,240px);min-width:var(--d-carousel-min-width,40px);max-width:var(--d-carousel-item-width,240px);scroll-snap-align:start}.d-carousel-fullscreen .d-carousel-item{flex-basis:100%;max-width:100%;min-height:70vh}.d-carousel-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding:8px}.d-carousel-controls button{min-width:44px;min-height:44px}.d-pull-to-refresh{position:relative;touch-action:pan-x}.d-pull-refresh-indicator{position:absolute;z-index:1;top:0;left:50%;transform:translate(-50%,var(--d-pull-distance,0px));min-height:40px}.d-swipe-dismiss{position:relative;overflow:hidden;touch-action:pan-y}.d-swipe-background{position:absolute;inset:0;background:var(--d-error-container,var(--d-error));color:var(--d-on-error-container,var(--d-on-error))}.d-swipe-content{position:relative;background:var(--d-surface);color:var(--d-on-surface);transform:translateX(var(--d-swipe-offset,0px));transition:transform 120ms ease}
+.d-floating-end{right:16px}.d-floating-start{left:16px}.d-floating-center{right:auto}
+@media(prefers-reduced-motion:reduce){.d-toggle input[role=switch][data-custom-colors],.d-slider{transition:none!important;animation:none!important}}
+@media(forced-colors:active){.d-toggle input[data-custom-colors],.d-slider,.d-chip,.d-tabs button,.d-navigation button,.d-navigation a,.d-segment-surface{forced-color-adjust:auto}.d-toggle input[data-custom-colors]:checked,.d-chip[aria-pressed=true],.d-tabs [aria-selected=true],.d-navigation [aria-current=page],.d-segment input:checked+.d-segment-surface{color:HighlightText;background:Highlight;border-color:Highlight}.d-toggle input[data-custom-colors]:focus-visible,.d-slider:focus-visible{outline:2px solid Highlight;outline-offset:3px}}
+.d-calendar-grid{display:flex;flex-direction:column;gap:4px}.d-calendar-week{display:grid;grid-template-columns:repeat(7,minmax(36px,1fr));gap:4px}.d-calendar-week>[role=columnheader]{font-size:var(--d-label);padding:8px 0}.d-calendar-day-in-range{border-radius:0;background:var(--d-secondary-container);color:var(--d-on-secondary-container)}.d-calendar-day-range-start{border-start-start-radius:50%;border-end-start-radius:50%}.d-calendar-day-range-end{border-start-end-radius:50%;border-end-end-radius:50%}.d-calendar-day[aria-pressed=true]{background:var(--d-primary);color:var(--d-on-primary)}
+.d-time-dial{display:flex;flex-direction:column;align-items:center;gap:12px}.d-time-value{font-variant-numeric:tabular-nums;font-size:var(--d-title)}.d-time-dial-controls{position:relative;display:grid;place-items:center;width:280px;height:280px;border-radius:50%;background:var(--d-secondary-container)}.d-time-dial-value{position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px;border:0;border-radius:50%;transform:rotate(var(--d-time-dial-angle)) translateY(calc(var(--d-time-dial-radius) * -1)) rotate(calc(var(--d-time-dial-angle) * -1));background:transparent;color:var(--d-on-secondary-container)}.d-time-dial-value[aria-current=true]{background:var(--d-primary);color:var(--d-on-primary)}.d-date-range-fields{display:flex;flex-direction:column;gap:4px}
+.d-calendar-day:focus-visible,.d-time-dial-value:focus-visible,.d-action-app-bar button:focus-visible,.d-autocomplete-options button:focus-visible{outline:3px solid var(--d-primary);outline-offset:2px}.d-app-bar-overflow button:disabled,.d-time-dial button:disabled{opacity:.38}
+@media(prefers-reduced-motion:reduce){.d-loading-morph-shape,.d-wave-indeterminate,.d-loading-indicator-track,.d-swipe-content,.d-carousel-track{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){.d-calendar-day,.d-time-dial-value,.d-multi-segment,.d-action-app-bar button,.d-autocomplete-options button,.d-list-item,.d-navigation-drawer-item,.d-wide-navigation-rail-item,.d-bottom-sheet-handle{forced-color-adjust:auto;border:1px solid ButtonText}.d-calendar-day[aria-pressed=true],.d-calendar-day-in-range,.d-time-dial-value[aria-current=true],.d-multi-segment[aria-pressed=true],.d-navigation-drawer-item[aria-current=page],.d-wide-navigation-rail-item[aria-current=page]{background:Highlight;color:HighlightText;border-color:Highlight}.d-calendar-day:focus-visible,.d-time-dial-value:focus-visible{outline:2px solid Highlight;outline-offset:2px}}
+.d-chip:hover:not(:disabled):not([aria-pressed=true]),.d-chip.d-item-hittarget:hover:not(:disabled):not([aria-pressed=true]) .d-chip-surface,.d-multi-segment:hover:not(:disabled):not([aria-pressed=true]),.d-tabs button:hover:not(:disabled):not([aria-selected=true]),.d-navigation button:hover:not(:disabled):not([aria-current=page]),.d-navigation a:hover:not([aria-current=page]),.d-list-item:hover:not(:disabled):not([aria-current=true]),.d-navigation-drawer-item:hover:not(:disabled):not([aria-current=page]),.d-wide-navigation-rail-item:hover:not(:disabled):not([aria-current=page]),.d-segment:hover:not(:has(input:checked)) .d-segment-surface{background:var(--d-item-hovered-container,var(--d-item-container,transparent));color:var(--d-item-hovered-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-hovered-border,var(--d-item-border,var(--d-outline)))}
+.d-chip:hover:not(:disabled)[aria-pressed=true],.d-chip.d-item-hittarget:hover:not(:disabled)[aria-pressed=true] .d-chip-surface,.d-multi-segment:hover:not(:disabled)[aria-pressed=true],.d-tabs button:hover:not(:disabled)[aria-selected=true],.d-navigation [aria-current=page]:hover:not(:disabled),.d-list-item:hover:not(:disabled)[aria-current=true],.d-navigation-drawer-item:hover:not(:disabled)[aria-current=page],.d-wide-navigation-rail-item:hover:not(:disabled)[aria-current=page],.d-segment:hover:has(input:checked) .d-segment-surface{background:var(--d-item-selected-container,var(--d-item-container,transparent));color:var(--d-item-selected-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-selected-border,var(--d-item-border,var(--d-outline)))}
+.d-chip:focus-visible:not(:disabled):not([aria-pressed=true]),.d-chip.d-item-hittarget:focus-visible:not(:disabled):not([aria-pressed=true]) .d-chip-surface,.d-multi-segment:focus-visible:not(:disabled):not([aria-pressed=true]),.d-tabs button:focus-visible:not(:disabled):not([aria-selected=true]),.d-navigation button:focus-visible:not(:disabled):not([aria-current=page]),.d-navigation a:focus-visible:not([aria-current=page]),.d-list-item:focus-visible:not(:disabled):not([aria-current=true]),.d-navigation-drawer-item:focus-visible:not(:disabled):not([aria-current=page]),.d-wide-navigation-rail-item:focus-visible:not(:disabled):not([aria-current=page]),.d-segment:has(input:focus-visible):not(:has(input:checked)) .d-segment-surface{background:var(--d-item-focused-container,var(--d-item-container,transparent));color:var(--d-item-focused-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-focused-border,var(--d-item-border,var(--d-outline)))}
+.d-chip:focus-visible:not(:disabled)[aria-pressed=true],.d-chip.d-item-hittarget:focus-visible:not(:disabled)[aria-pressed=true] .d-chip-surface,.d-multi-segment:focus-visible:not(:disabled)[aria-pressed=true],.d-tabs button:focus-visible:not(:disabled)[aria-selected=true],.d-navigation [aria-current=page]:focus-visible:not(:disabled),.d-list-item:focus-visible:not(:disabled)[aria-current=true],.d-navigation-drawer-item:focus-visible:not(:disabled)[aria-current=page],.d-wide-navigation-rail-item:focus-visible:not(:disabled)[aria-current=page],.d-segment:has(input:focus-visible:checked) .d-segment-surface{background:var(--d-item-selected-container,var(--d-item-container,transparent));color:var(--d-item-selected-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-selected-border,var(--d-item-border,var(--d-outline)))}
+.d-chip:active:not(:disabled):not([aria-pressed=true]),.d-chip.d-item-hittarget:active:not(:disabled):not([aria-pressed=true]) .d-chip-surface,.d-multi-segment:active:not(:disabled):not([aria-pressed=true]),.d-tabs button:active:not(:disabled):not([aria-selected=true]),.d-navigation button:active:not(:disabled):not([aria-current=page]),.d-navigation a:active:not([aria-current=page]),.d-list-item:active:not(:disabled):not([aria-current=true]),.d-navigation-drawer-item:active:not(:disabled):not([aria-current=page]),.d-wide-navigation-rail-item:active:not(:disabled):not([aria-current=page]),.d-segment:active:not(:has(input:checked)) .d-segment-surface{background:var(--d-item-pressed-container,var(--d-item-hovered-container,var(--d-item-container,transparent)));color:var(--d-item-pressed-content,var(--d-item-hovered-content,var(--d-item-content,var(--d-on-surface))));border-color:var(--d-item-pressed-border,var(--d-item-hovered-border,var(--d-item-border,var(--d-outline))))}
+.d-chip:active:not(:disabled)[aria-pressed=true],.d-chip.d-item-hittarget:active:not(:disabled)[aria-pressed=true] .d-chip-surface,.d-multi-segment:active:not(:disabled)[aria-pressed=true],.d-tabs button:active:not(:disabled)[aria-selected=true],.d-navigation [aria-current=page]:active:not(:disabled),.d-list-item:active:not(:disabled)[aria-current=true],.d-navigation-drawer-item:active:not(:disabled)[aria-current=page],.d-wide-navigation-rail-item:active:not(:disabled)[aria-current=page],.d-segment:active:has(input:checked) .d-segment-surface{background:var(--d-item-pressed-container,var(--d-item-hovered-container,var(--d-item-selected-container,var(--d-item-container,transparent))));color:var(--d-item-pressed-content,var(--d-item-hovered-content,var(--d-item-selected-content,var(--d-item-content,var(--d-on-surface)))));border-color:var(--d-item-pressed-border,var(--d-item-hovered-border,var(--d-item-selected-border,var(--d-item-border,var(--d-outline)))))}
+.d-chip:disabled,.d-multi-segment:disabled,.d-tabs button:disabled,.d-navigation button:disabled,.d-list-item:disabled,.d-navigation-drawer-item:disabled,.d-wide-navigation-rail-item:disabled,.d-segment input:disabled+.d-segment-surface{background:var(--d-item-disabled-container,var(--d-item-container,transparent));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-item-border,var(--d-outline)))}
+@media(forced-colors:active){.d-chip:hover,.d-chip:focus-visible,.d-chip:active,.d-multi-segment:hover,.d-multi-segment:focus-visible,.d-multi-segment:active,.d-tabs button:hover,.d-tabs button:focus-visible,.d-tabs button:active,.d-navigation button:hover,.d-navigation button:focus-visible,.d-navigation button:active,.d-list-item:hover,.d-list-item:focus-visible,.d-list-item:active,.d-navigation-drawer-item:hover,.d-navigation-drawer-item:focus-visible,.d-navigation-drawer-item:active,.d-wide-navigation-rail-item:hover,.d-wide-navigation-rail-item:focus-visible,.d-wide-navigation-rail-item:active{forced-color-adjust:auto}.d-chip[aria-pressed=true],.d-multi-segment[aria-pressed=true],.d-tabs [aria-selected=true],.d-navigation [aria-current=page],.d-list-item[aria-current=true],.d-navigation-drawer-item[aria-current=page],.d-wide-navigation-rail-item[aria-current=page]{background:Highlight!important;color:HighlightText!important;border-color:Highlight!important}.d-chip:disabled,.d-multi-segment:disabled,.d-tabs button:disabled,.d-navigation button:disabled,.d-list-item:disabled,.d-navigation-drawer-item:disabled,.d-wide-navigation-rail-item:disabled{color:GrayText!important;border-color:GrayText!important}.d-chip:focus-visible,.d-multi-segment:focus-visible,.d-tabs button:focus-visible,.d-navigation :focus-visible,.d-list-item:focus-visible,.d-navigation-drawer-item:focus-visible,.d-wide-navigation-rail-item:focus-visible{outline:2px solid Highlight!important;outline-offset:2px}}
+.d-chip.d-item-hittarget:disabled .d-chip-surface{background:var(--d-item-disabled-container,var(--d-item-container,var(--d-variant)));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-item-border,var(--d-outline)))}
+.d-chip[aria-pressed=true],.d-chip[aria-pressed=true] .d-chip-surface,.d-multi-segment[aria-pressed=true],.d-tabs [aria-selected=true],.d-navigation [aria-current=page],.d-list-item[aria-current=true],.d-navigation-drawer-item[aria-current=page],.d-wide-navigation-rail-item[aria-current=page],.d-segment input:checked+.d-segment-surface{border-width:var(--d-item-selected-border-width,var(--d-item-border-width,1px))}
+.d-chip:hover:not(:disabled),.d-chip:hover:not(:disabled) .d-chip-surface,.d-multi-segment:hover:not(:disabled),.d-tabs button:hover:not(:disabled),.d-navigation button:hover:not(:disabled),.d-navigation a:hover,.d-list-item:hover:not(:disabled),.d-navigation-drawer-item:hover:not(:disabled),.d-wide-navigation-rail-item:hover:not(:disabled),.d-segment:hover .d-segment-surface{box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-hover-opacity,8%),transparent)}
+.d-chip:focus-visible:not(:disabled),.d-chip:focus-visible:not(:disabled) .d-chip-surface,.d-multi-segment:focus-visible:not(:disabled),.d-tabs button:focus-visible:not(:disabled),.d-navigation button:focus-visible:not(:disabled),.d-navigation a:focus-visible,.d-list-item:focus-visible:not(:disabled),.d-navigation-drawer-item:focus-visible:not(:disabled),.d-wide-navigation-rail-item:focus-visible:not(:disabled),.d-segment:has(input:focus-visible) .d-segment-surface{box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-focus-opacity,12%),transparent)}
+.d-chip:active:not(:disabled),.d-chip:active:not(:disabled) .d-chip-surface,.d-multi-segment:active:not(:disabled),.d-tabs button:active:not(:disabled),.d-navigation button:active:not(:disabled),.d-navigation a:active,.d-list-item:active:not(:disabled),.d-navigation-drawer-item:active:not(:disabled),.d-wide-navigation-rail-item:active:not(:disabled),.d-segment:active .d-segment-surface{box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-pressed-opacity,12%),transparent)}
+.d-chip:disabled,.d-multi-segment:disabled,.d-tabs button:disabled,.d-navigation button:disabled,.d-list-item:disabled,.d-navigation-drawer-item:disabled,.d-wide-navigation-rail-item:disabled,.d-segment input:disabled+.d-segment-surface{opacity:var(--d-item-disabled-opacity,1)}
+.d-search-full-screen[role=search]{position:fixed;z-index:40;inset:0;display:flex;flex-direction:column;padding:16px;background:var(--d-surface)}.d-search-contained-full-screen[role=search]{position:fixed;z-index:40;inset:16px;display:flex;flex-direction:column;padding:16px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface);box-shadow:0 8px 28px rgb(0 0 0 / .22)} .d-search-full-screen[role=search] .d-search-results,
+.d-search-contained-full-screen[role=search] .d-search-results{position:static;flex:1;min-height:0;max-height:none}
+.d-search-docked-with-gap .d-search-control{gap:16px}.d-search-app-bar{min-width:0}.d-search-app-bar .d-search-control{min-height:48px;border-radius:var(--d-shape-extra-large,999px)}
+.d-dropdown-menu-item{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:8px 12px;border:var(--d-item-border-width,0) solid var(--d-item-border,transparent);border-radius:var(--d-item-radius,0);background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));text-align:start}.d-dropdown-menu-item[aria-checked=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-dropdown-menu-item:disabled{opacity:var(--d-item-disabled-opacity,1)}.d-dropdown-menu-labels{display:flex;flex:1;flex-direction:column;gap:2px}.d-dropdown-menu-supporting{font-size:var(--d-label);opacity:.72}.d-dropdown-menu-leading,.d-dropdown-menu-trailing{display:inline-flex;align-items:center}.d-menu-group{gap:2px;padding:8px;border-radius:var(--d-shape-small,var(--d-radius))}.d-component-label{display:block}.d-component-label-content{display:flex;flex-direction:column;gap:4px}.d-component-label-text{position:absolute;z-index:1;inset-inline-start:12px;inset-block-start:8px;max-width:calc(100% - 24px);padding:0 4px;overflow:hidden;background:var(--d-surface);color:var(--d-primary);font-size:var(--d-label);text-overflow:ellipsis;white-space:nowrap;opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity 120ms ease,transform 120ms ease}.d-component-label:hover .d-component-label-text,.d-component-label:focus-within .d-component-label-text,.d-component-label:active .d-component-label-text,.d-component-label-persistent .d-component-label-text{opacity:1;transform:translateY(0)}.d-component-label-persistent .d-component-label-text{position:static;display:block;max-width:none;padding:0;background:transparent;transform:none}.d-scroll-field{border:var(--d-item-border-width,1px) solid var(--d-item-border,var(--d-outline));border-radius:var(--d-item-radius,var(--d-shape-small,var(--d-radius)));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));padding:var(--d-item-padding,4px)}.d-scroll-field:focus-visible{outline:2px solid var(--d-primary);outline-offset:2px}.d-scroll-field[aria-disabled=true]{opacity:var(--d-item-disabled-opacity,1)}.d-scroll-field-viewport{width:min(160px,40vw);height:168px;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;scrollbar-width:none}.d-scroll-field-viewport::-webkit-scrollbar{display:none}.d-scroll-field-option{display:grid;min-height:44px;place-items:center;scroll-snap-align:center;cursor:pointer}.d-scroll-field-option-selected{font-weight:600}.d-app-bar-row,.d-app-bar-second-row{display:flex;align-items:center;gap:12px;width:100%}.d-app-bar-second-row{padding-inline-start:56px;font-size:var(--d-body)}.d-app-bar-heading{display:flex;flex:1;flex-direction:column;gap:2px}.d-app-bar-subtitle{font-size:var(--d-label);opacity:.8}.d-dialog-full-screen{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border-radius:0}.d-dialog-date-picker,.d-dialog-time-picker,.d-dialog-vibrant-time-picker{max-width:min(560px,94vw)}.d-dialog-vibrant-time-picker .d-time-picker{border-radius:var(--d-shape-extra-large,28px)}
+.d-menu-popup{position:fixed;inset-block-start:16px;inset-inline-end:16px;display:flex;flex-direction:column;min-width:196px;max-width:min(320px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));box-shadow:0 4px 12px rgb(0 0 0 / .2)}
+.d-chip.d-item-hittarget .d-chip-surface,.d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,0));border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,0));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,0));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,0))}
+.d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
+.d-snackbar-host>.d-snackbar-message{max-width:min(720px,100%);min-height:48px;box-shadow:0 3px 8px rgb(0 0 0 / .24);pointer-events:auto}
+.d-scroll-field-viewport::before,.d-scroll-field-viewport::after{content:"";display:block;height:62px;scroll-snap-align:none;pointer-events:none}
+.d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-theme .d-toggle+span{display:block;margin-block-start:0;line-height:20px}.d-theme .d-toggle:has(input:last-child)+span{margin-inline-end:30px;margin-inline-start:0}
+.d-theme .d-chip.d-item-hittarget .d-chip-surface{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
+.d-theme-expressive .d-chip{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
+.d-theme .d-progress-wavy-linear{width:100%}
+.d-theme .d-navigation:not([style*="column"]){display:flex;width:100%;min-height:80px;align-items:stretch;justify-content:space-around;gap:0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}
+.d-theme .d-navigation:not([style*="column"])>button,.d-theme .d-navigation:not([style*="column"])>a{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:80px;padding:8px 12px;border:0;border-radius:0;background:transparent;color:var(--d-item-content,var(--d-on-surface));font-size:12px;line-height:16px;text-align:center}
+.d-theme .d-navigation:not([style*="column"])>button[aria-current=page],.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]{border:0;background:transparent;color:var(--d-item-selected-content,var(--d-on-secondary-container,var(--d-primary)))}
+.d-theme .d-navigation:not([style*="column"])>button>svg:first-child,.d-theme .d-navigation:not([style*="column"])>a>svg:first-child{display:block;box-sizing:content-box;width:24px;height:24px;padding:4px 20px;border-radius:999px;transition:background-color 150ms ease}
+.d-theme .d-navigation:not([style*="column"])>button>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not([style*="column"])>a>span[aria-hidden=true]:first-child{display:grid;width:64px;height:32px;place-items:center;border-radius:999px;transition:background-color 150ms ease}
+.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>span[aria-hidden=true]:first-child{background:var(--d-item-selected-container,var(--d-secondary-container,var(--d-variant)))}
+.d-theme .d-navigation:not([style*="column"]).d-navigation-short{min-height:56px}
+.d-theme .d-navigation:not([style*="column"]).d-navigation-short>button,.d-theme .d-navigation-short:not([style*="column"])>a{min-height:56px}
+.d-theme .d-navigation[style*="column"]{min-width:80px;align-items:stretch;gap:4px;padding:12px;background:var(--d-surface-container,var(--d-surface))}
+.d-theme .d-navigation[style*="column"]>button,.d-theme .d-navigation[style*="column"]>a{min-height:56px;border-radius:var(--d-item-radius,28px);text-align:start}
+@media(forced-colors:active){.d-theme .d-navigation:not([style*="column"])>button[aria-current=page],.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]{outline:1px solid Highlight}.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>span[aria-hidden=true]:first-child{background:Highlight;color:HighlightText}}
+@media(forced-colors:active){.d-theme .d-toggle input[type=checkbox],.d-theme .d-toggle input[type=radio],.d-theme .d-toggle input[role=switch]{appearance:auto;forced-color-adjust:auto;background-image:none;background-color:ButtonFace;border-color:ButtonText}.d-theme .d-toggle input:checked{accent-color:Highlight}.d-theme .d-toggle input:focus-visible{outline:2px solid Highlight;outline-offset:3px}}
 """
