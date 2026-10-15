@@ -7,10 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
-import io.github.samuolis.domposable.foundation.DomposableStateColors
-import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
-import io.github.samuolis.domposable.foundation.DomposableTextFieldVariant
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
@@ -18,7 +15,6 @@ import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableAttributes
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.attributes.InputType
-import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Label
@@ -45,50 +41,150 @@ internal fun HtmlTextField(
         if (appearance.autoSize) autoSizeBinding.resize()
     }
     DomposableHtmlModifiers(modifier) {
-        Label(attrs = {
-            classes("d-field")
-            attr("for", id)
-        }) {
-            if (props.showLabel && !floating) {
-                Span(attrs = { fieldLabelStyle(appearance, props, focused, floating = false) }) { Text(props.label) }
+        if (floating) {
+            Div(attrs = { fieldRootStyle(props, floating = true) }) {
+                fieldControl(props, modifier, id, appearance, focused, autoSizeBinding, labelFloated) { focused = it }
+                fieldSupportingText(props, id, appearance, focused, supportingText)
             }
-            val needsControl =
-                floating || props.leadingIcon != null || props.prefix != null || props.trailingIcon != null
-            if (needsControl) {
-                Div(attrs = {
-                    classes("d-field-control")
-                    if (floating) style { property("position", "relative") }
-                    if (floating) floatingControlStyle(appearance)
-                }) {
-                    if (floating && props.showLabel) {
-                        Span(attrs = {
-                            fieldLabelStyle(appearance, props, focused, floating = labelFloated)
-                        }) { Text(props.label) }
-                    }
-                    props.leadingIcon?.let { icon -> fieldIcon(appearance, props, focused, leading = true, icon) }
-                    props.prefix?.invoke()
-                    fieldInput(props, modifier, id, appearance, focused, autoSizeBinding) { focused = it }
-                    props.trailingIcon?.let { icon -> fieldIcon(appearance, props, focused, leading = false, icon) }
+        } else {
+            Label(attrs = {
+                fieldRootStyle(props, floating = false)
+                attr("for", id)
+            }) {
+                if (props.showLabel) {
+                    Span(
+                        attrs = { fieldLabelStyle(appearance, props, focused, floating = false) },
+                    ) { Text(props.label) }
                 }
-            } else {
-                fieldInput(props, modifier, id, appearance, focused, autoSizeBinding) { focused = it }
-            }
-            supportingText?.let { message ->
-                Span(attrs = {
-                    id("$id-supporting")
-                    if (props.error != null) {
-                        classes("d-error")
-                        attr("aria-live", "polite")
-                    } else {
-                        classes("d-helper")
-                    }
-                    appearance.colors.supporting.color(props.enabled, props.isError, focused)?.let {
-                        style { property("color", it.css()) }
-                    }
-                    appearance.supportingAppearance?.let { style { applyTextAppearance(it) } }
-                }) { Text(message) }
+                fieldControl(props, modifier, id, appearance, focused, autoSizeBinding, labelFloated) { focused = it }
+                fieldSupportingText(props, id, appearance, focused, supportingText)
             }
         }
+    }
+}
+
+private fun <T : HTMLElement> AttrsScope<T>.fieldRootStyle(
+    props: DomposableTextFieldProps,
+    floating: Boolean,
+) {
+    classes("d-field")
+    if (floating && props.showLabel) {
+        style {
+            property("padding-block-start", "8px")
+            property("row-gap", "4px")
+        }
+    }
+}
+
+@Composable
+private fun fieldControl(
+    props: DomposableTextFieldProps,
+    modifier: DomposableModifier,
+    id: String,
+    appearance: DomposableTextFieldAppearance,
+    focused: Boolean,
+    autoSizeBinding: HtmlTextAreaAutoSizeBinding,
+    labelFloated: Boolean,
+    onFocusChange: (Boolean) -> Unit,
+) {
+    val floating = appearance.floatingLabel
+    val needsControl = floating || props.leadingIcon != null || props.prefix != null || props.trailingIcon != null
+    if (!needsControl) {
+        fieldInput(
+            props,
+            modifier,
+            id,
+            appearance,
+            focused,
+            autoSizeBinding,
+            floating = false,
+            onFocusChange = onFocusChange,
+        )
+        return
+    }
+    Div(attrs = {
+        classes("d-field-control")
+        if (floating) floatingControlStyle(appearance, props, focused)
+    }) {
+        if (floating && props.showLabel) {
+            Label(attrs = {
+                attr("for", id)
+                fieldLabelStyle(appearance, props, focused, floating = labelFloated)
+            }) { Text(props.label) }
+        }
+        if (floating) {
+            props.leadingIcon?.let { icon ->
+                Span(attrs = {
+                    classes("d-field-leading")
+                    floatingSlotStyle(leading = true)
+                }) { fieldIcon(appearance, props, focused, leading = true, icon) }
+            }
+            props.prefix?.let { prefix ->
+                Span(attrs = {
+                    classes("d-field-prefix")
+                    floatingPrefixStyle()
+                }) { prefix() }
+            }
+            fieldInput(
+                props,
+                modifier,
+                id,
+                appearance,
+                focused,
+                autoSizeBinding,
+                floating = true,
+                onFocusChange = onFocusChange,
+            )
+            props.trailingIcon?.let { icon ->
+                Span(attrs = {
+                    classes("d-field-trailing")
+                    floatingSlotStyle(leading = false)
+                }) { fieldIcon(appearance, props, focused, leading = false, icon) }
+            }
+        } else {
+            props.leadingIcon?.let { icon -> fieldIcon(appearance, props, focused, leading = true, icon) }
+            props.prefix?.invoke()
+            fieldInput(
+                props,
+                modifier,
+                id,
+                appearance,
+                focused,
+                autoSizeBinding,
+                floating = false,
+                onFocusChange = onFocusChange,
+            )
+            props.trailingIcon?.let { icon -> fieldIcon(appearance, props, focused, leading = false, icon) }
+        }
+    }
+}
+
+@Composable
+private fun fieldSupportingText(
+    props: DomposableTextFieldProps,
+    id: String,
+    appearance: DomposableTextFieldAppearance,
+    focused: Boolean,
+    supportingText: String?,
+) {
+    supportingText?.let { message ->
+        Span(attrs = {
+            id("$id-supporting")
+            style {
+                property("min-width", "0")
+                property("overflow-wrap", "anywhere")
+            }
+            if (props.error != null) {
+                classes("d-error")
+                attr("aria-live", "polite")
+            } else {
+                classes("d-helper")
+            }
+            appearance.colors.supporting.color(props.enabled, props.isError, focused)?.let {
+                style { property("color", it.css()) }
+            }
+            appearance.supportingAppearance?.let { style { applyTextAppearance(it) } }
+        }) { Text(message) }
     }
 }
 
@@ -100,6 +196,7 @@ private fun fieldInput(
     appearance: DomposableTextFieldAppearance,
     focused: Boolean,
     autoSizeBinding: HtmlTextAreaAutoSizeBinding,
+    floating: Boolean,
     onFocusChange: (Boolean) -> Unit,
 ) {
     fun <T : HTMLElement> AttrsScope<T>.applyInputAttributes() {
@@ -107,7 +204,7 @@ private fun fieldInput(
         domposableAttributes(modifier)
         inputSemantics(props, id, appearance)
         inputEvents(props, onFocusChange)
-        inputAppearance(appearance, props, focused)
+        inputAppearance(appearance, props, focused, floating)
         if (appearance.autoSize && (props.multiline || !props.singleLine)) {
             ref { element ->
                 val cleanup = installHtmlTextAreaAutoSize(element, autoSizeBinding)
@@ -121,7 +218,9 @@ private fun fieldInput(
             val initialRows = maxOf(2, props.minLines).coerceAtMost(props.maxLines)
             attr("rows", initialRows.toString())
             if (appearance.minHeight == null) style { property("min-height", "calc(${props.minLines}lh + 26px)") }
-            if (props.maxLines != Int.MAX_VALUE) style { property("max-height", "calc(${props.maxLines}lh + 26px)") }
+            if (!appearance.autoSize && props.maxLines != Int.MAX_VALUE) {
+                style { property("max-height", "calc(${props.maxLines}lh + 26px)") }
+            }
             onInput {
                 props.onValueChange(it.target.value)
                 autoSizeBinding.resize()
@@ -203,173 +302,6 @@ private fun <T : HTMLElement> AttrsScope<T>.inputEvents(
         onFocusChange(false)
         props.onFocusChange?.invoke(false)
     }
-}
-
-// Each optional appearance field independently overrides its CSS property.
-@Suppress("CyclomaticComplexMethod")
-private fun <T : HTMLElement> AttrsScope<T>.inputAppearance(
-    appearance: DomposableTextFieldAppearance,
-    props: DomposableTextFieldProps,
-    focused: Boolean,
-) {
-    val colors = appearance.colors
-    val stateText = colors.text.color(props.enabled, props.isError, focused)
-    val stateContainer = colors.container.color(props.enabled, props.isError, focused)
-    val stateOutline = colors.outline.color(props.enabled, props.isError, focused)
-    style {
-        stateText?.let { property("color", it.css()) }
-        stateContainer?.let { property("background-color", it.css()) }
-        stateOutline?.let { property("border-color", it.css()) }
-        colors.cursor.color(props.enabled, props.isError, focused)?.let { property("caret-color", it.css()) }
-        colors.placeholder
-            .color(
-                props.enabled,
-                props.isError,
-                focused,
-            )?.let { property("--d-field-placeholder", it.css()) }
-        val activeWidth = if (focused) appearance.focusedOutlineWidth else appearance.outlineWidth
-        (
-            activeWidth?.value ?: if (appearance.floatingLabel) {
-                if (focused) {
-                    2f
-                } else {
-                    1f
-                }
-            } else {
-                null
-            }
-        )?.let {
-            property("border-width", "${it}px")
-        }
-        appearance.shape?.let { materialShape(it) }
-        appearance.textAppearance?.let { applyTextAppearance(it) }
-        appearance.contentPadding?.let { padding ->
-            property("padding-block", "${padding.top.value}px ${padding.bottom.value}px")
-            property("padding-inline", "${padding.start.value}px ${padding.end.value}px")
-        }
-        if (appearance.contentPadding == null && appearance.floatingLabel) {
-            property("padding-block", "16px")
-            property("padding-inline", "16px")
-        }
-        appearance.minHeight?.let { property("min-height", "${it.value}px") }
-        if (appearance.minHeight == null && appearance.floatingLabel) property("min-height", "56px")
-        if (appearance.variant == DomposableTextFieldVariant.Filled) {
-            property("border-style", "solid")
-            if (activeWidth == null) property("border-width", "0 0 1px")
-            if (appearance.shape == null) property("border-radius", "4px 4px 0 0")
-        } else if (appearance.shape == null && appearance.floatingLabel) {
-            property("border-radius", "4px")
-        }
-        if (appearance.floatingLabel && props.value.isEmpty() && !focused) {
-            property("--d-field-placeholder", "transparent")
-        }
-    }
-}
-
-private const val MATERIAL_FIELD_MIN_HEIGHT = 56f
-
-private fun <T : HTMLElement> AttrsScope<T>.floatingControlStyle(appearance: DomposableTextFieldAppearance) {
-    style {
-        property("min-height", "${appearance.minHeight?.value ?: MATERIAL_FIELD_MIN_HEIGHT}px")
-        if (appearance.shape == null) property("border-radius", "4px")
-    }
-}
-
-private fun <T : HTMLElement> AttrsScope<T>.fieldLabelStyle(
-    appearance: DomposableTextFieldAppearance,
-    props: DomposableTextFieldProps,
-    focused: Boolean,
-    floating: Boolean,
-) {
-    val textAppearance =
-        if (floating) {
-            appearance.floatingLabelAppearance ?: appearance.labelAppearance
-        } else {
-            appearance.labelAppearance
-        }
-    style {
-        appearance.colors.label
-            .color(props.enabled, props.isError, focused)
-            ?.let { property("color", it.css()) }
-        textAppearance?.let { applyTextAppearance(it) }
-        if (appearance.floatingLabel) {
-            property("pointer-events", "none")
-            property(
-                "inset-inline-start",
-                if (floating) {
-                    "12px"
-                } else if (props.leadingIcon != null) {
-                    "64px"
-                } else {
-                    "16px"
-                },
-            )
-            property("top", if (floating) "0" else "50%")
-            property("transform", "translateY(-50%)")
-            property("transition", "top 150ms ease, transform 150ms ease, font-size 150ms ease")
-            property("position", "absolute")
-            property("z-index", "1")
-            if (floating) {
-                property("padding-inline", "4px")
-                property(
-                    "background",
-                    appearance.colors.container
-                        .color(props.enabled, props.isError, focused)
-                        ?.css()
-                        ?: "var(--d-surface)",
-                )
-                if (textAppearance?.fontSize == null) property("font-size", "12px")
-            }
-        }
-    }
-}
-
-@Composable
-private fun fieldIcon(
-    appearance: DomposableTextFieldAppearance,
-    props: DomposableTextFieldProps,
-    focused: Boolean,
-    leading: Boolean,
-    content: @Composable () -> Unit,
-) {
-    val palette = if (leading) appearance.colors.leadingIcon else appearance.colors.trailingIcon
-    val color = palette.color(props.enabled, props.isError, focused)
-    if (color == null) {
-        content()
-    } else {
-        Span(attrs = { style { property("color", color.css()) } }) { content() }
-    }
-}
-
-private fun DomposableStateColors.color(
-    enabled: Boolean,
-    isError: Boolean,
-    focused: Boolean,
-) = when {
-    !enabled -> disabled
-    isError -> error
-    focused -> this.focused
-    else -> unfocused
-}
-
-private fun StyleScope.applyTextAppearance(appearance: DomposableTextAppearance) {
-    appearance.fontSize?.let { property("font-size", "${it}px") }
-    appearance.lineHeight?.let { property("line-height", "${it}px") }
-    appearance.fontWeight?.let { property("font-weight", it.css()) }
-    appearance.alignment?.let { property("text-align", it.name.lowercase()) }
-    appearance.decoration?.let {
-        property(
-            "text-decoration",
-            if (it.name ==
-                "LineThrough"
-            ) {
-                "line-through"
-            } else {
-                it.name.lowercase()
-            },
-        )
-    }
-    appearance.letterSpacing?.let { property("letter-spacing", "${it}px") }
 }
 
 private fun DomposableInputPurpose.inputType(passwordVisible: Boolean) =

@@ -27,9 +27,10 @@ test('themed multiline field floats its label and resizes within its line limits
   const field = page.getByRole('textbox', { name: 'Theme notes', exact: true });
   await field.scrollIntoViewIfNeeded();
   await expect(field).toHaveJSProperty('tagName', 'TEXTAREA');
+  const control = field.locator('..');
   const before = await field.boundingBox();
   await field.fill('First\nSecond\nThird\nFourth\nFifth\nSixth');
-  await expect(field).toHaveCSS('border-color', 'rgb(119, 80, 59)');
+  await expect(control).toHaveCSS('border-color', 'rgb(119, 80, 59)');
   await expect.poll(async () => (await field.boundingBox())!.height).toBeGreaterThan(before!.height);
   const metrics = await field.evaluate(element => {
     const style = getComputedStyle(element);
@@ -39,7 +40,7 @@ test('themed multiline field floats its label and resizes within its line limits
   });
   expect(metrics.height).toBeLessThanOrEqual(metrics.max + 1);
   await field.blur();
-  await expect(field).toHaveCSS('border-color', 'rgb(116, 121, 140)');
+  await expect(control).toHaveCSS('border-color', 'rgb(116, 121, 140)');
   await expect(field).toHaveAccessibleName('Theme notes');
 });
 
@@ -49,7 +50,7 @@ test('theme overrides retain disabled styling and forced-colors keyboard focus',
   await expect(disabled).toBeDisabled();
   await expect(disabled).toHaveCSS('opacity', '1');
   const foreground = await disabled.evaluate(element => getComputedStyle(element).color);
-  expect(foreground).toMatch(/^rgba\(28, 32, 48, 0\.38/);
+  expect(foreground).toMatch(/^rgba\(36, 33, 55, 0\.38/);
   await page.emulateMedia({ forcedColors: 'active' });
   const action = page.getByTestId('themed-action');
   await action.scrollIntoViewIfNeeded();
@@ -62,6 +63,14 @@ test('theme overrides retain disabled styling and forced-colors keyboard focus',
 test('phone autocomplete and keyboard action hints stay on the HTML input', async ({ page }) => {
   await page.goto('/#/catalog');
   const phone = page.getByRole('textbox', { name: 'Contact phone', exact: true });
+  const control = phone.locator('..');
+  await expect(control).toHaveCSS('min-height', '56px');
+  const before = await phone.boundingBox();
+  await phone.focus();
+  await expect(control).toHaveCSS('border-top-width', '2px');
+  const focused = await phone.boundingBox();
+  expect(focused!.x + 15).toBeCloseTo(before!.x + 16, 1);
+  await expect(phone).toHaveAccessibleName('Contact phone');
   await expect(phone).toHaveAttribute('type', 'tel');
   await expect(phone).toHaveAttribute('autocomplete', 'tel');
   await expect(phone).toHaveAttribute('enterkeyhint', 'done');

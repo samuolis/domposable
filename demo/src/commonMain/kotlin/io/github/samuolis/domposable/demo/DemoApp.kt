@@ -585,6 +585,19 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
                         shape = DomposableShape.Rounded(6.dp),
                         minHeight = 48.dp,
                     ),
+                textField =
+                    DomposableTextFieldAppearance(
+                        colors =
+                            DomposableTextFieldColors(
+                                outline =
+                                    DomposableStateColors(
+                                        unfocused = DomposableColor(0xFF74798C),
+                                        focused = DomposableColor(0xFF77503B),
+                                    ),
+                            ),
+                        floatingLabel = true,
+                        autoSize = true,
+                    ),
             ),
             LocalDomposableComponents.current,
         ) {
