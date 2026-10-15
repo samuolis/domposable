@@ -166,7 +166,7 @@ Messages with an action default to indefinite duration. A caller can explicitly 
 
 ## Screen chrome
 
-`DomposableScreenScaffold` does not require a ViewModel, DI container, navigator or state wrapper. The shell owns routes and chrome; a screen owns its content. Apply `contentModifier` once at the content boundary.
+`DomposableScreenScaffold` does not require a ViewModel, DI container, navigator or state wrapper. The shell owns routes and chrome; a screen owns its content. Apply `contentModifier` once at the content boundary. Header and footer slots stack their emitted nodes vertically on both providers; the scaffold reserves their measured height before laying out content.
 
 ```kotlin
 DomposableScreenScaffold(

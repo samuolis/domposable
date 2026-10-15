@@ -537,8 +537,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     StyledContent(appearance.textAppearance) {
                         Scaffold(
                             modifier = Modifier.fillMaxSize(),
-                            topBar = props.topBar,
-                            bottomBar = props.bottomBar,
+                            topBar = { Column { props.topBar() } },
+                            bottomBar = { Column { props.bottomBar() } },
                             snackbarHost = props.snackbar,
                             floatingActionButton = props.floatingAction,
                             floatingActionButtonPosition =
