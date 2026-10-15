@@ -148,7 +148,7 @@ private fun DomposableAlignment.box() =
         DomposableAlignment.End -> Alignment.BottomEnd
     }
 
-private fun DomposableFontWeight.native() =
+internal fun DomposableFontWeight.native() =
     when (this) {
         DomposableFontWeight.Thin -> FontWeight.Thin
         DomposableFontWeight.ExtraLight -> FontWeight.ExtraLight
@@ -189,7 +189,7 @@ private fun DomposableLiveRegion.native() =
         DomposableLiveRegion.Assertive -> LiveRegionMode.Assertive
     }
 
-private fun DomposableImeAction.native() =
+internal fun DomposableImeAction.native() =
     when (this) {
         DomposableImeAction.Default -> ImeAction.Default
         DomposableImeAction.Done -> ImeAction.Done
@@ -369,7 +369,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             valueChart = { props, modifier, _ -> NativeValueChart(props, modifier) },
             dataTable = { props, modifier, _ -> NativeDataTable(props, modifier) },
             text = { props, modifier, _ ->
-                val appearance = props.appearance
+                val appearance = props.appearance ?: LocalMaterialButtonTextAppearance.current
                 val style =
                     when (props.style) {
                         DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
@@ -396,6 +396,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.fontWeight
                                     DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.fontWeight
                                 },
+                        letterSpacing =
+                            appearance?.letterSpacing?.sp ?: when (props.style) {
+                                DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.letterSpacing
+                                DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.letterSpacing
+                                DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.letterSpacing
+                            },
                         textAlign =
                             appearance?.alignment?.native()
                                 ?: when (props.style) {
@@ -434,39 +440,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 }
                 if (appearance?.selectable == true) SelectionContainer { renderText() } else renderText()
             },
-            button = { props, modifier, content ->
-                when (props.style) {
-                    DomposableButtonStyle.Filled -> {
-                        Button(
-                            props.onClick,
-                            modifier.toComposeModifier(),
-                            enabled = props.enabled && domposableFormEnabled(),
-                        ) {
-                            content()
-                        }
-                    }
-
-                    DomposableButtonStyle.Outlined -> {
-                        OutlinedButton(
-                            props.onClick,
-                            modifier.toComposeModifier(),
-                            enabled = props.enabled && domposableFormEnabled(),
-                        ) {
-                            content()
-                        }
-                    }
-
-                    DomposableButtonStyle.Text -> {
-                        TextButton(
-                            props.onClick,
-                            modifier.toComposeModifier(),
-                            enabled = props.enabled && domposableFormEnabled(),
-                        ) {
-                            content()
-                        }
-                    }
-                }
-            },
+            button = { props, modifier, content -> NativeButton(props, modifier, content) },
             iconButton = { props, modifier, content ->
                 IconButton(
                     props.onClick,
@@ -478,89 +452,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     content = content,
                 )
             },
-            textField = { props, modifier, _ ->
-                val focusRequester = remember { FocusRequester() }
-                val formEnabled = domposableFormEnabled()
-                val shouldAutofocus = props.autofocus && props.enabled && formEnabled
-                val submit = props.onImeAction ?: rememberDomposableFormSubmitOrNull()
-                val onClick = props.onClick
-                LaunchedEffect(shouldAutofocus) {
-                    if (shouldAutofocus) focusRequester.requestFocus()
-                }
-                val clickModifier =
-                    modifier
-                        .toComposeModifier()
-                        .then(if (shouldAutofocus) Modifier.focusRequester(focusRequester) else Modifier)
-                        .then(
-                            if (props.onClick != null) {
-                                Modifier.clickable(
-                                    enabled = props.enabled && formEnabled,
-                                    onClick = requireNotNull(onClick),
-                                )
-                            } else {
-                                Modifier
-                            },
-                        ).semantics {
-                            props.id?.let { testTag = it }
-                            if (!props.showLabel) contentDescription = props.label
-                            if (props.isError) props.error?.let { error(it) }
-                        }
-                val supporting = props.error ?: props.helperText
-                OutlinedTextField(
-                    value = props.value,
-                    onValueChange = props.onValueChange,
-                    modifier = clickModifier,
-                    enabled = props.enabled && domposableFormEnabled(),
-                    readOnly = props.readOnly,
-                    label = if (props.showLabel) ({ Text(props.label) }) else null,
-                    placeholder = props.placeholder?.let { value -> { Text(value) } },
-                    leadingIcon = props.leadingIcon,
-                    prefix = props.prefix,
-                    trailingIcon = props.trailingIcon,
-                    singleLine = props.singleLine,
-                    minLines = props.minLines,
-                    maxLines = props.maxLines,
-                    isError = props.isError,
-                    supportingText = supporting?.let { message -> { Text(message) } },
-                    keyboardOptions =
-                        KeyboardOptions(
-                            keyboardType =
-                                when (props.purpose) {
-                                    DomposableInputPurpose.Email -> KeyboardType.Email
-
-                                    DomposableInputPurpose.Password -> KeyboardType.Password
-
-                                    DomposableInputPurpose.Number,
-                                    DomposableInputPurpose.OneTimeCode,
-                                    -> KeyboardType.Number
-
-                                    DomposableInputPurpose.Phone -> KeyboardType.Phone
-
-                                    DomposableInputPurpose.Decimal -> KeyboardType.Decimal
-
-                                    else -> KeyboardType.Text
-                                },
-                            imeAction = props.imeAction.native(),
-                        ),
-                    keyboardActions =
-                        if (submit == null) {
-                            KeyboardActions.Default
-                        } else {
-                            KeyboardActions(
-                                onDone = { submit() },
-                                onGo = { submit() },
-                                onSearch = { submit() },
-                                onSend = { submit() },
-                            )
-                        },
-                    visualTransformation =
-                        if (props.purpose == DomposableInputPurpose.Password && !props.passwordVisible) {
-                            PasswordVisualTransformation()
-                        } else {
-                            VisualTransformation.None
-                        },
-                )
-            },
+            textField = { props, modifier, _ -> NativeTextField(props, modifier) },
             checkbox = {
                 props,
                 modifier,

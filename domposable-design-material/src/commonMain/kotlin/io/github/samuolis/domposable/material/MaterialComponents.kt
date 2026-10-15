@@ -1,6 +1,8 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableTheme
@@ -27,3 +29,5 @@ fun DomposableMaterialTheme(
 ) {
     DomposableTheme(tokens, rememberDomposableMaterialComponents(), content)
 }
+
+internal val LocalMaterialButtonTextAppearance = staticCompositionLocalOf<DomposableTextAppearance?> { null }

@@ -51,5 +51,9 @@ class ComponentAppearanceTest {
         listOf(0, -1).forEach { lines ->
             assertFailsWith<IllegalArgumentException> { DomposableTextAppearance(maxLines = lines) }
         }
+        listOf(Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY).forEach { spacing ->
+            assertFailsWith<IllegalArgumentException> { DomposableTextAppearance(letterSpacing = spacing) }
+        }
+        assertEquals(-0.5f, DomposableTextAppearance(letterSpacing = -0.5f).letterSpacing)
     }
 }

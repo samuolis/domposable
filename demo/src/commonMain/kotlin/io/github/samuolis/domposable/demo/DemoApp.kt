@@ -30,8 +30,13 @@ import io.github.samuolis.domposable.demo.generated.unavailableScreenDestination
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
+import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableScreen
+import io.github.samuolis.domposable.foundation.DomposableShape
+import io.github.samuolis.domposable.foundation.DomposableStateColors
+import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
+import io.github.samuolis.domposable.foundation.DomposableTextFieldColors
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.material.rememberDomposableMaterialComponents
@@ -493,6 +498,8 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
     var dialog by remember { mutableStateOf(false) }
     var sheet by remember { mutableStateOf(false) }
     var menu by remember { mutableStateOf(false) }
+    var themedLoading by remember { mutableStateOf(false) }
+    var themedNotes by rememberSaveable { mutableStateOf("") }
     DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
         DomposableText("Component catalog", style = DomposableTextStyle.Title)
         DomposableText("Explore the same controls through native Compose UI and semantic HTML.")
@@ -568,10 +575,40 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
         DomposableText("Nested theme", style = DomposableTextStyle.Title)
         val base = LocalDomposableTokens.current
         DomposableTheme(
-            base.copy(colors = base.colors.copy(primary = DomposableColor(0xFF77503B))),
+            base.copy(
+                colors = base.colors.copy(primary = DomposableColor(0xFF77503B)),
+                button =
+                    base.button.copy(
+                        container = DomposableColor(0xFF77503B),
+                        content = DomposableColor(0xFFFFFFFF),
+                        shape = DomposableShape.Rounded(6.dp),
+                        minHeight = 48.dp,
+                    ),
+            ),
             LocalDomposableComponents.current,
         ) {
             DomposableButton("Independent theme tokens", {})
+            DomposableButton({}, enabled = false) { DomposableText("Themed disabled") }
+            DomposableButton(
+                DomposableButtonProps(
+                    onClick = { themedLoading = true },
+                    loading = themedLoading,
+                    loadingLabel = "Saving themed action",
+                ),
+                modifier = DomposableModifier.testId("themed-action"),
+            ) { DomposableText("Themed action") }
+            DomposableButton("Reset themed action", { themedLoading = false })
+            DomposableTextField(
+                io.github.samuolis.domposable.ui.DomposableTextFieldProps(
+                    value = themedNotes,
+                    onValueChange = { themedNotes = it },
+                    label = "Theme notes",
+                    multiline = true,
+                    minLines = 2,
+                    maxLines = 4,
+                ),
+                modifier = DomposableModifier.testId("themed-notes"),
+            )
         }
         DomposableSpacer()
         DomposableText("Open More components for app bars, selection fields and feedback controls.")

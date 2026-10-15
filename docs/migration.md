@@ -82,3 +82,9 @@ attributes. This JS helper preserves the host's element/CSS and supplies the lib
 position observation and disposal behavior. Replace renderer code that mirrors `state.value`
 into element offsets or calls `scrollTo` from browser scroll events. See the complete
 [custom HTML scroll example](design-systems.md#scroll-state-in-custom-html-renderers).
+
+## Component theme defaults
+
+The next 0.x minor adds button and text-field appearance defaults to `DomposableTokens` and optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
+
+Keep application component names as thin adapters. Map brand tokens into `DomposableButtonAppearance` or `DomposableTextFieldAppearance`, and call the standard control instead of maintaining another HTML button/input implementation. Preserve custom editor, diagram and camera renderers; they are separate from ordinary control styling.

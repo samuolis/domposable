@@ -68,7 +68,7 @@ private fun DomposableAlignment.css() =
         DomposableAlignment.End -> "flex-end"
     }
 
-private fun DomposableFontWeight.css() =
+internal fun DomposableFontWeight.css() =
     when (this) {
         DomposableFontWeight.Thin -> "100"
         DomposableFontWeight.ExtraLight -> "200"
@@ -81,7 +81,7 @@ private fun DomposableFontWeight.css() =
         DomposableFontWeight.Black -> "900"
     }
 
-private fun DomposableAutocomplete.htmlValue() =
+internal fun DomposableAutocomplete.htmlValue() =
     when (this) {
         DomposableAutocomplete.Off -> "off"
         DomposableAutocomplete.Email -> "email"
@@ -203,7 +203,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             valueChart = { props, modifier, _ -> HtmlValueChart(props, modifier) },
             dataTable = { props, modifier, _ -> HtmlDataTable(props, modifier) },
             text = { props, modifier, _ ->
-                val appearance = props.appearance
+                val appearance = props.appearance ?: LocalMaterialButtonTextAppearance.current
                 val tokens = LocalDomposableTokens.current
                 val baseFontSize =
                     appearance?.fontSize ?: when (props.style) {
@@ -237,6 +237,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
                     textAlignment?.let { alignment -> style { property("text-align", alignment) } }
                     textDecoration?.let { decoration -> style { property("text-decoration", decoration) } }
+                    appearance?.letterSpacing?.let { style { property("letter-spacing", "${it}px") } }
                     appearance?.fontSize?.let { size -> style { property("font-size", "${size}px") } }
                     appearance?.lineHeight?.let { height -> style { property("line-height", "${height}px") } }
                     appearance?.fontWeight?.let { weight -> style { property("font-weight", weight.css()) } }
@@ -297,24 +298,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }
                 }
             },
-            button = {
-                props,
-                modifier,
-                content,
-                ->
-                DomposableHtmlModifiers(modifier) {
-                    Button(attrs = {
-                        domposableAttributes(modifier)
-                        attr("type", "button")
-                        classes("d-button", "d-button-${props.style.name.lowercase()}")
-                        if (!props.enabled) attr("disabled", "")
-                        onClick {
-                            ((it.target as? HTMLElement)?.closest("button") as? HTMLElement)?.focus()
-                            props.onClick()
-                        }
-                    }) { content() }
-                }
-            },
+            button = { props, modifier, content -> HtmlButton(props, modifier, content) },
             iconButton = {
                 props,
                 modifier,
@@ -331,176 +315,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }) { content() }
                 }
             },
-            textField = { props, modifier, _ ->
-                DomposableHtmlModifiers(modifier) {
-                    val id = props.id ?: remember { "d-input-${nextInputId++}" }
-                    val supportingText = props.error ?: props.helperText
-                    Label(attrs = {
-                        classes("d-field")
-                        attr("for", id)
-                    }) {
-                        if (props.showLabel) Span { Text(props.label) }
-
-                        fun <T : HTMLElement> AttrsScope<T>.applyInputAttributes() {
-                            id(id)
-                            domposableAttributes(modifier)
-                            when (props.purpose) {
-                                DomposableInputPurpose.Phone -> {
-                                    attr("inputmode", "tel")
-                                }
-
-                                DomposableInputPurpose.Decimal -> {
-                                    attr("inputmode", "decimal")
-                                    attr("step", "any")
-                                }
-
-                                DomposableInputPurpose.OneTimeCode -> {
-                                    attr("inputmode", "numeric")
-                                    if (props.autocomplete == null) attr("autocomplete", "one-time-code")
-                                }
-
-                                else -> {
-                                    Unit
-                                }
-                            }
-                            props.onImeAction?.let { submit ->
-                                val imeEnabled = props.enabled && !props.readOnly
-                                onKeyDown { event ->
-                                    if (event.key == "Enter" && props.singleLine && imeEnabled) {
-                                        event.preventDefault()
-                                        submit()
-                                    }
-                                }
-                            }
-                            if (!props.showLabel) attr("aria-label", props.label)
-                            if (props.isError) attr("aria-invalid", "true")
-                            supportingText?.let { attr("aria-describedby", "$id-supporting") }
-                            props.autocomplete?.let { attr("autocomplete", it.htmlValue()) }
-                            props.placeholder?.let { attr("placeholder", it) }
-                            if (props.readOnly) attr("readonly", "")
-                            if (props.autofocus) attr("autofocus", "")
-                            if (!props.enabled) attr("disabled", "")
-                            props.onClick?.let { callback -> onClick { callback() } }
-                        }
-
-                        fun <T : HTMLElement> AttrsScope<T>.applyMultilineBounds() {
-                            // Preserve the browser's two-row multiline default while honoring tighter bounds.
-                            val initialRows = maxOf(2, props.minLines).coerceAtMost(props.maxLines)
-                            attr("rows", initialRows.toString())
-                            style { property("min-height", "calc(${props.minLines}lh + 26px)") }
-                            if (props.maxLines != Int.MAX_VALUE) {
-                                style { property("max-height", "calc(${props.maxLines}lh + 26px)") }
-                            }
-                        }
-                        if (props.leadingIcon != null || props.prefix != null || props.trailingIcon != null) {
-                            Div(attrs = { classes("d-field-control") }) {
-                                props.leadingIcon?.invoke()
-                                props.prefix?.invoke()
-                                if (props.multiline || !props.singleLine) {
-                                    TextArea(value = props.value, attrs = {
-                                        applyInputAttributes()
-                                        applyMultilineBounds()
-                                        onInput { props.onValueChange(it.target.value) }
-                                    })
-                                } else {
-                                    val type =
-                                        when (props.purpose) {
-                                            DomposableInputPurpose.Email -> {
-                                                InputType.Email
-                                            }
-
-                                            DomposableInputPurpose.Password -> {
-                                                if (props.passwordVisible) InputType.Text else InputType.Password
-                                            }
-
-                                            DomposableInputPurpose.Number, DomposableInputPurpose.Decimal -> {
-                                                InputType.Number
-                                            }
-
-                                            DomposableInputPurpose.Phone -> {
-                                                InputType.Tel
-                                            }
-
-                                            DomposableInputPurpose.Search -> {
-                                                InputType.Search
-                                            }
-
-                                            DomposableInputPurpose.Date -> {
-                                                InputType.Date
-                                            }
-
-                                            DomposableInputPurpose.Time -> {
-                                                InputType.Time
-                                            }
-
-                                            else -> {
-                                                InputType.Text
-                                            }
-                                        }
-                                    Input(type = type, attrs = {
-                                        applyInputAttributes()
-                                        value(props.value)
-                                        onInput { props.onValueChange(it.target.value) }
-                                    })
-                                }
-                                props.trailingIcon?.invoke()
-                            }
-                        } else if (props.multiline || !props.singleLine) {
-                            TextArea(value = props.value, attrs = {
-                                applyInputAttributes()
-                                applyMultilineBounds()
-                                onInput { props.onValueChange(it.target.value) }
-                            })
-                        } else {
-                            val type =
-                                when (props.purpose) {
-                                    DomposableInputPurpose.Email -> {
-                                        InputType.Email
-                                    }
-
-                                    DomposableInputPurpose.Password -> {
-                                        if (props.passwordVisible) InputType.Text else InputType.Password
-                                    }
-
-                                    DomposableInputPurpose.Number, DomposableInputPurpose.Decimal -> {
-                                        InputType.Number
-                                    }
-
-                                    DomposableInputPurpose.Phone -> {
-                                        InputType.Tel
-                                    }
-
-                                    DomposableInputPurpose.Search -> {
-                                        InputType.Search
-                                    }
-
-                                    DomposableInputPurpose.Date -> {
-                                        InputType.Date
-                                    }
-
-                                    DomposableInputPurpose.Time -> {
-                                        InputType.Time
-                                    }
-
-                                    else -> {
-                                        InputType.Text
-                                    }
-                                }
-                            Input(type = type, attrs = {
-                                applyInputAttributes()
-                                value(props.value)
-                                onInput { props.onValueChange(it.target.value) }
-                            })
-                        }
-                        supportingText?.let { message ->
-                            Span(attrs = {
-                                id("$id-supporting")
-                                if (props.error != null) classes("d-error") else classes("d-helper")
-                            }) { Text(message) }
-                        }
-                    }
-                }
-            },
+            textField = { props, modifier, _ -> HtmlTextField(props, modifier) },
             checkbox = {
                 props,
                 modifier,
@@ -974,6 +789,8 @@ private fun HtmlImage(
 
 private var nextInputId = 0
 
+internal fun nextMaterialInputId(): String = "d-input-${nextInputId++}"
+
 @Composable
 private fun HtmlToggle(
     checkedValue: Boolean,
@@ -1129,10 +946,15 @@ private const val MATERIAL_CSS = """
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
 .d-theme h1,.d-theme h2,.d-theme h3{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:var(--d-radius);min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
+.d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;align-items:center;justify-content:center}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
+@media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}
+.d-button:not(:disabled):active{filter:brightness(.9)}.d-button:not(:disabled):focus-visible{outline:none;box-shadow:var(--d-button-feedback,0 0 0 0 transparent),0 0 0 3px var(--d-primary)}
+.d-button:disabled{cursor:default}
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}
 .d-icon-button{border-radius:50%;padding:10px}.d-chip{background:var(--d-variant);color:var(--d-on-surface)}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}
 .d-card{padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}
-.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{padding:12px;border:1px solid var(--d-outline);border-radius:var(--d-radius);color:var(--d-on-surface);background:var(--d-surface)}.d-field-control{display:flex;align-items:center;gap:8px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0}
+.d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{padding:12px;border:1px solid var(--d-outline);border-radius:var(--d-radius);color:var(--d-on-surface);background:var(--d-surface)}.d-field input::placeholder,.d-field textarea::placeholder{color:var(--d-field-placeholder)}
+.d-field-control{display:flex;align-items:center;gap:8px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0}
 .d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}
 .d-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{border-radius:12px;padding:2px 8px;background:var(--d-primary);color:var(--d-on-primary)}
 .d-divider{border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
@@ -1149,5 +971,6 @@ private const val MATERIAL_CSS = """
 .d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-navigation button,.d-navigation a{font:inherit;accent-color:var(--d-primary);box-sizing:border-box}
 .d-button:focus-visible,.d-chip:focus-visible,.d-icon-button:focus-visible,.d-field :focus-visible,.d-navigation :focus-visible,.d-tabs :focus-visible,.d-toggle :focus-visible,.d-segment :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-field *,.d-toggle *,.d-segments *,.d-tabs *,.d-navigation *,.d-scaffold *,.d-dialog *{box-sizing:border-box}
-@media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}.d-button-spinner{animation:none!important}}
+@media(forced-colors:active){.d-button:not(:disabled):focus-visible{outline:2px solid Highlight;outline-offset:3px;box-shadow:none}}
 """

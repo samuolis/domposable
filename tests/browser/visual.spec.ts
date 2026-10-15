@@ -105,3 +105,10 @@ for (const [name, width, height] of [['shop-phone',390,844],['shop-wide',1440,90
     expect(errors).toEqual([]);
   });
 }
+
+test('DOM visual themed controls', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/#/catalog');
+  await page.getByTestId('themed-action').scrollIntoViewIfNeeded();
+  await stableCapture(page, 'dom', 'themed-controls');
+});

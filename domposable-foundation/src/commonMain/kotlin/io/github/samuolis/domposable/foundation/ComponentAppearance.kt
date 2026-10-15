@@ -18,11 +18,13 @@ data class DomposableTextAppearance(
     /** Null preserves each renderer's existing selection behavior. */
     val selectable: Boolean? = null,
     val liveRegion: DomposableLiveRegion? = null,
+    val letterSpacing: Float? = null,
 ) {
     init {
         require(fontSize == null || (fontSize.isFinite() && fontSize > 0f))
         require(lineHeight == null || (lineHeight.isFinite() && lineHeight > 0f))
         require(maxLines == null || maxLines > 0)
+        require(letterSpacing == null || letterSpacing.isFinite())
     }
 }
 

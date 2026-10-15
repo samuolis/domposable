@@ -125,6 +125,8 @@ data class DomposableTokens(
     val radius: DomposableLength = 12.dp,
     val elevation: DomposableLength = 2.dp,
     val motionDurationMillis: Int = 180,
+    val button: DomposableButtonAppearance = DomposableButtonAppearance(),
+    val textField: DomposableTextFieldAppearance = DomposableTextFieldAppearance(),
 ) {
     init {
         require(motionDurationMillis >= 0)

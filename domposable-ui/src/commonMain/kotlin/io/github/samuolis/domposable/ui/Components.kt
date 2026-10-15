@@ -6,6 +6,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableAutocomplete
+import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponent
@@ -18,6 +19,7 @@ import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableScreenState
 import io.github.samuolis.domposable.foundation.DomposableSize
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
@@ -136,6 +138,10 @@ data class DomposableButtonProps(
     val onClick: () -> Unit,
     val enabled: Boolean = true,
     val style: DomposableButtonStyle = DomposableButtonStyle.Filled,
+    val loading: Boolean = false,
+    val loadingLabel: String? = null,
+    val expanded: Boolean? = null,
+    val appearance: DomposableButtonAppearance? = null,
 )
 
 @DomposableComponent("IconButton")
@@ -177,6 +183,7 @@ data class DomposableTextFieldProps(
     val leadingIcon: (@Composable () -> Unit)? = null,
     val prefix: (@Composable () -> Unit)? = null,
     val trailingIcon: (@Composable () -> Unit)? = null,
+    val appearance: DomposableTextFieldAppearance? = null,
 ) {
     init {
         require(minLines > 0)
@@ -365,6 +372,22 @@ fun DomposableTheme(
     style: DomposableButtonStyle = DomposableButtonStyle.Filled,
     content: @Composable () -> Unit,
 ) = DomposableButton(DomposableButtonProps(onClick, enabled, style), modifier, content)
+
+@Composable fun DomposableButton(
+    onClick: () -> Unit,
+    modifier: DomposableModifier = DomposableModifier,
+    enabled: Boolean = true,
+    style: DomposableButtonStyle = DomposableButtonStyle.Filled,
+    loading: Boolean = false,
+    loadingLabel: String? = null,
+    expanded: Boolean? = null,
+    appearance: DomposableButtonAppearance? = null,
+    content: @Composable () -> Unit,
+) = DomposableButton(
+    DomposableButtonProps(onClick, enabled, style, loading, loadingLabel, expanded, appearance),
+    modifier,
+    content,
+)
 
 @Composable fun DomposableButton(
     text: String,

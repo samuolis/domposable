@@ -263,3 +263,57 @@ observation and cleanup; the renderer owns layout constraints and overflow style
 `state.value` back to `scrollTop` during recomposition or calling `scrollTo` from an `onScroll`
 listener: those paths would interrupt animation. Standard Domposable scroll modifiers already
 install this binding. Native renderers use the portable modifier adapter.
+
+## Theme defaults and component overrides
+
+Use theme tokens for shared colors, typography, spacing and component defaults. Use component parameters for visual states, colors, shapes and slots. Modifiers describe layout and positioning; they do not need to reach into a button's internal HTML.
+
+```kotlin
+val brand = DomposableTokens(
+    colors = DomposableColors(
+        primary = DomposableColor(0xFF77503B),
+        onPrimary = DomposableColor(0xFFFFFFFF),
+    ),
+    button = DomposableButtonAppearance(
+        shape = DomposableShape.Circle,
+        minHeight = 48.dp,
+        contentPadding = DomposableInsets(start = 20.dp, end = 20.dp),
+    ),
+    textField = DomposableTextFieldAppearance(
+        colors = DomposableTextFieldColors(
+            outline = DomposableStateColors(
+                unfocused = DomposableColor(0xFF74798C),
+                focused = DomposableColor(0xFF77503B),
+                error = DomposableColor(0xFFBA1A1A),
+            ),
+        ),
+        shape = DomposableShape.Rounded(4.dp),
+        floatingLabel = true,
+    ),
+)
+
+DomposableMaterialTheme(tokens = brand) {
+    DomposableButton(
+        onClick = model::save,
+        loading = saving,
+        loadingLabel = "Saving changes",
+    ) { DomposableText("Save") }
+
+    // Copy the theme default when overriding one value for this control.
+    DomposableButton(
+        onClick = model::delete,
+        appearance = LocalDomposableTokens.current.button.copy(
+            container = DomposableColor(0xFFBA1A1A),
+            content = DomposableColor(0xFFFFFFFF),
+        ),
+    ) { DomposableText("Delete") }
+}
+```
+
+The types above live in `io.github.samuolis.domposable.foundation`; component calls and `LocalDomposableTokens` live in `io.github.samuolis.domposable.ui`. Import `foundation.dp` for portable dimensions and `material.DomposableMaterialTheme` for the standard renderers.
+
+A null appearance parameter uses the theme's component defaults. Supplying an appearance replaces those defaults for that call; use `copy` to inherit the settings you want to keep. Unspecified values inside an appearance use the renderer's default. Button colors include separate disabled container, content and border values. Text-field palettes group text, label, placeholder, container, outline, cursor, icon and supporting colors by unfocused, focused, disabled and error state. Field appearance also configures slot typography, inner padding, minimum height and optional multiline autosizing. Loading prevents activation, keeps the content's measured size, and shows the provided accessible loading label without switching to disabled colors.
+
+HTML inner-padding and outline-width overrides complement the native Material field's standard decoration geometry; native fields currently retain Material's built-in padding and stroke widths.
+
+These defaults style the standard Material renderers. A custom provider owns its rendering and must explicitly honor the appearance fields. Native rendering uses Compose UI and HTML rendering uses real browser controls; the renderers share configuration without requiring identical DOM and native widget trees.
