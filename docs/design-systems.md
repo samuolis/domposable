@@ -4,7 +4,7 @@
 
 ## Adopt inside an existing design system
 
-Keep your component names, tokens and feature signatures. Use Domposable's portable modifier behind your existing API, with native and HTML implementations at the design-system boundary. A component does not need generated props, a registry or a renderer provider merely to call its own platform implementation.
+Keep your component names, tokens and feature signatures. Start with [theme defaults and component overrides](#theme-defaults-and-component-overrides) behind those names, delegating ordinary control rendering to the library. Use your own native and HTML implementations at the design-system boundary when a custom component needs a different structure or behavior. A component does not need generated props, a registry or a renderer provider merely to call its own platform implementation.
 
 Shared design-system contract in `commonMain`:
 

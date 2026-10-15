@@ -142,6 +142,9 @@ private fun <T : HTMLElement> AttrsScope<T>.inputSemantics(
     appearance: DomposableTextFieldAppearance,
 ) {
     inputHints(props)
+    if (props.imeAction != io.github.samuolis.domposable.foundation.DomposableImeAction.Default) {
+        attr("enterkeyhint", props.imeAction.name.lowercase())
+    }
     if (!props.showLabel) attr("aria-label", props.label)
     if (props.isError) attr("aria-invalid", "true")
     if (props.error != null || props.helperText != null) attr("aria-describedby", "$id-supporting")
@@ -192,8 +195,14 @@ private fun <T : HTMLElement> AttrsScope<T>.inputEvents(
             }
         }
     }
-    onFocus { onFocusChange(true) }
-    onBlur { onFocusChange(false) }
+    onFocus {
+        onFocusChange(true)
+        props.onFocusChange?.invoke(true)
+    }
+    onBlur {
+        onFocusChange(false)
+        props.onFocusChange?.invoke(false)
+    }
 }
 
 // Each optional appearance field independently overrides its CSS property.

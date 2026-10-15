@@ -1,12 +1,17 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTouchInput
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableStateColors
@@ -23,6 +28,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -73,5 +79,36 @@ class NativeTextFieldAppearanceTest {
         compose.onNodeWithTag("account-number").assert(SemanticsMatcher.keyNotDefined(SemanticsActions.SetText))
         compose.onNodeWithText("Account number").assertIsDisplayed()
         compose.onNodeWithText("This value is locked").assertIsDisplayed()
+    }
+
+    @Test
+    fun accessibleFieldActivationUsesTheLatestCallbackAndReportsFocus() {
+        val version = mutableIntStateOf(1)
+        val clicks = mutableListOf<Int>()
+        val focus = mutableListOf<Boolean>()
+        compose.setContent {
+            val current = version.intValue
+            DomposableMaterialTheme {
+                DomposableTextField(
+                    DomposableTextFieldProps(
+                        value = "",
+                        onValueChange = {},
+                        label = "Picker",
+                        id = "picker",
+                        readOnly = true,
+                        onClick = { clicks += current },
+                        onFocusChange = { focus += it },
+                    ),
+                )
+            }
+        }
+        compose.runOnIdle { version.intValue = 2 }
+        compose.onNodeWithTag("picker").performClick()
+        compose.runOnIdle {
+            assertEquals(listOf(2), clicks)
+            assertEquals(true, focus.last())
+        }
+        compose.onNodeWithTag("picker").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.runOnIdle { assertEquals(listOf(2, 2), clicks) }
     }
 }

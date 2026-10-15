@@ -40,6 +40,7 @@ final enum class io.github.samuolis.domposable.foundation/DomposableAutocomplete
     enum entry NewPassword // io.github.samuolis.domposable.foundation/DomposableAutocomplete.NewPassword|null[0]
     enum entry Off // io.github.samuolis.domposable.foundation/DomposableAutocomplete.Off|null[0]
     enum entry OneTimeCode // io.github.samuolis.domposable.foundation/DomposableAutocomplete.OneTimeCode|null[0]
+    enum entry Phone // io.github.samuolis.domposable.foundation/DomposableAutocomplete.Phone|null[0]
     enum entry Username // io.github.samuolis.domposable.foundation/DomposableAutocomplete.Username|null[0]
 
     final val entries // io.github.samuolis.domposable.foundation/DomposableAutocomplete.entries|#static{}entries[0]

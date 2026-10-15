@@ -58,3 +58,11 @@ test('theme overrides retain disabled styling and forced-colors keyboard focus',
   await expect(action).toHaveCSS('outline-style', 'solid');
   await expect(action).toHaveCSS('outline-width', '2px');
 });
+
+test('phone autocomplete and keyboard action hints stay on the HTML input', async ({ page }) => {
+  await page.goto('/#/catalog');
+  const phone = page.getByRole('textbox', { name: 'Contact phone', exact: true });
+  await expect(phone).toHaveAttribute('type', 'tel');
+  await expect(phone).toHaveAttribute('autocomplete', 'tel');
+  await expect(phone).toHaveAttribute('enterkeyhint', 'done');
+});

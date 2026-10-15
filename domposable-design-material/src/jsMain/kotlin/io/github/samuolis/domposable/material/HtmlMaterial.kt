@@ -85,6 +85,7 @@ internal fun DomposableAutocomplete.htmlValue() =
     when (this) {
         DomposableAutocomplete.Off -> "off"
         DomposableAutocomplete.Email -> "email"
+        DomposableAutocomplete.Phone -> "tel"
         DomposableAutocomplete.Username -> "username"
         DomposableAutocomplete.CurrentPassword -> "current-password"
         DomposableAutocomplete.NewPassword -> "new-password"

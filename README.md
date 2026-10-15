@@ -114,7 +114,7 @@ The same feature can use different element structures and styling on each platfo
 | Your app | Adopt | Keep in your app |
 | --- | --- | --- |
 | Starting a shared UI | Material provider, components and adaptive helpers | Models, DI and application behaviour |
-| Has a design system | Portable modifiers and [native/HTML adapters](docs/design-systems.md#adopt-inside-an-existing-design-system) behind existing component names | Brand tokens, renderer bodies and custom controls |
+| Has a design system | [Theme defaults](docs/design-systems.md#theme-defaults-and-component-overrides) and thin adapters behind existing component names | Brand tokens, product layouts and custom controls |
 | Has Navigation 3 or another router | Optional entry display, pane and browser helpers | Back stack, entry decorators, route identity and URL policy |
 | Has screen annotations and codegen | Optional KSP function driver | Annotation contract, DI bindings and generated host templates |
 

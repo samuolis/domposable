@@ -184,6 +184,7 @@ data class DomposableTextFieldProps(
     val prefix: (@Composable () -> Unit)? = null,
     val trailingIcon: (@Composable () -> Unit)? = null,
     val appearance: DomposableTextFieldAppearance? = null,
+    val onFocusChange: ((Boolean) -> Unit)? = null,
 ) {
     init {
         require(minLines > 0)

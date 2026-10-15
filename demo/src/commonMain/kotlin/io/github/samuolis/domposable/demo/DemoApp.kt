@@ -500,6 +500,7 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
     var menu by remember { mutableStateOf(false) }
     var themedLoading by remember { mutableStateOf(false) }
     var themedNotes by rememberSaveable { mutableStateOf("") }
+    var themedPhone by rememberSaveable { mutableStateOf("") }
     DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
         DomposableText("Component catalog", style = DomposableTextStyle.Title)
         DomposableText("Explore the same controls through native Compose UI and semantic HTML.")
@@ -598,6 +599,16 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
                 modifier = DomposableModifier.testId("themed-action"),
             ) { DomposableText("Themed action") }
             DomposableButton("Reset themed action", { themedLoading = false })
+            DomposableTextField(
+                io.github.samuolis.domposable.ui.DomposableTextFieldProps(
+                    value = themedPhone,
+                    onValueChange = { themedPhone = it },
+                    label = "Contact phone",
+                    purpose = DomposableInputPurpose.Phone,
+                    autocomplete = io.github.samuolis.domposable.foundation.DomposableAutocomplete.Phone,
+                    imeAction = io.github.samuolis.domposable.foundation.DomposableImeAction.Done,
+                ),
+            )
             DomposableTextField(
                 io.github.samuolis.domposable.ui.DomposableTextFieldProps(
                     value = themedNotes,

@@ -2,7 +2,8 @@
 
 package io.github.samuolis.domposable.material
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,13 +16,17 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +47,7 @@ import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.rememberDomposableFormSubmitOrNull
 import io.github.samuolis.domposable.ui.toComposeModifier
+import kotlinx.coroutines.flow.collect
 
 @Composable
 internal fun NativeTextField(
@@ -56,19 +62,26 @@ internal fun NativeTextField(
         if (shouldAutofocus) focusRequester.requestFocus()
     }
     val onClick = props.onClick
+    val interactions = remember { MutableInteractionSource() }
+    val latestClick by rememberUpdatedState(onClick)
+    LaunchedEffect(interactions) {
+        interactions.interactions.collect { if (it is PressInteraction.Release) latestClick?.invoke() }
+    }
     val appearance = props.appearance ?: LocalDomposableTokens.current.textField
     val nativeModifier =
         modifier
             .toComposeModifier()
             .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier)
-            .then(if (shouldAutofocus) Modifier.focusRequester(focusRequester) else Modifier)
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(enabled = props.enabled && formEnabled, onClick = onClick)
-                } else {
-                    Modifier
-                },
-            ).semantics {
+            .focusRequester(focusRequester)
+            .onFocusChanged { props.onFocusChange?.invoke(it.isFocused) }
+            .semantics {
+                if (onClick != null && props.enabled && formEnabled) {
+                    onClick(action = {
+                        focusRequester.requestFocus()
+                        onClick()
+                        true
+                    })
+                }
                 props.id?.let { testTag = it }
                 if (!props.showLabel) contentDescription = props.label
                 if (props.isError) props.error?.let { error(it) }
@@ -199,6 +212,7 @@ internal fun NativeTextField(
             visualTransformation = visualTransformation,
             shape = shape,
             colors = colors,
+            interactionSource = interactions,
         )
     } else {
         OutlinedTextField(
@@ -223,6 +237,7 @@ internal fun NativeTextField(
             visualTransformation = visualTransformation,
             shape = shape,
             colors = colors,
+            interactionSource = interactions,
         )
     }
 }

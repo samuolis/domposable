@@ -68,6 +68,7 @@ enum class DomposableLiveRegion {
 enum class DomposableAutocomplete {
     Off,
     Email,
+    Phone,
     Username,
     CurrentPassword,
     NewPassword,

@@ -13,6 +13,7 @@ public final class io/github/samuolis/domposable/foundation/DomposableAutocomple
 	public static final field NewPassword Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
 	public static final field Off Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
 	public static final field OneTimeCode Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
+	public static final field Phone Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
 	public static final field Username Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableAutocomplete;
