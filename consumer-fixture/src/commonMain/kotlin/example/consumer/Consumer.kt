@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.adaptive.DomposableWidthClass
 import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
+import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.material.DomposableMaterialTheme
@@ -74,6 +75,26 @@ fun App(factory: () -> FeatureModel) {
 @Composable
 fun BrandedApp(components: DomposableComponents) {
     DomposableTheme(components = components) { DomposableText("Custom design system") }
+}
+
+// Compile scoped branding and partial overrides through the published API on every target.
+@Composable
+fun ScopedBranding() {
+    DomposableMaterialTheme(
+        colors = DomposableTheme.colors.copy(primary = DomposableColor(0xFF77503B)),
+        typography = DomposableTheme.typography,
+        shapes = DomposableTheme.shapes,
+        styles = DomposableTheme.styles.copy(button = DomposableTheme.styles.button.copy(minHeight = 48.dp)),
+    ) {
+        DomposableMaterialTheme(
+            styles =
+                DomposableTheme.styles.copy(
+                    textField = DomposableTheme.styles.textField.copy(floatingLabel = true),
+                ),
+        ) {
+            DomposableButton("Save", {})
+        }
+    }
 }
 
 object FixtureRoute
