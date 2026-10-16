@@ -28,7 +28,7 @@ internal fun HtmlTextField(
     props: DomposableTextFieldProps,
     modifier: DomposableModifier,
 ) {
-    val appearance = props.appearance ?: LocalDomposableTokens.current.textField
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.textField
     val id = props.id ?: remember { nextMaterialInputId() }
     val supportingText = props.error ?: props.helperText
     var focused by remember { mutableStateOf(false) }

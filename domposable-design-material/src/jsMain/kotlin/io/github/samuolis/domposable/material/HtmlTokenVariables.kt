@@ -151,6 +151,7 @@ private fun StyleScope.applyTypographyRole(
     prefix: String,
     appearance: DomposableTextAppearance?,
 ) {
+    appearance?.color?.let { property("$prefix-color", it.css()) }
     appearance?.fontSize?.let { property("$prefix-size", "${it}px") }
     appearance?.lineHeight?.let { property("$prefix-line-height", "${it}px") }
     appearance?.fontWeight?.let { property("$prefix-weight", it.css()) }

@@ -29,6 +29,7 @@ internal fun DomposableTextAppearance?.nativeTextStyle(base: TextStyle): TextSty
 
 internal fun DomposableTextAppearance?.nativeTextStyleDirect(base: TextStyle): TextStyle =
     base.copy(
+        color = this?.color?.nativeColor() ?: base.color,
         fontSize = this?.fontSize?.sp ?: base.fontSize,
         lineHeight = this?.lineHeight?.sp ?: base.lineHeight,
         letterSpacing = this?.letterSpacing?.sp ?: base.letterSpacing,

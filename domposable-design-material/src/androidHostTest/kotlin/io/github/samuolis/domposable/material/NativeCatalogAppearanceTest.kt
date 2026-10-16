@@ -10,24 +10,39 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
+import io.github.samuolis.domposable.foundation.DomposableCheckboxAppearance
+import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableColors
+import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
+import io.github.samuolis.domposable.foundation.DomposableShape
+import io.github.samuolis.domposable.foundation.DomposableShapes
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTokens
+import io.github.samuolis.domposable.foundation.DomposableTypography
 import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableCheckboxProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableRadioButton
 import io.github.samuolis.domposable.ui.DomposableRadioButtonProps
 import io.github.samuolis.domposable.ui.DomposableTabs
+import io.github.samuolis.domposable.ui.DomposableTheme
 import io.github.samuolis.domposable.ui.testId
 import org.junit.Rule
 import org.junit.Test
@@ -44,6 +59,91 @@ import kotlin.test.assertSame
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeCatalogAppearanceTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun nestedThemeStylesInheritBrandValuesAndRestoreTheOuterTheme() {
+        val colors = DomposableColors(primary = DomposableColor(0xFF77503B))
+        val typography = DomposableTypography(bodySize = 18f, fontFamily = "Brand")
+        val shapes = DomposableShapes(small = DomposableShape.Circle)
+        val styles =
+            DomposableComponentStyles(
+                button =
+                    DomposableButtonAppearance(
+                        minHeight =
+                            io.github.samuolis.domposable.foundation
+                                .DomposableLength(48f),
+                    ),
+            )
+        var nestedColors: DomposableColors? = null
+        var nestedTypography: DomposableTypography? = null
+        var nestedShapes: DomposableShapes? = null
+        var nestedStyles: DomposableComponentStyles? = null
+        var restoredStyles: DomposableComponentStyles? = null
+        compose.setContent {
+            DomposableMaterialTheme(colors = colors, typography = typography, shapes = shapes, styles = styles) {
+                DomposableMaterialTheme(styles = DomposableTheme.styles.copy(button = DomposableButtonAppearance())) {
+                    val currentColors = DomposableTheme.colors
+                    val currentStyles = DomposableTheme.styles
+                    val currentTypography = DomposableTheme.typography
+                    val currentShapes = DomposableTheme.shapes
+                    SideEffect {
+                        nestedColors = currentColors
+                        nestedStyles = currentStyles
+                        nestedTypography = currentTypography
+                        nestedShapes = currentShapes
+                    }
+                }
+                val current = DomposableTheme.styles
+                SideEffect { restoredStyles = current }
+            }
+        }
+        compose.runOnIdle {
+            assertEquals(colors, nestedColors)
+            assertEquals(typography, nestedTypography)
+            assertEquals(shapes, nestedShapes)
+            assertEquals(DomposableButtonAppearance(), nestedStyles?.button)
+            assertEquals(styles.card, nestedStyles?.card)
+            assertEquals(styles, restoredStyles)
+        }
+    }
+
+    @Test
+    fun textAppearanceColorOverridesItsBaseWithoutReplacingUnspecifiedValues() {
+        val base = TextStyle(color = Color.Red)
+        assertEquals(Color.Red, DomposableTextAppearance().nativeTextStyleDirect(base).color)
+        assertEquals(
+            Color.Blue,
+            DomposableTextAppearance(color = DomposableColor(0xFF0000FF)).nativeTextStyleDirect(base).color,
+        )
+    }
+
+    @Test
+    fun supportingTextUsesItsConfiguredColor() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableCheckbox(
+                    true,
+                    {},
+                    "Archive",
+                    description = "Kept locally",
+                    appearance =
+                        DomposableCheckboxAppearance(
+                            descriptionAppearance = DomposableTextAppearance(color = DomposableColor(0xFF0000FF)),
+                        ),
+                )
+            }
+        }
+        val layouts = mutableListOf<TextLayoutResult>()
+        compose
+            .onNodeWithText("Kept locally", useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        assertEquals(
+            Color.Blue,
+            layouts
+                .single()
+                .layoutInput.style.color,
+        )
+    }
 
     @Test
     fun indeterminateCheckboxExposesMixedStateAndInvokesCallbackOnce() {

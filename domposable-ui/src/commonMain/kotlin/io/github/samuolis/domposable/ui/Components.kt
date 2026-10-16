@@ -2,6 +2,7 @@ package io.github.samuolis.domposable.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.foundation.DomposableAlignment
@@ -12,7 +13,9 @@ import io.github.samuolis.domposable.foundation.DomposableCardVariant
 import io.github.samuolis.domposable.foundation.DomposableCheckboxAppearance
 import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableColors
 import io.github.samuolis.domposable.foundation.DomposableComponent
+import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableControlPlacement
 import io.github.samuolis.domposable.foundation.DomposableDividerAppearance
 import io.github.samuolis.domposable.foundation.DomposableIconAppearance
@@ -29,6 +32,7 @@ import io.github.samuolis.domposable.foundation.DomposableProgressVariant
 import io.github.samuolis.domposable.foundation.DomposableRadioButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableScreenState
+import io.github.samuolis.domposable.foundation.DomposableShapes
 import io.github.samuolis.domposable.foundation.DomposableSize
 import io.github.samuolis.domposable.foundation.DomposableSliderColors
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
@@ -38,6 +42,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
+import io.github.samuolis.domposable.foundation.DomposableTypography
 import io.github.samuolis.domposable.foundation.dp
 
 data class DomposableLazyItem(
@@ -260,7 +265,12 @@ data class DomposableRadioButtonProps(
     val showLabel: Boolean = true,
     val description: String? = null,
     val controlPlacement: DomposableControlPlacement = DomposableControlPlacement.Leading,
-)
+    val groupName: String? = null,
+) {
+    init {
+        require(groupName == null || groupName.isNotBlank()) { "A radio group name must not be blank" }
+    }
+}
 
 @DomposableComponent("Slider")
 data class DomposableSliderProps(
@@ -441,9 +451,25 @@ val LocalDomposableComponents =
         error("Install DomposableTheme with a component provider before rendering Domposable UI")
     }
 
+/** Current theme values from the nearest enclosing theme, rather than mutable global branding. */
+object DomposableTheme {
+    val colors: DomposableColors
+        @Composable @ReadOnlyComposable
+        get() = LocalDomposableTokens.current.colors
+    val typography: DomposableTypography
+        @Composable @ReadOnlyComposable
+        get() = LocalDomposableTokens.current.typography
+    val shapes: DomposableShapes
+        @Composable @ReadOnlyComposable
+        get() = LocalDomposableTokens.current.shapes
+    val styles: DomposableComponentStyles
+        @Composable @ReadOnlyComposable
+        get() = LocalDomposableTokens.current.components
+}
+
 @Composable
 fun DomposableTheme(
-    tokens: DomposableTokens = DomposableTokens(),
+    tokens: DomposableTokens = LocalDomposableTokens.current,
     components: DomposableComponents,
     content: @Composable () -> Unit,
 ) {

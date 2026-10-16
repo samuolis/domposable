@@ -31,6 +31,7 @@ data class DomposableCheckboxAppearance(
     val labelAppearance: DomposableTextAppearance? = null,
     val descriptionAppearance: DomposableTextAppearance? = null,
     val labelSpacing: DomposableLength = 8.dp,
+    val descriptionSpacing: DomposableLength = 0.dp,
 )
 
 @Immutable
@@ -60,6 +61,7 @@ data class DomposableSwitchAppearance(
     val labelAppearance: DomposableTextAppearance? = null,
     val descriptionAppearance: DomposableTextAppearance? = null,
     val labelSpacing: DomposableLength = 8.dp,
+    val descriptionSpacing: DomposableLength = 0.dp,
 )
 
 @Immutable
@@ -68,6 +70,7 @@ data class DomposableRadioButtonAppearance(
     val labelAppearance: DomposableTextAppearance? = null,
     val descriptionAppearance: DomposableTextAppearance? = null,
     val labelSpacing: DomposableLength = 8.dp,
+    val descriptionSpacing: DomposableLength = 0.dp,
 )
 
 @Immutable
@@ -191,6 +194,8 @@ data class DomposableChartAppearance(
 @Immutable
 @Suppress("LongParameterList")
 data class DomposableComponentStyles(
+    val button: DomposableButtonAppearance = DomposableButtonAppearance(),
+    val textField: DomposableTextFieldAppearance = DomposableTextFieldAppearance(),
     val text: DomposableTextAppearance = DomposableTextAppearance(),
     val link: DomposableTextAppearance = DomposableTextAppearance(),
     val icon: DomposableIconAppearance = DomposableIconAppearance(),

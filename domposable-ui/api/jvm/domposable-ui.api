@@ -48,7 +48,7 @@ public final class io/github/samuolis/domposable/ui/ComponentCallsKt {
 	public static final fun DomposableMenu (ZLkotlin/jvm/functions/Function0;Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableNavigationBar (Ljava/util/List;ILkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableOrientation;Lio/github/samuolis/domposable/foundation/DomposableItemAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/ui/DomposableWebNavigationLayout;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableProgress (Lio/github/samuolis/domposable/ui/DomposableModifier;Ljava/lang/Float;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableProgressAppearance;Lio/github/samuolis/domposable/foundation/DomposableProgressVariant;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;Lio/github/samuolis/domposable/foundation/DomposableProgressSemantics;Landroidx/compose/runtime/Composer;II)V
-	public static final fun DomposableRadioButton (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableRadioButton (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;Ljava/lang/String;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableRangeSlider (Lkotlin/ranges/ClosedFloatingPointRange;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/ranges/ClosedFloatingPointRange;IZLio/github/samuolis/domposable/foundation/DomposableSliderColors;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableSegmentedButtons (Ljava/util/List;ILkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLio/github/samuolis/domposable/foundation/DomposableItemAppearance;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableSelect (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Ljava/util/List;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableButtonAppearance;Landroidx/compose/runtime/Composer;II)V
@@ -2612,8 +2612,8 @@ public abstract interface class io/github/samuolis/domposable/ui/DomposablePullT
 
 public final class io/github/samuolis/domposable/ui/DomposableRadioButtonProps {
 	public static final field $stable I
-	public fun <init> (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;)V
-	public synthetic fun <init> (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Ljava/lang/String;
@@ -2622,13 +2622,15 @@ public final class io/github/samuolis/domposable/ui/DomposableRadioButtonProps {
 	public final fun component6 ()Z
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;
-	public final fun copy (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;)Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;
-	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;ZLkotlin/jvm/functions/Function0;Ljava/lang/String;ZLio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;ZLjava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;Ljava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableRadioButtonProps;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppearance ()Lio/github/samuolis/domposable/foundation/DomposableRadioButtonAppearance;
 	public final fun getControlPlacement ()Lio/github/samuolis/domposable/foundation/DomposableControlPlacement;
 	public final fun getDescription ()Ljava/lang/String;
 	public final fun getEnabled ()Z
+	public final fun getGroupName ()Ljava/lang/String;
 	public final fun getLabel ()Ljava/lang/String;
 	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
 	public final fun getSelected ()Z
@@ -3444,6 +3446,15 @@ public final class io/github/samuolis/domposable/ui/DomposableTextProps {
 
 public abstract interface class io/github/samuolis/domposable/ui/DomposableTextRenderer {
 	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableTextProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableTheme {
+	public static final field $stable I
+	public static final field INSTANCE Lio/github/samuolis/domposable/ui/DomposableTheme;
+	public final fun getColors (Landroidx/compose/runtime/Composer;I)Lio/github/samuolis/domposable/foundation/DomposableColors;
+	public final fun getShapes (Landroidx/compose/runtime/Composer;I)Lio/github/samuolis/domposable/foundation/DomposableShapes;
+	public final fun getStyles (Landroidx/compose/runtime/Composer;I)Lio/github/samuolis/domposable/foundation/DomposableComponentStyles;
+	public final fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/github/samuolis/domposable/foundation/DomposableTypography;
 }
 
 public final class io/github/samuolis/domposable/ui/DomposableThemeProps {

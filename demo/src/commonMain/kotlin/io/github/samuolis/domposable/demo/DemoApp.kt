@@ -629,30 +629,33 @@ fun ComponentCatalogScreen(
         DomposableTheme(
             base.copy(
                 colors = base.colors.copy(primary = DomposableColor(0xFF77503B)),
-                button =
-                    base.button.copy(
-                        container = DomposableColor(0xFF77503B),
-                        content = DomposableColor(0xFFFFFFFF),
-                        shape = DomposableShape.Rounded(6.dp),
-                        minHeight = 48.dp,
-                    ),
-                textField =
-                    DomposableTextFieldAppearance(
-                        colors =
-                            DomposableTextFieldColors(
-                                outline =
-                                    DomposableStateColors(
-                                        unfocused = DomposableColor(0xFF74798C),
-                                        focused = DomposableColor(0xFF77503B),
-                                    ),
+                components =
+                    base.components.copy(
+                        button =
+                            base.components.button.copy(
+                                container = DomposableColor(0xFF77503B),
+                                content = DomposableColor(0xFFFFFFFF),
+                                shape = DomposableShape.Rounded(6.dp),
+                                minHeight = 48.dp,
                             ),
-                        floatingLabel = true,
-                        autoSize = true,
+                        textField =
+                            DomposableTextFieldAppearance(
+                                colors =
+                                    DomposableTextFieldColors(
+                                        outline =
+                                            DomposableStateColors(
+                                                unfocused = DomposableColor(0xFF74798C),
+                                                focused = DomposableColor(0xFF77503B),
+                                            ),
+                                    ),
+                                floatingLabel = true,
+                                autoSize = true,
+                            ),
                     ),
             ),
             LocalDomposableComponents.current,
         ) {
-            DomposableButton("Independent theme tokens", {})
+            DomposableButton("Independent theme styles", {})
             DomposableButton({}, enabled = false) { DomposableText("Themed disabled") }
             DomposableButton(
                 DomposableButtonProps(

@@ -20,6 +20,7 @@ import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableItemColors
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
+import io.github.samuolis.domposable.foundation.DomposableRadioButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
@@ -79,7 +80,13 @@ fun MaterialCatalogScreen(
     var expressive by rememberSaveable { mutableStateOf(true) }
     var customized by rememberSaveable { mutableStateOf(false) }
     val tokens = materialCatalogTokens(expressive, customized)
-    DomposableMaterialTheme(tokens) {
+    DomposableMaterialTheme(
+        colors = tokens.colors,
+        typography = tokens.typography,
+        shapes = tokens.shapes,
+        styles = tokens.components,
+        designLanguage = tokens.designLanguage,
+    ) {
         DomposableColumn(
             DomposableModifier
                 .fillMaxWidth()
@@ -239,6 +246,7 @@ internal fun MaterialActions() {
 @Composable
 internal fun MaterialSelection() {
     var checked by rememberSaveable { mutableStateOf(false) }
+    var mixed by rememberSaveable { mutableStateOf(true) }
     var triState by rememberSaveable(stateSaver = enumSaver<DomposableToggleState>()) {
         mutableStateOf(DomposableToggleState.Indeterminate)
     }
@@ -259,8 +267,8 @@ internal fun MaterialSelection() {
             }
     }, "Select all documents")
     DomposableSwitch(checked, { checked = it }, "Enable notifications")
-    DomposableRadioButton(selected == 0, { selected = 0 }, "Personal")
-    DomposableRadioButton(selected == 1, { selected = 1 }, "Business")
+    DomposableRadioButton(selected == 0, { selected = 0 }, "Personal", groupName = "account-type")
+    DomposableRadioButton(selected == 1, { selected = 1 }, "Business", groupName = "account-type")
     DomposableFlowRow(gap = 8.dp) {
         DomposableChipVariant.entries.forEach { variant ->
             DomposableChip(variant.name, {
@@ -288,4 +296,62 @@ internal fun MaterialSelection() {
         value = it
     }, "Vertical volume", orientation = DomposableOrientation.Vertical, modifier = DomposableModifier.height(180.dp))
     DomposableRangeSlider(range, { range = it }, "Minimum price", "Maximum price")
+    DomposableText("App-owned control labels", headingLevel = 3)
+    DomposableFlowRow(gap = 12.dp) {
+        DomposableText("Select documents")
+        DomposableCheckbox(
+            checked,
+            {
+                checked = it
+                mixed = false
+            },
+            "App-owned document selection",
+            showLabel = false,
+            indeterminate = mixed,
+        )
+    }
+    DomposableFlowRow(gap = 12.dp) {
+        DomposableText("Business account")
+        DomposableRadioButton(selected == 1, { selected = 1 }, "App-owned account selection", showLabel = false)
+    }
+    DomposableCheckbox(
+        true,
+        {},
+        "Disabled custom checkbox",
+        enabled = false,
+        description = "Configured disabled description",
+        appearance =
+            DomposableCheckboxAppearance(
+                colors = DomposableSelectionColors(disabledSelected = WarmAccent),
+                disabledCheckmark = OnWarmContainer,
+                labelAppearance = DomposableTextAppearance(color = WarmAccent),
+                descriptionAppearance = DomposableTextAppearance(color = OnWarmContainer),
+                descriptionSpacing = 4.dp,
+            ),
+    )
+    DomposableSwitch(
+        true,
+        {},
+        "Disabled custom switch",
+        enabled = false,
+        appearance =
+            DomposableSwitchAppearance(
+                colors =
+                    DomposableSwitchColors(
+                        disabledCheckedThumb = OnWarmContainer,
+                        disabledCheckedTrack = WarmContainer,
+                        disabledCheckedBorder = WarmAccent,
+                    ),
+            ),
+    )
+    DomposableRadioButton(
+        true,
+        {},
+        "Disabled custom radio",
+        enabled = false,
+        appearance =
+            DomposableRadioButtonAppearance(
+                colors = DomposableSelectionColors(disabledSelected = WarmAccent),
+            ),
+    )
 }

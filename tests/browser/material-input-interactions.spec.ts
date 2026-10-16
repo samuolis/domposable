@@ -134,3 +134,30 @@ test('search exposes an expanded results dialog and keeps the chosen query contr
   await expect(search).toHaveAttribute('aria-expanded', 'false');
   await expect(results).not.toBeVisible();
 });
+
+test('controls embed in app-owned labels and mixed selection commits true', async ({ page }) => {
+  await page.goto('/#/material/selection');
+  for (const [role, name] of [
+    ['checkbox', 'App-owned document selection'],
+    ['radio', 'App-owned account selection'],
+  ] as const) {
+    const control = page.getByRole(role, { name, exact: true });
+    await control.scrollIntoViewIfNeeded();
+    await control.evaluate(input => {
+      const host = input.closest('.d-toggle')!;
+      if (host.tagName === 'LABEL') throw new Error('Hidden-label controls must support an app-owned label');
+      const label = document.createElement('label');
+      host.parentElement!.insertBefore(label, host);
+      label.append(host);
+    });
+    if (role === 'checkbox') {
+      await expect(control).toHaveJSProperty('indeterminate', true);
+      // Browsers support either underlying checked value while painting mixed state.
+      await control.evaluate(input => { (input as HTMLInputElement).checked = true; });
+    }
+    await control.click();
+    await expect(control).toBeChecked();
+    await expect(control.locator('xpath=ancestor::label')).toHaveCount(1);
+    if (role === 'checkbox') await expect(control).toHaveJSProperty('indeterminate', false);
+  }
+});

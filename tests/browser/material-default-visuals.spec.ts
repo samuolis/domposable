@@ -136,3 +136,49 @@ test('disabled button variants use Material state colors without fading the enti
     if (variant === 'Elevated') expect(colors.shadow).toBe('none');
   }
 });
+
+test('selection descriptions stay beside the control and trailing controls reach the row edge', async ({ page }) => {
+  await page.goto('/#/material/selection');
+  const checkbox = page.getByRole('checkbox', { name: 'Receive updates', exact: true });
+  const description = page.getByText('Optional product news', { exact: true });
+  await expect(checkbox).toHaveAccessibleDescription('Optional product news');
+  const copy = description.locator('..');
+  const inputBox = (await checkbox.boundingBox())!;
+  const copyBox = (await copy.boundingBox())!;
+  expect(copyBox.x).toBeGreaterThan(inputBox.x + inputBox.width);
+  expect(inputBox.y + inputBox.height / 2).toBeGreaterThanOrEqual(copyBox.y);
+  expect(inputBox.y + inputBox.height / 2).toBeLessThanOrEqual(copyBox.y + copyBox.height);
+  const trailing = page.getByRole('checkbox', { name: 'Trailing control', exact: true });
+  const rowBox = (await trailing.locator('..').boundingBox())!;
+  const controlBox = (await trailing.boundingBox())!;
+  expect(Math.abs(rowBox.x + rowBox.width - controlBox.x - controlBox.width)).toBeLessThan(2);
+});
+
+test('explicit disabled selection colors are not faded or ignored', async ({ page }) => {
+  await page.goto('/#/material/selection');
+  for (const [role, name] of [
+    ['checkbox', 'Disabled custom checkbox'],
+    ['switch', 'Disabled custom switch'],
+    ['radio', 'Disabled custom radio'],
+  ] as const) {
+    const control = page.getByRole(role, { name, exact: true });
+    await expect(control).toBeDisabled();
+    await expect(control).toHaveCSS('opacity', '1');
+    await expect(control).toHaveCSS('border-top-color', 'rgb(148, 103, 73)');
+    if (role === 'switch') {
+      await expect(control).toHaveCSS('background-color', 'rgb(243, 232, 222)');
+      await expect(control).toHaveCSS('background-image', /rgb\(64, 45, 33\)/);
+    }
+  }
+});
+
+test('selection label and description styles configure color and spacing independently', async ({ page }) => {
+  await page.goto('/#/material/selection');
+  const control = page.getByRole('checkbox', { name: 'Disabled custom checkbox', exact: true });
+  const label = page.getByText('Disabled custom checkbox', { exact: true });
+  const description = page.getByText('Configured disabled description', { exact: true });
+  await expect(control).toHaveAccessibleDescription('Configured disabled description');
+  await expect(label).toHaveCSS('color', 'rgb(148, 103, 73)');
+  await expect(description).toHaveCSS('color', 'rgb(64, 45, 33)');
+  await expect(description.locator('..')).toHaveCSS('gap', '4px');
+});

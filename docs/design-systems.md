@@ -266,14 +266,10 @@ install this binding. Native renderers use the portable modifier adapter.
 
 ## Theme defaults and component overrides
 
-Use theme tokens for shared colors, typography, spacing and component defaults. Use component parameters for visual states, colors, shapes and slots. Modifiers describe layout and positioning; they do not need to reach into a button's internal HTML.
+Theme settings are scoped to the composables beneath the theme, rather than mutable global branding. `DomposableMaterialTheme()` supplies Material defaults. Override only the brand values and component styles you need; nested themes inherit their current values.
 
 ```kotlin
-val brand = DomposableTokens(
-    colors = DomposableColors(
-        primary = DomposableColor(0xFF77503B),
-        onPrimary = DomposableColor(0xFFFFFFFF),
-    ),
+val brandStyles = DomposableComponentStyles(
     button = DomposableButtonAppearance(
         shape = DomposableShape.Circle,
         minHeight = 48.dp,
@@ -292,7 +288,13 @@ val brand = DomposableTokens(
     ),
 )
 
-DomposableMaterialTheme(tokens = brand) {
+DomposableMaterialTheme(
+    colors = DomposableColors(
+        primary = DomposableColor(0xFF77503B),
+        onPrimary = DomposableColor(0xFFFFFFFF),
+    ),
+    styles = brandStyles,
+) {
     DomposableButton(
         onClick = model::save,
         loading = saving,
@@ -302,7 +304,7 @@ DomposableMaterialTheme(tokens = brand) {
     // Copy the theme default when overriding one value for this control.
     DomposableButton(
         onClick = model::delete,
-        appearance = LocalDomposableTokens.current.button.copy(
+        appearance = DomposableTheme.styles.button.copy(
             container = DomposableColor(0xFFBA1A1A),
             content = DomposableColor(0xFFFFFFFF),
         ),
@@ -310,9 +312,27 @@ DomposableMaterialTheme(tokens = brand) {
 }
 ```
 
-The types above live in `io.github.samuolis.domposable.foundation`; component calls and `LocalDomposableTokens` live in `io.github.samuolis.domposable.ui`. Import `foundation.dp` for portable dimensions and `material.DomposableMaterialTheme` for the standard renderers.
+The types above live in `io.github.samuolis.domposable.foundation`; component calls and the current `DomposableTheme` values live in `io.github.samuolis.domposable.ui`. Import `foundation.dp` for portable dimensions and `material.DomposableMaterialTheme` for the standard renderers.
+
+The ordinary theme API accepts `colors`, `typography`, `shapes`, `styles` and `designLanguage`, all optional. `DomposableTheme.colors`, `.typography`, `.shapes` and `.styles` expose the nearest theme. Tokens are the underlying design values; the `DomposableTokens` bundle remains available for custom provider and host integrations, rather than being required for ordinary branding.
+
+Copy the current styles when a section changes just one component family. Its colors, typography, shapes and other component defaults stay inherited:
+
+```kotlin
+DomposableMaterialTheme(
+    styles = DomposableTheme.styles.copy(
+        button = DomposableTheme.styles.button.copy(minHeight = 56.dp),
+    ),
+) {
+    CheckoutActions()
+}
+```
+
+The enclosing theme resumes after this section. An application adapter can centralize these mappings while feature code keeps its existing component calls.
 
 A null appearance parameter uses the theme's component defaults. Supplying an appearance replaces those defaults for that call; use `copy` to inherit the settings you want to keep. Unspecified values inside an appearance use the renderer's default. Button colors include separate disabled container, content and border values. Text-field palettes group text, label, placeholder, container, outline, cursor, icon and supporting colors by unfocused, focused, disabled and error state. Field appearance also configures slot typography, inner padding, minimum height and optional multiline autosizing. Loading prevents activation, keeps the content's measured size, and shows the provided accessible loading label without switching to disabled colors.
+
+Checkbox, switch and radio appearances configure label and description typography, including text color, control placement, label spacing and `descriptionSpacing`. Use `showLabel = false` when an app-owned row supplies the visible label; the control retains its accessible label without introducing a nested HTML label. Supply a shared `groupName` for related radio buttons to enable native browser arrow-key selection.
 
 Field padding and outline-width overrides apply to the inner decoration on HTML and Compose UI. When no overrides are supplied, native fields keep Material's standard decoration path.
 

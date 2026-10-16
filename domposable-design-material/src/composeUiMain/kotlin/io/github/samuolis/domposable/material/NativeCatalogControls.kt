@@ -380,6 +380,7 @@ internal fun NativeCheckbox(
         spacing = appearance.labelSpacing.value.dp,
         labelAppearance = appearance.labelAppearance,
         descriptionAppearance = appearance.descriptionAppearance,
+        descriptionSpacing = appearance.descriptionSpacing.value.dp,
         modifier =
             (
                 if (props.indeterminate) {
@@ -435,6 +436,7 @@ internal fun NativeSwitch(
         spacing = appearance.labelSpacing.value.dp,
         labelAppearance = appearance.labelAppearance,
         descriptionAppearance = appearance.descriptionAppearance,
+        descriptionSpacing = appearance.descriptionSpacing.value.dp,
         modifier =
             modifier
                 .toComposeModifier()
@@ -472,6 +474,7 @@ internal fun NativeRadioButton(
         spacing = appearance.labelSpacing.value.dp,
         labelAppearance = appearance.labelAppearance,
         descriptionAppearance = appearance.descriptionAppearance,
+        descriptionSpacing = appearance.descriptionSpacing.value.dp,
         modifier =
             modifier
                 .toComposeModifier()
@@ -503,19 +506,21 @@ private fun ChoiceRow(
     spacing: androidx.compose.ui.unit.Dp,
     labelAppearance: DomposableTextAppearance?,
     descriptionAppearance: DomposableTextAppearance?,
+    descriptionSpacing: androidx.compose.ui.unit.Dp,
     modifier: Modifier,
     control: @Composable () -> Unit,
 ) {
-    val text: @Composable () -> Unit = {
+    val text: @Composable (Modifier) -> Unit = { textModifier ->
         if (showLabel || description != null) {
-            Column {
+            Column(textModifier, verticalArrangement = Arrangement.spacedBy(descriptionSpacing)) {
                 if (showLabel) {
                     Text(label, style = labelAppearance.nativeTextStyle(MaterialTheme.typography.bodyLarge))
                 }
                 description?.let {
                     Text(
                         it,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color =
+                            descriptionAppearance?.color?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
                         style = descriptionAppearance.nativeTextStyle(MaterialTheme.typography.bodySmall),
                     )
                 }
@@ -526,9 +531,9 @@ private fun ChoiceRow(
         if (placement == DomposableControlPlacement.Leading) {
             control()
             if (showLabel || description != null) Spacer(Modifier.width(spacing))
-            text()
+            text(Modifier)
         } else {
-            text()
+            text(if (showLabel || description != null) Modifier.weight(1f) else Modifier)
             if (showLabel || description != null) Spacer(Modifier.width(spacing))
             control()
         }

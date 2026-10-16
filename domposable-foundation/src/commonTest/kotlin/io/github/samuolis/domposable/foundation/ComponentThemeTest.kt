@@ -15,7 +15,9 @@ class ComponentThemeTest {
     @Test
     fun themeCopyKeepsUnchangedComponentDefaults() {
         val themed =
-            DomposableTokens(button = DomposableButtonAppearance(shape = DomposableShape.Circle, minHeight = 48.dp))
+            DomposableComponentStyles(
+                button = DomposableButtonAppearance(shape = DomposableShape.Circle, minHeight = 48.dp),
+            )
         val local = themed.button.copy(content = DomposableColor(0xFFFFFFFF))
         assertEquals(themed.button.shape, local.shape)
         assertEquals(48.dp, local.minHeight)

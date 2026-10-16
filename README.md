@@ -28,7 +28,7 @@ Domposable is a Kotlin Multiplatform UI library with optional integration helper
 
 - **Shared feature code** — ordinary Compose functions with your models and callbacks.
 - **Real HTML** — headings, links, forms and header/main/footer landmarks, styled with CSS.
-- **A replaceable design system** — portable theme tokens and typed renderers; customize one control or supply a complete provider.
+- **A replaceable design system** — scoped brand styles and typed renderers; customize one control or supply a complete provider.
 - **Adaptive layouts** — measure the space a feature receives and choose breakpoints, panes and layout recipes.
 - **Shared components** — Material 3 and expressive actions, selection, inputs, navigation and feedback, plus layout, forms and data displays. [Catalog and configuration](docs/material-catalog.md).
 - **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
@@ -105,7 +105,22 @@ flowchart TB
     Provider --> HTML[Semantic HTML and CSS: Kotlin/JS]
 ```
 
-The same feature can use different element structures and styling on each platform. Change tokens for colors, typography and spacing, or replace a renderer for a different control implementation. Component use requires no application KSP setup or navigation registry.
+The same feature can use different element structures and styling on each platform. Set theme colors, typography, shapes and component styles, or replace a renderer for a different control implementation. Component use requires no application KSP setup or navigation registry.
+
+Brand the standard controls once; every argument is optional:
+
+```kotlin
+DomposableMaterialTheme(
+    colors = brandColors,
+    styles = DomposableComponentStyles(
+        button = DomposableButtonAppearance(shape = DomposableShape.Circle),
+    ),
+) {
+    FeatureScreen()
+}
+```
+
+Use `DomposableTheme.styles.button.copy(...)` for a local override. Nested themes inherit their enclosing brand values. Styles are composition-scoped, so different parts of an app can use different brands.
 
 [Understand the API →](docs/how-it-works.md) · [Customize a design system →](docs/design-systems.md) · [Build adaptive layouts →](docs/adaptive.md)
 

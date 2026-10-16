@@ -70,10 +70,10 @@ Layout helpers, forms, disclosures, rich text, tables and charts are additional 
 
 ## Configuration
 
-Use `DomposableTokens` for the palette, typography, shape scale and design language. `Standard` uses the standard Material theme; `Expressive` selects the expressive theme and motion defaults on Compose UI. HTML applies the corresponding shape, type and motion tokens to real elements. Use `components` for family-specific defaults, and `appearance` or `colors` on a call for an override. Configure layout, padding and dimensions with `DomposableModifier` except where a component exposes its inner decoration separately.
+`DomposableMaterialTheme()` works with default Material styles. Override its `colors`, `typography`, `shapes`, `styles` or `designLanguage` arguments to establish a brand. `Standard` uses the standard Material theme; `Expressive` selects expressive theme and motion defaults on Compose UI. HTML applies the corresponding values to real elements. Configure layout, padding and dimensions with `DomposableModifier`, and inner decoration with each component's appearance.
 
 ```kotlin
-val brand = DomposableTokens(
+DomposableMaterialTheme(
     designLanguage = DomposableDesignLanguage.Expressive,
     colors = DomposableColors(
         primary = DomposableColor(0xFF455E91),
@@ -83,7 +83,7 @@ val brand = DomposableTokens(
         onSecondaryContainer = DomposableColor(0xFF141B2C),
     ),
     shapes = DomposableShapes(medium = DomposableShape.Rounded(16.dp)),
-    components = DomposableComponentStyles(
+    styles = DomposableComponentStyles(
         card = DomposableSurfaceAppearance(
             shape = DomposableShape.Rounded(16.dp),
             shadowElevation = 2.dp,
@@ -92,15 +92,14 @@ val brand = DomposableTokens(
             colors = DomposableSelectionColors(selected = DomposableColor(0xFF455E91)),
         ),
     ),
-)
-DomposableMaterialTheme(brand) {
+) {
     DomposableCard(variant = DomposableCardVariant.Outlined) {
         DomposableText("Shared feature content")
     }
 }
 ```
 
-A null per-call appearance inherits its component default. An explicit appearance replaces it; use `LocalDomposableTokens.current.components.card.copy(...)` for a partial local override. Null fields within an appearance preserve the renderer's defaults. Custom providers own their rendering and must honor any appearance settings they expose.
+A null per-call appearance inherits its component default. An explicit appearance replaces it; use `DomposableTheme.styles.card.copy(...)` for a partial local override. Null fields within an appearance preserve the renderer's defaults. Custom providers own their rendering and must honor any appearance settings they expose.
 
 Native font assets remain installed by the host's Compose theme. The CSS font-family token controls HTML font selection; it does not download a native font or register a platform typeface.
 
@@ -268,3 +267,19 @@ Floating toolbars and action menus participate in their caller's layout. Put the
 - [Compose Multiplatform releases](https://github.com/JetBrains/compose-multiplatform/releases)
 
 For website headers, set `DomposableNavigationBar(webLayout = DomposableWebNavigationLayout.Links, ...)` to render compact HTML links with browser URL and current-page semantics. The default is the Material navigation bar; native targets retain their Material presentation. The shopping demo uses this option to keep its web header compact.
+
+Use `groupName` on related radio buttons to retain native HTML arrow-key grouping. `showLabel = false` keeps the accessible name while allowing an app-owned label or cell around the control, without nesting HTML labels. Native radio selection remains controlled by the caller.
+
+Control descriptions stay with their labels. `controlPlacement = DomposableControlPlacement.Trailing` reserves the leading space for that copy and places the control at the row's end. For an app-owned cell, use `showLabel = false` and retain a meaningful `label` for accessibility:
+
+```kotlin
+DomposableFlowRow(gap = 12.dp) {
+    DomposableText("Select documents")
+    DomposableCheckbox(
+        checked = selected,
+        onCheckedChange = onSelectionChange,
+        label = "Select documents",
+        showLabel = false,
+    )
+}
+```

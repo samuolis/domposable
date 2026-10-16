@@ -23,8 +23,8 @@ import androidx.compose.ui.test.performTouchInput
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableShape
-import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableButtonProps
@@ -104,8 +104,8 @@ class NativeButtonAppearanceTest {
         var clicks = 0
         compose.setContent {
             DomposableMaterialTheme(
-                tokens =
-                    DomposableTokens(
+                styles =
+                    DomposableComponentStyles(
                         button =
                             DomposableButtonAppearance(
                                 container = DomposableColor(0xFF77503B),

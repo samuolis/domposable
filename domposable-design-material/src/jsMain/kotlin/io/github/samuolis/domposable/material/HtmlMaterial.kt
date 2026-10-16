@@ -269,6 +269,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }
 
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
+                    appearance?.role?.let { style { applyCatalogTextAppearance(appearance) } }
+                    (props.color ?: appearance?.color)?.let { style { property("color", it.css()) } }
                     textAlignment?.let { alignment -> style { property("text-align", alignment) } }
                     textDecoration?.let { decoration -> style { property("text-decoration", decoration) } }
                     appearance?.letterSpacing?.let { style { property("letter-spacing", "${it}px") } }
@@ -487,6 +489,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     appearance.descriptionAppearance,
                     appearance.checkmark,
                     appearance.disabledCheckmark,
+                    descriptionSpacing = appearance.descriptionSpacing,
                 )
             },
             switch = {
@@ -509,6 +512,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     appearance.labelSpacing,
                     labelAppearance = appearance.labelAppearance,
                     descriptionAppearance = appearance.descriptionAppearance,
+                    descriptionSpacing = appearance.descriptionSpacing,
                     switchColors = appearance.colors,
                 )
             },
@@ -522,15 +526,16 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val labelId = remember { "d-radio-label-${nextInputId++}" }
                 val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
-                    Label(attrs = {
+                    TagElement<HTMLElement>(if (props.showLabel) "label" else "span", applyAttrs = {
                         classes("d-toggle")
                         onClick { it.stopPropagation() }
-                        style { property("gap", "${appearance.labelSpacing.value.takeIf { it > 0f } ?: 10f}px") }
+                        style { property("gap", "${appearance.labelSpacing.value}px") }
                     }) {
                         @Composable fun control() {
                             Input(InputType.Radio, attrs = {
                                 domposableAttributes(modifier)
                                 checked(props.selected)
+                                props.groupName?.let { attr("name", it) }
                                 if (props.label.isNotEmpty()) attr("aria-labelledby", labelId)
                                 props.description?.let { attr("aria-describedby", descriptionId) }
                                 if (!enabled) disabled()
@@ -545,11 +550,15 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     )
                                     property(
                                         "--d-control-disabled-selected",
-                                        appearance.colors.disabledSelected.cssOr("var(--d-primary)"),
+                                        appearance.colors.disabledSelected.cssOr(
+                                            "color-mix(in srgb,var(--d-on-surface) 38%,transparent)",
+                                        ),
                                     )
                                     property(
                                         "--d-control-disabled-unselected",
-                                        appearance.colors.disabledUnselected.cssOr("var(--d-outline)"),
+                                        appearance.colors.disabledUnselected.cssOr(
+                                            "color-mix(in srgb,var(--d-on-surface) 38%,transparent)",
+                                        ),
                                     )
                                     if (appearance.colors !=
                                         io.github.samuolis.domposable.foundation
@@ -561,27 +570,39 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                             } else {
                                                 appearance.colors.disabledSelected
                                             }
-                                        val unselectedColor =
-                                            if (enabled) {
-                                                appearance.colors.unselected
-                                            } else {
-                                                appearance.colors.disabledUnselected
-                                            }
                                         property("accent-color", selectedColor.cssOr("var(--d-primary)"))
-                                        property("border-color", unselectedColor.cssOr("var(--d-outline)"))
                                     }
                                 }
                                 if (appearance.colors != DomposableSelectionColors()) attr("data-custom-colors", "true")
                                 onChange { if (enabled) props.onClick() }
+                                onClick { if (enabled && props.selected) props.onClick() }
                             })
                         }
 
                         @Composable fun label() {
                             Span(attrs = {
-                                id(labelId)
-                                if (!props.showLabel) classes("d-visually-hidden")
-                                style { appearance.labelAppearance?.let { applyCatalogTextAppearance(it) } }
-                            }) { Text(props.label) }
+                                classes("d-toggle-copy")
+                                style { property("gap", "${appearance.descriptionSpacing.value}px") }
+                                if (props.showLabel || props.description != null) classes("d-toggle-copy-visible")
+                            }) {
+                                Span(attrs = {
+                                    id(labelId)
+                                    if (!props.showLabel) classes("d-visually-hidden")
+                                    style { appearance.labelAppearance?.let { applyCatalogTextAppearance(it) } }
+                                }) { Text(props.label) }
+                                props.description?.let {
+                                    Span(attrs = {
+                                        id(descriptionId)
+                                        style {
+                                            appearance.descriptionAppearance?.let {
+                                                applyCatalogTextAppearance(
+                                                    it,
+                                                )
+                                            }
+                                        }
+                                    }) { Text(it) }
+                                }
+                            }
                         }
                         if (props.controlPlacement == DomposableControlPlacement.Leading) {
                             control()
@@ -590,16 +611,6 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             label()
                             control()
                         }
-                    }
-                    props.description?.let {
-                        Span(attrs = {
-                            id(descriptionId)
-                            style {
-                                appearance.descriptionAppearance?.let { appearance ->
-                                    applyCatalogTextAppearance(appearance)
-                                }
-                            }
-                        }) { Text(it) }
                     }
                 }
             },
@@ -1581,6 +1592,7 @@ private fun HtmlToggle(
     descriptionAppearance: DomposableTextAppearance? = null,
     checkmark: DomposableColor? = null,
     disabledCheckmark: DomposableColor? = null,
+    descriptionSpacing: DomposableLength = DomposableLength(0f),
     switchColors: DomposableSwitchColors? = null,
 ) {
     val effectiveEnabled = enabled && domposableFormEnabled()
@@ -1594,7 +1606,7 @@ private fun HtmlToggle(
                 DomposableSelectionColors()
         }
     DomposableHtmlModifiers(modifier) {
-        Label(attrs = {
+        TagElement<HTMLElement>(if (showLabel) "label" else "span", applyAttrs = {
             classes("d-toggle")
             onClick { it.stopPropagation() }
             style { property("gap", "${labelSpacing.value}px") }
@@ -1617,7 +1629,7 @@ private fun HtmlToggle(
                             switchColors?.let {
                                 property("--d-switch-checked-thumb", it.checkedThumb.cssOr("var(--d-on-primary)"))
                                 property("--d-switch-checked-track", it.checkedTrack.cssOr("var(--d-primary)"))
-                                property("--d-switch-checked-border", it.checkedBorder.cssOr("var(--d-primary)"))
+                                property("--d-switch-checked-border", it.checkedBorder.cssOr("transparent"))
                                 property("--d-switch-checked-icon", it.checkedIcon.cssOr("var(--d-on-primary)"))
                                 property("--d-switch-unchecked-thumb", it.uncheckedThumb.cssOr("var(--d-outline)"))
                                 property("--d-switch-unchecked-track", it.uncheckedTrack.cssOr("var(--d-surface)"))
@@ -1625,47 +1637,66 @@ private fun HtmlToggle(
                                 property("--d-switch-unchecked-icon", it.uncheckedIcon.cssOr("var(--d-on-surface)"))
                                 property(
                                     "--d-switch-disabled-checked-thumb",
-                                    it.disabledCheckedThumb.cssOr("var(--d-on-surface)"),
+                                    it.disabledCheckedThumb.cssOr("var(--d-surface)"),
                                 )
                                 property(
                                     "--d-switch-disabled-checked-track",
-                                    it.disabledCheckedTrack.cssOr("var(--d-variant)"),
+                                    it.disabledCheckedTrack.cssOr(
+                                        "color-mix(in srgb,var(--d-on-surface) 12%,var(--d-surface))",
+                                    ),
                                 )
                                 property(
                                     "--d-switch-disabled-checked-border",
-                                    it.disabledCheckedBorder.cssOr("var(--d-variant)"),
+                                    it.disabledCheckedBorder.cssOr("transparent"),
                                 )
                                 property(
                                     "--d-switch-disabled-checked-icon",
-                                    it.disabledCheckedIcon.cssOr("var(--d-on-surface)"),
+                                    it.disabledCheckedIcon.cssOr(
+                                        "color-mix(in srgb,var(--d-on-surface) 38%,var(--d-surface))",
+                                    ),
                                 )
                                 property(
                                     "--d-switch-disabled-unchecked-thumb",
-                                    it.disabledUncheckedThumb.cssOr("var(--d-on-surface)"),
+                                    it.disabledUncheckedThumb.cssOr(
+                                        "color-mix(in srgb,var(--d-on-surface) 38%,var(--d-surface))",
+                                    ),
                                 )
                                 property(
                                     "--d-switch-disabled-unchecked-track",
-                                    it.disabledUncheckedTrack.cssOr("var(--d-surface)"),
+                                    it.disabledUncheckedTrack.cssOr(
+                                        "color-mix(in srgb," +
+                                            "var(--d-surface-container-highest,var(--d-variant)) 12%,var(--d-surface))",
+                                    ),
                                 )
                                 property(
                                     "--d-switch-disabled-unchecked-border",
-                                    it.disabledUncheckedBorder.cssOr("var(--d-outline)"),
+                                    it.disabledUncheckedBorder.cssOr(
+                                        "color-mix(in srgb,var(--d-on-surface) 12%,var(--d-surface))",
+                                    ),
                                 )
                                 property(
                                     "--d-switch-disabled-unchecked-icon",
-                                    it.disabledUncheckedIcon.cssOr("var(--d-on-surface)"),
+                                    it.disabledUncheckedIcon.cssOr(
+                                        "color-mix(in srgb," +
+                                            "var(--d-surface-container-highest,var(--d-variant)) 38%,var(--d-surface))",
+                                    ),
                                 )
                             }
                         } else {
                             property("--d-control-selected", colors.selected.cssOr("var(--d-primary)"))
                             property("--d-control-unselected", colors.unselected.cssOr("var(--d-outline)"))
-                            property("--d-control-disabled-selected", colors.disabledSelected.cssOr("var(--d-primary)"))
+                            property(
+                                "--d-control-disabled-selected",
+                                colors.disabledSelected.cssOr("color-mix(in srgb,var(--d-on-surface) 38%,transparent)"),
+                            )
                             property(
                                 "--d-control-disabled-unselected",
-                                colors.disabledUnselected.cssOr("var(--d-outline)"),
+                                colors.disabledUnselected.cssOr(
+                                    "color-mix(in srgb,var(--d-on-surface) 38%,transparent)",
+                                ),
                             )
                             property("--d-control-checkmark", checkmark.cssOr("var(--d-on-primary)"))
-                            property("--d-control-disabled-checkmark", disabledCheckmark.cssOr("var(--d-on-surface)"))
+                            property("--d-control-disabled-checkmark", disabledCheckmark.cssOr("var(--d-surface)"))
                             property(
                                 "accent-color",
                                 (if (effectiveEnabled) colors.selected else colors.disabledSelected).cssOr(
@@ -1674,16 +1705,28 @@ private fun HtmlToggle(
                             )
                         }
                     }
-                    onChange { if (effectiveEnabled) onChange(it.value) }
+                    onChange { if (effectiveEnabled) onChange(indeterminate || it.value) }
                 })
             }
 
             @Composable fun labelText() {
                 Span(attrs = {
-                    id(labelId)
-                    if (!showLabel) classes("d-visually-hidden")
-                    style { labelAppearance?.let { applyCatalogTextAppearance(it) } }
-                }) { Text(label) }
+                    classes("d-toggle-copy")
+                    style { property("gap", "${descriptionSpacing.value}px") }
+                    if (showLabel || description != null) classes("d-toggle-copy-visible")
+                }) {
+                    Span(attrs = {
+                        id(labelId)
+                        if (!showLabel) classes("d-visually-hidden")
+                        style { labelAppearance?.let { applyCatalogTextAppearance(it) } }
+                    }) { Text(label) }
+                    description?.let {
+                        Span(attrs = {
+                            id(descriptionId)
+                            style { descriptionAppearance?.let { applyCatalogTextAppearance(it) } }
+                        }) { Text(it) }
+                    }
+                }
             }
             if (controlPlacement == DomposableControlPlacement.Leading) {
                 control()
@@ -1692,12 +1735,6 @@ private fun HtmlToggle(
                 labelText()
                 control()
             }
-        }
-        description?.let {
-            Span(attrs = {
-                id(descriptionId)
-                style { descriptionAppearance?.let { applyCatalogTextAppearance(it) } }
-            }) { Text(it) }
         }
     }
 }
@@ -1858,12 +1895,14 @@ private const val MATERIAL_CSS = """
 .d-toggle input[type=checkbox]:not([role=switch]):checked{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary));background-image:linear-gradient(135deg,transparent 43%,var(--d-control-checkmark,var(--d-on-primary)) 44% 56%,transparent 57%),linear-gradient(45deg,transparent 38%,var(--d-control-checkmark,var(--d-on-primary)) 39% 52%,transparent 53%);background-size:9px 9px;background-position:1px 0,3px 4px;background-repeat:no-repeat}
 .d-toggle input[type=checkbox]:not([role=switch]):indeterminate{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary));background-image:linear-gradient(var(--d-control-checkmark,var(--d-on-primary)),var(--d-control-checkmark,var(--d-on-primary)));background-size:10px 2px;background-position:center;background-repeat:no-repeat}
 .d-toggle input[type=radio]{border-radius:50%;background-color:transparent}.d-toggle input[type=radio]:checked{border-color:var(--d-control-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-selected,var(--d-primary)) 0 42%,transparent 46%)}
-.d-toggle input[type=checkbox]:not([role=switch]):disabled,.d-toggle input[type=radio]:disabled{border-color:var(--d-control-disabled-unselected,var(--d-outline));opacity:.38}
+.d-toggle input[type=checkbox]:not([role=switch]):disabled,.d-toggle input[type=radio]:disabled{border-color:var(--d-control-disabled-unselected,color-mix(in srgb,var(--d-on-surface) 38%,transparent));opacity:1}
 .d-toggle input[type=checkbox]:not([role=switch]):checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background-color:var(--d-control-disabled-selected,var(--d-primary));background-image:linear-gradient(135deg,transparent 43%,var(--d-control-disabled-checkmark,var(--d-on-surface)) 44% 56%,transparent 57%),linear-gradient(45deg,transparent 38%,var(--d-control-disabled-checkmark,var(--d-on-surface)) 39% 52%,transparent 53%)}
 .d-toggle input[type=radio]:checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-disabled-selected,var(--d-primary)) 0 42%,transparent 46%)}
 .d-toggle input[role=switch]{appearance:none;flex:0 0 52px;width:52px;height:32px;margin:0;border:2px solid var(--d-switch-unchecked-border,var(--d-outline));border-radius:999px;background-color:var(--d-switch-unchecked-track,var(--d-surface));background-image:radial-gradient(circle closest-side,var(--d-switch-unchecked-thumb,var(--d-outline)) 0 98%,transparent 100%);background-size:16px 16px;background-position:6px center;background-repeat:no-repeat;transition:background-color 150ms ease,border-color 150ms ease,background-position 150ms ease,background-size 150ms ease}
-.d-toggle input[role=switch]:checked{border-color:transparent;background-color:var(--d-switch-checked-track,var(--d-primary));background-image:radial-gradient(circle closest-side,var(--d-switch-checked-thumb,var(--d-on-primary)) 0 98%,transparent 100%);background-size:24px 24px;background-position:calc(100% - 2px) center}
-.d-toggle input[role=switch]:disabled{opacity:.38}
+.d-toggle input[role=switch]:checked{border-color:var(--d-switch-checked-border,transparent);background-color:var(--d-switch-checked-track,var(--d-primary));background-image:radial-gradient(circle closest-side,var(--d-switch-checked-thumb,var(--d-on-primary)) 0 98%,transparent 100%);background-size:24px 24px;background-position:calc(100% - 2px) center}
+.d-toggle input[role=switch]:disabled{opacity:1;border-color:var(--d-switch-disabled-unchecked-border);background-color:var(--d-switch-disabled-unchecked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-unchecked-thumb) 0 98%,transparent 100%)}
+.d-toggle input[role=switch]:checked:disabled{border-color:var(--d-switch-disabled-checked-border);background-color:var(--d-switch-disabled-checked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-checked-thumb) 0 98%,transparent 100%)}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate:disabled{border-color:var(--d-control-disabled-selected);background-color:var(--d-control-disabled-selected);background-image:linear-gradient(var(--d-control-disabled-checkmark),var(--d-control-disabled-checkmark))}
 .d-slider{appearance:none;width:100%;height:20px;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
 .d-slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(to right,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) 100%)}
 .d-slider::-moz-range-track{height:4px;border-radius:4px;background:var(--d-slider-inactive-current,var(--d-outline))}
@@ -1936,7 +1975,7 @@ private const val MATERIAL_CSS = """
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
 .d-snackbar-host>.d-snackbar-message{max-width:min(720px,100%);min-height:48px;box-shadow:0 3px 8px rgb(0 0 0 / .24);pointer-events:auto}
 .d-scroll-field-viewport::before,.d-scroll-field-viewport::after{content:"";display:block;height:62px;scroll-snap-align:none;pointer-events:none}
-.d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-theme .d-toggle+span{display:block;margin-block-start:0;line-height:20px}.d-theme .d-toggle:has(input:last-child)+span{margin-inline-end:30px;margin-inline-start:0}
+.d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}
 .d-theme .d-chip.d-item-hittarget .d-chip-surface{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme-expressive .d-chip{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme .d-progress-wavy-linear{width:100%}

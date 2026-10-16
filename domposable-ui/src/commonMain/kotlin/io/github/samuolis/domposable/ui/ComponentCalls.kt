@@ -210,6 +210,7 @@ fun DomposableRadioButton(
     showLabel: Boolean = true,
     description: String? = null,
     controlPlacement: DomposableControlPlacement = DomposableControlPlacement.Leading,
+    groupName: String? = null,
 ) = DomposableRadioButton(
     DomposableRadioButtonProps(
         selected,
@@ -220,6 +221,7 @@ fun DomposableRadioButton(
         showLabel = showLabel,
         description = description,
         controlPlacement = controlPlacement,
+        groupName = groupName,
     ),
     modifier,
 )

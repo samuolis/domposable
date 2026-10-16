@@ -22,3 +22,16 @@ for (const section of ['actions', 'selection', 'inputs', 'surfaces', 'navigation
     });
   }
 }
+
+test('radio groups keep browser arrow-key selection', async ({ page }) => {
+  await page.goto('/#/material/selection');
+  const personal = page.getByRole('radio', { name: 'Personal', exact: true });
+  const business = page.getByRole('radio', { name: 'Business', exact: true });
+  await expect(personal).toBeChecked();
+  await personal.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(business).toBeChecked();
+  await expect(personal).not.toBeChecked();
+  await page.keyboard.press('ArrowUp');
+  await expect(personal).toBeChecked();
+});

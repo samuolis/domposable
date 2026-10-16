@@ -7,6 +7,18 @@ import kotlin.test.assertFailsWith
 
 class MaterialCatalogContractsTest {
     @Test
+    fun optionalRadioGroupsRejectBlankNames() {
+        assertFailsWith<IllegalArgumentException> {
+            DomposableRadioButtonProps(false, {}, "Personal", groupName = " ")
+        }
+        assertEquals(
+            "account-type",
+            DomposableRadioButtonProps(true, {}, "Personal", groupName = "account-type").groupName,
+        )
+        assertEquals(null, DomposableRadioButtonProps(false, {}, "Personal").groupName)
+    }
+
+    @Test
     fun interactiveScrimAndTabsRequireAccessibleValidTargets() {
         assertFailsWith<IllegalArgumentException> { DomposableScrimProps(onClick = {}) }
         assertFailsWith<IllegalArgumentException> { DomposableScrimProps(alpha = Float.NaN) }

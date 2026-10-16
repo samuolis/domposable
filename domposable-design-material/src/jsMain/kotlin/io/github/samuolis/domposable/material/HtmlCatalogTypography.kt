@@ -7,6 +7,7 @@ private const val DEFAULT_FONT_SIZE_PX = 16f
 
 internal fun StyleScope.applyCatalogTextAppearance(appearance: DomposableTextAppearance) {
     applyRoleTextAppearance(appearance)
+    appearance.color?.let { property("color", it.css()) }
     appearance.fontSize?.let { property("font-size", "${it}px") }
     appearance.lineHeight?.let { property("line-height", "${it}px") }
     appearance.fontWeight?.let { property("font-weight", it.css()) }
@@ -20,6 +21,7 @@ internal fun StyleScope.applyCatalogTextAppearance(appearance: DomposableTextApp
 private fun StyleScope.applyRoleTextAppearance(appearance: DomposableTextAppearance) {
     appearance.role?.let { role ->
         val prefix = "--d-type-${role.name.toKebabCase()}${if (appearance.emphasized) "-emphasized" else ""}"
+        property("color", appearance.color?.css() ?: "var($prefix-color,inherit)")
         property("font-size", appearance.fontSize?.let { "${it}px" } ?: "var($prefix-size,inherit)")
         property("line-height", appearance.lineHeight?.let { "${it}px" } ?: "var($prefix-line-height,inherit)")
         property("font-weight", appearance.fontWeight?.css() ?: "var($prefix-weight,inherit)")

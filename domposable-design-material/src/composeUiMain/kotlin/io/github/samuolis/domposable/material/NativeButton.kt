@@ -71,7 +71,7 @@ internal fun NativeButton(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
-    val appearance = props.appearance ?: LocalDomposableTokens.current.button
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.button
     val formEnabled = domposableFormEnabled()
     if (appearance == DomposableButtonAppearance() && !props.loading && props.expanded == null) {
         when (props.style) {

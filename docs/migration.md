@@ -85,7 +85,7 @@ into element offsets or calls `scrollTo` from browser scroll events. See the com
 
 ## Material catalog and theme defaults
 
-The next 0.x minor expands the Material 3 and expressive catalog and adds button and text-field appearance defaults to `DomposableTokens` and optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
+The next 0.x minor expands the Material 3 and expressive catalog and groups all component defaults in `DomposableComponentStyles` and adds optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
 
 Keep application component names as thin adapters. Map brand tokens into `DomposableButtonAppearance` or `DomposableTextFieldAppearance`, and call the standard control instead of maintaining another HTML button/input implementation. Preserve custom editor, diagram and camera renderers; they are separate from ordinary control styling.
 
@@ -97,3 +97,6 @@ The expanded catalog also adds per-family defaults under `DomposableTokens.compo
 This is a pre-1.0 **breaking ABI change**, requiring a minor release and recompilation. Props constructors, `copy`, generated provider signatures and several direct-call signatures changed. Prefer named optional arguments and named provider properties. For example, pass `cellContent = { ... }` by name when constructing data-table props positionally; the direct composable still accepts its content as the trailing lambda. Do not mix old compiled adapters with the new artifacts.
 
 `DomposableScreenScaffold` now has a stateless overload for caller-owned state and chrome. Keep an existing application scaffold when it already handles insets and ownership correctly; delegate the library pieces it needs. The optional loading/error overload is a convenience, not a required screen contract.
+
+
+Theme configuration now groups **all** component defaults, including buttons and text fields, in `DomposableComponentStyles`. Replace `DomposableTokens(button = ..., textField = ...)` with `DomposableMaterialTheme(styles = DomposableComponentStyles(button = ..., textField = ...))`. Custom host integrations can use `DomposableTokens(components = DomposableComponentStyles(...))`. Access defaults through `DomposableTheme.styles`; the former `tokens.button` and `tokens.textField` fields move to `tokens.components`.

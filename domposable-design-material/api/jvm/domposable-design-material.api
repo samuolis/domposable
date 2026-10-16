@@ -20,7 +20,7 @@ public final class io/github/samuolis/domposable/material/ComposableSingletons$N
 }
 
 public final class io/github/samuolis/domposable/material/MaterialComponentsKt {
-	public static final fun DomposableMaterialTheme (Lio/github/samuolis/domposable/foundation/DomposableTokens;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableMaterialTheme (Lio/github/samuolis/domposable/foundation/DomposableTokens;Lio/github/samuolis/domposable/foundation/DomposableColors;Lio/github/samuolis/domposable/foundation/DomposableTypography;Lio/github/samuolis/domposable/foundation/DomposableShapes;Lio/github/samuolis/domposable/foundation/DomposableComponentStyles;Lio/github/samuolis/domposable/foundation/DomposableDesignLanguage;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/github/samuolis/domposable/material/NativeMaterialKt {

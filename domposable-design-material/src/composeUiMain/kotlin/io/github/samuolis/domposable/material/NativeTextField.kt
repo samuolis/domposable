@@ -80,7 +80,7 @@ internal fun NativeTextField(
     LaunchedEffect(interactions) {
         interactions.interactions.collect { if (it is PressInteraction.Release) latestClick?.invoke() }
     }
-    val appearance = props.appearance ?: LocalDomposableTokens.current.textField
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.textField
     val nativeModifier =
         modifier
             .toComposeModifier()

@@ -13,12 +13,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableStateColors
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldColors
 import io.github.samuolis.domposable.foundation.DomposableTextFieldVariant
-import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
@@ -40,8 +40,8 @@ class NativeTextFieldAppearanceTest {
     fun themedReadonlyFieldKeepsLabelErrorAndNoTextEntryAction() {
         compose.setContent {
             DomposableMaterialTheme(
-                tokens =
-                    DomposableTokens(
+                styles =
+                    DomposableComponentStyles(
                         textField =
                             DomposableTextFieldAppearance(
                                 colors =

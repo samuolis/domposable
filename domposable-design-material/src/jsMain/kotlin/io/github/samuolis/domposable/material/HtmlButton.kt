@@ -25,7 +25,7 @@ internal fun HtmlButton(
     respectFormEnabled: Boolean = true,
 ) {
     val tokens = LocalDomposableTokens.current
-    val appearance = props.appearance ?: tokens.button
+    val appearance = props.appearance ?: tokens.components.button
     val customAppearance = appearance != DomposableButtonAppearance()
     val formEnabled = !respectFormEnabled || domposableFormEnabled()
     val useEnabledColors = (props.enabled && formEnabled) || props.loading
@@ -132,6 +132,7 @@ internal fun HtmlButton(
                     property("padding-inline", "${it.start.value}px ${it.end.value}px")
                 }
                 appearance.textAppearance?.let {
+                    it.color?.let { property("color", it.css()) }
                     it.fontSize?.let { property("font-size", "${it}px") }
                     it.lineHeight?.let { property("line-height", "${it}px") }
                     it.letterSpacing?.let { property("letter-spacing", "${it}px") }

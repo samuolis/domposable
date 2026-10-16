@@ -169,8 +169,6 @@ data class DomposableTokens(
     val radius: DomposableLength = 12.dp,
     val elevation: DomposableLength = 2.dp,
     val motionDurationMillis: Int = 180,
-    val button: DomposableButtonAppearance = DomposableButtonAppearance(),
-    val textField: DomposableTextFieldAppearance = DomposableTextFieldAppearance(),
     val components: DomposableComponentStyles = DomposableComponentStyles(),
     val designLanguage: DomposableDesignLanguage = DomposableDesignLanguage.Standard,
     val shapes: DomposableShapes = DomposableShapes(),
