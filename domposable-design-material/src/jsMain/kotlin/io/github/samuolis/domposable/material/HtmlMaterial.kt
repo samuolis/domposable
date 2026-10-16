@@ -706,16 +706,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         } else {
                             null
                         }
-                val borderWidth =
-                    if (appearance.border !=
-                        null
-                    ) {
-                        appearance.borderWidth.value
-                    } else if (borderColor != null) {
-                        1f
-                    } else {
-                        0f
-                    }
+                val borderWidth = if (borderColor != null) appearance.borderWidth.value else 0f
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
@@ -995,7 +986,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         classes("d-avatar")
                         style { surfaceAppearance(appearance) }
                     }) {
-                        if (props.content == null) Text(props.initials) else props.content.invoke()
+                        props.content?.invoke() ?: Text(props.initials)
                     }
                 }
             },

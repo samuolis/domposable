@@ -610,7 +610,10 @@ internal fun NativeCard(
                 )
             }
         }
-    val border = appearance.border?.let { BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()) }
+    val defaultBorder = if (props.variant == DomposableCardVariant.Outlined) CardDefaults.outlinedCardBorder() else null
+    val border =
+        appearance.border?.let { BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()) }
+            ?: defaultBorder?.let { BorderStroke(appearance.borderWidth.value.dp, it.brush) }
     val uriHandler = LocalUriHandler.current
     val safeHref = props.href?.let(::safeDomposableHref)
     val onClick = props.onClick ?: safeHref?.let { href -> { uriHandler.openUri(href) } }
@@ -622,7 +625,14 @@ internal fun NativeCard(
         } else {
             Modifier
         }
-    val cardModifier = modifier.toComposeModifier().then(linkModifier)
+    val cardModifier =
+        modifier.toComposeModifier().then(linkModifier).then(
+            if (props.variant == DomposableCardVariant.Elevated && border != null) {
+                Modifier.border(border, shape)
+            } else {
+                Modifier
+            },
+        )
     val styleContent: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
         val cardContent: @Composable () -> Unit = { StyledContent(appearance.textAppearance, content) }
         props.contentPadding?.let { contentPadding ->
