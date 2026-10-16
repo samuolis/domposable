@@ -62,7 +62,12 @@ kotlin {
                 }
             }
         getByName("androidMain").dependsOn(composeUiMain)
-        wasmJsMain { dependencies { implementation(libs.ktor.client.js) } }
+        wasmJsMain {
+            dependencies {
+                implementation(libs.ktor.client.js)
+                implementation(libs.kotlinx.browser)
+            }
+        }
         androidMain { dependencies { implementation(libs.ktor.client.okhttp) } }
         jvmMain { dependencies { implementation(libs.ktor.client.java) } }
         iosMain { dependencies { implementation(libs.ktor.client.darwin) } }
