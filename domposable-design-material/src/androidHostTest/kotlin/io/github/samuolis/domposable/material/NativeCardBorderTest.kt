@@ -1,11 +1,11 @@
 package io.github.samuolis.domposable.material
 
-import android.annotation.TargetApi
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.test.filters.SdkSuppress
 import io.github.samuolis.domposable.foundation.DomposableCardVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableInsets
@@ -33,7 +33,7 @@ class NativeCardBorderTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
-    @TargetApi(26)
+    @SdkSuppress(minSdkVersion = 26)
     fun elevatedCardsHonorAnExplicitBorderWithoutShrinkingContent() {
         compose.setContent {
             DomposableMaterialTheme {

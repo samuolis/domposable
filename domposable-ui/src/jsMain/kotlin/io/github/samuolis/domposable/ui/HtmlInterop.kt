@@ -81,11 +81,6 @@ fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableMod
                 attr("data-testid", element.value)
             }
 
-            is DomposableModifierOperation.Region -> {
-                attr("role", "region")
-                attr("aria-label", element.label)
-            }
-
             is HtmlAttributes -> {
                 element.attributes(this)
             }

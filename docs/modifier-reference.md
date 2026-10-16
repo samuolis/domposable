@@ -27,12 +27,14 @@ fun DomposableModifier.aspectRatio(ratio: Float): DomposableModifier
 ```kotlin
 fun DomposableModifier.background(value: DomposableColor): DomposableModifier
 fun DomposableModifier.background(value: DomposableColor, shape: DomposableShape): DomposableModifier
+fun DomposableModifier.background(gradient: DomposableLinearGradient, shape: DomposableShape = DomposableShape.Rectangle): DomposableModifier
 ```
 
 ## border
 
 ```kotlin
 fun DomposableModifier.border(width: DomposableLength, color: DomposableColor, shape: DomposableShape = DomposableShape.Rectangle): DomposableModifier
+fun DomposableModifier.border(width: DomposableLength, color: DomposableColor, edge: DomposableBorderEdge): DomposableModifier
 ```
 
 ## boxAlignment
@@ -82,6 +84,7 @@ fun DomposableModifier.fillMaxSize(): DomposableModifier
 ## fillMaxWidth
 
 ```kotlin
+fun DomposableModifier.fillMaxWidth(fraction: Float, min: DomposableLength? = null, max: DomposableLength? = null): DomposableModifier
 fun DomposableModifier.fillMaxWidth(): DomposableModifier
 ```
 
@@ -140,6 +143,18 @@ fun DomposableModifier.offset(x: Float, y: Float): DomposableModifier
 fun DomposableModifier.padding(all: DomposableLength): DomposableModifier
 fun DomposableModifier.padding(insets: DomposableInsets): DomposableModifier
 fun DomposableModifier.padding(horizontal: DomposableLength, vertical: DomposableLength): DomposableModifier
+```
+
+## pointerPassthrough
+
+```kotlin
+fun DomposableModifier.pointerPassthrough(): DomposableModifier
+```
+
+## region
+
+```kotlin
+fun DomposableModifier.region(label: String): DomposableModifier
 ```
 
 ## rotate

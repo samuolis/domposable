@@ -7,7 +7,6 @@ import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class HtmlAvatarContentTest {
     @Test
@@ -23,6 +22,9 @@ class HtmlAvatarContentTest {
 
         try {
             val avatar = root.querySelector(".d-avatar") as HTMLElement
+            val style = kotlinx.browser.window.getComputedStyle(avatar)
+            assertEquals("hidden", style.getPropertyValue("overflow"))
+            assertEquals("relative", style.position)
             assertEquals("img", avatar.getAttribute("role"))
             assertEquals("Alex Brown", avatar.getAttribute("aria-label"))
             assertEquals("Profile photo", avatar.textContent?.trim())
