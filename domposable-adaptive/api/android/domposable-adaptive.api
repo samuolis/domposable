@@ -156,6 +156,10 @@ public final class io/github/samuolis/domposable/adaptive/DomposableWidthClass :
 	public static fun values ()[Lio/github/samuolis/domposable/adaptive/DomposableWidthClass;
 }
 
+public final class io/github/samuolis/domposable/adaptive/PaneScaffoldKt {
+	public static final fun DomposablePaneScaffold-5bADBzA (Lio/github/samuolis/domposable/adaptive/DomposablePaneLayout;Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/ui/DomposableModifier;FFLio/github/samuolis/domposable/foundation/DomposableLength;FLjava/lang/Object;Lio/github/samuolis/domposable/adaptive/DomposablePaneRole;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
+}
+
 public final class io/github/samuolis/domposable/adaptive/PanesKt {
 	public static final fun domposablePaneShouldReplaceDetail (Lio/github/samuolis/domposable/adaptive/DomposablePane;Lio/github/samuolis/domposable/adaptive/DomposablePane;Z)Z
 	public static final fun domposablePaneShouldReplaceSiblingDetail (Lio/github/samuolis/domposable/adaptive/DomposablePane;Lio/github/samuolis/domposable/adaptive/DomposablePane;)Z

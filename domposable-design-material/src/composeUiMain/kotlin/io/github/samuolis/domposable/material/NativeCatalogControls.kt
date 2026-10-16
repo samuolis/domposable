@@ -1071,13 +1071,14 @@ internal fun NativeAvatar(
         border = appearance.border?.let { BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()) },
     ) {
         Box(contentAlignment = Alignment.Center) {
-            if (props.content == null) {
+            val content = props.content
+            if (content == null) {
                 Text(
                     props.initials,
                     style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
                 )
             } else {
-                props.content.invoke()
+                content()
             }
         }
     }

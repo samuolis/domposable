@@ -57,3 +57,17 @@ test('caller-owned history falls back to the URL without rewriting invalid state
   expect(await page.evaluate(() => history.state)).toBe('tampered');
   await expect(page).toHaveURL(/#\/caller-history\/fallback\?source=url#arrival$/);
 });
+
+test('caller-owned path URLs preserve query and fragment through Back and refresh', async ({ page }) => {
+  await page.goto('/routes/caller-history/');
+  await expect(page.getByTestId('caller-history-page')).toHaveText('Current page: home');
+  await page.getByRole('button', { name: 'Push two routes' }).click();
+  await expect(page).toHaveURL(/\/routes\/caller-history\/third\/\?source=fixture#summary$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/routes\/caller-history\/second\/\?source=fixture#notes$/);
+  await expect(page.getByTestId('caller-history-page')).toHaveText('Current page: second');
+  await page.reload();
+  await expect(page.getByTestId('caller-history-page')).toHaveText('Current page: second');
+  await expect(page.getByTestId('caller-history-position')).toHaveText('Physical position: 1');
+  await expect(page).toHaveURL(/\/routes\/caller-history\/second\/\?source=fixture#notes$/);
+});

@@ -11,5 +11,6 @@ actual fun <S : Any> DomposableBrowserHistory(
     onBeforeRestore: () -> Unit,
     onRestore: (DomposableBrowserHistoryRecord<S>?) -> Unit,
 ) {
-    SideEffect { state.takePending() }
+    val pendingCount = state.pendingCount
+    SideEffect { if (pendingCount > 0) state.takePending() }
 }

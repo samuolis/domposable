@@ -1,7 +1,47 @@
+public final class io/github/samuolis/domposable/navigation3/CallerBrowserHistoryKt {
+	public static final fun DomposableBrowserHistory (Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryState;Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryCodec;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/github/samuolis/domposable/navigation3/ComposableSingletons$NavigationKt {
 	public static final field INSTANCE Lio/github/samuolis/domposable/navigation3/ComposableSingletons$NavigationKt;
 	public fun <init> ()V
 	public final fun getLambda$-1824004815$io_github_samuolis_domposable_domposable_navigation3 ()Lkotlin/jvm/functions/Function3;
+}
+
+public abstract interface class io/github/samuolis/domposable/navigation3/DomposableBrowserHistoryCodec {
+	public abstract fun decode (Ljava/lang/String;)Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryRecord;
+	public abstract fun encode (ILjava/lang/Object;)Ljava/lang/String;
+	public abstract fun url (Ljava/lang/Object;)Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/navigation3/DomposableBrowserHistoryRecord {
+	public static final field $stable I
+	public fun <init> (ILjava/lang/Object;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (ILjava/lang/Object;)Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryRecord;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryRecord;ILjava/lang/Object;ILjava/lang/Object;)Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryRecord;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPosition ()I
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/navigation3/DomposableBrowserHistoryState {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;I)V
+	public synthetic fun <init> (Ljava/lang/Object;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCurrent ()Ljava/lang/Object;
+	public final fun getPosition ()I
+	public final fun getRetainedSnapshots ()Ljava/util/List;
+	public final fun push (Ljava/lang/Object;Ljava/lang/String;)I
+	public static synthetic fun push$default (Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryState;Ljava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)I
+	public final fun replace (Ljava/lang/Object;Ljava/lang/String;)V
+	public static synthetic fun replace$default (Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryState;Ljava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun reset (Ljava/lang/Object;Ljava/lang/String;)V
+	public static synthetic fun reset$default (Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryState;Ljava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun restore (Lio/github/samuolis/domposable/navigation3/DomposableBrowserHistoryRecord;)V
 }
 
 public abstract interface class io/github/samuolis/domposable/navigation3/DomposableBrowserUrls {
