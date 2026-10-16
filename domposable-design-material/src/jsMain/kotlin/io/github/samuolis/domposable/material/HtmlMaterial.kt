@@ -725,11 +725,6 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             }
                             appearance.shape?.let { materialShape(it) }
                                 ?: tokens.shapes.medium?.let { materialShape(it) }
-                            if (appearance.shape == null && tokens.shapes.medium == null &&
-                                tokens.designLanguage == DomposableDesignLanguage.Expressive
-                            ) {
-                                property("border-radius", "28px")
-                            }
                             appearance.shadowElevation?.let {
                                 property(
                                     "box-shadow",
@@ -1977,7 +1972,6 @@ private const val MATERIAL_CSS = """
 .d-scroll-field-viewport::before,.d-scroll-field-viewport::after{content:"";display:block;height:62px;scroll-snap-align:none;pointer-events:none}
 .d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}
 .d-theme .d-chip.d-item-hittarget .d-chip-surface{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
-.d-theme-expressive .d-chip{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme .d-progress-wavy-linear{width:100%}
 .d-theme .d-navigation:not(.d-navigation-links):not([style*="column"]){display:flex;width:100%;min-height:80px;align-items:stretch;justify-content:space-around;gap:0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}
 .d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:80px;padding:8px 12px;border:0;border-radius:0;background:transparent;color:var(--d-item-content,var(--d-on-surface));font-size:12px;line-height:16px;text-align:center}

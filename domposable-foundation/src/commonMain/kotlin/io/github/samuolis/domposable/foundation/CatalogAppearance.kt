@@ -264,7 +264,7 @@ enum class DomposableControlPlacement {
     Trailing,
 }
 
-/** Expressive changes the Material shape and motion defaults, without changing app architecture. */
+/** Selects Material theme defaults; expressive components and variants remain independently selectable. */
 enum class DomposableDesignLanguage { Standard, Expressive }
 
 enum class DomposableCardVariant { Elevated, Filled, Outlined }

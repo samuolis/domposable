@@ -1,5 +1,18 @@
 import { test, expect } from '@playwright/test';
 
+test('expressive theme keeps ordinary card shapes and explicit overrides', async ({ page }) => {
+  await page.goto('/#/material/surfaces');
+  const card = page.locator('.d-card').filter({ has: page.getByText('Filled card', { exact: true }) });
+  await expect(card).toHaveCSS('border-top-left-radius', '12px');
+  await page.getByRole('switch', { name: 'Expressive theme', exact: true }).check();
+  await expect(page.locator('.d-theme-expressive')).toBeVisible();
+  await expect(card).toHaveCSS('border-top-left-radius', '12px');
+  await page.getByRole('switch', { name: 'Component overrides', exact: true }).check();
+  await expect(card).toHaveCSS('border-top-left-radius', '20px');
+  await page.getByRole('switch', { name: 'Expressive theme', exact: true }).uncheck();
+  await expect(card).toHaveCSS('border-top-left-radius', '20px');
+});
+
 test('selection controls and chips use Material-sized visual surfaces', async ({ page }) => {
   await page.goto('/#/material/selection');
 

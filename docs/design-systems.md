@@ -2,6 +2,18 @@
 
 `DomposableTheme` installs semantic tokens and a complete `DomposableComponents` provider. The Material artifact is optional: a product can supply every renderer without depending on Material.
 
+## Build your own UI
+
+Domposable shares feature UI across native Compose and semantic HTML. Its core provides portable layout, modifiers, component contracts and renderer extension points. Your design system owns the visual language, composition of controls and platform integrations.
+
+Choose the level that fits each component:
+
+- Compose a custom layout from existing shared primitives and controls.
+- Configure the optional Material provider through theme styles and per-call appearance values.
+- Replace a built-in renderer, or introduce a custom shared component with native and HTML implementations.
+
+Feature code uses the same shared API in each case. A custom control may need platform implementations, but its callers do not need separate native and web screens. The Material catalog is a ready-made design system, not the limit of what a Domposable application can render. Expressive components and theme settings are optional choices within that provider.
+
 ## Adopt inside an existing design system
 
 Keep your component names, tokens and feature signatures. Start with [theme defaults and component overrides](#theme-defaults-and-component-overrides) behind those names, delegating ordinary control rendering to the library. Use your own native and HTML implementations at the design-system boundary when a custom component needs a different structure or behavior. A component does not need generated props, a registry or a renderer provider merely to call its own platform implementation.

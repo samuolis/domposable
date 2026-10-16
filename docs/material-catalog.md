@@ -74,7 +74,6 @@ Layout helpers, forms, disclosures, rich text, tables and charts are additional 
 
 ```kotlin
 DomposableMaterialTheme(
-    designLanguage = DomposableDesignLanguage.Expressive,
     colors = DomposableColors(
         primary = DomposableColor(0xFF455E91),
         onPrimary = DomposableColor(0xFFFFFFFF),
@@ -100,6 +99,23 @@ DomposableMaterialTheme(
 ```
 
 A null per-call appearance inherits its component default. An explicit appearance replaces it; use `DomposableTheme.styles.card.copy(...)` for a partial local override. Null fields within an appearance preserve the renderer's defaults. Custom providers own their rendering and must honor any appearance settings they expose.
+
+### Standard and expressive choices
+
+Standard Material is the default. Choose individual expressive components, such as `DomposableLoadingIndicator`, or an expressive variant of a shared component where the upstream catalog offers one. These components work inside the standard theme; enabling an expressive theme is optional.
+
+```kotlin
+DomposableMaterialTheme {
+    DomposableLoadingIndicator(label = "Loading documents")
+}
+
+// Opt into expressive theme defaults for this app or section.
+DomposableMaterialTheme(designLanguage = DomposableDesignLanguage.Expressive) {
+    FeatureContent()
+}
+```
+
+The theme setting follows Material's [expressive theming approach](https://kotlinlang.org/api/compose-multiplatform/material3/androidx.compose.material3/-material-expressive-theme.html). It selects expressive defaults and motion where supported; it does not replace every component with an expressive variant. Explicit shapes and component styles still apply. For example, a regular card keeps the Material medium shape unless you override it, in either theme. HTML adapts these choices to browser layout and CSS motion; it does not execute Compose's spring motion scheme.
 
 Native font assets remain installed by the host's Compose theme. The CSS font-family token controls HTML font selection; it does not download a native font or register a platform typeface.
 

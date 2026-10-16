@@ -38,7 +38,6 @@ import io.github.samuolis.domposable.foundation.DomposableShapes
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
-import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.DomposableTypography
 import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableCheckboxProps
@@ -250,14 +249,20 @@ class NativeCatalogAppearanceTest {
     }
 
     @Test
-    fun expressiveThemeUsesExpressiveMotionAndKeepsHostFontFamily() {
+    fun expressiveThemeIsOptInAndKeepsHostFontFamily() {
+        val expressive = mutableStateOf(false)
         val motion = mutableStateOf<MotionScheme?>(null)
         val fontFamily = mutableStateOf<FontFamily?>(null)
         val hostTypography = Typography().copy(bodyLarge = Typography().bodyLarge.copy(fontFamily = FontFamily.Cursive))
         compose.setContent {
             MaterialTheme(typography = hostTypography) {
                 DomposableMaterialTheme(
-                    tokens = DomposableTokens(designLanguage = DomposableDesignLanguage.Expressive),
+                    designLanguage =
+                        if (expressive.value) {
+                            DomposableDesignLanguage.Expressive
+                        } else {
+                            DomposableDesignLanguage.Standard
+                        },
                 ) {
                     val currentMotion = MaterialTheme.motionScheme
                     val currentFontFamily = MaterialTheme.typography.bodyLarge.fontFamily
@@ -269,6 +274,11 @@ class NativeCatalogAppearanceTest {
             }
         }
 
+        compose.runOnIdle {
+            assertSame(MotionScheme.standard(), motion.value)
+            assertEquals(FontFamily.Cursive, fontFamily.value)
+            expressive.value = true
+        }
         compose.runOnIdle {
             assertSame(MotionScheme.expressive(), motion.value)
             assertEquals(FontFamily.Cursive, fontFamily.value)
