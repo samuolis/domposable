@@ -1,3 +1,5 @@
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
@@ -85,4 +87,30 @@ tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMet
 ksp {
     arg("domposable.components.package", "example.consumer.components.generated")
     arg("domposable.components.provider", "ConsumerComponents")
+}
+
+tasks.register("verifyStableComposeBaseline") {
+    group = "verification"
+    description = "Rejects prerelease Compose core dependencies resolved by packaged consumers."
+    notCompatibleWithConfigurationCache("Inspects resolved consumer dependencies")
+    doLast {
+        val coreGroups =
+            setOf("animation", "foundation", "runtime", "ui")
+                .flatMap { listOf("org.jetbrains.compose.$it", "androidx.compose.$it") }
+                .toSet()
+        kotlin.targets.matching { it.name != "metadata" }.forEach { target ->
+            val compilation = target.compilations.getByName("main")
+            val configuration = configurations.getByName(compilation.compileDependencyConfigurationName)
+            val prereleases =
+                configuration.incoming.resolutionResult.allComponents.mapNotNull { component ->
+                    (component.id as? ModuleComponentIdentifier)?.takeIf {
+                        it.group in coreGroups && '-' in it.version
+                    }
+                }
+            check(prereleases.isEmpty()) {
+                "${target.name} resolves prerelease Compose core dependencies: ${prereleases.joinToString()}"
+            }
+            logger.lifecycle("${target.name}: stable Compose core dependencies verified")
+        }
+    }
 }

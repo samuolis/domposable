@@ -160,6 +160,8 @@ jobs:
       - run: python scripts/ci/package_publications.py --unsigned
       - name: Resolve and compile published artifacts on all six targets
         run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 :koin-example:compileKotlinJvm :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
+      - name: Verify stable Compose core in every packaged consumer target
+        run: ./gradlew :consumer-fixture:verifyStableComposeBaseline -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
       - run: python scripts/ci/generate_xcode_project.py
       - run: python scripts/ci/ios_test.py
       - name: iOS visual regression

@@ -2,7 +2,9 @@
 
 Domposable targets Material 3 component families through shared Compose calls. Native targets use Compose Multiplatform Material 3. Kotlin/JS renders semantic HTML. The standard and expressive themes share the same feature API.
 
-The inventory below maps the pinned `org.jetbrains.compose.material3:material3:1.13.0-alpha02` source artifact to shared Domposable components. See [platform coverage](coverage.md) for renderer boundaries and [compatibility](compatibility.md) for tested versions.
+The inventory below maps the pinned `org.jetbrains.compose.material3:material3:1.12.0-alpha03` source artifact to shared Domposable components. See [platform coverage](coverage.md) for renderer boundaries and [compatibility](compatibility.md) for tested versions.
+
+The supported baseline uses stable Compose Multiplatform core. Material 3 has a separate version and opt-in API surface; an expressive component does not require upgrading the core to alpha.
 
 Layout helpers, forms, disclosures, rich text, tables and charts are additional Domposable APIs. They are not upstream Material components. Android-specific system integrations and internal Material implementation utilities are outside the component catalog.
 
@@ -14,7 +16,7 @@ Layout helpers, forms, disclosures, rich text, tables and charts are additional 
 | --- | --- | --- |
 | Actions | `DomposableButton` | `Button`, `ElevatedButton`, `FilledTonalButton`, `OutlinedButton`, `TextButton` |
 | Actions | `DomposableIconButton` | `IconButton`, `FilledIconButton`, `FilledTonalIconButton`, `OutlinedIconButton`, `IconToggleButton`, `FilledIconToggleButton`, `FilledTonalIconToggleButton`, `OutlinedIconToggleButton` |
-| Expressive actions | `DomposableToggleButton` | `ToggleButton`, `ElevatedToggleButton`, `FilledTonalToggleButton`, `OutlinedToggleButton` |
+| Expressive actions | `DomposableToggleButton` | `ToggleButton`, `ElevatedToggleButton`, `TonalToggleButton`, `OutlinedToggleButton` |
 | Expressive actions | `DomposableButtonGroup` | `ButtonGroup` |
 | Expressive actions | `DomposableSplitButton` | `SplitButtonLayout` |
 | Actions | `DomposableFloatingActionButton` | `FloatingActionButton`, `SmallFloatingActionButton`, `MediumFloatingActionButton`, `LargeFloatingActionButton`, `ExtendedFloatingActionButton`, `SmallExtendedFloatingActionButton`, `MediumExtendedFloatingActionButton`, `LargeExtendedFloatingActionButton` |
@@ -32,7 +34,7 @@ Layout helpers, forms, disclosures, rich text, tables and charts are additional 
 | Input | `DomposableAutocomplete` | `ExposedDropdownMenuBox`, `ExposedDropdownMenu` |
 | Input | `DomposableDatePicker` | `DatePicker`, `DatePickerDialog` |
 | Input | `DomposableDateRangePicker` | `DateRangePicker` |
-| Input | `DomposableTimePicker` | `TimePicker`, `TimeInput`, `TimePickerDialog`, `TimeScroll`, `VibrantTimePickerDialog` |
+| Input | `DomposableTimePicker` | `TimePicker`, `TimeInput`, `TimePickerDialog` |
 | Containment | `DomposableCard` | `Card`, `ElevatedCard`, `OutlinedCard` |
 | Containment | `DomposableSurface` | `Surface` |
 | Containment | `DomposableListItem` | `ListItem`, `SegmentedListItem` |
@@ -53,7 +55,7 @@ Layout helpers, forms, disclosures, rich text, tables and charts are additional 
 | Navigation | `DomposableNavigationDrawer` | `ModalNavigationDrawer`, `DismissibleNavigationDrawer`, `PermanentNavigationDrawer`, `ModalDrawerSheet`, `DismissibleDrawerSheet`, `PermanentDrawerSheet` |
 | Navigation | `DomposableNavigationDrawerItem` | `NavigationDrawerItem` |
 | Navigation | `DomposableTabs` | `PrimaryTabRow`, `SecondaryTabRow`, `PrimaryScrollableTabRow`, `SecondaryScrollableTabRow`, `Tab`, `LeadingIconTab` |
-| Selection | `DomposableMenu` / `DomposableDropdownMenuItem` | `DropdownMenu`, `DropdownMenuItem`, `CheckableDropdownMenuItem`, `SelectableDropdownMenuItem` |
+| Selection | `DomposableMenu` / `DomposableDropdownMenuItem` | `DropdownMenu`, `DropdownMenuItem` (including checked and selected overloads) |
 | Structure | `DomposableScaffold` | `Scaffold` |
 | Expressive structure | `DomposableDragHandle` | `VerticalDragHandle` |
 | Gestures | `DomposablePullToRefresh` | `PullToRefreshBox`, `PullToRefreshDefaults.Indicator`, `PullToRefreshDefaults.LoadingIndicator` |
@@ -316,3 +318,9 @@ DomposableFlowRow(gap = 12.dp) {
     )
 }
 ```
+
+## Baseline-native picker variants
+
+`DomposableTimePickerMode.Scroll` composes the shared controlled wheel renderer for hours and minutes, with AM/PM controls in 12-hour mode. It supports keyboard adjustment, accessibility actions, disabled forms and caller-owned values. It does not require the newer upstream `TimeScroll` implementation.
+
+`DomposableDialogVariant.VibrantTimePicker` uses the baseline Material time-picker dialog with expressive shape and container defaults. Title, content, confirmation and dismissal slots are retained; its layout follows the supported baseline rather than the newer upstream vibrant dialog shell. Override its appearance or provide a custom renderer when a different layout is required.

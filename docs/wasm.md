@@ -35,7 +35,7 @@ The mirror lives in the canvas container's open shadow root. Compose publishes i
 
 ## Known bridge limitations
 
-The pinned Compose UI **1.13.0-alpha02** bridge currently emits these WCAG axe findings on the otherwise empty input lab:
+The published **0.7.0** release used the Compose UI **1.13.0-alpha02** bridge and recorded these WCAG axe findings on the otherwise empty input lab. The stable-baseline update must review the new CI report before these findings can be claimed for its bridge:
 
 | Rule | Concrete finding |
 | --- | --- |

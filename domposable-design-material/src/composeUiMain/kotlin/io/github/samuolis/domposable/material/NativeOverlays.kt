@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.TimePickerDialogDefaults
-import androidx.compose.material3.VibrantTimePickerDialog
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -115,16 +114,17 @@ internal fun NativeDialog(
             }
 
             DomposableDialogVariant.VibrantTimePicker -> {
-                VibrantTimePickerDialog(
+                // The vibrant dialog shell is 1.13-only; keep its slots on the stable dialog API.
+                TimePickerDialog(
                     onDismissRequest = props.onDismiss,
                     confirmButton = confirm,
                     dismissButton = close,
+                    title = { Text(props.title) },
                     modifier = modifier.toComposeModifier(),
-                    shape = appearance.nativeShape(TimePickerDialogDefaults.vibrantShape),
+                    shape = appearance.nativeShape(MaterialTheme.shapes.extraLarge),
                     containerColor =
-                        appearance.container?.nativeColor() ?: TimePickerDialogDefaults.vibrantContainerColor,
+                        appearance.container?.nativeColor() ?: MaterialTheme.colorScheme.surfaceContainer,
                 ) {
-                    Text(props.title)
                     body()
                 }
             }

@@ -14,12 +14,9 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
-import androidx.compose.material3.TimeInputDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
-import androidx.compose.material3.TimeScroll
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -192,26 +189,17 @@ internal fun NativeTimePicker(
     val colors =
         TimePickerDefaults.colors(
             containerColor = appearance.pickerContainer(),
-            clockDialContentColor = contentColor,
-            periodSelectorContentColor = contentColor,
-            timeSelectorContentColor = contentColor,
+            clockDialSelectedContentColor = contentColor,
+            clockDialUnselectedContentColor = contentColor,
+            periodSelectorSelectedContentColor = contentColor,
+            periodSelectorUnselectedContentColor = contentColor,
+            timeSelectorSelectedContentColor = contentColor,
+            timeSelectorUnselectedContentColor = contentColor,
         )
     NativePickerSurface(appearance, modifier, "Time picker") {
         when (props.mode) {
             DomposableTimePickerMode.Input -> {
-                TimeInput(
-                    state,
-                    colors =
-                        TimeInputDefaults.colors(
-                            containerColor = appearance.pickerContainer(),
-                            periodSelectorContentColor = contentColor,
-                            timeTextFieldColors =
-                                TextFieldDefaults.colors(
-                                    focusedTextColor = contentColor,
-                                    unfocusedTextColor = contentColor,
-                                ),
-                        ),
-                )
+                TimeInput(state, colors = colors)
             }
 
             DomposableTimePickerMode.Dial -> {
@@ -219,7 +207,8 @@ internal fun NativeTimePicker(
             }
 
             DomposableTimePickerMode.Scroll -> {
-                TimeScroll(state, TimePickerDefaults.shapes(), colors = colors)
+                // TimeScroll is 1.13-only; stable M3 uses the shared controlled wheel renderer.
+                NativeTimeScroll(state, colors)
             }
         }
     }
