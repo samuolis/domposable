@@ -200,6 +200,8 @@ The fictional Fieldwork shop shares its catalogue, cart and feature composables.
 
 See the [Material catalog](docs/material-catalog.md) for standard and expressive variants, theme configuration and per-component overrides.
 
+![App-owned components and modifier decoration on Android and semantic HTML](docs/assets/examples/custom-extensions.png)
+
 The [extension example](docs/custom-components.md) combines a custom label, native drawing and HTML/CSS decoration while keeping counter and input state in shared code.
 
 </details>

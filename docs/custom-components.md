@@ -4,6 +4,8 @@ Your application can introduce components without changing Domposable, adopting 
 
 [Live example](https://samuolis.github.io/domposable/demo/#/extensions) · [Supported component parameters](component-reference.md) · [Custom modifiers and drawing](modifiers.md)
 
+![An app-owned counter label and modifier decoration rendered on Android and semantic HTML from the same feature](assets/examples/custom-extensions.png)
+
 ## Compose existing shared primitives
 
 For a reusable component made from existing controls, write a normal composable:

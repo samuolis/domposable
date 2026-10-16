@@ -4,6 +4,8 @@ Modifiers are immutable, ordered operations on shared UI. Use the same chain in 
 
 [Full modifier signatures and parameters](modifier-reference.md) · [Live extension example](https://samuolis.github.io/domposable/demo/#/extensions)
 
+![The shared extension example on Android and semantic HTML, with app-owned decoration and retained counter/input state](assets/examples/custom-extensions.png)
+
 ## Supported operations
 
 | Purpose | Shared operations | Behavior |
@@ -180,7 +182,7 @@ Use this **instead of** installing a decoration handler for the same element. `A
 
 A decoration must render its content once, preserve its state and semantics, and avoid covering interactive content. Mark purely decorative markup `aria-hidden` and disable its pointer events. Your renderer owns sizing, positioning, disposal of external resources and accessibility. Unhandled custom elements fail explicitly rather than silently disappearing. Built-in operations keep their library implementations; use a custom element for app behavior.
 
-To forward an allocated height through your decoration, give its root `display: grid` and `grid-template: minmax(0, 1fr) / minmax(0, 1fr)`, with overlays positioned absolutely. The child then stretches into the available area. An ordinary block wrapper keeps its children at intrinsic height; use that when your component intentionally owns its sizing. Built-in height modifiers propagate constraints through subsequent built-in wrappers, while `wrapContentSize` restores intrinsic content sizing inside its aligned slot.
+To forward an allocated height through your decoration, give its root `display: grid` and `grid-template: minmax(0, 1fr) / minmax(0, 1fr)`, with overlays positioned absolutely. The child then stretches into the available area. An ordinary block wrapper keeps its children at intrinsic height; use that when your component intentionally owns its sizing. Built-in height modifiers propagate constraints through subsequent built-in wrappers, while `wrapContentSize` restores intrinsic content sizing inside its aligned slot. A vertical scroll modifier bounds the viewport and keeps its content at intrinsic height so its start and end remain reachable.
 
 ## Drawing and advanced platform APIs
 

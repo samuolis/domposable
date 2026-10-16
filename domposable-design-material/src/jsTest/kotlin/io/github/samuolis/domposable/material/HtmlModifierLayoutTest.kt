@@ -6,6 +6,7 @@ import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.ui.DomposableBox
+import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.background
@@ -15,16 +16,19 @@ import io.github.samuolis.domposable.ui.htmlAttributes
 import io.github.samuolis.domposable.ui.maxHeight
 import io.github.samuolis.domposable.ui.minHeight
 import io.github.samuolis.domposable.ui.padding
+import io.github.samuolis.domposable.ui.rememberDomposableScrollState
 import io.github.samuolis.domposable.ui.rotate
 import io.github.samuolis.domposable.ui.scale
 import io.github.samuolis.domposable.ui.shadow
 import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.verticalScroll
 import io.github.samuolis.domposable.ui.width
 import io.github.samuolis.domposable.ui.wrapContentSize
 import kotlinx.browser.document
 import kotlinx.browser.window
 import org.jetbrains.compose.web.renderComposable
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -107,6 +111,23 @@ class HtmlModifierLayoutTest {
             root.parentNode?.removeChild(root)
         }
     }
+
+    @Test
+    fun verticalScrollKeepsShortAndTallContentAtTheViewportStart() {
+        val root = document.createElement("div")
+        document.body!!.appendChild(root)
+        val composition = renderComposable(root) { ScrollConstraintFixture() }
+
+        try {
+            assertVerticalScrollLayout(root, "short-scroll-content", "Scroll", 0, tall = false)
+            assertVerticalScrollLayout(root, "tall-scroll-content", "Scroll", 1, tall = true)
+            assertVerticalScrollLayout(root, "stateful-short-scroll-content", "StatefulScroll", 0, tall = false)
+            assertVerticalScrollLayout(root, "stateful-tall-scroll-content", "StatefulScroll", 1, tall = true)
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
 }
 
 @Composable
@@ -184,4 +205,96 @@ private fun ConstraintFixture() {
                     .testId("max-height"),
         ) { DomposableText("Long content ".repeat(20)) }
     }
+}
+
+@Composable
+private fun ScrollConstraintFixture() {
+    DomposableMaterialTheme {
+        StatelessScrollExamples()
+        StatefulScrollExamples()
+    }
+}
+
+@Composable
+private fun StatelessScrollExamples() {
+    DomposableBox(
+        modifier =
+            DomposableModifier
+                .height(DomposableLength(48f))
+                .verticalScroll()
+                .wrapContentSize()
+                .background(DomposableColor(0xFFECEFF8))
+                .testId("short-scroll-content"),
+    ) { DomposableText("Short content") }
+    DomposableColumn(
+        modifier =
+            DomposableModifier
+                .height(DomposableLength(48f))
+                .verticalScroll()
+                .wrapContentSize()
+                .background(DomposableColor(0xFFECEFF8))
+                .testId("tall-scroll-content"),
+    ) {
+        repeat(8) { index ->
+            DomposableText(
+                "Tall row $index",
+                modifier = DomposableModifier.height(DomposableLength(24f)),
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatefulScrollExamples() {
+    val shortScrollState = rememberDomposableScrollState()
+    val tallScrollState = rememberDomposableScrollState()
+    DomposableBox(
+        modifier =
+            DomposableModifier
+                .height(DomposableLength(48f))
+                .verticalScroll(shortScrollState)
+                .wrapContentSize()
+                .background(DomposableColor(0xFFECEFF8))
+                .testId("stateful-short-scroll-content"),
+    ) { DomposableText("Short stateful content") }
+    DomposableColumn(
+        modifier =
+            DomposableModifier
+                .maxHeight(DomposableLength(48f))
+                .verticalScroll(tallScrollState)
+                .wrapContentSize()
+                .background(DomposableColor(0xFFECEFF8))
+                .testId("stateful-tall-scroll-content"),
+    ) {
+        repeat(8) { index ->
+            DomposableText(
+                "Stateful tall row $index",
+                modifier = DomposableModifier.height(DomposableLength(24f)),
+            )
+        }
+    }
+}
+
+private fun assertVerticalScrollLayout(
+    root: Element,
+    testId: String,
+    operation: String,
+    index: Int,
+    tall: Boolean,
+) {
+    val content = root.querySelector("[data-testid=$testId]") as HTMLElement
+    val scrollport = root.querySelectorAll("[data-domposable-modifier=$operation]").item(index) as HTMLElement
+    val background = content.parentElement as HTMLElement
+    val offset = background.getBoundingClientRect().top - scrollport.getBoundingClientRect().top
+    val maxScrollTop = scrollport.scrollHeight - scrollport.clientHeight
+    scrollport.scrollTop = maxScrollTop.toDouble()
+    val reachedScrollEnd = kotlin.math.abs(scrollport.scrollTop - maxScrollTop) < 1
+    scrollport.scrollTop = 0.0
+    val hasExpectedScrollRange = !tall || (maxScrollTop > 0 && reachedScrollEnd)
+
+    assertEquals(48, scrollport.clientHeight)
+    assertTrue(
+        offset >= -1 && hasExpectedScrollRange,
+        "$testId offset=$offset, scrollHeight=${scrollport.scrollHeight}",
+    )
 }

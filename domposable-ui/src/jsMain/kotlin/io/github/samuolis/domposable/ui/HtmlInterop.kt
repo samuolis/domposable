@@ -218,18 +218,24 @@ private fun HtmlModifierBox(
         return
     }
     val wrapContentSize = operation is DomposableModifierOperation.WrapContentSize
+    val verticalScroll =
+        when (operation) {
+            is DomposableModifierOperation.Scroll -> operation.orientation == DomposableOrientation.Vertical
+            is DomposableModifierOperation.StatefulScroll -> operation.orientation == DomposableOrientation.Vertical
+            else -> false
+        }
     val establishesHeight =
         operation is DomposableModifierOperation.Height ||
             operation is DomposableModifierOperation.MinHeight ||
             operation is DomposableModifierOperation.MaxHeight ||
             operation == DomposableModifierOperation.FillHeight
     // CSS block height stops at each nested wrapper; Compose passes these constraints through to its child.
-    val childFillsHeight = establishesHeight || (fillAvailableHeight && !wrapContentSize)
+    val childFillsHeight = !verticalScroll && (establishesHeight || (fillAvailableHeight && !wrapContentSize))
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
         style {
             property("box-sizing", "border-box")
-            if ((fillAvailableHeight && !wrapContentSize) || establishesHeight) {
+            if (childFillsHeight) {
                 property("display", "grid")
                 property("grid-template-columns", "minmax(0, 1fr)")
                 property("grid-template-rows", "minmax(0, 1fr)")
