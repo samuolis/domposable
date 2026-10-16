@@ -19,6 +19,7 @@ async function edit(page: Page, id: string, value: string, password = false) {
   const backing = page.locator('.compose-backing-field');
   await expect(backing).toBeFocused();
   await expect(backing).toHaveAttribute('inputmode', password ? 'password' : 'text');
+  if (password) await expect(backing).toHaveAttribute('type', 'password');
   await page.keyboard.insertText(value);
   await expect(field).toHaveText(password ? '•'.repeat(value.length) : value);
   return field;
@@ -74,7 +75,7 @@ test.describe('Stable Wasm comparison and bridge limits', () => {
 
   test('password semantics are masked and the private field is not saved in browser history', async ({ page }) => {
     await edit(page, 'input-secret', 'Fake password 123', true);
-    expect(await page.locator('#cmp_a11y_root').ariaSnapshot()).not.toContain('Fake password 123');
+    expect(await page.locator('body').ariaSnapshot()).not.toContain('Fake password 123');
     await activate(page.getByRole('button', { name: 'Tasks', exact: true }));
     await expect(page).toHaveURL(/#\/tasks$/);
     expect(await page.evaluate(() => JSON.stringify(history.state))).not.toContain('Fake password 123');

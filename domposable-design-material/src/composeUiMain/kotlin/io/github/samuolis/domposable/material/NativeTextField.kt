@@ -24,6 +24,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -69,6 +70,9 @@ internal fun NativeTextField(
     props: DomposableTextFieldProps,
     modifier: DomposableModifier,
 ) {
+    if (props.purpose == DomposableInputPurpose.Password) {
+        DisposableEffect(Unit) { onDispose(protectPasswordBackingInput()) }
+    }
     val focusRequester = remember { FocusRequester() }
     val formEnabled = domposableFormEnabled()
     val shouldAutofocus = props.autofocus && props.enabled && formEnabled
