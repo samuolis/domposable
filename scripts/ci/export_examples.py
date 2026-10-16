@@ -13,6 +13,9 @@ for name, inputs in {
     'shop-native': [('android/shop.png','Android'),('ios/shop.png','iOS · tablet')],
     'components': [('android/catalog.png','Android components'),('dom/catalog-wide.png','Semantic HTML components')],
     'selection-controls': [('android/extended-components.png','Android · selection and feedback'),('dom/extended-components.png','Semantic HTML · same feature')],
+    'material-selection': [('android/material-selection.png','Android · Material selection'),('dom/material-selection.png','Semantic HTML · same feature')],
+    'material-feedback': [('android/material-feedback.png','Android · expressive feedback'),('dom/material-feedback.png','Semantic HTML · same feature')],
+    'custom-extensions': [('android/extensions.png','Android · app-owned extensions'),('dom/extensions-phone.png','Semantic HTML · same feature')],
 }.items():
     images = [png((source/path).read_bytes()) for path,_ in inputs]
     (target/f'{name}.png').write_bytes(panel(images,[label for _,label in inputs]))

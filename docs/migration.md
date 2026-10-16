@@ -28,7 +28,7 @@ Upgrading from the 0.1.x provider expands it from 34 to 41 required contracts. A
 | RangeSlider | DomposableRangeSlider | Two labelled range inputs |
 | TooltipBox / PlainTooltip | DomposableTooltip | Hover/focus help with Escape dismissal |
 
-Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Columns, rows, grids and tables can use [opt-in windowing](performance.md). Rich text editing, column virtualization, complex date pickers and platform camera/maps still require application or provider-specific implementations; this vocabulary does not claim to mirror every Material API.
+Use the [component recipes](components.md) and [call-path guide](how-it-works.md) to migrate controls. Columns, rows, grids and tables can use [opt-in windowing](performance.md). Rich text editing, column virtualization and platform camera/maps remain application or provider-specific implementations. The current [Material catalog](material-catalog.md) adds shared date, date-range and time picker families; it maps component variants without copying every upstream overload.
 
 ## Collections and tables after 0.2.0
 
@@ -82,3 +82,27 @@ attributes. This JS helper preserves the host's element/CSS and supplies the lib
 position observation and disposal behavior. Replace renderer code that mirrors `state.value`
 into element offsets or calls `scrollTo` from browser scroll events. See the complete
 [custom HTML scroll example](design-systems.md#scroll-state-in-custom-html-renderers).
+
+## Material catalog and theme defaults
+
+Version 0.7 expands the Material 3 and expressive catalog, groups component defaults in `DomposableComponentStyles`, and adds optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
+
+Keep application component names as thin adapters. Map brand tokens into `DomposableButtonAppearance` or `DomposableTextFieldAppearance`, and call the standard control instead of maintaining another HTML button/input implementation. Preserve custom editor, diagram and camera renderers; they are separate from ordinary control styling.
+
+HTML controls now use Material default geometry, including switch tracks, chip surfaces and floating field labels. Set `floatingLabel = false` explicitly for a separate HTML field label. Existing per-call appearances still override family defaults; keep application-specific geometry and colors in those adapters.
+
+
+The expanded catalog also adds per-family defaults under `DomposableTokens.components`, the Material color/type/shape scales and `designLanguage`. Per-call appearance overrides replace a family default; copy that default when changing only one field. Existing explicit providers must implement the new slots or inherit them from the Material provider. KSP remains optional for component consumers.
+
+This is a pre-1.0 **breaking ABI change**, requiring a minor release and recompilation. Props constructors, `copy`, generated provider signatures and several direct-call signatures changed. Prefer named optional arguments and named provider properties. For example, pass `cellContent = { ... }` by name when constructing data-table props positionally; the direct composable still accepts its content as the trailing lambda. Do not mix old compiled adapters with the new artifacts.
+
+`DomposableScreenScaffold` now has a stateless overload for caller-owned state and chrome. Keep an existing application scaffold when it already handles insets and ownership correctly; delegate the library pieces it needs. The optional loading/error overload is a convenience, not a required screen contract.
+
+
+Theme configuration now groups **all** component defaults, including buttons and text fields, in `DomposableComponentStyles`. Replace `DomposableTokens(button = ..., textField = ...)` with `DomposableMaterialTheme(styles = DomposableComponentStyles(button = ..., textField = ...))`. Custom host integrations can use `DomposableTokens(components = DomposableComponentStyles(...))`. Access defaults through `DomposableTheme.styles`; the former `tokens.button` and `tokens.textField` fields move to `tokens.components`.
+
+## App-owned modifiers and text sizing
+
+Existing three-argument `DomposableHtmlModifiers(modifier, operationRenderer, content)` calls remain supported. Use the new overload with a named `decorationRenderer` only when an app-owned modifier needs HTML/SVG or other markup around its content. CSS and attribute changes on a wrapper can keep using the attribute handler. See [custom modifier examples](modifiers.md#render-custom-html-and-css).
+
+`DomposableTextAppearance(minLines = ...)` reserves a minimum number of text lines on native and HTML. It defaults to one; existing HTML text does not acquire a minimum-height override. If you also set `maxLines`, it must be at least `minLines`. Shared scale, rotation, shadow and min/max dimension helpers are optional additions; transformed content still needs room around it in its parent.

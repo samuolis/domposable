@@ -1,0 +1,487 @@
+{
+  "artifact": "org.jetbrains.compose.material3:material3",
+  "version": "1.13.0-alpha02",
+  "scope": "component families and supported public variants; excludes internal implementation utilities",
+  "components": [
+    {
+      "component": "Button",
+      "category": "Actions",
+      "upstream": [
+        "Button",
+        "ElevatedButton",
+        "FilledTonalButton",
+        "OutlinedButton",
+        "TextButton"
+      ]
+    },
+    {
+      "component": "IconButton",
+      "category": "Actions",
+      "upstream": [
+        "IconButton",
+        "FilledIconButton",
+        "FilledTonalIconButton",
+        "OutlinedIconButton",
+        "IconToggleButton",
+        "FilledIconToggleButton",
+        "FilledTonalIconToggleButton",
+        "OutlinedIconToggleButton"
+      ]
+    },
+    {
+      "component": "ToggleButton",
+      "category": "Expressive actions",
+      "upstream": [
+        "ToggleButton",
+        "ElevatedToggleButton",
+        "FilledTonalToggleButton",
+        "OutlinedToggleButton"
+      ]
+    },
+    {
+      "component": "ButtonGroup",
+      "category": "Expressive actions",
+      "upstream": [
+        "ButtonGroup"
+      ]
+    },
+    {
+      "component": "SplitButton",
+      "category": "Expressive actions",
+      "upstream": [
+        "SplitButtonLayout"
+      ]
+    },
+    {
+      "component": "FloatingActionButton",
+      "category": "Actions",
+      "upstream": [
+        "FloatingActionButton",
+        "SmallFloatingActionButton",
+        "MediumFloatingActionButton",
+        "LargeFloatingActionButton",
+        "ExtendedFloatingActionButton",
+        "SmallExtendedFloatingActionButton",
+        "MediumExtendedFloatingActionButton",
+        "LargeExtendedFloatingActionButton"
+      ]
+    },
+    {
+      "component": "FloatingActionButtonMenu",
+      "category": "Expressive actions",
+      "upstream": [
+        "FloatingActionButtonMenu",
+        "FloatingActionButtonMenuItem",
+        "ToggleFloatingActionButton"
+      ]
+    },
+    {
+      "component": "FloatingToolbar",
+      "category": "Expressive actions",
+      "upstream": [
+        "HorizontalFloatingToolbar",
+        "VerticalFloatingToolbar"
+      ]
+    },
+    {
+      "component": "Chip",
+      "category": "Selection",
+      "upstream": [
+        "AssistChip",
+        "ElevatedAssistChip",
+        "SuggestionChip",
+        "ElevatedSuggestionChip",
+        "InputChip",
+        "FilterChip",
+        "ElevatedFilterChip"
+      ]
+    },
+    {
+      "component": "Checkbox",
+      "category": "Selection",
+      "upstream": [
+        "Checkbox",
+        "TriStateCheckbox"
+      ]
+    },
+    {
+      "component": "Switch",
+      "category": "Selection",
+      "upstream": [
+        "Switch"
+      ]
+    },
+    {
+      "component": "RadioButton",
+      "category": "Selection",
+      "upstream": [
+        "RadioButton"
+      ]
+    },
+    {
+      "component": "Slider",
+      "category": "Selection",
+      "upstream": [
+        "Slider",
+        "VerticalSlider"
+      ]
+    },
+    {
+      "component": "RangeSlider",
+      "category": "Selection",
+      "upstream": [
+        "RangeSlider"
+      ]
+    },
+    {
+      "component": "SegmentedButtons",
+      "category": "Selection",
+      "upstream": [
+        "SingleChoiceSegmentedButtonRow",
+        "SegmentedButton"
+      ]
+    },
+    {
+      "component": "TextField",
+      "category": "Input",
+      "upstream": [
+        "TextField",
+        "OutlinedTextField",
+        "SecureTextField",
+        "OutlinedSecureTextField"
+      ]
+    },
+    {
+      "component": "SearchBar",
+      "category": "Input",
+      "upstream": [
+        "SearchBar",
+        "DockedSearchBar",
+        "ExpandedFullScreenSearchBar",
+        "ExpandedDockedSearchBar",
+        "AppBarWithSearch",
+        "TopSearchBar",
+        "ExpandedFullScreenContainedSearchBar",
+        "ExpandedDockedSearchBarWithGap"
+      ]
+    },
+    {
+      "component": "Autocomplete",
+      "category": "Input",
+      "upstream": [
+        "ExposedDropdownMenuBox",
+        "ExposedDropdownMenu"
+      ]
+    },
+    {
+      "component": "DatePicker",
+      "category": "Input",
+      "upstream": [
+        "DatePicker",
+        "DatePickerDialog"
+      ]
+    },
+    {
+      "component": "DateRangePicker",
+      "category": "Input",
+      "upstream": [
+        "DateRangePicker"
+      ]
+    },
+    {
+      "component": "TimePicker",
+      "category": "Input",
+      "upstream": [
+        "TimePicker",
+        "TimeInput",
+        "TimePickerDialog",
+        "TimeScroll",
+        "VibrantTimePickerDialog"
+      ]
+    },
+    {
+      "component": "Card",
+      "category": "Containment",
+      "upstream": [
+        "Card",
+        "ElevatedCard",
+        "OutlinedCard"
+      ]
+    },
+    {
+      "component": "Surface",
+      "category": "Containment",
+      "upstream": [
+        "Surface"
+      ]
+    },
+    {
+      "component": "ListItem",
+      "category": "Containment",
+      "upstream": [
+        "ListItem",
+        "SegmentedListItem"
+      ]
+    },
+    {
+      "component": "Carousel",
+      "category": "Containment",
+      "upstream": [
+        "HorizontalMultiBrowseCarousel",
+        "HorizontalUncontainedCarousel",
+        "HorizontalCenteredHeroCarousel"
+      ]
+    },
+    {
+      "component": "Badge",
+      "category": "Communication",
+      "upstream": [
+        "Badge",
+        "BadgedBox"
+      ]
+    },
+    {
+      "component": "Progress",
+      "category": "Communication",
+      "upstream": [
+        "CircularProgressIndicator",
+        "LinearProgressIndicator",
+        "CircularWavyProgressIndicator",
+        "LinearWavyProgressIndicator"
+      ]
+    },
+    {
+      "component": "LoadingIndicator",
+      "category": "Expressive communication",
+      "upstream": [
+        "LoadingIndicator",
+        "ContainedLoadingIndicator"
+      ]
+    },
+    {
+      "component": "Snackbar",
+      "category": "Communication",
+      "upstream": [
+        "Snackbar",
+        "SnackbarHost"
+      ]
+    },
+    {
+      "component": "Tooltip",
+      "category": "Communication",
+      "upstream": [
+        "PlainTooltip",
+        "RichTooltip",
+        "TooltipBox"
+      ]
+    },
+    {
+      "component": "Divider",
+      "category": "Containment",
+      "upstream": [
+        "HorizontalDivider",
+        "VerticalDivider"
+      ]
+    },
+    {
+      "component": "Dialog",
+      "category": "Containment",
+      "upstream": [
+        "AlertDialog",
+        "BasicAlertDialog"
+      ]
+    },
+    {
+      "component": "BottomSheet",
+      "category": "Containment",
+      "upstream": [
+        "ModalBottomSheet",
+        "BottomSheet"
+      ]
+    },
+    {
+      "component": "BottomSheetScaffold",
+      "category": "Containment",
+      "upstream": [
+        "BottomSheetScaffold"
+      ]
+    },
+    {
+      "component": "TopAppBar",
+      "category": "Navigation",
+      "upstream": [
+        "TopAppBar",
+        "CenterAlignedTopAppBar",
+        "MediumTopAppBar",
+        "LargeTopAppBar",
+        "MediumFlexibleTopAppBar",
+        "LargeFlexibleTopAppBar",
+        "TwoRowsTopAppBar"
+      ]
+    },
+    {
+      "component": "BottomAppBar",
+      "category": "Navigation",
+      "upstream": [
+        "BottomAppBar",
+        "FlexibleBottomAppBar"
+      ]
+    },
+    {
+      "component": "NavigationBar",
+      "category": "Navigation",
+      "upstream": [
+        "NavigationBar",
+        "NavigationBarItem",
+        "NavigationRail",
+        "NavigationRailItem",
+        "ShortNavigationBar",
+        "ShortNavigationBarItem"
+      ]
+    },
+    {
+      "component": "WideNavigationRail",
+      "category": "Expressive navigation",
+      "upstream": [
+        "WideNavigationRail",
+        "ModalWideNavigationRail"
+      ]
+    },
+    {
+      "component": "NavigationDrawer",
+      "category": "Navigation",
+      "upstream": [
+        "ModalNavigationDrawer",
+        "DismissibleNavigationDrawer",
+        "PermanentNavigationDrawer",
+        "ModalDrawerSheet",
+        "DismissibleDrawerSheet",
+        "PermanentDrawerSheet"
+      ]
+    },
+    {
+      "component": "NavigationDrawerItem",
+      "category": "Navigation",
+      "upstream": [
+        "NavigationDrawerItem"
+      ]
+    },
+    {
+      "component": "Tabs",
+      "category": "Navigation",
+      "upstream": [
+        "PrimaryTabRow",
+        "SecondaryTabRow",
+        "PrimaryScrollableTabRow",
+        "SecondaryScrollableTabRow",
+        "Tab",
+        "LeadingIconTab"
+      ]
+    },
+    {
+      "component": "Menu",
+      "category": "Selection",
+      "upstream": [
+        "DropdownMenu",
+        "DropdownMenuItem",
+        "CheckableDropdownMenuItem",
+        "SelectableDropdownMenuItem"
+      ]
+    },
+    {
+      "component": "Scaffold",
+      "category": "Structure",
+      "upstream": [
+        "Scaffold"
+      ]
+    },
+    {
+      "component": "DragHandle",
+      "category": "Expressive structure",
+      "upstream": [
+        "VerticalDragHandle"
+      ]
+    },
+    {
+      "component": "PullToRefresh",
+      "category": "Gestures",
+      "upstream": [
+        "PullToRefreshBox",
+        "PullToRefreshDefaults.Indicator",
+        "PullToRefreshDefaults.LoadingIndicator"
+      ]
+    },
+    {
+      "component": "SwipeToDismiss",
+      "category": "Gestures",
+      "upstream": [
+        "SwipeToDismissBox"
+      ]
+    },
+    {
+      "component": "Text",
+      "category": "Typography",
+      "upstream": [
+        "Text"
+      ]
+    },
+    {
+      "component": "Icon",
+      "category": "Graphics",
+      "upstream": [
+        "Icon"
+      ]
+    },
+    {
+      "component": "AppBar",
+      "category": "Navigation",
+      "upstream": [
+        "AppBarRow",
+        "AppBarColumn"
+      ]
+    },
+    {
+      "component": "WideNavigationRailItem",
+      "category": "Expressive navigation",
+      "upstream": [
+        "WideNavigationRailItem"
+      ]
+    },
+    {
+      "component": "MultiChoiceSegmentedButtons",
+      "category": "Selection",
+      "upstream": [
+        "MultiChoiceSegmentedButtonRow",
+        "SegmentedButton"
+      ]
+    },
+    {
+      "component": "ScrollField",
+      "category": "Input",
+      "upstream": [
+        "ScrollField"
+      ]
+    },
+    {
+      "component": "Label",
+      "category": "Communication",
+      "upstream": [
+        "Label"
+      ]
+    },
+    {
+      "component": "MenuGroup",
+      "category": "Selection",
+      "upstream": [
+        "DropdownMenuGroup"
+      ]
+    },
+    {
+      "component": "Scrim",
+      "category": "Containment",
+      "upstream": [
+        "Scrim"
+      ]
+    }
+  ]
+}

@@ -5,16 +5,17 @@
 | Layout | Theme, Column, Row, FlowRow, Box, Scaffold, measure, ordered modifiers |
 | Collections and data | Keyed LazyColumn, LazyRow, LazyGrid, Table, DataTable, LineChart, ValueChart |
 | Content | Disclosure, RichHtml, Text/headings, Image, Icon, Divider, Spacer, Avatar, Badge |
-| Actions | Button, Link, IconButton, FloatingActionButton, Chip, Card, Tooltip |
-| Forms | Form, TextField, Checkbox, Switch, RadioButton, Slider, RangeSlider, Select, SegmentedButtons |
-| Feedback | Banner, Progress, Snackbar, Surface |
-| Navigation | TopAppBar, Tabs, NavigationBar, Menu |
-| Overlays | Dialog, BottomSheet |
+| Actions | Button, ToggleButton, ButtonGroup, SplitButton, Link, IconButton, FloatingActionButton/Menu, FloatingToolbar, Chip, Card, Tooltip/Label |
+| Forms | Form, TextField, SearchBar, Autocomplete, Checkbox, Switch, RadioButton, Slider, RangeSlider, Select, SegmentedButtons, DatePicker, DateRangePicker, TimePicker, ScrollField |
+| Feedback | Banner, Progress, LoadingIndicator, Snackbar/Host, Surface, BadgedBox |
+| Navigation | TopAppBar, BottomAppBar, AppBar, Tabs, NavigationBar, NavigationDrawer, WideNavigationRail, Menu/Group/Item |
+| Overlays | Dialog, BottomSheet, BottomSheetScaffold |
+| Expressive containment and gestures | ListItem/SegmentedListItem, Carousel, DragHandle, PullToRefresh, SwipeToDismiss |
 | Architecture | Route registry, entry resources/saveables, optional Navigation 3, lifecycle and KSP |
 
-The 0.4 shared API has 48 renderer contracts on main; 0.2.0 has 41 and 0.1.x has 34. HTML uses native input elements, headings, landmarks, labeled dialog elements, tabs with keyboard navigation and focus restoration. Native providers use Compose UI/Material3 semantics. Browser accessibility checks run in Chromium, Firefox and WebKit. Native demo smoke tests run on an iOS simulator; shared rules are tested on JVM.
+The [Material catalog](material-catalog.md) records the current component families, upstream variants and renderer mappings. Renderer, interaction and visual checks gate catalog changes before release. HTML uses native input elements, headings, landmarks, labeled dialog elements, tabs with keyboard navigation and focus restoration. Native providers use Compose UI/Material3 semantics. Browser accessibility checks run in Chromium, Firefox and WebKit. Native demo smoke tests run on an iOS simulator; shared rules are tested on JVM.
 
-HTML keyed collections normally render all items. Columns offer fixed or measured heights; rows, responsive grids and semantic tables also support [opt-in windows](performance.md), with browser tests for bounded DOM size, keyboard focus, keyed drafts, resizing, RTL and removed rows. Rich text editors, drag/reorder, complex date pickers, fold/hinge APIs, platform camera/maps and product-specific widgets remain outside the provider. Date/time HTML inputs use browser controls; native text fields currently expose text input for those purposes. Scrolling and sizing use each platform's layout model and are not pixel-identical.
+HTML keyed collections normally render all items. Columns offer fixed or measured heights; rows, responsive grids and semantic tables also support [opt-in windows](performance.md), with browser tests for bounded DOM size, keyboard focus, keyed drafts, resizing, RTL and removed rows. Rich text editors, drag/reorder, fold/hinge APIs, platform camera/maps and product-specific widgets remain outside the provider. Shared date/range/time pickers, pull-to-refresh and swipe dismissal belong to the expanded catalog. Native date/time pickers use Material calendar and time controls; HTML uses accessible calendars and browser input controls. Scrolling and sizing use each platform's layout model and are not pixel-identical.
 
 The default design provider uses upstream Material3 alpha APIs matching the current Compose release. JVM desktop is experimental. Until 1.0, minor releases may change APIs. KSP generates typed entries and feature entry lists; screen business logic and DI remain application-owned.
 

@@ -33,10 +33,17 @@ kotlin {
             getByName("commonMain") {
                 dependencies {
                     api(libs.compose.runtime)
+                    implementation(libs.coroutines.core)
                     api(project(":domposable-foundation"))
                 }
             }
-        val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
+        val commonTest =
+            getByName("commonTest") {
+                dependencies {
+                    implementation(kotlin("test"))
+                    implementation(libs.coroutines.test)
+                }
+            }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
@@ -54,8 +61,8 @@ kotlin {
         iosMain.dependsOn(composeUiMain)
         jsMain {
             dependencies {
-                implementation(libs.compose.html)
-                implementation(libs.kotlinx.browser)
+                api(libs.compose.html)
+                api(libs.kotlinx.browser)
             }
         }
     }

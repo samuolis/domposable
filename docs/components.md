@@ -1,6 +1,8 @@
 # Shared components
 
-Use direct composable calls in shared feature code and install a provider at the app root. The 0.4 API has **48 renderer contracts** with Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
+Use direct composable calls in shared feature code and install a provider at the app root. The shared API has typed renderer contracts with Compose UI and semantic HTML implementations; Wasm uses the Compose UI provider. [How the API works](how-it-works.md) explains the call path and [the catalog](https://samuolis.github.io/domposable/demo/#/catalog) exercises the controls.
+
+The [Material 3 and expressive catalog](material-catalog.md) maps component families to their shared APIs and shows theme, appearance and screen-scaffold configuration.
 
 ![Shared components on Android and in a browser](assets/examples/components.png)
 
@@ -115,7 +117,7 @@ DomposableScaffold(
 }
 ```
 
-Scaffold owns the full-window shell with header/main/footer landmarks on HTML. Embed columns inside its content rather than another full-window scaffold. The app controls whether a snackbar exists and when it expires; Domposable does not create a queue or timer. Supply both `actionLabel` and `onAction` when offering an action. Use Banner for inline status and Progress for determinate or indeterminate work.
+Scaffold owns the full-window shell with header/main/footer landmarks on HTML. Use `DomposableScreenScaffold` for screen chrome inside an application shell. The direct `DomposableSnackbar` call is controlled by the app, as shown above. For serialized requests, timeouts and action results, use the optional [`DomposableSnackbarHostState` and `DomposableSnackbarHost`](material-catalog.md#queued-messages-and-badges). Supply both `actionLabel` and `onAction` when offering a direct snackbar action. Use Banner for inline status and Progress for determinate or indeterminate work.
 
 ```kotlin
 if (confirming) {
@@ -135,6 +137,8 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 
 ## Complete vocabulary
 
+The [complete parameter reference](component-reference.md) lists every current renderer contract with types, required parameters and defaults. See [custom components](custom-components.md) and [modifier extensions](modifiers.md) for app-owned UI.
+
 | Family | Components |
 | --- | --- |
 | Theme | Theme |
@@ -148,10 +152,7 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 
 Every component has direct arguments and a `Props` overload. Keep props for renderer customization or reusable configuration; ordinary feature code can use the calls above. See [design-system customization](design-systems.md), [adaptive examples](adaptive.md) and [platform boundaries](coverage.md).
 
-The additional controls demos share the same source for native, HTML and Wasm. Published 0.3.0 has
-42 renderer contracts; the 0.4 API adds Form, Disclosure, RichHtml, LineChart, ValueChart
-and DataTable. Check [release versions](https://github.com/samuolis/domposable/releases) before
-selecting Maven dependencies.
+The demos share the same feature code for native Compose, HTML and Wasm. The generated reference and API site describe the current source; choose a published version from [Releases](https://github.com/samuolis/domposable/releases) and consult the [migration guide](migration.md) when upgrading.
 
 ## Documents, rich inputs and data
 

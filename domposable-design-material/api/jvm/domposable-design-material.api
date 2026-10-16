@@ -1,18 +1,26 @@
 public final class io/github/samuolis/domposable/material/ComposableSingletons$ExtendedNativeKt {
 	public static final field INSTANCE Lio/github/samuolis/domposable/material/ComposableSingletons$ExtendedNativeKt;
 	public fun <init> ()V
-	public final fun getLambda$995133508$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$603687540$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class io/github/samuolis/domposable/material/ComposableSingletons$NativeExpandedControlsKt {
+	public static final field INSTANCE Lio/github/samuolis/domposable/material/ComposableSingletons$NativeExpandedControlsKt;
+	public fun <init> ()V
+	public final fun getLambda$-1089041368$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1139604610$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1221133546$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class io/github/samuolis/domposable/material/ComposableSingletons$NativeOverlaysKt {
 	public static final field INSTANCE Lio/github/samuolis/domposable/material/ComposableSingletons$NativeOverlaysKt;
 	public fun <init> ()V
-	public final fun getLambda$-483719818$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$1884434078$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-528403900$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1954224986$io_github_samuolis_domposable_domposable_design_material ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class io/github/samuolis/domposable/material/MaterialComponentsKt {
-	public static final fun DomposableMaterialTheme (Lio/github/samuolis/domposable/foundation/DomposableTokens;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableMaterialTheme (Lio/github/samuolis/domposable/foundation/DomposableTokens;Lio/github/samuolis/domposable/foundation/DomposableColors;Lio/github/samuolis/domposable/foundation/DomposableTypography;Lio/github/samuolis/domposable/foundation/DomposableShapes;Lio/github/samuolis/domposable/foundation/DomposableComponentStyles;Lio/github/samuolis/domposable/foundation/DomposableDesignLanguage;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/github/samuolis/domposable/material/NativeMaterialKt {

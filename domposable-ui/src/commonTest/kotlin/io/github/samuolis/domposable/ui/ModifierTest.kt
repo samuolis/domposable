@@ -13,6 +13,30 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class ModifierTest {
+    @Test fun constraintsAndGraphicsValidateBeforeReusingTheBaseChain() {
+        val base = DomposableModifier.padding(8.dp)
+        assertFailsWith<IllegalArgumentException> { base.widthIn(min = 20.dp, max = 10.dp) }
+        assertFailsWith<IllegalArgumentException> { base.heightIn(min = 20.dp, max = 10.dp) }
+        assertFailsWith<IllegalArgumentException> { base.scale(Float.NaN) }
+        assertFailsWith<IllegalArgumentException> { base.rotate(Float.POSITIVE_INFINITY) }
+        val modifier =
+            base
+                .widthIn(10.dp, 80.dp)
+                .heightIn(20.dp, 40.dp)
+                .scale(-1f, 0.5f)
+                .rotate(30f)
+                .shadow(4.dp)
+        assertEquals(base.elements, modifier.elements.take(1))
+        assertEquals(DomposableModifierOperation.MinWidth(10.dp), modifier.elements[1])
+        assertEquals(DomposableModifierOperation.MaxWidth(80.dp), modifier.elements[2])
+        assertEquals(DomposableModifierOperation.MinHeight(20.dp), modifier.elements[3])
+        assertEquals(DomposableModifierOperation.MaxHeight(40.dp), modifier.elements[4])
+        assertEquals(DomposableModifierOperation.Scale(-1f, 0.5f), modifier.elements[5])
+        assertEquals(DomposableModifierOperation.Rotation(30f), modifier.elements[6])
+        assertEquals(DomposableModifierOperation.Shadow(4.dp, DomposableShape.Rectangle), modifier.elements[7])
+        assertEquals(base, base.widthIn().heightIn())
+    }
+
     @Test fun paddingAndBackgroundRemainOrderedAndComposable() {
         val color = DomposableColor(0xFF4059AD)
         val chain = DomposableModifier.padding(8.dp).background(color).padding(16.dp)
@@ -34,12 +58,14 @@ class ModifierTest {
             val token: String,
         ) : DomposableModifierElement
         val brand = BrandSurface("surface-raised")
+        val base = DomposableModifier.padding(8.dp)
         val modifier =
-            DomposableModifier
-                .padding(8.dp)
+            base
                 .then(brand)
                 .border(1.dp, DomposableColor(0xFF4059AD), DomposableShape.Rounded(12.dp))
                 .then(DomposableModifier.zIndex(2f))
+
+        assertEquals(listOf(DomposableModifierOperation.Padding(DomposableInsets(8.dp))), base.elements)
 
         assertEquals(
             listOf(

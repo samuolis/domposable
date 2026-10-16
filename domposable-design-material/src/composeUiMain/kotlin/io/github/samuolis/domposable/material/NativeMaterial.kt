@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.columns
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,16 +34,21 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Label
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -50,9 +57,13 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -105,6 +116,7 @@ import io.github.samuolis.domposable.foundation.DomposableImeAction
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableLiveRegion
 import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
@@ -148,7 +160,7 @@ private fun DomposableAlignment.box() =
         DomposableAlignment.End -> Alignment.BottomEnd
     }
 
-private fun DomposableFontWeight.native() =
+internal fun DomposableFontWeight.native() =
     when (this) {
         DomposableFontWeight.Thin -> FontWeight.Thin
         DomposableFontWeight.ExtraLight -> FontWeight.ExtraLight
@@ -183,13 +195,13 @@ private fun DomposableTextOverflow.native() =
         DomposableTextOverflow.Visible -> TextOverflow.Visible
     }
 
-private fun DomposableLiveRegion.native() =
+internal fun DomposableLiveRegion.native() =
     when (this) {
         DomposableLiveRegion.Polite -> LiveRegionMode.Polite
         DomposableLiveRegion.Assertive -> LiveRegionMode.Assertive
     }
 
-private fun DomposableImeAction.native() =
+internal fun DomposableImeAction.native() =
     when (this) {
         DomposableImeAction.Default -> ImeAction.Default
         DomposableImeAction.Done -> ImeAction.Done
@@ -210,8 +222,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             theme = { props, _, content ->
                 val colors = props.tokens.colors
                 val type = props.tokens.typography
-                MaterialTheme(
-                    colorScheme =
+                val colorScheme =
+                    colors.nativeColorScheme(
                         lightColorScheme(
                             primary = Color(colors.primary.argb),
                             onPrimary = Color(colors.onPrimary.argb),
@@ -226,24 +238,28 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             secondaryContainer = Color(colors.surfaceVariant.argb),
                             onSecondaryContainer = Color(colors.onSurface.argb),
                         ),
-                    typography =
-                        Typography().let {
-                            it.copy(
-                                bodyLarge =
-                                    it.bodyLarge.copy(
-                                        fontSize = type.bodySize.sp,
-                                        lineHeight =
-                                            (
-                                                type.bodySize *
-                                                    type.lineHeight
-                                            ).sp,
-                                    ),
-                                titleLarge = it.titleLarge.copy(fontSize = type.titleSize.sp),
-                                labelLarge = it.labelLarge.copy(fontSize = type.labelSize.sp),
-                            )
-                        },
-                    content = content,
-                )
+                    )
+                val typography = type.nativeTypography(MaterialTheme.typography)
+                val shapes = props.tokens.shapes.nativeShapes(MaterialTheme.shapes)
+                if (props.tokens.designLanguage ==
+                    io.github.samuolis.domposable.foundation.DomposableDesignLanguage.Expressive
+                ) {
+                    MaterialExpressiveTheme(
+                        colorScheme = colorScheme,
+                        motionScheme = MotionScheme.expressive(),
+                        typography = typography,
+                        shapes = shapes,
+                        content = content,
+                    )
+                } else {
+                    MaterialTheme(
+                        colorScheme = colorScheme,
+                        motionScheme = MotionScheme.standard(),
+                        typography = typography,
+                        shapes = shapes,
+                        content = content,
+                    )
+                }
             },
             column = {
                 props,
@@ -369,48 +385,16 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             valueChart = { props, modifier, _ -> NativeValueChart(props, modifier) },
             dataTable = { props, modifier, _ -> NativeDataTable(props, modifier) },
             text = { props, modifier, _ ->
-                val appearance = props.appearance
-                val style =
+                val appearance =
+                    props.appearance ?: LocalMaterialButtonTextAppearance.current
+                        ?: LocalDomposableTokens.current.components.text
+                val baseStyle =
                     when (props.style) {
                         DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
                         DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
                         DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
-                    }.copy(
-                        fontSize =
-                            appearance?.fontSize?.sp ?: when (props.style) {
-                                DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.fontSize
-                                DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.fontSize
-                                DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.fontSize
-                            },
-                        lineHeight =
-                            appearance?.lineHeight?.sp
-                                ?: when (props.style) {
-                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.lineHeight
-                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.lineHeight
-                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.lineHeight
-                                },
-                        fontWeight =
-                            appearance?.fontWeight?.native()
-                                ?: when (props.style) {
-                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.fontWeight
-                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.fontWeight
-                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.fontWeight
-                                },
-                        textAlign =
-                            appearance?.alignment?.native()
-                                ?: when (props.style) {
-                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.textAlign
-                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.textAlign
-                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.textAlign
-                                },
-                        textDecoration =
-                            appearance?.decoration?.native()
-                                ?: when (props.style) {
-                                    DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge.textDecoration
-                                    DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge.textDecoration
-                                    DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge.textDecoration
-                                },
-                    )
+                    }
+                val style = appearance.nativeTextStyle(baseStyle)
                 val textModifier =
                     modifier.toComposeModifier().semantics {
                         if (props.headingLevel !=
@@ -419,7 +403,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         ) {
                             heading()
                         }
-                        appearance?.liveRegion?.let { liveRegion = it.native() }
+                        appearance.liveRegion?.let { liveRegion = it.native() }
                     }
 
                 val renderText: @Composable () -> Unit = {
@@ -428,227 +412,68 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         textModifier,
                         color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
                         style = style,
-                        maxLines = appearance?.maxLines ?: Int.MAX_VALUE,
-                        overflow = appearance?.overflow?.native() ?: TextOverflow.Clip,
+                        minLines = appearance.minLines,
+                        maxLines = appearance.maxLines ?: Int.MAX_VALUE,
+                        overflow = appearance.overflow.nativeOverflow(),
                     )
                 }
-                if (appearance?.selectable == true) SelectionContainer { renderText() } else renderText()
+                if (appearance.selectable == true) SelectionContainer { renderText() } else renderText()
             },
-            button = { props, modifier, content ->
-                when (props.style) {
-                    DomposableButtonStyle.Filled -> {
-                        Button(
-                            props.onClick,
-                            modifier.toComposeModifier(),
-                            enabled = props.enabled && domposableFormEnabled(),
-                        ) {
-                            content()
-                        }
-                    }
-
-                    DomposableButtonStyle.Outlined -> {
-                        OutlinedButton(
-                            props.onClick,
-                            modifier.toComposeModifier(),
-                            enabled = props.enabled && domposableFormEnabled(),
-                        ) {
-                            content()
-                        }
-                    }
-
-                    DomposableButtonStyle.Text -> {
-                        TextButton(
-                            props.onClick,
-                            modifier.toComposeModifier(),
-                            enabled = props.enabled && domposableFormEnabled(),
-                        ) {
-                            content()
-                        }
-                    }
-                }
-            },
+            button = { props, modifier, content -> NativeButton(props, modifier, content) },
             iconButton = { props, modifier, content ->
-                IconButton(
-                    props.onClick,
-                    modifier.toComposeModifier().semantics {
-                        contentDescription =
-                            props.label
-                    },
-                    enabled = props.enabled && domposableFormEnabled(),
-                    content = content,
-                )
+                NativeIconButton(props, modifier, content)
             },
-            textField = { props, modifier, _ ->
-                val focusRequester = remember { FocusRequester() }
-                val formEnabled = domposableFormEnabled()
-                val shouldAutofocus = props.autofocus && props.enabled && formEnabled
-                val submit = props.onImeAction ?: rememberDomposableFormSubmitOrNull()
-                val onClick = props.onClick
-                LaunchedEffect(shouldAutofocus) {
-                    if (shouldAutofocus) focusRequester.requestFocus()
-                }
-                val clickModifier =
-                    modifier
-                        .toComposeModifier()
-                        .then(if (shouldAutofocus) Modifier.focusRequester(focusRequester) else Modifier)
-                        .then(
-                            if (props.onClick != null) {
-                                Modifier.clickable(
-                                    enabled = props.enabled && formEnabled,
-                                    onClick = requireNotNull(onClick),
-                                )
-                            } else {
-                                Modifier
-                            },
-                        ).semantics {
-                            props.id?.let { testTag = it }
-                            if (!props.showLabel) contentDescription = props.label
-                            if (props.isError) props.error?.let { error(it) }
-                        }
-                val supporting = props.error ?: props.helperText
-                OutlinedTextField(
-                    value = props.value,
-                    onValueChange = props.onValueChange,
-                    modifier = clickModifier,
-                    enabled = props.enabled && domposableFormEnabled(),
-                    readOnly = props.readOnly,
-                    label = if (props.showLabel) ({ Text(props.label) }) else null,
-                    placeholder = props.placeholder?.let { value -> { Text(value) } },
-                    leadingIcon = props.leadingIcon,
-                    prefix = props.prefix,
-                    trailingIcon = props.trailingIcon,
-                    singleLine = props.singleLine,
-                    minLines = props.minLines,
-                    maxLines = props.maxLines,
-                    isError = props.isError,
-                    supportingText = supporting?.let { message -> { Text(message) } },
-                    keyboardOptions =
-                        KeyboardOptions(
-                            keyboardType =
-                                when (props.purpose) {
-                                    DomposableInputPurpose.Email -> KeyboardType.Email
-
-                                    DomposableInputPurpose.Password -> KeyboardType.Password
-
-                                    DomposableInputPurpose.Number,
-                                    DomposableInputPurpose.OneTimeCode,
-                                    -> KeyboardType.Number
-
-                                    DomposableInputPurpose.Phone -> KeyboardType.Phone
-
-                                    DomposableInputPurpose.Decimal -> KeyboardType.Decimal
-
-                                    else -> KeyboardType.Text
-                                },
-                            imeAction = props.imeAction.native(),
-                        ),
-                    keyboardActions =
-                        if (submit == null) {
-                            KeyboardActions.Default
-                        } else {
-                            KeyboardActions(
-                                onDone = { submit() },
-                                onGo = { submit() },
-                                onSearch = { submit() },
-                                onSend = { submit() },
-                            )
-                        },
-                    visualTransformation =
-                        if (props.purpose == DomposableInputPurpose.Password && !props.passwordVisible) {
-                            PasswordVisualTransformation()
-                        } else {
-                            VisualTransformation.None
-                        },
-                )
-            },
+            textField = { props, modifier, _ -> NativeTextField(props, modifier) },
             checkbox = {
                 props,
                 modifier,
                 _,
                 ->
-                Row(
-                    modifier
-                        .toComposeModifier()
-                        .toggleable(
-                            props.checked,
-                            enabled = props.enabled && domposableFormEnabled(),
-                            role = Role.Checkbox,
-                            onValueChange = props.onCheckedChange,
-                        ).semantics(mergeDescendants = true) {
-                        },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(props.checked, null, enabled = props.enabled && domposableFormEnabled())
-                    Text(props.label)
-                }
+                NativeCheckbox(props, modifier)
             },
             switch = {
                 props,
                 modifier,
                 _,
                 ->
-                Row(
-                    modifier
-                        .toComposeModifier()
-                        .toggleable(
-                            props.checked,
-                            enabled = props.enabled && domposableFormEnabled(),
-                            role = Role.Switch,
-                            onValueChange = props.onCheckedChange,
-                        ).semantics(mergeDescendants = true) {
-                        },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Switch(props.checked, null, enabled = props.enabled && domposableFormEnabled())
-                    Text(props.label)
-                }
+                NativeSwitch(props, modifier)
             },
-            radioButton = { props, modifier, _ ->
-                Row(
-                    modifier
-                        .toComposeModifier()
-                        .clickable(
-                            enabled = props.enabled && domposableFormEnabled(),
-                            role = Role.RadioButton,
-                            onClick = props.onClick,
-                        ).semantics(mergeDescendants = true) {
-                            selected =
-                                props.selected
-                        },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(props.selected, null, enabled = props.enabled && domposableFormEnabled())
-                    Text(props.label)
-                }
-            },
+            radioButton = { props, modifier, _ -> NativeRadioButton(props, modifier) },
             slider = { props, modifier, _ ->
-                Slider(
-                    props.value,
-                    props.onValueChange,
-                    modifier.toComposeModifier().semantics {
-                        contentDescription =
-                            props.label
-                    },
-                    enabled = props.enabled && domposableFormEnabled(),
-                    valueRange = props.range,
-                    steps = props.steps,
-                )
+                val appearance = props.colors ?: LocalDomposableTokens.current.components.slider
+                val sliderModifier = modifier.toComposeModifier().semantics { contentDescription = props.label }
+                if (props.orientation == DomposableOrientation.Vertical) {
+                    val state =
+                        remember(
+                            props.range,
+                            props.steps,
+                        ) { androidx.compose.material3.SliderState(props.value, props.steps, props.range) }
+                    LaunchedEffect(props.value, state) { if (state.value != props.value) state.value = props.value }
+                    androidx.compose.material3.VerticalSlider(
+                        state = state,
+                        modifier = sliderModifier,
+                        enabled = props.enabled && domposableFormEnabled(),
+                        onValueChange = props.onValueChange,
+                        topToBottom = props.topToBottom,
+                        colors = appearance.nativeSliderColors(),
+                    )
+                } else {
+                    Slider(
+                        props.value,
+                        props.onValueChange,
+                        sliderModifier,
+                        enabled = props.enabled && domposableFormEnabled(),
+                        valueRange = props.range,
+                        steps = props.steps,
+                        colors = appearance.nativeSliderColors(),
+                    )
+                }
             },
             card = { props, modifier, content ->
-                val shape = RoundedCornerShape(LocalDomposableTokens.current.radius.value.dp)
-                if (props.onClick != null) {
-                    Card(props.onClick!!, modifier.toComposeModifier(), shape = shape) { content() }
-                } else {
-                    Card(modifier.toComposeModifier(), shape = shape) { content() }
-                }
+                NativeCard(props, modifier, content)
             },
             surface = { props, modifier, content ->
-                Surface(
-                    modifier.toComposeModifier(),
-                    color =
-                        props.color?.let { Color(it.argb) } ?: MaterialTheme.colorScheme.surface,
-                    content = content,
-                )
+                NativeSurface(props, modifier, content)
             },
             image = {
                 props,
@@ -672,126 +497,21 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 )
             },
             icon = { props, modifier, _ ->
-                Text(
-                    props.symbol,
-                    modifier.toComposeModifier().clearAndSetSemantics {
-                        props.description?.let { contentDescription = it }
-                    },
-                )
+                NativeIcon(props, modifier)
             },
             divider = { props, modifier, _ ->
-                if (props.orientation ==
-                    DomposableOrientation.Horizontal
-                ) {
-                    HorizontalDivider(modifier.toComposeModifier())
-                } else {
-                    VerticalDivider(modifier.toComposeModifier())
-                }
+                NativeDivider(props, modifier)
             },
             spacer = { props, modifier, _ -> Spacer(modifier.toComposeModifier().size(props.length.value.dp)) },
-            badge = { props, modifier, _ -> Badge(modifier.toComposeModifier()) { Text(props.text) } },
-            chip = {
-                props,
-                modifier,
-                _,
-                ->
-                FilterChip(props.selected, props.onClick, label = {
-                    Text(props.label)
-                }, modifier.toComposeModifier(), enabled = props.enabled && domposableFormEnabled())
-            },
-            avatar = { props, modifier, _ ->
-                Surface(
-                    modifier.toComposeModifier().size(40.dp).semantics {
-                        contentDescription =
-                            props.description
-                    },
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                ) { Box(contentAlignment = Alignment.Center) { Text(props.initials) } }
-            },
-            banner = { props, modifier, _ ->
-                Text(
-                    props.message,
-                    modifier.toComposeModifier().semantics {
-                        liveRegion =
-                            LiveRegionMode.Polite
-                    },
-                    color = if (props.isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                )
-            },
-            progress = { props, modifier, _ ->
-                val native = modifier.toComposeModifier().semantics { contentDescription = props.label }
-                if (props.circular) {
-                    if (props.value ==
-                        null
-                    ) {
-                        CircularProgressIndicator(native)
-                    } else {
-                        CircularProgressIndicator(progress = { props.value!! }, modifier = native)
-                    }
-                } else {
-                    if (props.value ==
-                        null
-                    ) {
-                        LinearProgressIndicator(native)
-                    } else {
-                        LinearProgressIndicator(progress = { props.value!! }, modifier = native)
-                    }
-                }
-            },
-            tabs = { props, modifier, _ ->
-                if (props.labels.isNotEmpty()) {
-                    PrimaryTabRow(props.selectedIndex, modifier.toComposeModifier()) {
-                        props.labels.forEachIndexed { index, label ->
-                            Tab(props.selectedIndex == index, { props.onSelect(index) }, text = { Text(label) })
-                        }
-                    }
-                }
-            },
-            navigationBar = { props, modifier, _ ->
-                if (props.orientation ==
-                    DomposableOrientation.Horizontal
-                ) {
-                    NavigationBar(modifier.toComposeModifier()) {
-                        props.items.forEachIndexed { index, item ->
-                            NavigationBarItem(props.selectedIndex == index, {
-                                props.onSelect(index)
-                            }, icon = { Text(item.symbol) }, label = { Text(item.label) })
-                        }
-                    }
-                } else {
-                    NavigationRail(modifier.toComposeModifier()) {
-                        props.items.forEachIndexed { index, item ->
-                            NavigationRailItem(props.selectedIndex == index, {
-                                props.onSelect(index)
-                            }, icon = { Text(item.symbol) }, label = { Text(item.label) })
-                        }
-                    }
-                }
-            },
-            menu = {
-                props,
-                modifier,
-                _,
-                ->
-                NativeWindow {
-                    DropdownMenu(props.expanded, props.onDismiss, modifier.toComposeModifier()) {
-                        props.items.forEach { item ->
-                            DropdownMenuItem(text = { Text(item.label) }, onClick = {
-                                item.onClick()
-                                props.onDismiss()
-                            }, enabled = item.enabled)
-                        }
-                    }
-                }
-            },
-            dialog = {
-                props,
-                modifier,
-                content,
-                ->
-                NativeDialog(props, modifier, content)
-            },
+            badge = { props, modifier, _ -> NativeBadge(props, modifier) },
+            chip = { props, modifier, _ -> NativeChip(props, modifier) },
+            avatar = { props, modifier, _ -> NativeAvatar(props, modifier) },
+            banner = { props, modifier, _ -> NativeBanner(props, modifier) },
+            progress = { props, modifier, _ -> NativeProgress(props, modifier) },
+            tabs = { props, modifier, _ -> NativeTabs(props, modifier) },
+            navigationBar = { props, modifier, _ -> NativeNavigationBar(props, modifier) },
+            menu = { props, modifier, content -> NativeMenu(props, modifier, content) },
+            dialog = { props, modifier, content -> NativeDialog(props, modifier, content) },
             bottomSheet = { props, modifier, content -> NativeBottomSheet(props, modifier, content) },
             topAppBar = { props, modifier, _ -> NativeTopAppBar(props, modifier) },
             floatingActionButton = { props, modifier, content -> NativeFloatingActionButton(props, modifier, content) },
@@ -801,22 +521,81 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             rangeSlider = { props, modifier, _ -> NativeRangeSlider(props, modifier) },
             tooltip = { props, modifier, content -> NativeTooltip(props, modifier, content) },
             scaffold = { props, modifier, content ->
-                Surface(modifier.toComposeModifier().fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Column(Modifier.fillMaxSize()) {
-                        props.topBar()
-                        Row(Modifier.weight(1f).fillMaxWidth()) {
-                            props.navigation()
-                            Box(Modifier.weight(1f).fillMaxHeight()) {
-                                content()
-                                Box(Modifier.align(Alignment.BottomEnd)) { props.floatingAction() }
-                                Box(Modifier.align(Alignment.BottomCenter)) { props.snackbar() }
+                val appearance = props.appearance ?: LocalDomposableTokens.current.components.scaffold
+                val shape = appearance.nativeShape(androidx.compose.ui.graphics.RectangleShape)
+                Surface(
+                    modifier = modifier.toComposeModifier().fillMaxSize(),
+                    color = appearance.nativeContainer(MaterialTheme.colorScheme.background),
+                    contentColor = appearance.nativeContent(MaterialTheme.colorScheme.onBackground),
+                    shape = shape,
+                    tonalElevation = appearance.tonalElevation?.value?.dp ?: 0.dp,
+                    shadowElevation = appearance.shadowElevation?.value?.dp ?: 0.dp,
+                    border =
+                        appearance.border?.let {
+                            androidx.compose.foundation.BorderStroke(appearance.borderWidth.value.dp, it.nativeColor())
+                        },
+                ) {
+                    StyledContent(appearance.textAppearance) {
+                        Scaffold(
+                            modifier = Modifier.fillMaxSize(),
+                            topBar = { Column { props.topBar() } },
+                            bottomBar = { Column { props.bottomBar() } },
+                            snackbarHost = props.snackbar,
+                            floatingActionButton = props.floatingAction,
+                            floatingActionButtonPosition =
+                                when (props.floatingActionPosition) {
+                                    DomposableScaffoldFabPosition.Start -> FabPosition.Start
+                                    DomposableScaffoldFabPosition.Center -> FabPosition.Center
+                                    DomposableScaffoldFabPosition.End -> FabPosition.End
+                                },
+                            containerColor = Color.Transparent,
+                            contentColor = appearance.nativeContent(MaterialTheme.colorScheme.onBackground),
+                            contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
+                        ) { padding ->
+                            Row(Modifier.fillMaxSize().padding(padding)) {
+                                ProvideDomposableRowModifierScope {
+                                    props.navigation()
+                                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                                        ProvideDomposableBoxModifierScope { content() }
+                                    }
+                                    props.contextual()
+                                }
                             }
-                            props.contextual()
+                            props.overlays()
                         }
-                        props.bottomBar()
-                        props.overlays()
                     }
                 }
             },
+            appBar = { props, modifier, _ -> NativeAppBar(props, modifier) },
+            autocomplete = { props, modifier, _ -> NativeAutocomplete(props, modifier) },
+            bottomAppBar = { props, modifier, content -> NativeBottomAppBar(props, modifier, content) },
+            bottomSheetScaffold = { props, modifier, content -> NativeBottomSheetScaffold(props, modifier, content) },
+            buttonGroup = { props, modifier, _ -> NativeButtonGroup(props, modifier) },
+            carousel = { props, modifier, _ -> NativeCarousel(props, modifier) },
+            datePicker = { props, modifier, _ -> NativeDatePicker(props, modifier) },
+            dateRangePicker = { props, modifier, _ -> NativeDateRangePicker(props, modifier) },
+            dragHandle = { props, modifier, _ -> NativeDragHandle(props, modifier) },
+            floatingActionButtonMenu = { props, modifier, _ -> NativeFloatingActionButtonMenu(props, modifier) },
+            floatingToolbar = { props, modifier, content -> NativeFloatingToolbar(props, modifier, content) },
+            listItem = { props, modifier, _ -> NativeListItem(props, modifier) },
+            loadingIndicator = { props, modifier, _ -> NativeLoadingIndicator(props, modifier) },
+            multiChoiceSegmentedButtons = { props, modifier, _ -> NativeMultiChoiceSegmentedButtons(props, modifier) },
+            navigationDrawer = { props, modifier, content -> NativeNavigationDrawer(props, modifier, content) },
+            navigationDrawerItem = { props, modifier, _ -> NativeNavigationDrawerItem(props, modifier) },
+            pullToRefresh = { props, modifier, content -> NativePullToRefresh(props, modifier, content) },
+            searchBar = { props, modifier, content -> NativeSearchBar(props, modifier, content) },
+            splitButton = { props, modifier, _ -> NativeSplitButton(props, modifier) },
+            swipeToDismiss = { props, modifier, content -> NativeSwipeToDismiss(props, modifier, content) },
+            timePicker = { props, modifier, _ -> NativeTimePicker(props, modifier) },
+            toggleButton = { props, modifier, content -> NativeToggleButton(props, modifier, content) },
+            wideNavigationRail = { props, modifier, content -> NativeWideNavigationRail(props, modifier, content) },
+            wideNavigationRailItem = { props, modifier, _ -> NativeWideNavigationRailItem(props, modifier) },
+            badgedBox = { props, modifier, content -> NativeBadgedBox(props, modifier, content) },
+            dropdownMenuItem = { props, modifier, content -> NativeDropdownMenuItem(props, modifier, content) },
+            label = { props, modifier, content -> NativeLabel(props, modifier, content) },
+            menuGroup = { props, modifier, content -> NativeMenuGroup(props, modifier, content) },
+            scrollField = { props, modifier, _ -> NativeScrollField(props, modifier) },
+            snackbarHost = { props, modifier, _ -> NativeSnackbarHost(props, modifier) },
+            scrim = { props, modifier, content -> NativeScrim(props, modifier, content) },
         )
     }

@@ -20,6 +20,8 @@ import io.github.samuolis.domposable.demo.generated.collectionLabDestination
 import io.github.samuolis.domposable.demo.generated.componentCatalogScreenDestination
 import io.github.samuolis.domposable.demo.generated.extendedComponentCatalogDestination
 import io.github.samuolis.domposable.demo.generated.inputLabDestination
+import io.github.samuolis.domposable.demo.generated.materialCatalogScreenDestination
+import io.github.samuolis.domposable.demo.generated.modifierExtensionExampleDestination
 import io.github.samuolis.domposable.demo.generated.navigationPoliciesDestination
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
 import io.github.samuolis.domposable.demo.generated.productComponentLabDestination
@@ -30,8 +32,13 @@ import io.github.samuolis.domposable.demo.generated.unavailableScreenDestination
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
+import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableScreen
+import io.github.samuolis.domposable.foundation.DomposableShape
+import io.github.samuolis.domposable.foundation.DomposableStateColors
+import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
+import io.github.samuolis.domposable.foundation.DomposableTextFieldColors
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.material.rememberDomposableMaterialComponents
@@ -101,6 +108,10 @@ sealed interface DemoRoute {
 
     data object ExtendedCatalog : DemoRoute
 
+    data class Material(
+        val section: String = "actions",
+    ) : DemoRoute
+
     data object Catalog : DemoRoute
 
     data object Recipes : DemoRoute
@@ -117,6 +128,8 @@ sealed interface DemoRoute {
 
     data object Inputs : DemoRoute
 
+    data object Extensions : DemoRoute
+
     data class NotFound(
         val path: String,
     ) : DemoRoute
@@ -128,6 +141,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.Tasks -> "/tasks"
             DemoRoute.ExtendedCatalog -> "/components"
             DemoRoute.Catalog -> "/catalog"
+            is DemoRoute.Material -> "/material/${route.section}"
             DemoRoute.Recipes -> "/recipes"
             DemoRoute.Policies -> "/navigation-policies"
             DemoRoute.Roots -> "/roots"
@@ -135,31 +149,60 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             DemoRoute.AdvancedCollections -> "/collection-recipes"
             DemoRoute.ProductComponents -> "/product-components"
             DemoRoute.Inputs -> "/inputs"
+            DemoRoute.Extensions -> "/extensions"
             is DemoRoute.NotFound -> route.path
             is DemoRoute.Detail -> "/tasks/${route.taskId}"
         }
 
     override fun decode(path: String): DemoRoute? =
         when {
-            path == "/tasks" || path == "/" || path.isEmpty() -> DemoRoute.Tasks
+            path == "/tasks" || path == "/" || path.isEmpty() -> {
+                DemoRoute.Tasks
+            }
 
-            path == "/components" -> DemoRoute.ExtendedCatalog
+            path == "/components" -> {
+                DemoRoute.ExtendedCatalog
+            }
 
-            path == "/catalog" -> DemoRoute.Catalog
+            path == "/catalog" -> {
+                DemoRoute.Catalog
+            }
 
-            path == "/recipes" -> DemoRoute.Recipes
+            path.startsWith("/material/") && path.removePrefix("/material/") in MaterialSections -> {
+                DemoRoute.Material(path.removePrefix("/material/"))
+            }
 
-            path == "/navigation-policies" -> DemoRoute.Policies
+            path == "/recipes" -> {
+                DemoRoute.Recipes
+            }
 
-            path == "/roots" -> DemoRoute.Roots
+            path == "/navigation-policies" -> {
+                DemoRoute.Policies
+            }
 
-            path == "/collections" -> DemoRoute.Collections
+            path == "/roots" -> {
+                DemoRoute.Roots
+            }
 
-            path == "/collection-recipes" -> DemoRoute.AdvancedCollections
+            path == "/collections" -> {
+                DemoRoute.Collections
+            }
 
-            path == "/product-components" -> DemoRoute.ProductComponents
+            path == "/collection-recipes" -> {
+                DemoRoute.AdvancedCollections
+            }
 
-            path == "/inputs" -> DemoRoute.Inputs
+            path == "/product-components" -> {
+                DemoRoute.ProductComponents
+            }
+
+            path == "/inputs" -> {
+                DemoRoute.Inputs
+            }
+
+            path == "/extensions" -> {
+                DemoRoute.Extensions
+            }
 
             path.startsWith(
                 "/tasks/",
@@ -168,9 +211,13 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
                     .removePrefix(
                         "/tasks/",
                     ).matches(Regex("[a-z0-9-]+"))
-            -> DemoRoute.Detail(path.removePrefix("/tasks/"))
+            -> {
+                DemoRoute.Detail(path.removePrefix("/tasks/"))
+            }
 
-            else -> DemoRoute.NotFound(path)
+            else -> {
+                DemoRoute.NotFound(path)
+            }
         }
 }
 
@@ -276,7 +323,10 @@ fun DemoApp(
                 )
                 register(
                     componentCatalogScreenDestination {
-                        ComponentCatalogScreen { stack.add(DomposableEntryScope(DemoRoute.ExtendedCatalog)) }
+                        ComponentCatalogScreen(
+                            onMoreComponents = { stack.add(DomposableEntryScope(DemoRoute.ExtendedCatalog)) },
+                            onMaterialCatalog = { stack.add(DomposableEntryScope(DemoRoute.Material())) },
+                        )
                     },
                 )
                 register(
@@ -285,6 +335,7 @@ fun DemoApp(
                             onCollections = { stack.add(DomposableEntryScope(DemoRoute.Collections)) },
                             onInputs = { stack.add(DomposableEntryScope(DemoRoute.Inputs)) },
                             onProductComponents = { stack.add(DomposableEntryScope(DemoRoute.ProductComponents)) },
+                            onExtensions = { stack.add(DomposableEntryScope(DemoRoute.Extensions)) },
                         )
                     },
                 )
@@ -306,7 +357,15 @@ fun DemoApp(
                 )
                 register(advancedCollectionsDestination())
                 register(inputLabDestination())
+                register(
+                    materialCatalogScreenDestination {
+                        MaterialCatalogScreen(route.section) { section ->
+                            stack[stack.lastIndex] = DomposableEntryScope(DemoRoute.Material(section))
+                        }
+                    },
+                )
                 register(productComponentLabDestination())
+                register(modifierExtensionExampleDestination())
                 register(
                     unavailableScreenDestination {
                         UnavailableScreen(route.path) {
@@ -328,6 +387,7 @@ fun DemoApp(
                     DemoRoute.Collections,
                     DemoRoute.AdvancedCollections,
                     DemoRoute.Inputs,
+                    DemoRoute.Extensions,
                     DemoRoute.ProductComponents,
                     -> 1
 
@@ -485,7 +545,10 @@ fun TaskDetailScreen(
 
 @Composable
 @DomposableScreen(route = DemoRoute.Catalog::class)
-fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
+fun ComponentCatalogScreen(
+    onMoreComponents: () -> Unit = {},
+    onMaterialCatalog: () -> Unit = {},
+) {
     var text by rememberSaveable { mutableStateOf("") }
     var checked by rememberSaveable { mutableStateOf(false) }
     var slider by rememberSaveable { mutableFloatStateOf(0.5f) }
@@ -493,11 +556,14 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
     var dialog by remember { mutableStateOf(false) }
     var sheet by remember { mutableStateOf(false) }
     var menu by remember { mutableStateOf(false) }
+    var themedLoading by remember { mutableStateOf(false) }
+    var themedNotes by rememberSaveable { mutableStateOf("") }
+    var themedPhone by rememberSaveable { mutableStateOf("") }
     DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
         DomposableText("Component catalog", style = DomposableTextStyle.Title)
         DomposableText("Explore the same controls through native Compose UI and semantic HTML.")
         DomposableFlowRow(gap = 8.dp) {
-            DomposableBadge(text = "41 renderers")
+            DomposableBadge(text = "Shared components")
             DomposableChip(label = "Theme tokens", onClick = {}, selected = true)
             DomposableLink("Renderer contracts", "https://samuolis.github.io/domposable/design-systems/")
         }
@@ -546,7 +612,6 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
             DomposableButton("Open sheet", { sheet = true })
             DomposableButton("Open menu", { menu = true })
         }
-        DomposableText("Keyed collections", style = DomposableTextStyle.Title)
         DomposableText("Keyed collections", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableLazyRow(
             items = (1..6).toList(),
@@ -565,13 +630,74 @@ fun ComponentCatalogScreen(onMoreComponents: () -> Unit = {}) {
             key = { "cell-$it" },
             modifier = DomposableModifier.height(180.dp).fillMaxWidth(),
         ) { number -> DomposableCard { DomposableText("Cell $number") } }
+        DomposableLink(
+            "Open the full Material and expressive catalog",
+            "#/material/actions",
+            onClick = onMaterialCatalog,
+        )
         DomposableText("Nested theme", style = DomposableTextStyle.Title)
         val base = LocalDomposableTokens.current
         DomposableTheme(
-            base.copy(colors = base.colors.copy(primary = DomposableColor(0xFF77503B))),
+            base.copy(
+                colors = base.colors.copy(primary = DomposableColor(0xFF77503B)),
+                components =
+                    base.components.copy(
+                        button =
+                            base.components.button.copy(
+                                container = DomposableColor(0xFF77503B),
+                                content = DomposableColor(0xFFFFFFFF),
+                                shape = DomposableShape.Rounded(6.dp),
+                                minHeight = 48.dp,
+                            ),
+                        textField =
+                            DomposableTextFieldAppearance(
+                                colors =
+                                    DomposableTextFieldColors(
+                                        outline =
+                                            DomposableStateColors(
+                                                unfocused = DomposableColor(0xFF74798C),
+                                                focused = DomposableColor(0xFF77503B),
+                                            ),
+                                    ),
+                                floatingLabel = true,
+                                autoSize = true,
+                            ),
+                    ),
+            ),
             LocalDomposableComponents.current,
         ) {
-            DomposableButton("Independent theme tokens", {})
+            DomposableButton("Independent theme styles", {})
+            DomposableButton({}, enabled = false) { DomposableText("Themed disabled") }
+            DomposableButton(
+                DomposableButtonProps(
+                    onClick = { themedLoading = true },
+                    loading = themedLoading,
+                    loadingLabel = "Saving themed action",
+                ),
+                modifier = DomposableModifier.testId("themed-action"),
+            ) { DomposableText("Themed action") }
+            DomposableButton("Reset themed action", { themedLoading = false })
+            DomposableTextField(
+                io.github.samuolis.domposable.ui.DomposableTextFieldProps(
+                    value = themedPhone,
+                    onValueChange = { themedPhone = it },
+                    label = "Contact phone",
+                    purpose = DomposableInputPurpose.Phone,
+                    autocomplete = io.github.samuolis.domposable.foundation.DomposableAutocomplete.Phone,
+                    imeAction = io.github.samuolis.domposable.foundation.DomposableImeAction.Done,
+                ),
+            )
+            DomposableTextField(
+                io.github.samuolis.domposable.ui.DomposableTextFieldProps(
+                    value = themedNotes,
+                    onValueChange = { themedNotes = it },
+                    label = "Theme notes",
+                    multiline = true,
+                    minLines = 2,
+                    maxLines = 4,
+                ),
+                modifier = DomposableModifier.testId("themed-notes"),
+            )
         }
         DomposableSpacer()
         DomposableText("Open More components for app bars, selection fields and feedback controls.")

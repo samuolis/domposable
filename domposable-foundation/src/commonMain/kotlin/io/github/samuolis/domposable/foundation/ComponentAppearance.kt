@@ -18,11 +18,19 @@ data class DomposableTextAppearance(
     /** Null preserves each renderer's existing selection behavior. */
     val selectable: Boolean? = null,
     val liveRegion: DomposableLiveRegion? = null,
+    val letterSpacing: Float? = null,
+    val role: DomposableTypographyRole? = null,
+    val emphasized: Boolean = false,
+    val color: DomposableColor? = null,
+    val minLines: Int = 1,
 ) {
     init {
         require(fontSize == null || (fontSize.isFinite() && fontSize > 0f))
         require(lineHeight == null || (lineHeight.isFinite() && lineHeight > 0f))
+        require(minLines > 0)
         require(maxLines == null || maxLines > 0)
+        require(maxLines == null || minLines <= maxLines)
+        require(letterSpacing == null || letterSpacing.isFinite())
     }
 }
 
@@ -66,6 +74,7 @@ enum class DomposableLiveRegion {
 enum class DomposableAutocomplete {
     Off,
     Email,
+    Phone,
     Username,
     CurrentPassword,
     NewPassword,

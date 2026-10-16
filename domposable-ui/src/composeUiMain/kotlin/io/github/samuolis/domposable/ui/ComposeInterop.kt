@@ -33,6 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onSizeChanged
@@ -173,6 +176,22 @@ fun DomposableModifier.toComposeModifier(
 
                 is DomposableModifierOperation.Opacity -> {
                     result.alpha(operation.value)
+                }
+
+                is DomposableModifierOperation.Scale -> {
+                    result.scale(operation.x, operation.y)
+                }
+
+                is DomposableModifierOperation.Rotation -> {
+                    result.rotate(operation.degrees)
+                }
+
+                is DomposableModifierOperation.Shadow -> {
+                    result.shadow(
+                        operation.elevation.value.dp,
+                        operation.shape.nativeShape(),
+                        clip = false,
+                    )
                 }
 
                 is DomposableModifierOperation.Click -> {

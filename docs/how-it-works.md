@@ -48,7 +48,7 @@ fun App() {
 }
 ```
 
-`savePreferences` is your application's function. `DomposableMaterialTheme` installs the default provider and its theme tokens through composition locals. The feature automatically uses the nearest provider; a nested theme can customize one part of the app.
+`savePreferences` is your application's function. `DomposableMaterialTheme` installs the default provider and its theme values through composition locals. The feature automatically uses the nearest provider; a nested theme can customize one part of the app.
 
 Choose a standard host at the platform entry point:
 
@@ -81,19 +81,23 @@ Shared feature → DomposableSelect → installed Select renderer
 
 A provider controls structure, styling and platform interaction. Values, callbacks and semantic meaning stay in the shared contract. This shares feature code while allowing platform layouts and controls to behave naturally; it does not promise identical pixels.
 
-## 4. Style tokens, replace renderers, and adapt layout
+## 4. Customize the theme, replace renderers, and adapt layout
 
-Tokens change the default provider's colors, typography, spacing, radius and motion:
+Use the theme's named arguments to establish your brand. Every argument is optional; omitted values inherit the nearest theme or the library defaults:
 
 ```kotlin
-val tokens = DomposableTokens(
+DomposableMaterialTheme(
     colors = DomposableColors(primary = DomposableColor(0xFF354C3C)),
-    radius = 8.dp,
-)
-DomposableMaterialTheme(tokens = tokens) {
+    shapes = DomposableShapes(medium = DomposableShape.Rounded(8.dp)),
+    styles = DomposableComponentStyles(
+        card = DomposableSurfaceAppearance(shape = DomposableShape.Rounded(8.dp)),
+    ),
+) {
     DeliveryPreferences(onSave)
 }
 ```
+
+Read the current values through `DomposableTheme.colors`, `.typography`, `.shapes` and `.styles`. For a partial component override, copy its current style, such as `DomposableTheme.styles.card.copy(...)`. [Material configuration](material-catalog.md#configuration) explains per-call overrides and standard/expressive choices. `DomposableTokens` remains an advanced provider configuration bundle; ordinary app themes can use the named arguments above.
 
 For a different control implementation, copy the provider and replace its typed renderer:
 

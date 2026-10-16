@@ -17,7 +17,9 @@ nav:
       - Get started: getting-started.md
       - How the API works: how-it-works.md
       - Components: components.md
+      - Material catalog: material-catalog.md
       - Design systems: design-systems.md
+      - Modifiers: modifiers.md
       - Adaptive layouts: adaptive.md
       - Large collections: performance.md
       - Screens and navigation: screens.md
@@ -28,13 +30,18 @@ nav:
       - Compatibility and coverage: compatibility.md
       - Component coverage: coverage.md
   - Examples:
+      - Custom components: custom-components.md
+      - Custom modifiers and drawing: modifiers.md
       - Shopping app: shopping.md
       - Modular app and injection: modular-demo.md
       - Compare HTML and Wasm: compare.md
       - Wasm input and accessibility: wasm.md
       - Playground: https://samuolis.github.io/domposable/demo/
       - Storefront: https://samuolis.github.io/domposable/shop/
-  - API: https://samuolis.github.io/domposable/api/
+  - Reference:
+      - Component parameters: component-reference.md
+      - Modifier parameters: modifier-reference.md
+      - Complete Kotlin API: https://samuolis.github.io/domposable/api/
   - Contributing:
       - Validation and visual review: validation.md
       - Binary API compatibility: binary-compatibility.md

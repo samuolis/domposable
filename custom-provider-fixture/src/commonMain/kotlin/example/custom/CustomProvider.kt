@@ -189,6 +189,130 @@ fun independentProvider(onRender: (String) -> Unit): DomposableComponents =
             onRender("Tooltip")
             content()
         },
+        appBar = { _, _, content ->
+            onRender("AppBar")
+            content()
+        },
+        autocomplete = { _, _, content ->
+            onRender("Autocomplete")
+            content()
+        },
+        badgedBox = { _, _, content ->
+            onRender("BadgedBox")
+            content()
+        },
+        bottomAppBar = { _, _, content ->
+            onRender("BottomAppBar")
+            content()
+        },
+        bottomSheetScaffold = { _, _, content ->
+            onRender("BottomSheetScaffold")
+            content()
+        },
+        buttonGroup = { _, _, content ->
+            onRender("ButtonGroup")
+            content()
+        },
+        carousel = { _, _, content ->
+            onRender("Carousel")
+            content()
+        },
+        datePicker = { _, _, content ->
+            onRender("DatePicker")
+            content()
+        },
+        dateRangePicker = { _, _, content ->
+            onRender("DateRangePicker")
+            content()
+        },
+        dragHandle = { _, _, content ->
+            onRender("DragHandle")
+            content()
+        },
+        dropdownMenuItem = { _, _, content ->
+            onRender("DropdownMenuItem")
+            content()
+        },
+        floatingActionButtonMenu = { _, _, content ->
+            onRender("FloatingActionButtonMenu")
+            content()
+        },
+        floatingToolbar = { _, _, content ->
+            onRender("FloatingToolbar")
+            content()
+        },
+        label = { _, _, content ->
+            onRender("Label")
+            content()
+        },
+        listItem = { _, _, content ->
+            onRender("ListItem")
+            content()
+        },
+        loadingIndicator = { _, _, content ->
+            onRender("LoadingIndicator")
+            content()
+        },
+        menuGroup = { _, _, content ->
+            onRender("MenuGroup")
+            content()
+        },
+        multiChoiceSegmentedButtons = { _, _, content ->
+            onRender("MultiChoiceSegmentedButtons")
+            content()
+        },
+        navigationDrawer = { _, _, content ->
+            onRender("NavigationDrawer")
+            content()
+        },
+        navigationDrawerItem = { _, _, content ->
+            onRender("NavigationDrawerItem")
+            content()
+        },
+        pullToRefresh = { _, _, content ->
+            onRender("PullToRefresh")
+            content()
+        },
+        scrim = { _, _, content ->
+            onRender("Scrim")
+            content()
+        },
+        scrollField = { _, _, content ->
+            onRender("ScrollField")
+            content()
+        },
+        searchBar = { _, _, content ->
+            onRender("SearchBar")
+            content()
+        },
+        snackbarHost = { _, _, content ->
+            onRender("SnackbarHost")
+            content()
+        },
+        splitButton = { _, _, content ->
+            onRender("SplitButton")
+            content()
+        },
+        swipeToDismiss = { _, _, content ->
+            onRender("SwipeToDismiss")
+            content()
+        },
+        timePicker = { _, _, content ->
+            onRender("TimePicker")
+            content()
+        },
+        toggleButton = { _, _, content ->
+            onRender("ToggleButton")
+            content()
+        },
+        wideNavigationRail = { _, _, content ->
+            onRender("WideNavigationRail")
+            content()
+        },
+        wideNavigationRailItem = { _, _, content ->
+            onRender("WideNavigationRailItem")
+            content()
+        },
         scaffold = { _, _, content ->
             onRender("Scaffold")
             content()

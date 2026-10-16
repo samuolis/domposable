@@ -12,6 +12,15 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class ReviewEvidenceTest(unittest.TestCase):
+    def test_catalog_manifest_is_bounded_per_platform(self):
+        manifest = {platform: [f'scenario-{i}' for i in range(24)] for platform in ('android', 'desktop', 'ios', 'dom', 'wasm')}
+        module.validate_manifest(manifest)
+        for names in ([], ['duplicate', 'duplicate'], [f'scenario-{i}' for i in range(65)]):
+            with self.assertRaises(ValueError):
+                module.validate_manifest(dict(manifest, dom=names))
+        with self.assertRaises(ValueError):
+            module.validate_manifest({'dom': ['only-one-platform']})
+
     def test_asset_identity_includes_full_content_digest(self):
         name = module.asset_name(9, 1234, 'ios', 'adaptive', b'image')
         self.assertEqual(name, 'pr-9-run-1234-ios-adaptive-' + hashlib.sha256(b'image').hexdigest() + '.png')

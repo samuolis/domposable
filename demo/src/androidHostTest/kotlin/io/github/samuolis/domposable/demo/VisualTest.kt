@@ -2,10 +2,14 @@ package io.github.samuolis.domposable.demo
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.filters.SdkSuppress
 import org.junit.Rule
 import org.junit.Test
@@ -19,12 +23,12 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36], qualifiers = "w390dp-h844dp-mdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-class VisualTest {
-    @get:Rule val compose = createComposeRule()
-
+class VisualTest : VisualCapture() {
     @Test fun tasks() = capture("tasks", DemoRoute.Tasks)
 
     @Test fun catalog() = capture("catalog", DemoRoute.Catalog)
+
+    @Test fun extensions() = capture("extensions", DemoRoute.Extensions)
 
     @Test fun extendedComponents() = capture("extended-components", DemoRoute.ExtendedCatalog)
 
@@ -46,8 +50,47 @@ class VisualTest {
         compose.mainClock.advanceTimeByFrame()
         save("shop")
     }
+}
 
-    private fun capture(
+@SdkSuppress(minSdkVersion = 26)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [36], qualifiers = "w390dp-h844dp-mdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class MaterialVisualTest : VisualCapture() {
+    @Test fun materialActions() = captureMaterial("actions")
+
+    @Test fun materialSelection() = captureMaterial("selection")
+
+    @Test fun materialInputs() = captureMaterial("inputs")
+
+    @Test fun materialSurfaces() = captureMaterial("surfaces")
+
+    @Test fun materialNavigation() = captureMaterial("navigation")
+
+    @Test fun materialFeedback() = captureMaterial("feedback")
+
+    @Test fun materialGestures() = captureMaterial("gestures")
+
+    @Test fun materialScaffold() = captureMaterial("scaffold")
+
+    private fun captureMaterial(section: String) {
+        compose.setContent { DemoApp(initialRoute = DemoRoute.Material(section)) }
+        compose.waitForIdle()
+        val heading = compose.onNodeWithTag("material-section-heading").assertExists().performScrollTo()
+        val viewport = compose.onNodeWithTag("material-catalog-scroll")
+        val distance = heading.fetchSemanticsNode().boundsInRoot.top - viewport.fetchSemanticsNode().boundsInRoot.top
+        viewport.performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, distance) }
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+        save("material-$section")
+    }
+}
+
+@androidx.annotation.RequiresApi(26)
+abstract class VisualCapture {
+    @get:Rule val compose = createComposeRule()
+
+    protected fun capture(
         name: String,
         route: DemoRoute,
     ) {
@@ -56,7 +99,7 @@ class VisualTest {
         save(name)
     }
 
-    private fun save(name: String) {
+    protected fun save(name: String) {
         val target = File(System.getProperty("domposable.screenshots"), "android/$name.png")
         target.parentFile!!.mkdirs()
         target.outputStream().use {

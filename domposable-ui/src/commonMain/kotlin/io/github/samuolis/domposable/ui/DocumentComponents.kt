@@ -6,7 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
+import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponent
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 
 /** Controlled semantic form shared by native Compose and HTML renderers. */
@@ -25,6 +28,7 @@ data class DomposableDisclosureProps(
     val description: String? = null,
     val expanded: Boolean,
     val onToggle: () -> Unit,
+    val appearance: DomposableSurfaceAppearance? = null,
 )
 
 /** Safe, renderer-neutral rich text parsed as allowlisted markup on every platform. */
@@ -34,6 +38,8 @@ data class DomposableRichHtmlProps(
     val selectable: Boolean = false,
     val onLinkClick: ((String) -> Unit)? = null,
     val style: DomposableTextStyle = DomposableTextStyle.Body,
+    val appearance: DomposableTextAppearance? = null,
+    val color: DomposableColor? = null,
 )
 
 private data class DomposableFormContext(
@@ -102,9 +108,10 @@ fun DomposableDisclosure(
     onToggle: () -> Unit,
     modifier: DomposableModifier = DomposableModifier,
     description: String? = null,
+    appearance: DomposableSurfaceAppearance? = null,
     content: @Composable () -> Unit,
 ) = DomposableDisclosure(
-    DomposableDisclosureProps(title, description, expanded, onToggle),
+    DomposableDisclosureProps(title, description, expanded, onToggle, appearance = appearance),
     modifier,
     content,
 )
@@ -116,7 +123,9 @@ fun DomposableRichHtml(
     selectable: Boolean = false,
     onLinkClick: ((String) -> Unit)? = null,
     style: DomposableTextStyle = DomposableTextStyle.Body,
+    appearance: DomposableTextAppearance? = null,
+    color: DomposableColor? = null,
 ) = DomposableRichHtml(
-    DomposableRichHtmlProps(rawHtml, selectable, onLinkClick, style),
+    DomposableRichHtmlProps(rawHtml, selectable, onLinkClick, style, appearance, color),
     modifier,
 )

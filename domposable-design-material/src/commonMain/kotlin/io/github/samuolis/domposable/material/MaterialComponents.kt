@@ -1,9 +1,17 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+import io.github.samuolis.domposable.foundation.DomposableColors
+import io.github.samuolis.domposable.foundation.DomposableComponentStyles
+import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
+import io.github.samuolis.domposable.foundation.DomposableShapes
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTokens
+import io.github.samuolis.domposable.foundation.DomposableTypography
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableTheme
+import io.github.samuolis.domposable.ui.LocalDomposableTokens
 
 @Composable
 expect fun rememberDomposableMaterialComponents(): DomposableComponents
@@ -22,8 +30,25 @@ expect fun ProvideDomposableMaterialComponents(
 
 @Composable
 fun DomposableMaterialTheme(
-    tokens: DomposableTokens = DomposableTokens(),
+    tokens: DomposableTokens = LocalDomposableTokens.current,
+    colors: DomposableColors = tokens.colors,
+    typography: DomposableTypography = tokens.typography,
+    shapes: DomposableShapes = tokens.shapes,
+    styles: DomposableComponentStyles = tokens.components,
+    designLanguage: DomposableDesignLanguage = tokens.designLanguage,
     content: @Composable () -> Unit,
 ) {
-    DomposableTheme(tokens, rememberDomposableMaterialComponents(), content)
+    DomposableTheme(
+        tokens.copy(
+            colors = colors,
+            typography = typography,
+            shapes = shapes,
+            components = styles,
+            designLanguage = designLanguage,
+        ),
+        rememberDomposableMaterialComponents(),
+        content,
+    )
 }
+
+internal val LocalMaterialButtonTextAppearance = staticCompositionLocalOf<DomposableTextAppearance?> { null }

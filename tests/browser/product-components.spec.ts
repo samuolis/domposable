@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { stableCapture } from './stable-capture';
 
 test('document and data controls use browser semantics and shared callbacks', async ({ page }) => {
   const errors: string[] = [];
@@ -8,7 +9,7 @@ test('document and data controls use browser semantics and shared callbacks', as
   await page.goto('/#/product-components');
   await expect(page.getByRole('heading', { name: 'Documents and data lab', exact: true })).toBeVisible();
   if (test.info().project.name === 'chromium') {
-    await page.screenshot({ path: 'build/screenshots/dom/product-components.png' });
+    await stableCapture(page, 'dom', 'product-components');
   }
   const form = page.getByRole('form', { name: 'Delivery preferences', exact: true });
   await expect(form).toHaveJSProperty('tagName', 'FORM');
@@ -70,7 +71,7 @@ test('Wasm document controls execute the same feature callbacks', async ({ page,
   await page.goto('/wasm/#/product-components');
   const email = page.getByRole('textbox', { name: /^Contact email/ });
   await expect(email).toHaveCount(1, { timeout: 60000 });
-  await page.screenshot({ path: 'build/screenshots/wasm/product-components.png' });
+  await stableCapture(page, 'wasm', 'product-components');
   await email.focus();
   await expect(page.locator('.compose-backing-field')).toBeFocused();
   await page.keyboard.insertText('hello@example.com');

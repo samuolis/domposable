@@ -2,6 +2,7 @@ package io.github.samuolis.domposable.ui
 
 import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableComponent
+import io.github.samuolis.domposable.foundation.DomposableTableAppearance
 
 data class DomposableTableColumn(
     val key: String,
@@ -28,6 +29,7 @@ data class DomposableTableProps(
     val columns: List<DomposableTableColumn>,
     val rows: List<DomposableTableRow>,
     val window: DomposableListWindow? = null,
+    val appearance: DomposableTableAppearance? = null,
 ) {
     init {
         require(caption.isNotBlank())
@@ -45,6 +47,7 @@ fun <T> DomposableTable(
     key: (T) -> String,
     modifier: DomposableModifier = DomposableModifier,
     window: DomposableListWindow? = null,
+    appearance: DomposableTableAppearance? = null,
     cellContent: @Composable (T, DomposableTableColumn) -> Unit,
 ) {
     val rows =
@@ -52,5 +55,5 @@ fun <T> DomposableTable(
             val cells: List<@Composable () -> Unit> = columns.map { column -> { cellContent(item, column) } }
             DomposableTableRow(key(item), cells)
         }
-    DomposableTable(DomposableTableProps(caption, columns, rows, window), modifier)
+    DomposableTable(DomposableTableProps(caption, columns, rows, window, appearance = appearance), modifier)
 }

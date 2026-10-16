@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.demo
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -14,6 +15,12 @@ import org.robolectric.annotation.Config
 @Config(sdk = [36])
 class NativeLabNavigationTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun materialSectionsNavigateThroughNativeControls() {
+        compose.setContent { DemoApp(initialRoute = DemoRoute.Material()) }
+        compose.onNodeWithTag("material-section-selection").performScrollTo().performClick()
+        compose.onNodeWithText("Receive updates").assertExists()
+    }
 
     @Test fun componentMenuReachesTheSemanticTableThroughNativeControls() {
         compose.setContent { DemoApp(initialRoute = DemoRoute.ExtendedCatalog) }

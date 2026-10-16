@@ -9,7 +9,7 @@
 
 ## Product follow-ups
 
-- Continue pre-1.0 API iteration with plain semantic versions. There is no scheduled stable 1.0 release. Ranker adoption remains postponed; application feedback can guide later API decisions.
+- Continue pre-1.0 API iteration with plain semantic versions. There is no scheduled stable 1.0 release. Ranker adoption is being evaluated in [its draft integration PR](https://github.com/samuolis/ranker/pull/245); application feedback guides API decisions, and the app retains ownership of product components.
 - Wasm now exercises Unicode editing, password masking, disabled/error state, modal isolation/dismissal and a bounded axe regression audit. Resolve the documented upstream semantics-bridge findings before claiming a clean accessibility scan; physical review remains deferred.
 - Root-stack recipes cover snapshot restoration, custom native Navigation 3 list/detail scenes, route overlays, cancellable Back policy and application-owned live models across inactive roots. Product route grouping, animation tuning and model lifetime remain caller-owned.
 - Columns now support measured heights; horizontal rows, responsive grids and semantic tables have opt-in windows and browser regression checks. Column virtualization, remote paging and spreadsheet editing remain application/provider work.

@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.adaptive.DomposableWidthClass
 import io.github.samuolis.domposable.adaptive.rememberDomposableAdaptiveInfo
+import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.material.DomposableMaterialTheme
@@ -20,6 +21,7 @@ import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableMeasure
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableModifierElement
 import io.github.samuolis.domposable.ui.DomposableRangeSlider
 import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.DomposableSelect
@@ -36,6 +38,10 @@ import io.github.samuolis.domposable.ui.size
 class FeatureModel {
     var label by mutableStateOf("Public artifact consumer")
 }
+
+data class ConsumerFrame(
+    val color: io.github.samuolis.domposable.foundation.DomposableColor,
+) : DomposableModifierElement
 
 @Composable
 fun Feature(
@@ -74,6 +80,26 @@ fun App(factory: () -> FeatureModel) {
 @Composable
 fun BrandedApp(components: DomposableComponents) {
     DomposableTheme(components = components) { DomposableText("Custom design system") }
+}
+
+// Compile scoped branding and partial overrides through the published API on every target.
+@Composable
+fun ScopedBranding() {
+    DomposableMaterialTheme(
+        colors = DomposableTheme.colors.copy(primary = DomposableColor(0xFF77503B)),
+        typography = DomposableTheme.typography,
+        shapes = DomposableTheme.shapes,
+        styles = DomposableTheme.styles.copy(button = DomposableTheme.styles.button.copy(minHeight = 48.dp)),
+    ) {
+        DomposableMaterialTheme(
+            styles =
+                DomposableTheme.styles.copy(
+                    textField = DomposableTheme.styles.textField.copy(floatingLabel = true),
+                ),
+        ) {
+            DomposableButton("Save", {})
+        }
+    }
 }
 
 object FixtureRoute

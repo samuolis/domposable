@@ -2,6 +2,7 @@ package io.github.samuolis.domposable.ui
 
 import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableChoiceOption
+import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 
 /** Typed choices use option values, rather than translated labels, as their selection identity. */
 @Composable
@@ -16,6 +17,7 @@ fun <T> DomposableSegmentedButtons(
     groupName: String? = null,
     showSelectedIcon: Boolean = true,
     allowReselect: Boolean = false,
+    appearance: DomposableItemAppearance? = null,
 ) {
     require(options.map { it.value }.distinct().size == options.size) { "Choice values must be unique" }
     DomposableSegmentedButtons(
@@ -31,6 +33,7 @@ fun <T> DomposableSegmentedButtons(
                 groupName = groupName,
                 showSelectedIcon = showSelectedIcon,
                 allowReselect = allowReselect,
+                appearance = appearance,
             ),
         modifier = modifier,
     )

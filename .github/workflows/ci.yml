@@ -64,7 +64,9 @@ jobs:
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
       - run: python -m unittest discover -s scripts/tests -v
-      - run: xvfb-run -a ./gradlew jvmTest :demo:testAndroidHostTest :domposable-design-material:testAndroidHostTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs dokkaGenerate --console=plain
+      - run: xvfb-run -a ./gradlew jvmTest :domposable-design-material:jsBrowserTest :demo:testAndroidHostTest :domposable-design-material:testAndroidHostTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs dokkaGenerate --console=plain
+      - name: Verify component and modifier reference matches the compiled API
+        run: python scripts/ci/api_reference.py --check
       - name: Verify the Android demo version derived from SemVer
         run: python scripts/ci/sign_release.py --verify-debug
       - run: npm ci

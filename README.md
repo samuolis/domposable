@@ -28,12 +28,14 @@ Domposable is a Kotlin Multiplatform UI library with optional integration helper
 
 - **Shared feature code** — ordinary Compose functions with your models and callbacks.
 - **Real HTML** — headings, links, forms and header/main/footer landmarks, styled with CSS.
-- **A replaceable design system** — portable theme tokens and typed renderers; customize one control or supply a complete provider.
+- **A replaceable design system** — scoped brand styles and typed renderers; customize one control or supply a complete provider.
 - **Adaptive layouts** — measure the space a feature receives and choose breakpoints, panes and layout recipes.
-- **Shared components** — layout, forms, selection, navigation and feedback controls across both renderers.
+- **Optional Material design system** — standard Material 3 components, selected expressive components and variants, with scoped theme styles. [Catalog and configuration](docs/material-catalog.md).
 - **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
 
 Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable. [Koin and Metro](docs/screens.md#one-entry-api-for-koin-and-metro) use the same generated entry API; existing frameworks can [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
+
+Build your own visual language with shared layouts and controls, theme an existing provider, or add custom native/HTML renderers and modifier decorations without changing Domposable. [Custom design systems](docs/design-systems.md#build-your-own-ui) keep feature code common across platforms.
 
 > [!NOTE]
 > This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). Before 1.0, minor releases may change APIs; see the [migration guide](docs/migration.md) when upgrading.
@@ -105,7 +107,22 @@ flowchart TB
     Provider --> HTML[Semantic HTML and CSS: Kotlin/JS]
 ```
 
-The same feature can use different element structures and styling on each platform. Change tokens for colors, typography and spacing, or replace a renderer for a different control implementation. Component use requires no application KSP setup or navigation registry.
+The same feature can use different element structures and styling on each platform. Set theme colors, typography, shapes and component styles, or replace a renderer for a different control implementation. Component use requires no application KSP setup or navigation registry.
+
+Brand the standard controls once; every argument is optional:
+
+```kotlin
+DomposableMaterialTheme(
+    colors = brandColors,
+    styles = DomposableComponentStyles(
+        button = DomposableButtonAppearance(shape = DomposableShape.Circle),
+    ),
+) {
+    FeatureScreen()
+}
+```
+
+Use `DomposableTheme.styles.button.copy(...)` for a local override. Nested themes inherit their enclosing brand values. Styles are composition-scoped, so different parts of an app can use different brands.
 
 [Understand the API →](docs/how-it-works.md) · [Customize a design system →](docs/design-systems.md) · [Build adaptive layouts →](docs/adaptive.md)
 
@@ -114,7 +131,7 @@ The same feature can use different element structures and styling on each platfo
 | Your app | Adopt | Keep in your app |
 | --- | --- | --- |
 | Starting a shared UI | Material provider, components and adaptive helpers | Models, DI and application behaviour |
-| Has a design system | Portable modifiers and [native/HTML adapters](docs/design-systems.md#adopt-inside-an-existing-design-system) behind existing component names | Brand tokens, renderer bodies and custom controls |
+| Has a design system | [Theme defaults](docs/design-systems.md#theme-defaults-and-component-overrides) and thin adapters behind existing component names | Brand tokens, product layouts and custom controls |
 | Has Navigation 3 or another router | Optional entry display, pane and browser helpers | Back stack, entry decorators, route identity and URL policy |
 | Has screen annotations and codegen | Optional KSP function driver | Annotation contract, DI bindings and generated host templates |
 
@@ -138,10 +155,14 @@ HTML and Wasm support optional browser history, hash or path URLs and portable e
 
 ## Examples
 
+- [Custom components and modifiers](docs/custom-components.md): shared component APIs, app-owned CSS/HTML decoration and native `drawBehind`. Web adapters can also [attach CSS and attributes directly](docs/modifiers.md#set-html-attributes-in-jsmain).
+- [Component parameter reference](docs/component-reference.md) and [modifier signatures](docs/modifier-reference.md): generated from the current API.
+
 | Example | What to explore | Open |
 | --- | --- | --- |
 | **Fieldwork shop** | Responsive storefront, product pages, filters, cart and checkout | [Live app](https://samuolis.github.io/domposable/shop/) · [Walkthrough](docs/shopping.md) |
 | **Documents and data** | Rich inputs, typed choices, forms, disclosure, rich text, charts and interactive tables | [Shared source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/ProductComponentLab.kt) · [Recipes](docs/components.md#documents-rich-inputs-and-data) |
+| **Material and expressive catalog** | Theme defaults, local appearance overrides, pickers, menus, expressive actions and screen chrome | [Live catalog](https://samuolis.github.io/domposable/demo/#/material/actions) · [Shared source](demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/MaterialCatalog.kt) · [API guide](docs/material-catalog.md) |
 | **Component playground** | Shared controls, theme tokens and renderer customization | [Live app](https://samuolis.github.io/domposable/demo/) · [Components](docs/components.md) |
 | **HTML / Wasm comparison** | The same feature at phone, tablet and desktop widths | [Compare](https://samuolis.github.io/domposable/compare/) |
 | **Browser routes** | Clean paths, deep links and browser navigation | [URL example](https://samuolis.github.io/domposable/routes/tasks/welcome/) · [Routing guide](docs/screens.md) |
@@ -174,6 +195,14 @@ The fictional Fieldwork shop shares its catalogue, cart and feature composables.
 ![Domposable shared components on mobile and semantic HTML](docs/assets/examples/components.png)
 
 ![The same delivery preferences feature on Android and semantic HTML](docs/assets/examples/selection-controls.png)
+
+![Material selection controls on Android and semantic HTML](docs/assets/examples/material-selection.png)
+
+See the [Material catalog](docs/material-catalog.md) for standard and expressive variants, theme configuration and per-component overrides.
+
+![App-owned components and modifier decoration on Android and semantic HTML](docs/assets/examples/custom-extensions.png)
+
+The [extension example](docs/custom-components.md) combines a custom label, native drawing and HTML/CSS decoration while keeping counter and input state in shared code.
 
 </details>
 
@@ -210,6 +239,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | Install Domposable and set up platform hosts | [Getting started](docs/getting-started.md) |
 | Understand components, props, providers and modifiers | [How the API works](docs/how-it-works.md) |
 | Use shared controls with examples | [Components](docs/components.md) |
+| Configure Material 3 and expressive components | [Material catalog](docs/material-catalog.md) |
 | Adapt a feature to its available space | [Adaptive layouts](docs/adaptive.md) |
 | Build or customize a design system | [Design systems](docs/design-systems.md) |
 | Add screens, Navigation 3 or generated entries | [Screens and navigation](docs/screens.md) |

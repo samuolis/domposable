@@ -97,9 +97,12 @@ data class DomposableTypography(
     val titleSize: Float = 24f,
     val labelSize: Float = 14f,
     val lineHeight: Float = 1.5f,
+    val roles: Map<DomposableTypographyRole, DomposableTextAppearance> = emptyMap(),
+    val emphasizedRoles: Map<DomposableTypographyRole, DomposableTextAppearance> = emptyMap(),
 )
 
 @Immutable
+@Suppress("LongParameterList")
 data class DomposableColors(
     val primary: DomposableColor = DomposableColor(0xFF4059AD),
     val onPrimary: DomposableColor = DomposableColor(0xFFFFFFFF),
@@ -108,6 +111,47 @@ data class DomposableColors(
     val surfaceVariant: DomposableColor = DomposableColor(0xFFECEFF8),
     val outline: DomposableColor = DomposableColor(0xFF74798C),
     val error: DomposableColor = DomposableColor(0xFFBA1A1A),
+    val onError: DomposableColor? = null,
+    val errorContainer: DomposableColor? = null,
+    val onErrorContainer: DomposableColor? = null,
+    val secondary: DomposableColor? = null,
+    val onSecondary: DomposableColor? = null,
+    val secondaryContainer: DomposableColor? = null,
+    val onSecondaryContainer: DomposableColor? = null,
+    val tertiary: DomposableColor? = null,
+    val onTertiary: DomposableColor? = null,
+    val tertiaryContainer: DomposableColor? = null,
+    val onTertiaryContainer: DomposableColor? = null,
+    val primaryContainer: DomposableColor? = null,
+    val onPrimaryContainer: DomposableColor? = null,
+    val background: DomposableColor? = null,
+    val onBackground: DomposableColor? = null,
+    val onSurfaceVariant: DomposableColor? = null,
+    val outlineVariant: DomposableColor? = null,
+    val inverseSurface: DomposableColor? = null,
+    val inverseOnSurface: DomposableColor? = null,
+    val inversePrimary: DomposableColor? = null,
+    val surfaceTint: DomposableColor? = null,
+    val scrim: DomposableColor? = null,
+    val surfaceBright: DomposableColor? = null,
+    val surfaceDim: DomposableColor? = null,
+    val surfaceContainer: DomposableColor? = null,
+    val surfaceContainerHigh: DomposableColor? = null,
+    val surfaceContainerHighest: DomposableColor? = null,
+    val surfaceContainerLow: DomposableColor? = null,
+    val surfaceContainerLowest: DomposableColor? = null,
+    val primaryFixed: DomposableColor? = null,
+    val primaryFixedDim: DomposableColor? = null,
+    val onPrimaryFixed: DomposableColor? = null,
+    val onPrimaryFixedVariant: DomposableColor? = null,
+    val secondaryFixed: DomposableColor? = null,
+    val secondaryFixedDim: DomposableColor? = null,
+    val onSecondaryFixed: DomposableColor? = null,
+    val onSecondaryFixedVariant: DomposableColor? = null,
+    val tertiaryFixed: DomposableColor? = null,
+    val tertiaryFixedDim: DomposableColor? = null,
+    val onTertiaryFixed: DomposableColor? = null,
+    val onTertiaryFixedVariant: DomposableColor? = null,
 )
 
 @Immutable
@@ -125,6 +169,9 @@ data class DomposableTokens(
     val radius: DomposableLength = 12.dp,
     val elevation: DomposableLength = 2.dp,
     val motionDurationMillis: Int = 180,
+    val components: DomposableComponentStyles = DomposableComponentStyles(),
+    val designLanguage: DomposableDesignLanguage = DomposableDesignLanguage.Standard,
+    val shapes: DomposableShapes = DomposableShapes(),
 ) {
     init {
         require(motionDurationMillis >= 0)
@@ -141,7 +188,7 @@ enum class DomposableLayoutAxis { Horizontal, Vertical }
 
 enum class DomposableOrientation { Vertical, Horizontal }
 
-enum class DomposableButtonStyle { Filled, Outlined, Text }
+enum class DomposableButtonStyle { Filled, Outlined, Text, Elevated, FilledTonal }
 
 enum class DomposableInputPurpose { Text, Email, Password, Number, Search, Date, Time, Phone, Decimal, OneTimeCode }
 

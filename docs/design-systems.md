@@ -2,9 +2,21 @@
 
 `DomposableTheme` installs semantic tokens and a complete `DomposableComponents` provider. The Material artifact is optional: a product can supply every renderer without depending on Material.
 
+## Build your own UI
+
+Domposable shares feature UI across native Compose and semantic HTML. Its core provides portable layout, modifiers, component contracts and renderer extension points. Your design system owns the visual language, composition of controls and platform integrations.
+
+Choose the level that fits each component:
+
+- Compose a custom layout from existing shared primitives and controls.
+- Configure the optional Material provider through theme styles and per-call appearance values.
+- Replace a built-in renderer, or introduce a custom shared component with native and HTML implementations.
+
+Feature code uses the same shared API in each case. A custom control may need platform implementations, but its callers do not need separate native and web screens. The Material catalog is a ready-made design system, not the limit of what a Domposable application can render. Expressive components and theme settings are optional choices within that provider.
+
 ## Adopt inside an existing design system
 
-Keep your component names, tokens and feature signatures. Use Domposable's portable modifier behind your existing API, with native and HTML implementations at the design-system boundary. A component does not need generated props, a registry or a renderer provider merely to call its own platform implementation.
+Keep your component names, tokens and feature signatures. Start with [theme defaults and component overrides](#theme-defaults-and-component-overrides) behind those names, delegating ordinary control rendering to the library. Use your own native and HTML implementations at the design-system boundary when a custom component needs a different structure or behavior. A component does not need generated props, a registry or a renderer provider merely to call its own platform implementation.
 
 Shared design-system contract in `commonMain`:
 
@@ -84,7 +96,7 @@ DomposableTheme(components = product) { FeatureScreen(model) }
 
 `ProductButton` is a platform implementation. It receives the same enabled state, click handler, modifier and composable content. It can replace the element structure, interaction and styling. The demo supplies foundation-based native buttons and dashed DOM buttons to show this.
 
-Tokens cover colors, typography, spacing, radius and motion duration. Theme scope maps values to native Material defaults or CSS variables; nested themes remain local. Product-specific dimensions can be supplied through your own composition locals. Current native typography maps sizes/line height; custom fonts need a provider-specific font mapping.
+Tokens cover colors, typography, spacing, radius and motion duration. Theme scope maps values to native Material defaults or CSS variables; nested themes remain local. Product-specific dimensions can be supplied through your own composition locals. Typography roles map to the native Material type scale and HTML styles. Native font assets remain supplied by the host; CSS font-family names do not register platform fonts.
 
 Modifiers preserve operation order. `padding().background()` and `background().padding()` are different. Shared modifiers contain portable operations; use `toComposeModifier()` in native renderer code and `DomposableHtmlModifiers`/`domposableAttributes` in JS renderers. Native `Modifier` remains outside shared feature signatures.
 
@@ -185,16 +197,44 @@ component's name instead of dropping content.
 
 ## Extend portable modifiers
 
+See the [modifier guide](modifiers.md) for supported operations, complete native/HTML decoration examples and platform boundaries.
+
+An ordinary Kotlin extension can combine existing operations. It works on every renderer without additional platform code:
+
+```kotlin
+fun DomposableModifier.contentGutter(inset: DomposableLength = 16.dp): DomposableModifier =
+    fillMaxWidth().padding(inset)
+
+DomposableColumn(DomposableModifier.contentGutter(24.dp)) {
+    FeatureContent()
+}
+```
+
+Import these types and operations from `ui` and `foundation`, as in the theme examples. Parameters are typed values, and chaining returns a new modifier. Reusing a base modifier does not change its previous consumers. Compose built-in operations rather than inspecting or rewriting an existing chain.
+
 Use built-in operations for constraints, shape, border, child weight/alignment and controlled
 scrolling. A product-specific operation can implement `DomposableModifierElement` and be appended
 with `modifier.then(element)`; the single ordered `elements` chain keeps it in place between
 built-in operations.
 
-Native providers consume `toComposeModifier(operationRenderer = ...)`. HTML providers consume
+```kotlin
+data class BrandElevation(val level: Int) : DomposableModifierElement {
+    init { require(level in 0..3) }
+}
+
+fun DomposableModifier.brandElevation(level: Int): DomposableModifier =
+    then(BrandElevation(level))
+```
+
+`BrandElevation` belongs to the application's design system. Its native and HTML handlers translate each level into the appropriate shadow; the common feature only calls `.brandElevation(2)`.
+
+Native providers consume `toComposeModifier(operationRenderer = ...)`. HTML content decorators use `LocalDomposableHtmlModifierDecorationRenderer` or the explicit `decorationRenderer` parameter to compose markup around the remaining chain. Attribute-only HTML providers consume
 `DomposableHtmlModifiers(modifier, operationRenderer = ...)`. Providers can also install
 `LocalDomposableNativeModifierRenderer` or `LocalDomposableHtmlModifierRenderer` for their
 children. Each custom element needs native and HTML handling. An unhandled element fails visibly;
 it is never silently discarded. Keep product token roles in that provider, outside feature code.
+
+Keep the extension boundary small: portable modifiers describe layout, drawing, input and semantics. Component-specific parameters, such as a button's selected colors or a field's error styling, belong in that component's props or appearance. Do not expose mutable internal fields, arbitrary property-name setters or DOM/CSS objects in the shared modifier API. A missing portable behavior can become a typed custom element without changing the framework's built-in operation set.
 
 Inside native Row, Column and Box renderer content, install the respective
 `ProvideDomposableRowModifierScope`, `ProvideDomposableColumnModifierScope` or
@@ -263,3 +303,80 @@ observation and cleanup; the renderer owns layout constraints and overflow style
 `state.value` back to `scrollTop` during recomposition or calling `scrollTo` from an `onScroll`
 listener: those paths would interrupt animation. Standard Domposable scroll modifiers already
 install this binding. Native renderers use the portable modifier adapter.
+
+## Theme defaults and component overrides
+
+Theme settings are scoped to the composables beneath the theme, rather than mutable global branding. `DomposableMaterialTheme()` supplies Material defaults. Override only the brand values and component styles you need; nested themes inherit their current values.
+
+```kotlin
+val brandStyles = DomposableComponentStyles(
+    button = DomposableButtonAppearance(
+        shape = DomposableShape.Circle,
+        minHeight = 48.dp,
+        contentPadding = DomposableInsets(start = 20.dp, end = 20.dp),
+    ),
+    textField = DomposableTextFieldAppearance(
+        colors = DomposableTextFieldColors(
+            outline = DomposableStateColors(
+                unfocused = DomposableColor(0xFF74798C),
+                focused = DomposableColor(0xFF77503B),
+                error = DomposableColor(0xFFBA1A1A),
+            ),
+        ),
+        shape = DomposableShape.Rounded(4.dp),
+        floatingLabel = true,
+    ),
+)
+
+DomposableMaterialTheme(
+    colors = DomposableColors(
+        primary = DomposableColor(0xFF77503B),
+        onPrimary = DomposableColor(0xFFFFFFFF),
+    ),
+    styles = brandStyles,
+) {
+    DomposableButton(
+        onClick = model::save,
+        loading = saving,
+        loadingLabel = "Saving changes",
+    ) { DomposableText("Save") }
+
+    // Copy the theme default when overriding one value for this control.
+    DomposableButton(
+        onClick = model::delete,
+        appearance = DomposableTheme.styles.button.copy(
+            container = DomposableColor(0xFFBA1A1A),
+            content = DomposableColor(0xFFFFFFFF),
+        ),
+    ) { DomposableText("Delete") }
+}
+```
+
+The types above live in `io.github.samuolis.domposable.foundation`; component calls and the current `DomposableTheme` values live in `io.github.samuolis.domposable.ui`. Import `foundation.dp` for portable dimensions and `material.DomposableMaterialTheme` for the standard renderers.
+
+The ordinary theme API accepts `colors`, `typography`, `shapes`, `styles` and `designLanguage`, all optional. `DomposableTheme.colors`, `.typography`, `.shapes` and `.styles` expose the nearest theme. Tokens are the underlying design values; the `DomposableTokens` bundle remains available for custom provider and host integrations, rather than being required for ordinary branding.
+
+Copy the current styles when a section changes just one component family. Its colors, typography, shapes and other component defaults stay inherited:
+
+```kotlin
+DomposableMaterialTheme(
+    styles = DomposableTheme.styles.copy(
+        button = DomposableTheme.styles.button.copy(minHeight = 56.dp),
+    ),
+) {
+    CheckoutActions()
+}
+```
+
+The enclosing theme resumes after this section. An application adapter can centralize these mappings while feature code keeps its existing component calls.
+
+A null appearance parameter uses the theme's component defaults. Supplying an appearance replaces those defaults for that call; use `copy` to inherit the settings you want to keep. Unspecified values inside an appearance use the renderer's default. Button colors include separate disabled container, content and border values. Text-field palettes group text, label, placeholder, container, outline, cursor, icon and supporting colors by unfocused, focused, disabled and error state. Field appearance also configures slot typography, inner padding, minimum height and optional multiline autosizing. Loading prevents activation, keeps the content's measured size, and shows the provided accessible loading label without switching to disabled colors.
+
+Checkbox, switch and radio appearances configure label and description typography, including text color, control placement, label spacing and `descriptionSpacing`. Use `showLabel = false` when an app-owned row supplies the visible label; the control retains its accessible label without introducing a nested HTML label. Supply a shared `groupName` for related radio buttons to enable native browser arrow-key selection.
+
+Field padding and outline-width overrides apply to the inner decoration on HTML and Compose UI. When no overrides are supplied, native fields keep Material's standard decoration path.
+
+These defaults style the standard Material renderers. A custom provider owns its rendering and must explicitly honor the appearance fields. Native rendering uses Compose UI and HTML rendering uses real browser controls; the renderers share configuration without requiring identical DOM and native widget trees.
+
+
+The [Material catalog](material-catalog.md) lists the standard and expressive variants and provides examples for selection controls, queued messages, badge anchors and screen chrome.

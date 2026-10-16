@@ -15,6 +15,7 @@ import io.github.samuolis.domposable.ui.DomposableSelectProps
 import io.github.samuolis.domposable.ui.DomposableSnackbarProps
 import io.github.samuolis.domposable.ui.DomposableTooltipProps
 import io.github.samuolis.domposable.ui.DomposableTopAppBarProps
+import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableAttributes
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
@@ -26,6 +27,7 @@ import org.jetbrains.compose.web.dom.Label
 import org.jetbrains.compose.web.dom.Option
 import org.jetbrains.compose.web.dom.Select
 import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.TagElement
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLSelectElement
@@ -38,14 +40,64 @@ internal fun HtmlTopAppBar(
     props: DomposableTopAppBarProps,
     modifier: DomposableModifier,
 ) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.topAppBar
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
-            classes("d-app-bar")
+            classes("d-app-bar", "d-app-bar-${props.variant.name.lowercase()}")
+            style {
+                surfaceAppearance(appearance)
+                if (props.variant == io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.TwoRows) {
+                    property("display", "flex")
+                    property("flex-direction", "column")
+                    property("align-items", "stretch")
+                }
+                property(
+                    "min-height",
+                    when (props.variant) {
+                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.Small,
+                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.CenterAligned,
+                        -> "64px"
+
+                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.Medium,
+                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.MediumFlexible,
+                        -> "112px"
+
+                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.TwoRows -> "120px"
+
+                        else -> "152px"
+                    },
+                )
+                if (props.variant ==
+                    io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.CenterAligned
+                ) {
+                    property("position", "relative")
+                }
+            }
         }) {
-            props.navigationIcon()
-            H2 { Text(props.title) }
-            Div(attrs = { classes("d-app-bar-actions") }) { props.actions() }
+            if (props.variant == io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.TwoRows) {
+                Div(attrs = { classes("d-app-bar-row") }) {
+                    props.navigationIcon()
+                    H2(attrs = {
+                        classes("d-app-bar-title")
+                        attr("data-variant", props.variant.name.lowercase())
+                    }) { Text(props.title) }
+                    Div(attrs = { classes("d-app-bar-actions") }) { props.actions() }
+                }
+                Div(attrs = { classes("d-app-bar-second-row") }) {
+                    props.subtitle?.let { Span { Text(it) } }
+                }
+            } else {
+                props.navigationIcon()
+                Div(attrs = { classes("d-app-bar-heading") }) {
+                    H2(attrs = {
+                        classes("d-app-bar-title")
+                        attr("data-variant", props.variant.name.lowercase())
+                    }) { Text(props.title) }
+                    props.subtitle?.let { Span(attrs = { classes("d-app-bar-subtitle") }) { Text(it) } }
+                }
+                Div(attrs = { classes("d-app-bar-actions") }) { props.actions() }
+            }
         }
     }
 }
@@ -56,12 +108,44 @@ internal fun HtmlFloatingActionButton(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.floatingActionButton
     DomposableHtmlModifiers(modifier) {
         Button(attrs = {
             domposableAttributes(modifier)
             attr("type", "button")
             attr("aria-label", props.label)
-            classes("d-button", "d-fab")
+            classes("d-button", "d-fab", "d-fab-${props.size.name.lowercase()}")
+            style {
+                surfaceAppearance(appearance)
+                appearance.container?.let { property("background-color", it.css()) }
+                appearance.content?.let { property("color", it.css()) }
+                if (props.extended) property("padding-inline", "20px")
+                if (props.extended) property("gap", "12px")
+                if (props.extended) {
+                    property("width", "auto")
+                } else {
+                    property(
+                        "width",
+                        when (props.size) {
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Small -> "40px"
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Medium -> "80px"
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Large -> "96px"
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Standard -> "56px"
+                        },
+                    )
+                }
+                if (!props.extended) {
+                    property(
+                        "height",
+                        when (props.size) {
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Small -> "40px"
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Medium -> "80px"
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Large -> "96px"
+                            io.github.samuolis.domposable.foundation.DomposableFabSize.Standard -> "56px"
+                        },
+                    )
+                }
+            }
             onClick { props.onClick() }
         }) { content() }
     }
@@ -72,10 +156,12 @@ internal fun HtmlSnackbar(
     props: DomposableSnackbarProps,
     modifier: DomposableModifier,
 ) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.snackbar
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-snackbar-message")
+            style { surfaceAppearance(appearance) }
         }) {
             Span(attrs = { attr("role", "status") }) { Text(props.message) }
             props.onAction?.let { action ->
@@ -100,6 +186,7 @@ internal fun HtmlSelect(
     modifier: DomposableModifier,
 ) {
     val inputId = remember { "d-select-${nextControlId++}" }
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.select
     var element by remember { mutableStateOf<HTMLSelectElement?>(null) }
     SideEffect { element?.value = props.value }
     DomposableHtmlModifiers(modifier) {
@@ -113,6 +200,27 @@ internal fun HtmlSelect(
                     onDispose { element = null }
                 }
                 if (!props.enabled) disabled()
+                style {
+                    (if (props.enabled) appearance.container else appearance.disabledContainer)?.let {
+                        property("background-color", it.css())
+                    }
+                    (if (props.enabled) appearance.content else appearance.disabledContent)?.let {
+                        property(
+                            "color",
+                            it.css(),
+                        )
+                    }
+                    (if (props.enabled) appearance.border else appearance.disabledBorder)?.let {
+                        property("border", "${appearance.borderWidth?.value ?: 1f}px solid ${it.css()}")
+                    }
+                    appearance.borderWidth?.let { property("border-width", "${it.value}px") }
+                    appearance.shape?.let { materialShape(it) }
+                    appearance.minHeight?.let { property("min-height", "${it.value}px") }
+                    appearance.minWidth?.let { property("min-width", "${it.value}px") }
+                    appearance.contentPadding?.let { property("padding", it.cssPadding()) }
+                    appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                    property("accent-color", appearance.container?.css() ?: "var(--d-primary)")
+                }
                 props.error?.let {
                     attr("aria-invalid", "true")
                     attr("aria-describedby", "$inputId-error")
@@ -143,29 +251,50 @@ internal fun HtmlSegmentedButtons(
 ) {
     val generatedGroup = remember { "d-segments-${nextControlId++}" }
     val group = props.groupName ?: generatedGroup
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.segmentedButtons
+    val formEnabled =
+        io.github.samuolis.domposable.ui
+            .domposableFormEnabled()
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-segments")
             attr("role", "radiogroup")
             attr("aria-label", props.label)
+            style { itemAppearance(appearance) }
         }) {
             props.labels.forEachIndexed { index, label ->
+                val canSelect = formEnabled && props.enabled && props.optionEnabled[index]
                 Label(attrs = { classes("d-segment") }) {
                     Input(InputType.Radio, attrs = {
                         attr("name", group)
                         checked(index == props.selectedIndex)
-                        if (!props.enabled || !props.optionEnabled[index]) disabled()
+                        if (!canSelect) disabled()
                         props.optionTestTags[index]?.let { attr("data-testid", it) }
+                        onClick {
+                            if (canSelect && props.allowReselect && index == props.selectedIndex) {
+                                props.onSelect(index)
+                            }
+                        }
                         onChange {
-                            if (it.value &&
-                                (props.allowReselect || index != props.selectedIndex)
-                            ) {
+                            val selectionChanged = props.allowReselect || index != props.selectedIndex
+                            if (canSelect && it.value && selectionChanged) {
                                 props.onSelect(index)
                             }
                         }
                     })
-                    Span { Text(label) }
+                    Span(attrs = {
+                        classes("d-segment-surface")
+                        style { itemAppearance(appearance, index == props.selectedIndex) }
+                    }) {
+                        if (props.showSelectedIcon && index == props.selectedIndex) {
+                            Span(attrs = {
+                                attr("aria-hidden", "true")
+                                classes("d-segment-checkmark")
+                            }) { Text("✓") }
+                        }
+                        Text(label)
+                    }
                 }
             }
         }
@@ -177,6 +306,7 @@ internal fun HtmlRangeSlider(
     props: DomposableRangeSliderProps,
     modifier: DomposableModifier,
 ) {
+    val colors = props.colors ?: LocalDomposableTokens.current.components.rangeSlider
     val step =
         if (props.steps == 0) {
             "any"
@@ -192,6 +322,7 @@ internal fun HtmlRangeSlider(
                 Label(attrs = { classes("d-field") }) {
                     Text(if (start) props.startLabel else props.endLabel)
                     Input(InputType.Range, attrs = {
+                        classes("d-slider")
                         attr("aria-label", if (start) props.startLabel else props.endLabel)
                         attr("min", props.range.start.toString())
                         attr("max", props.range.endInclusive.toString())
@@ -203,6 +334,16 @@ internal fun HtmlRangeSlider(
                         )
                         value((if (start) props.value.start else props.value.endInclusive).toString())
                         if (!props.enabled) disabled()
+                        val current = if (start) props.value.start else props.value.endInclusive
+                        val percent =
+                            (
+                                (current - props.range.start) / (props.range.endInclusive - props.range.start) *
+                                    100f
+                            ).coerceIn(0f, 100f)
+                        style {
+                            sliderColors(colors, props.enabled)
+                            property("--d-slider-progress", "$percent%")
+                        }
                         onInput { event ->
                             event.target.value.toFloatOrNull()?.let { value ->
                                 props.onValueChange(
@@ -248,6 +389,7 @@ internal fun HtmlTooltip(
         }
     }
     val visible = (hovering || focused) && !dismissed
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.tooltip
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
@@ -296,12 +438,17 @@ internal fun HtmlTooltip(
             }
         }) {
             content()
-            Span(attrs = {
+            TagElement<HTMLElement>(if (props.action == null) "span" else "div", applyAttrs = {
                 id(tooltipId)
-                attr("role", "tooltip")
+                attr("role", if (props.action == null) "tooltip" else "dialog")
                 classes("d-tooltip")
+                style { surfaceAppearance(appearance) }
                 if (!visible) attr("hidden", "")
-            }) { Text(props.text) }
+            }) {
+                props.title?.let { H2 { Text(it) } }
+                Span { Text(props.text) }
+                props.action?.invoke()
+            }
         }
     }
 }

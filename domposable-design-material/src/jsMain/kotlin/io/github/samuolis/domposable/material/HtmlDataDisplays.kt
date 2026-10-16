@@ -9,8 +9,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import io.github.samuolis.domposable.foundation.DomposableChartAppearance
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.ui.DomposableChartSeries
 import io.github.samuolis.domposable.ui.DomposableChartSize
 import io.github.samuolis.domposable.ui.DomposableDataTableColumn
@@ -64,6 +66,8 @@ internal fun HtmlLineChart(
     props: DomposableLineChartProps,
     modifier: DomposableModifier,
 ) {
+    val tokens = LocalDomposableTokens.current
+    val appearance = props.appearance ?: tokens.components.lineChart
     val gap =
         if (props.sizePreset == DomposableChartSize.Thumbnail ||
             props.sizePreset == DomposableChartSize.Compact
@@ -81,19 +85,34 @@ internal fun HtmlLineChart(
                 property("gap", "${gap}px")
                 property("width", "100%")
                 property("min-width", "0")
+                appearance.background?.let { property("background-color", it.css()) }
+                appearance.labelAppearance?.let { applyCatalogTextAppearance(it) }
             }
         }) {
-            if (props.displayTitle) props.title?.let { TagElement<HTMLElement>("h2", applyAttrs = {}) { Text(it) } }
-            props.description?.let { Span { Text(it) } }
+            if (props.displayTitle) {
+                props.title?.let { title ->
+                    TagElement<HTMLElement>("h2", applyAttrs = {
+                        style { appearance.titleAppearance?.let { applyCatalogTextAppearance(it) } }
+                    }) { Text(title) }
+                }
+            }
+            props.description?.let { description ->
+                Span(attrs = { style { appearance.labelAppearance?.let { applyCatalogTextAppearance(it) } } }) {
+                    Text(description)
+                }
+            }
             if (props.series.any { it.values.isNotEmpty() }) {
-                HtmlLineChartSvg(props)
+                HtmlLineChartSvg(props, appearance)
             }
         }
     }
 }
 
 @Composable
-private fun HtmlLineChartSvg(props: DomposableLineChartProps) {
+private fun HtmlLineChartSvg(
+    props: DomposableLineChartProps,
+    appearance: DomposableChartAppearance,
+) {
     val pointCount = chartPointCount(props.series, props.xAxisLabels)
     val currentPointCount by rememberUpdatedState(pointCount)
     val height = props.sizePreset.materialHeight()
@@ -118,6 +137,9 @@ private fun HtmlLineChartSvg(props: DomposableLineChartProps) {
             svg.setAttribute("role", "img")
             svg.setAttribute("tabindex", "0")
             svg.setAttribute("style", "display: block; width: 100%; height: 100%;")
+            appearance.background?.let {
+                svg.setAttribute("style", "display:block;width:100%;height:100%;background-color:${it.css()};")
+            }
             host.appendChild(svg)
             svgNode.value = svg
 
@@ -206,6 +228,9 @@ private fun HtmlLineChartSvg(props: DomposableLineChartProps) {
                 tokens.colors.surfaceVariant,
                 tokens.colors.outline,
                 tokens.colors.error,
+                appearance,
+                tokens.colors.surfaceVariant,
+                tokens.typography.fontFamily,
             )
         }
     }
@@ -233,6 +258,7 @@ internal fun HtmlValueChart(
     modifier: DomposableModifier,
 ) {
     val tokens = LocalDomposableTokens.current
+    val appearance = props.appearance ?: tokens.components.valueChart
     val maxValue =
         props.series
             .flatMap { it.values }
@@ -247,11 +273,19 @@ internal fun HtmlValueChart(
                 property("display", "flex")
                 property("flex-direction", "column")
                 property("gap", "${gap}px")
+                appearance.background?.let { property("background-color", it.css()) }
+                appearance.labelAppearance?.let { applyCatalogTextAppearance(it) }
             }
         }) {
-            TagElement<HTMLElement>("h2", applyAttrs = {}) { Text(props.title) }
-            Span { Text(props.description) }
-            TagElement<HTMLElement>("h3", applyAttrs = {}) { Text(props.dataTableLabel) }
+            TagElement<HTMLElement>("h2", applyAttrs = {
+                style { appearance.titleAppearance?.let { applyCatalogTextAppearance(it) } }
+            }) { Text(props.title) }
+            Span(attrs = {
+                style { appearance.labelAppearance?.let { applyCatalogTextAppearance(it) } }
+            }) { Text(props.description) }
+            TagElement<HTMLElement>("h3", applyAttrs = {
+                style { appearance.titleAppearance?.let { applyCatalogTextAppearance(it) } }
+            }) { Text(props.dataTableLabel) }
             props.series.forEach { series ->
                 key(series.key) {
                     Div(attrs = { classes("d-value-chart-series") }) {
@@ -270,8 +304,8 @@ internal fun HtmlValueChart(
                                     chartColor(
                                         series,
                                         tokens.colors.primary,
-                                        tokens.colors.surfaceVariant,
-                                        tokens.colors.outline,
+                                        tokens.colors.secondary ?: tokens.colors.surfaceVariant,
+                                        tokens.colors.tertiary ?: tokens.colors.outline,
                                         tokens.colors.error,
                                     )
                                 Div(attrs = {
@@ -293,6 +327,7 @@ internal fun HtmlValueChart(
                                         style {
                                             property("width", "100%")
                                             property("accent-color", color)
+                                            appearance.grid?.let { property("--d-progress-track", it.css()) }
                                         }
                                     }) { }
                                     Span { Text(props.formatValue(point.value)) }
@@ -311,6 +346,7 @@ internal fun HtmlDataTable(
     props: DomposableDataTableProps,
     modifier: DomposableModifier,
 ) {
+    val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
@@ -327,6 +363,7 @@ internal fun HtmlDataTable(
                     property("border-collapse", "collapse")
                     property("table-layout", "fixed")
                     property("width", "100%")
+                    appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                     if (props.allowHorizontalOverflow) {
                         property(
                             "min-width",
@@ -344,7 +381,14 @@ internal fun HtmlDataTable(
                                     attr("aria-label", column.accessibleLabel)
                                     style {
                                         property("text-align", column.alignment.htmlTextAlign())
-                                        property("padding", props.sizePreset.htmlCellPadding())
+                                        property(
+                                            "padding",
+                                            appearance.cellPadding?.cssPadding() ?: props.sizePreset.htmlCellPadding(),
+                                        )
+                                        appearance.headerContainer?.let { property("background-color", it.css()) }
+                                        appearance.headerContent?.let { property("color", it.css()) }
+                                        appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                        appearance.headerTextAppearance?.let { applyCatalogTextAppearance(it) }
                                     }
                                 }) { Text(column.label) }
                             }
@@ -366,6 +410,15 @@ internal fun HtmlDataTable(
                                 attr("aria-rowindex", (index + 2).toString())
                                 attr("aria-selected", row.selected.toString())
                                 row.accessibleLabel?.let { attr("aria-label", it) }
+                                style {
+                                    (if (row.selected) appearance.selectedContainer else appearance.rowContainer)?.let {
+                                        property("background-color", it.css())
+                                    }
+                                    (if (row.selected) appearance.selectedContent else appearance.rowContent)?.let {
+                                        property("color", it.css())
+                                    }
+                                    appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                }
                                 if (rowAction != null) {
                                     attr("tabindex", "0")
                                     onClick { rowAction(row.key) }
@@ -404,7 +457,31 @@ internal fun HtmlDataTable(
                                                 attr("data-column-label", column.accessibleLabel)
                                                 style {
                                                     property("text-align", column.alignment.htmlTextAlign())
-                                                    property("padding", props.sizePreset.htmlCellPadding())
+                                                    property(
+                                                        "padding",
+                                                        appearance.cellPadding?.cssPadding()
+                                                            ?: props.sizePreset.htmlCellPadding(),
+                                                    )
+                                                    val rowContainer =
+                                                        if (row.selected) {
+                                                            appearance.selectedContainer
+                                                        } else {
+                                                            appearance.rowContainer
+                                                        }
+                                                    val rowContent =
+                                                        if (row.selected) {
+                                                            appearance.selectedContent
+                                                        } else {
+                                                            appearance.rowContent
+                                                        }
+                                                    rowContainer?.let { property("background-color", it.css()) }
+                                                    rowContent?.let { property("color", it.css()) }
+                                                    appearance.border?.let {
+                                                        property(
+                                                            "border-bottom",
+                                                            "1px solid ${it.css()}",
+                                                        )
+                                                    }
                                                     if (!props.allowHorizontalOverflow) {
                                                         property(
                                                             "overflow-wrap",
@@ -418,7 +495,31 @@ internal fun HtmlDataTable(
                                                 attr("data-column-label", column.accessibleLabel)
                                                 style {
                                                     property("text-align", column.alignment.htmlTextAlign())
-                                                    property("padding", props.sizePreset.htmlCellPadding())
+                                                    property(
+                                                        "padding",
+                                                        appearance.cellPadding?.cssPadding()
+                                                            ?: props.sizePreset.htmlCellPadding(),
+                                                    )
+                                                    val rowContainer =
+                                                        if (row.selected) {
+                                                            appearance.selectedContainer
+                                                        } else {
+                                                            appearance.rowContainer
+                                                        }
+                                                    val rowContent =
+                                                        if (row.selected) {
+                                                            appearance.selectedContent
+                                                        } else {
+                                                            appearance.rowContent
+                                                        }
+                                                    rowContainer?.let { property("background-color", it.css()) }
+                                                    rowContent?.let { property("color", it.css()) }
+                                                    appearance.border?.let {
+                                                        property(
+                                                            "border-bottom",
+                                                            "1px solid ${it.css()}",
+                                                        )
+                                                    }
                                                     if (!props.allowHorizontalOverflow) {
                                                         property(
                                                             "overflow-wrap",
@@ -479,6 +580,8 @@ private fun htmlSvgText(
     anchor: String,
     fontSize: String,
     color: String,
+    appearance: DomposableTextAppearance? = null,
+    fontFamily: String = "system-ui, sans-serif",
 ) {
     val node =
         htmlSvgElement(
@@ -488,11 +591,13 @@ private fun htmlSvgText(
                 "x" to x.toString(),
                 "y" to y.toString(),
                 "text-anchor" to anchor,
-                "font-size" to fontSize,
+                "font-size" to (appearance?.fontSize?.toString() ?: fontSize),
                 "fill" to color,
-                "font-family" to "system-ui, sans-serif",
+                "font-family" to fontFamily,
             ),
         )
+    appearance?.fontWeight?.let { node.setAttribute("font-weight", it.css()) }
+    appearance?.letterSpacing?.let { node.setAttribute("letter-spacing", it.toString()) }
     node.textContent = text
 }
 
@@ -520,14 +625,26 @@ private fun drawHtmlChart(
     secondary: DomposableColor,
     tertiary: DomposableColor,
     error: DomposableColor,
+    appearance: DomposableChartAppearance,
+    defaultAxis: DomposableColor,
+    fontFamily: String,
 ) {
     while (svg.firstChild != null) svg.removeChild(svg.firstChild!!)
     val pointCount = chartPointCount(props.series, props.xAxisLabels)
     val range = chartValueRange(props.series)
     val bottom = (height - DATA_CHART_BOTTOM_INSET).toDouble()
     val plotHeight = (bottom - DATA_CHART_TOP).coerceAtLeast(1.0)
-    drawHtmlChartGrid(svg, props, range, plotHeight, secondary.css(), tertiary.css())
-    drawHtmlSelectedIndex(svg, selectedIndex, pointCount, bottom, primary.css())
+    drawHtmlChartGrid(
+        svg,
+        props,
+        range,
+        plotHeight,
+        appearance.axis?.css() ?: defaultAxis.css(),
+        appearance.grid?.css() ?: tertiary.css(),
+        appearance.labelAppearance,
+        fontFamily,
+    )
+    drawHtmlSelectedIndex(svg, selectedIndex, pointCount, bottom, (appearance.selection ?: primary).css())
     drawHtmlChartSeries(
         svg,
         props.series,
@@ -540,7 +657,15 @@ private fun drawHtmlChart(
         error,
         selectedIndex,
     )
-    drawHtmlChartAxisLabels(svg, props, pointCount, height, secondary.css())
+    drawHtmlChartAxisLabels(
+        svg,
+        props,
+        pointCount,
+        height,
+        appearance.axis?.css() ?: defaultAxis.css(),
+        appearance.labelAppearance,
+        fontFamily,
+    )
 }
 
 private fun drawHtmlChartGrid(
@@ -550,6 +675,8 @@ private fun drawHtmlChartGrid(
     plotHeight: Double,
     labelColor: String,
     gridColor: String,
+    labelAppearance: DomposableTextAppearance?,
+    fontFamily: String,
 ) {
     repeat(DOMPOSABLE_CHART_GRID_LINE_COUNT) { tick ->
         val fraction = tick.toDouble() / DOMPOSABLE_CHART_GRID_DIVISION_COUNT
@@ -576,6 +703,8 @@ private fun drawHtmlChartGrid(
             "end",
             DATA_CHART_FONT_SIZE.toString(),
             labelColor,
+            labelAppearance,
+            fontFamily,
         )
     }
 }
@@ -659,6 +788,8 @@ private fun drawHtmlChartAxisLabels(
     pointCount: Int,
     height: Int,
     color: String,
+    labelAppearance: DomposableTextAppearance?,
+    fontFamily: String,
 ) {
     chartTickIndices(pointCount).forEach { index ->
         chartAxisLabel(props.series, props.xAxisLabels, index, pointCount, centerSingleton = true)?.let { label ->
@@ -676,6 +807,8 @@ private fun drawHtmlChartAxisLabels(
                 anchor,
                 DATA_CHART_FONT_SIZE.toString(),
                 color,
+                labelAppearance,
+                fontFamily,
             )
         }
     }
