@@ -22,11 +22,11 @@ class GradientHtmlInteropTest {
             )
 
         assertEquals(
-            "linear-gradient(to bottom, rgba(0,0,0,0.0) 0.0%, rgba(16,32,48,1.0) 50.0%, rgba(255,255,255,1.0) 100.0%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(16,32,48,1) 50%, rgba(255,255,255,1) 100%)",
             gradient.css(),
         )
         assertEquals(
-            "linear-gradient(to right, rgba(0,0,0,0.0) 0.0%, rgba(16,32,48,1.0) 50.0%, rgba(255,255,255,1.0) 100.0%)",
+            "linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(16,32,48,1) 50%, rgba(255,255,255,1) 100%)",
             gradient.copy(axis = DomposableLayoutAxis.Horizontal).css(),
         )
     }

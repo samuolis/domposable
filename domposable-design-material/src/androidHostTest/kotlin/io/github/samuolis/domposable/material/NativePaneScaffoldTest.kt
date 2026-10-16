@@ -30,6 +30,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import io.github.samuolis.domposable.foundation.dp as portableDp
 
 @RunWith(RobolectricTestRunner::class)
@@ -68,6 +69,7 @@ class NativePaneScaffoldTest {
                         val instance = remember { if (entry == "list") ++listCompositions else 0 }
                         if (entry == "list") {
                             BoxWithConstraints(Modifier.fillMaxWidth()) {
+                                assertTrue(constraints.hasBoundedWidth)
                                 DomposableBox(
                                     DomposableModifier.fillMaxWidth().height(40.portableDp).testId(entry),
                                 ) { DomposableText("$entry $instance") }
