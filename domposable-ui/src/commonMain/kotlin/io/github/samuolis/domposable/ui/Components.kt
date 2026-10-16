@@ -105,6 +105,7 @@ data class DomposableColumnProps(
 data class DomposableRowProps(
     val gap: DomposableLength = 0.dp,
     val alignment: DomposableAlignment = DomposableAlignment.Start,
+    val stretch: Boolean = false,
 )
 
 @DomposableComponent("FlowRow")
@@ -294,6 +295,7 @@ data class DomposableCardProps(
     val enabled: Boolean = true,
     val href: String? = null,
     val actionLabel: String? = null,
+    val contentPadding: DomposableInsets? = null,
 )
 
 @DomposableComponent("Surface")
@@ -334,6 +336,10 @@ data class DomposableBadgeProps(
     val text: String? = null,
     val appearance: DomposableSurfaceAppearance? = null,
     val label: String? = null,
+    val contentPadding: io.github.samuolis.domposable.foundation.DomposableInsets? = null,
+    val minWidth: DomposableLength? = null,
+    val minHeight: DomposableLength? = null,
+    val content: (@Composable () -> Unit)? = null,
 )
 
 @DomposableComponent("Chip")
@@ -354,6 +360,7 @@ data class DomposableAvatarProps(
     val initials: String,
     val description: String,
     val appearance: DomposableSurfaceAppearance? = null,
+    val content: (@Composable () -> Unit)? = null,
 )
 
 @DomposableComponent("Banner")
@@ -532,6 +539,14 @@ fun DomposableTheme(
     content: @Composable () -> Unit,
 ) = DomposableRow(DomposableRowProps(gap, alignment), modifier, content)
 
+@Composable fun DomposableRow(
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
+    stretch: Boolean,
+    content: @Composable () -> Unit,
+) = DomposableRow(DomposableRowProps(gap, alignment, stretch), modifier, content)
+
 @Composable fun DomposableFlowRow(
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 8.dp,
@@ -561,6 +576,7 @@ fun DomposableTheme(
     enabled: Boolean = true,
     href: String? = null,
     actionLabel: String? = null,
+    contentPadding: DomposableInsets? = null,
     content: @Composable () -> Unit,
 ) = DomposableCard(
     DomposableCardProps(
@@ -570,6 +586,7 @@ fun DomposableTheme(
         enabled = enabled,
         href = href,
         actionLabel = actionLabel,
+        contentPadding = contentPadding,
     ),
     modifier,
     content,

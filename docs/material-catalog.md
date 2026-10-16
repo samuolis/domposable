@@ -322,3 +322,25 @@ DomposableFlowRow(gap = 12.dp) {
 ## Supported picker variants
 
 Time pickers support `Dial` and `Input`; dialogs support the baseline `TimePicker` variant. The newer upstream `TimeScroll` and `VibrantTimePickerDialog` require the 1.13 alpha dependency stack and are excluded. `DomposableScrollField` remains available because the compatible Material baseline already provides that component.
+
+## Compose custom badge content
+
+Use the family appearance for brand colors and shape. Badge geometry stays explicit when a count or status needs different sizing; its defaults keep Material badge sizing.
+
+```kotlin
+DomposableBadge(
+    label = "Registration closes soon",
+    appearance = LocalDomposableTokens.current.components.badge.copy(
+        container = LocalDomposableTokens.current.colors.secondaryContainer,
+    ),
+    minHeight = 24.dp,
+    contentPadding = DomposableInsets(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
+) {
+    DomposableRow(gap = 4.dp) {
+        DomposableText("Soon")
+        DomposableIcon("schedule", description = null)
+    }
+}
+```
+
+A supplied `content` slot replaces the default text or dot. Avatar content works the same way: the library retains the avatar surface and description while the app can provide an image with its own loading and fallback policy.

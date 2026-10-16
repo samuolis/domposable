@@ -33,11 +33,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -53,6 +57,7 @@ import io.github.samuolis.domposable.foundation.DomposableLayoutAxis
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSize
+import kotlin.math.roundToInt
 
 /** Installed by a product provider; explicit call-site renderers take precedence. */
 val LocalDomposableNativeModifierRenderer =
@@ -114,6 +119,40 @@ fun DomposableModifier.toComposeModifier(
                     result.widthIn(max = operation.length.value.dp)
                 }
 
+                is DomposableModifierOperation.FillWidthFraction -> {
+                    result.layout { measurable, constraints ->
+                        val requestedMin =
+                            operation.minWidth
+                                ?.value
+                                ?.dp
+                                ?.roundToPx() ?: 0
+                        val requestedMax =
+                            operation.maxWidth
+                                ?.value
+                                ?.dp
+                                ?.roundToPx() ?: constraints.maxWidth
+                        val minWidth = maxOf(constraints.minWidth, requestedMin).coerceAtMost(constraints.maxWidth)
+                        val maxWidth = minOf(constraints.maxWidth, requestedMax).coerceAtLeast(minWidth)
+                        if (constraints.hasBoundedWidth) {
+                            val width =
+                                (constraints.maxWidth * operation.fraction).roundToInt().coerceIn(minWidth, maxWidth)
+                            val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                            layout(width, placeable.height.coerceIn(constraints.minHeight, constraints.maxHeight)) {
+                                placeable.placeRelative(0, 0)
+                            }
+                        } else {
+                            val placeable =
+                                measurable.measure(constraints.copy(minWidth = minWidth, maxWidth = maxWidth))
+                            layout(
+                                placeable.width,
+                                placeable.height.coerceIn(constraints.minHeight, constraints.maxHeight),
+                            ) {
+                                placeable.placeRelative(0, 0)
+                            }
+                        }
+                    }
+                }
+
                 is DomposableModifierOperation.MinWidth -> {
                     result.widthIn(min = operation.length.value.dp)
                 }
@@ -130,6 +169,10 @@ fun DomposableModifier.toComposeModifier(
                     result.fillMaxWidth()
                 }
 
+                DomposableModifierOperation.PointerPassthrough -> {
+                    result
+                }
+
                 DomposableModifierOperation.FillHeight -> {
                     result.fillMaxHeight()
                 }
@@ -140,6 +183,24 @@ fun DomposableModifier.toComposeModifier(
 
                 is DomposableModifierOperation.ShapeBackground -> {
                     result.background(Color(operation.color.argb), operation.shape.nativeShape())
+                }
+
+                is DomposableModifierOperation.GradientBackground -> {
+                    val colorStops =
+                        operation.gradient.stops
+                            .map { it.position to Color(it.color.argb) }
+                            .toTypedArray()
+                    val brush =
+                        when (operation.gradient.axis) {
+                            io.github.samuolis.domposable.foundation.DomposableLayoutAxis.Horizontal -> {
+                                Brush.horizontalGradient(*colorStops)
+                            }
+
+                            io.github.samuolis.domposable.foundation.DomposableLayoutAxis.Vertical -> {
+                                Brush.verticalGradient(*colorStops)
+                            }
+                        }
+                    result.background(brush, operation.shape.nativeShape())
                 }
 
                 is DomposableModifierOperation.Radius -> {
@@ -156,6 +217,44 @@ fun DomposableModifier.toComposeModifier(
                         Color(operation.color.argb),
                         operation.shape.nativeShape(),
                     )
+                }
+
+                is DomposableModifierOperation.EdgeBorder -> {
+                    result.drawBehind {
+                        val strokeWidth =
+                            operation.width.value.dp
+                                .toPx()
+                        val halfStroke = strokeWidth / 2f
+                        val startIsLeft = layoutDirection == androidx.compose.ui.unit.LayoutDirection.Ltr
+                        val (start, end) =
+                            when (operation.edge) {
+                                DomposableBorderEdge.Top -> {
+                                    Offset(0f, halfStroke) to Offset(size.width, halfStroke)
+                                }
+
+                                DomposableBorderEdge.End -> {
+                                    val x = if (startIsLeft) size.width - halfStroke else halfStroke
+                                    Offset(x, 0f) to Offset(x, size.height)
+                                }
+
+                                DomposableBorderEdge.Bottom -> {
+                                    Offset(0f, size.height - halfStroke) to Offset(size.width, size.height - halfStroke)
+                                }
+
+                                DomposableBorderEdge.Start -> {
+                                    val x = if (startIsLeft) halfStroke else size.width - halfStroke
+                                    Offset(x, 0f) to Offset(x, size.height)
+                                }
+                            }
+                        drawLine(Color(operation.color.argb), start, end, strokeWidth)
+                    }
+                }
+
+                is DomposableModifierOperation.Region -> {
+                    result.semantics {
+                        isTraversalGroup = true
+                        contentDescription = operation.label
+                    }
                 }
 
                 is DomposableModifierOperation.AspectRatio -> {

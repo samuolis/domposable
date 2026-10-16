@@ -20,6 +20,16 @@ final class SmokeTests: XCTestCase {
         tapVisible(app, "Change frame color")
         ready(app, "Custom counter: 1")
     }
+    func testSharedComposition() {
+        let app = XCUIApplication()
+        app.launch()
+        ready(app, "Task workspace")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Recipes")).firstMatch.tap()
+        ready(app, "Navigation recipes")
+        tapVisible(app, "Shared cards and adaptive panes")
+        ready(app, "Design workshop")
+        capture(app, "composition", renderedText: "Design workshop")
+    }
     private func ready(_ app: XCUIApplication, _ title: String) {
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", title)).firstMatch.waitForExistence(timeout: 30))
     }

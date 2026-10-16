@@ -5,6 +5,8 @@ import kotlinx.browser.window
 internal actual fun browserHistoryState(): String? =
     window.history.state.let { if (jsTypeOf(it) == "string") it as String else null }
 
+internal actual fun browserHistoryStateIsNull(): Boolean = js("window.history.state === null") as Boolean
+
 internal actual fun replaceBrowserHistoryState(
     value: String,
     url: String?,

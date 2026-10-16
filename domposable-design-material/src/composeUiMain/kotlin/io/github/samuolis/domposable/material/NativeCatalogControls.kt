@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -623,7 +624,12 @@ internal fun NativeCard(
         }
     val cardModifier = modifier.toComposeModifier().then(linkModifier)
     val styleContent: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
-        StyledContent(appearance.textAppearance, content)
+        val cardContent: @Composable () -> Unit = { StyledContent(appearance.textAppearance, content) }
+        props.contentPadding?.let { contentPadding ->
+            Box(Modifier.fillMaxWidth().padding(contentPadding.nativePadding())) {
+                cardContent()
+            }
+        } ?: cardContent()
     }
     if (onClick != null) {
         when (props.variant) {
@@ -675,6 +681,7 @@ internal fun NativeCard(
 private fun DomposableCardProps.isDefaultNativeCard(appearance: DomposableSurfaceAppearance): Boolean =
     listOf(
         appearance.isEmpty(),
+        contentPadding == null,
         variant == DomposableCardVariant.Filled,
         this.appearance == null,
         onClick == null,
@@ -751,8 +758,10 @@ internal fun NativeBadge(
                 Modifier.semantics { props.label?.let { contentDescription = it } }
             },
         )
-    if (appearance.isEmpty()) {
-        Badge(nativeModifier, content = props.text?.let { text -> { Text(text) } })
+    if (appearance.isEmpty() && props.contentPadding == null && props.minWidth == null && props.minHeight == null) {
+        val content: (@Composable androidx.compose.foundation.layout.RowScope.() -> Unit)? =
+            props.content?.let { custom -> { custom() } } ?: props.text?.let { text -> { Text(text) } }
+        Badge(nativeModifier, content = content)
     } else {
         val shape = appearance.nativeShape(MaterialTheme.shapes.small)
         Surface(
@@ -767,11 +776,25 @@ internal fun NativeBadge(
             shadowElevation = appearance.shadowElevation?.value?.dp ?: 0.dp,
             border = appearance.border?.let { BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()) },
         ) {
-            props.text?.let {
-                Text(
-                    it,
-                    style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelSmall),
-                )
+            val padding = props.contentPadding
+            Box(
+                Modifier
+                    .defaultMinSize(
+                        minWidth = props.minWidth?.value?.dp ?: 0.dp,
+                        minHeight = props.minHeight?.value?.dp ?: 0.dp,
+                    ).padding(
+                        start = padding?.start?.value?.dp ?: 0.dp,
+                        top = padding?.top?.value?.dp ?: 0.dp,
+                        end = padding?.end?.value?.dp ?: 0.dp,
+                        bottom = padding?.bottom?.value?.dp ?: 0.dp,
+                    ),
+                contentAlignment = androidx.compose.ui.Alignment.Center,
+            ) {
+                androidx.compose.material3.ProvideTextStyle(
+                    appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelSmall),
+                ) {
+                    props.content?.invoke() ?: props.text?.let { Text(it) }
+                }
             }
         }
     }
@@ -1045,7 +1068,14 @@ internal fun NativeAvatar(
         border = appearance.border?.let { BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()) },
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(props.initials, style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge))
+            if (props.content == null) {
+                Text(
+                    props.initials,
+                    style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
+                )
+            } else {
+                props.content.invoke()
+            }
         }
     }
 }
@@ -1511,7 +1541,8 @@ internal fun NativeSegmentedButtons(
                     onClick = { if (props.allowReselect || !selected) props.onSelect(index) },
                     enabled = enabled,
                     modifier =
-                        (props.optionTestTags[index]?.let { Modifier.testTag(it) } ?: Modifier)
+                        (if (props.equalWidth) Modifier.weight(1f) else Modifier)
+                            .then(props.optionTestTags[index]?.let { Modifier.testTag(it) } ?: Modifier)
                             .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier),
                     shape =
                         appearance.shape?.nativeShape() ?: SegmentedButtonDefaults.itemShape(index, props.labels.size),
@@ -1541,7 +1572,15 @@ internal fun NativeSegmentedButtons(
                         } else {
                             BorderStroke(borderWidth, borderColor)
                         },
-                    icon = { if (props.showSelectedIcon) SegmentedButtonDefaults.Icon(selected) },
+                    icon = {
+                        if (props.showSelectedIcon) {
+                            if (selected) {
+                                props.selectedIcon?.invoke() ?: SegmentedButtonDefaults.Icon(true)
+                            } else {
+                                SegmentedButtonDefaults.Icon(false)
+                            }
+                        }
+                    },
                 ) { Text(label, style = labelAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge)) }
             }
         }

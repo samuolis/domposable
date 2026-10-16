@@ -26,6 +26,7 @@ import io.github.samuolis.domposable.demo.generated.navigationPoliciesDestinatio
 import io.github.samuolis.domposable.demo.generated.navigationRecipesScreenDestination
 import io.github.samuolis.domposable.demo.generated.productComponentLabDestination
 import io.github.samuolis.domposable.demo.generated.rootStackRecipeDestination
+import io.github.samuolis.domposable.demo.generated.sharedCompositionScreenDestination
 import io.github.samuolis.domposable.demo.generated.taskDetailScreenDestination
 import io.github.samuolis.domposable.demo.generated.taskListScreenDestination
 import io.github.samuolis.domposable.demo.generated.unavailableScreenDestination
@@ -116,6 +117,12 @@ sealed interface DemoRoute {
 
     data object Recipes : DemoRoute
 
+    data object Composition : DemoRoute
+
+    data class CallerHistory(
+        val page: String = "home",
+    ) : DemoRoute
+
     data object Policies : DemoRoute
 
     data object Roots : DemoRoute
@@ -138,20 +145,69 @@ sealed interface DemoRoute {
 internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
     override fun encode(route: DemoRoute): String =
         when (route) {
-            DemoRoute.Tasks -> "/tasks"
-            DemoRoute.ExtendedCatalog -> "/components"
-            DemoRoute.Catalog -> "/catalog"
-            is DemoRoute.Material -> "/material/${route.section}"
-            DemoRoute.Recipes -> "/recipes"
-            DemoRoute.Policies -> "/navigation-policies"
-            DemoRoute.Roots -> "/roots"
-            DemoRoute.Collections -> "/collections"
-            DemoRoute.AdvancedCollections -> "/collection-recipes"
-            DemoRoute.ProductComponents -> "/product-components"
-            DemoRoute.Inputs -> "/inputs"
-            DemoRoute.Extensions -> "/extensions"
-            is DemoRoute.NotFound -> route.path
-            is DemoRoute.Detail -> "/tasks/${route.taskId}"
+            DemoRoute.Tasks -> {
+                "/tasks"
+            }
+
+            DemoRoute.ExtendedCatalog -> {
+                "/components"
+            }
+
+            DemoRoute.Catalog -> {
+                "/catalog"
+            }
+
+            is DemoRoute.Material -> {
+                "/material/${route.section}"
+            }
+
+            DemoRoute.Recipes -> {
+                "/recipes"
+            }
+
+            DemoRoute.Composition -> {
+                "/composition"
+            }
+
+            is DemoRoute.CallerHistory -> {
+                if (route.page == "home") "/caller-history" else "/caller-history/${route.page}"
+            }
+
+            DemoRoute.Policies -> {
+                "/navigation-policies"
+            }
+
+            DemoRoute.Roots -> {
+                "/roots"
+            }
+
+            DemoRoute.Collections -> {
+                "/collections"
+            }
+
+            DemoRoute.AdvancedCollections -> {
+                "/collection-recipes"
+            }
+
+            DemoRoute.ProductComponents -> {
+                "/product-components"
+            }
+
+            DemoRoute.Inputs -> {
+                "/inputs"
+            }
+
+            DemoRoute.Extensions -> {
+                "/extensions"
+            }
+
+            is DemoRoute.NotFound -> {
+                route.path
+            }
+
+            is DemoRoute.Detail -> {
+                "/tasks/${route.taskId}"
+            }
         }
 
     override fun decode(path: String): DemoRoute? =
@@ -174,6 +230,18 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
 
             path == "/recipes" -> {
                 DemoRoute.Recipes
+            }
+
+            path == "/composition" -> {
+                DemoRoute.Composition
+            }
+
+            path == "/caller-history" -> {
+                DemoRoute.CallerHistory()
+            }
+
+            path.startsWith("/caller-history/") -> {
+                DemoRoute.CallerHistory(path.removePrefix("/caller-history/"))
             }
 
             path == "/navigation-policies" -> {
@@ -279,10 +347,17 @@ private fun DomposableEntryScope<DemoRoute.Detail>.rememberDetailModel(): TaskDe
 fun DemoApp(
     initialRoute: DemoRoute = DemoRoute.Tasks,
     browserUrls: DomposableBrowserUrls = DomposableBrowserUrls.Hash,
+    callerHistoryFallback: () -> String = { "home" },
 ) {
     var shopping by rememberSaveable { mutableStateOf(false) }
     if (shopping) {
         ShoppingApp(browserUrls = browserUrls, onExit = { shopping = false })
+        return
+    }
+    if (initialRoute is DemoRoute.CallerHistory) {
+        DomposableTheme(tokens = DemoTokens, components = rememberDomposableMaterialComponents()) {
+            CallerHistoryDemo(initialRoute.page, callerHistoryFallback, browserUrls)
+        }
         return
     }
     val workspace = remember { TaskWorkspaceModel() }
@@ -344,11 +419,13 @@ fun DemoApp(
                         NavigationRecipesScreen(
                             onRoots = { stack.add(DomposableEntryScope(DemoRoute.Roots)) },
                             onPolicies = { stack.add(DomposableEntryScope(DemoRoute.Policies)) },
+                            onComposition = { stack.add(DomposableEntryScope(DemoRoute.Composition)) },
                         )
                     },
                 )
                 register(navigationPoliciesDestination())
                 register(rootStackRecipeDestination())
+                register(sharedCompositionScreenDestination())
 
                 register(
                     collectionLabDestination {
@@ -391,7 +468,7 @@ fun DemoApp(
                     DemoRoute.ProductComponents,
                     -> 1
 
-                    DemoRoute.Recipes, DemoRoute.Roots, DemoRoute.Policies -> 2
+                    DemoRoute.Recipes, DemoRoute.Roots, DemoRoute.Policies, DemoRoute.Composition -> 2
 
                     is DemoRoute.NotFound -> -1
 

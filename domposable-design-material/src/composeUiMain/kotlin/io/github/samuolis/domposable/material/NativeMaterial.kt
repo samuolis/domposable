@@ -282,8 +282,10 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
+                val rowModifier =
+                    modifier.toComposeModifier().let { if (props.stretch) it.fillMaxHeight() else it }
                 Row(
-                    modifier.toComposeModifier(),
+                    rowModifier,
                     horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp),
                     verticalAlignment = props.alignment.vertical(),
                 ) {

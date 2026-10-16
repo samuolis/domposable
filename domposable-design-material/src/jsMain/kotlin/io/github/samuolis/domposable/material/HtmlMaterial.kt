@@ -161,7 +161,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         style {
                             property("display", "flex")
                             property("gap", "${props.gap.value}px")
-                            property("align-items", props.alignment.css())
+                            property("align-items", if (props.stretch) "stretch" else props.alignment.css())
                         }
                     }) { content() }
                 }
@@ -191,8 +191,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
+                        classes("d-box")
                         style {
                             property("display", "grid")
+                            property("position", "relative")
+                            property("grid-template-columns", "minmax(0,1fr)")
                             property(
                                 "place-items",
                                 when (props.alignment) {
@@ -679,30 +682,50 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val appearance = props.appearance ?: tokens.components.card
                 val enabled = props.enabled && domposableFormEnabled()
                 val cardContentId = remember { "d-card-content-${nextInputId++}" }
+                val container =
+                    when (props.variant) {
+                        io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
+                            tokens.colors.surfaceVariant
+                        }
+
+                        io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {
+                            tokens.colors.surfaceContainerLow ?: tokens.colors.surface
+                        }
+
+                        io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined -> {
+                            tokens.colors.surface
+                        }
+                    }
+                val cardContainer = appearance.container ?: container
+                val borderColor =
+                    appearance.border
+                        ?: if (props.variant ==
+                            io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined
+                        ) {
+                            tokens.colors.outlineVariant ?: tokens.colors.outline
+                        } else {
+                            null
+                        }
+                val borderWidth =
+                    if (appearance.border !=
+                        null
+                    ) {
+                        appearance.borderWidth.value
+                    } else if (borderColor != null) {
+                        1f
+                    } else {
+                        0f
+                    }
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
                         classes("d-card", "d-card-${props.variant.name.lowercase()}")
-                        if (props.href != null) {
-                            style { property("position", "relative") }
-                        }
                         style {
-                            val container =
-                                when (props.variant) {
-                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
-                                        tokens.colors.surfaceVariant
-                                    }
-
-                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {
-                                        tokens.colors.surfaceContainerLow
-                                            ?: tokens.colors.surface
-                                    }
-
-                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined -> {
-                                        tokens.colors.surface
-                                    }
-                                }
-                            property("background-color", (appearance.container ?: container).css())
+                            property("background-color", cardContainer.css())
+                            property("--d-card-container", cardContainer.css())
+                            property("--d-card-border-color", borderColor?.css() ?: "transparent")
+                            property("--d-card-border-width", "${borderWidth}px")
+                            props.contentPadding?.let { property("padding", it.cssPadding()) }
                             appearance.content?.let { property("color", it.css()) }
                             when (props.variant) {
                                 io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
@@ -717,20 +740,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 }
 
                                 io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined -> {
-                                    val borderColor =
-                                        (appearance.border ?: tokens.colors.outlineVariant ?: tokens.colors.outline)
-                                            .css()
-                                    property(
-                                        "border",
-                                        "1px solid $borderColor",
-                                    )
+                                    Unit
                                 }
-                            }
-                            appearance.border?.let {
-                                property(
-                                    "border",
-                                    "${appearance.borderWidth.value}px solid ${it.css()}",
-                                )
                             }
                             appearance.shape?.let { materialShape(it) }
                                 ?: tokens.shapes.medium?.let { materialShape(it) }
@@ -919,14 +930,26 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     Span(attrs = {
                         domposableAttributes(modifier)
                         classes("d-badge")
-                        if (props.text == null) classes("d-badge-dot")
+                        if (props.text == null && props.content == null) classes("d-badge-dot")
                         props.label?.let {
                             attr("role", "img")
                             attr("aria-label", it)
                         }
-                        if (props.text == null && props.label == null) attr("aria-hidden", "true")
-                        style { surfaceAppearance(appearance) }
-                    }) { props.text?.let { Text(it) } }
+                        if (props.text == null && props.content == null &&
+                            props.label == null
+                        ) {
+                            attr("aria-hidden", "true")
+                        }
+                        style {
+                            surfaceAppearance(appearance)
+                            props.contentPadding?.let { property("padding", it.cssPadding()) }
+                            props.minWidth?.let { property("min-width", "${it.value}px") }
+                            props.minHeight?.let { property("min-height", "${it.value}px") }
+                            if (props.contentPadding != null || props.minHeight != null) property("height", "auto")
+                        }
+                    }) {
+                        props.content?.invoke() ?: props.text?.let { Text(it) }
+                    }
                 }
             },
             chip = {
@@ -972,7 +995,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         attr("aria-label", props.description.orEmpty())
                         classes("d-avatar")
                         style { surfaceAppearance(appearance) }
-                    }) { Text(props.initials) }
+                    }) {
+                        if (props.content == null) Text(props.initials) else props.content.invoke()
+                    }
                 }
             },
             banner = {
@@ -1508,11 +1533,13 @@ private fun HtmlImage(
     val failed by rememberUpdatedState(props.onError)
     // A sized leaf must fit inside the ordered layout boxes, including inner padding.
     var imageHeight: Float? = null
+    var fillsHeight = false
     modifier.elements.forEach { element ->
         val operation = element as? DomposableModifierOperation ?: return@forEach
         when (operation) {
             is DomposableModifierOperation.Height -> {
                 imageHeight = operation.length.value
+                fillsHeight = false
             }
 
             is DomposableModifierOperation.Padding -> {
@@ -1526,6 +1553,7 @@ private fun HtmlImage(
 
             DomposableModifierOperation.FillHeight -> {
                 imageHeight = null
+                fillsHeight = true
             }
 
             else -> {
@@ -1560,8 +1588,10 @@ private fun HtmlImage(
                     },
                 )
                 imageHeight?.let { property("height", "${it}px") }
+                if (fillsHeight) property("height", "100%")
                 if (modifier.elements.any {
                         it is DomposableModifierOperation.Width ||
+                            it is DomposableModifierOperation.FillWidthFraction ||
                             it == DomposableModifierOperation.FillWidth
                     }
                 ) {
@@ -1860,6 +1890,7 @@ internal fun InstallDomposableMaterialStyles() {
 }
 
 private const val MATERIAL_CSS = """
+.d-box>*{grid-area:1/1;min-width:0;min-height:0}
 .d-theme *{box-sizing:border-box}.d-link{color:var(--d-primary);padding:8px;display:inline-flex;align-items:center;min-height:44px}.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
 .d-theme button,.d-theme input,.d-theme textarea{font:inherit;accent-color:var(--d-primary)}
 .d-theme button{cursor:pointer}.d-theme button:disabled{cursor:default;opacity:.5}
@@ -1873,7 +1904,7 @@ private const val MATERIAL_CSS = """
 .d-button:disabled{cursor:default}
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}.d-button-elevated{background:var(--d-surface-container-low,var(--d-surface));color:var(--d-primary);box-shadow:0 1px 3px rgb(0 0 0 / .24)}.d-button-filledtonal{background:var(--d-secondary-container,var(--d-variant));color:var(--d-on-secondary-container,var(--d-on-surface))}
 .d-icon-button{border-radius:50%;padding:10px}.d-chip{min-height:var(--d-item-min-height,32px);padding:var(--d-item-padding,6px 12px);border-radius:var(--d-item-radius,var(--d-shape-small,8px));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,var(--d-outline))}.d-chip[aria-pressed=true]{border-color:var(--d-primary)}
-.d-card{padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}
+.d-card{position:relative;min-width:0;padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}.d-card::after{content:"";position:absolute;z-index:3;inset:0;box-sizing:border-box;pointer-events:none;border:var(--d-card-border-width,0px) solid var(--d-card-border-color,transparent);border-radius:inherit}.d-theme .d-card .d-field{--d-surface:var(--d-card-container,var(--d-variant))}
 .d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{box-sizing:border-box;min-height:56px;padding:16px;border:1px solid var(--d-outline);border-radius:4px;color:var(--d-on-surface);background:var(--d-surface);line-height:24px}.d-field input::placeholder,.d-field textarea::placeholder{color:var(--d-field-placeholder);font-size:var(--d-field-placeholder-size,inherit);line-height:var(--d-field-placeholder-line,inherit);font-weight:var(--d-field-placeholder-weight,inherit);letter-spacing:var(--d-field-placeholder-spacing,inherit)}
 .d-field-control{display:flex;align-items:center;gap:8px;min-height:56px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0;height:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent}
 .d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}

@@ -40,6 +40,7 @@ kotlin {
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         getByName("androidHostTest") {
             dependencies {
+                implementation(project(":domposable-adaptive"))
                 implementation(libs.robolectric)
                 implementation(libs.junit)
                 implementation(libs.androidx.test.runner)

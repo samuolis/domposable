@@ -137,6 +137,9 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 | `initials` | <code>String</code> | **Required** |
 | `description` | <code>String</code> | **Required** |
 | `appearance` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-surface-appearance/index.html">DomposableSurfaceAppearance</a>?</code> | `null` |
+| `content` | <code>@Composable () -&gt; Unit?</code> | `null` |
+
+Provide `content` to replace the initials with caller-owned content inside the avatar surface. The slot keeps the avatar's size, appearance, and accessible description.
 
 ## DomposableBadge
 
@@ -245,6 +248,7 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 | `enabled` | <code>Boolean</code> | `true` |
 | `href` | <code>String?</code> | `null` |
 | `actionLabel` | <code>String?</code> | `null` |
+| `contentPadding` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-insets/index.html">DomposableInsets</a>?</code> | `null` (renderer default) |
 
 ## DomposableCarousel
 
@@ -756,6 +760,9 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 | --- | --- | --- |
 | `gap` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-length/index.html">DomposableLength</a></code> | `0.dp` |
 | `alignment` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-alignment/index.html">DomposableAlignment</a></code> | `DomposableAlignment.Start` |
+| `stretch` | <code>Boolean</code> | `false` |
+
+Set `stretch = true` to stretch children. Native rows fill the available height when the parent bounds it; HTML rows use the tallest child's natural height. Pane content that needs to fill the native row should use `fillMaxHeight()`.
 
 ## DomposableScaffold
 
@@ -837,6 +844,9 @@ Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/do
 | `showSelectedIcon` | <code>Boolean</code> | `true` |
 | `allowReselect` | <code>Boolean</code> | `true` |
 | `appearance` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-item-appearance/index.html">DomposableItemAppearance</a>?</code> | `null` |
+| `equalWidth` | <code>Boolean</code> | `false` |
+
+Set `equalWidth = true` to give each segment the same width in native and HTML layouts.
 
 ## DomposableSelect
 

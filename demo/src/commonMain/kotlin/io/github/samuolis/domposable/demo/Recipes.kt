@@ -80,6 +80,7 @@ private sealed interface RecipeRoute {
 fun NavigationRecipesScreen(
     onRoots: (() -> Unit)? = null,
     onPolicies: (() -> Unit)? = null,
+    onComposition: (() -> Unit)? = null,
 ) {
     val stack = rememberDomposableBackStack<RecipeRoute>(RecipeRoute.List)
     var supporting by rememberSaveable { mutableStateOf(false) }
@@ -159,6 +160,7 @@ fun NavigationRecipesScreen(
         }
         onRoots?.let { DomposableButton("Saved root stacks", it) }
         onPolicies?.let { DomposableButton("Advanced navigation policies", it) }
+        onComposition?.let { DomposableButton("Shared cards and adaptive panes", it) }
     }
 }
 

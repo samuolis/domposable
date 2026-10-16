@@ -206,14 +206,15 @@ private class BrowserBinding<R : Any>(
 
     private fun url(route: R): String = codec.urlFor(route, urls)
 
-    private val snapshots = mutableMapOf<String, String>()
+    private val history = DomposableHistoryBranch(0, "")
     private var currentId = stack.last().id
     private var previousIds = stack.map { it.id }
     private var applyingHistory = false
 
-    private fun snapshot(): String =
+    private fun snapshot(position: Int = history.position): String =
         buildJsonObject {
             put("domposable", 1)
+            put("position", position)
             put(
                 "entries",
                 JsonArray(
@@ -283,7 +284,7 @@ private class BrowserBinding<R : Any>(
         currentId = stack.last().id
         previousIds = stack.map { it.id }
         val value = snapshot()
-        snapshots[currentId] = value
+        history.replace(value)
         replaceBrowserHistoryState(value, url(stack.last().route))
         applyingHistory = false
     }
@@ -306,6 +307,10 @@ private class BrowserBinding<R : Any>(
                     ?: DomposableEntryScope(route, id, saved)
             }
         if (restored.isEmpty()) return
+        history.restore(
+            state["position"]?.jsonPrimitive?.intOrNull?.takeIf { it >= 0 } ?: history.position,
+            state.toString(),
+        )
         applyingHistory = true
         stack.clear()
         stack.addAll(restored)
@@ -344,11 +349,14 @@ private class BrowserBinding<R : Any>(
             return
         }
         if (id != currentId) {
-            snapshots[currentId]?.let { replaceBrowserHistoryState(it, null) }
-            val value = snapshot()
+            replaceBrowserHistoryState(history.current, null)
+            val nextPosition = if (replaceEntry) history.position else history.position + 1
+            val value = snapshot(nextPosition)
             if (replaceEntry) {
+                history.replace(value)
                 replaceBrowserHistoryState(value, url(stack.last().route))
             } else {
+                check(history.push(value) == nextPosition)
                 pushBrowserHistoryState(value, url(stack.last().route))
             }
             currentId = id
@@ -360,28 +368,27 @@ private class BrowserBinding<R : Any>(
     fun saveCurrent() {
         if (stack.isEmpty() || stack.last().id != currentId) return
         val value = snapshot()
-        snapshots[currentId] = value
+        history.replace(value)
         replaceBrowserHistoryState(value, null)
     }
 
     fun pop() {
         val state = readSnapshot(browserHistoryState())
         if (state != null) {
-            val top =
-                state["entries"]
-                    ?.jsonArray
-                    ?.lastOrNull()
-                    ?.jsonObject
-                    ?.get("id")
+            val previous =
+                state["position"]
                     ?.jsonPrimitive
-                    ?.content
-            restore(readSnapshot(snapshots[top]) ?: state)
+                    ?.intOrNull
+                    ?.let(history::snapshotAt)
+                    ?.let(::readSnapshot)
+            restore(previous ?: state)
         } else {
             codec.decode(routePath())?.let { route ->
                 applyingHistory = true
                 stack.clear()
                 stack.add(DomposableEntryScope(route))
                 currentId = stack.last().id
+                history.replace(snapshot())
             }
         }
     }
@@ -424,6 +431,8 @@ internal fun <R : Any> BrowserHistoryBinding(
 }
 
 internal expect fun browserHistoryState(): String?
+
+internal expect fun browserHistoryStateIsNull(): Boolean
 
 internal expect fun replaceBrowserHistoryState(
     value: String,

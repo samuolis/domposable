@@ -45,6 +45,40 @@ composing a paired layout; its default is `null` for standalone presentation. Pa
 chrome and transitions remain configurable in the product renderer. The same relationship helpers
 work with native Nav3 scenes and semantic HTML without requiring KSP, a registry or a navigator.
 
+## Render the panes with shared composables
+
+`DomposablePaneScaffold` renders the selected layout without app-owned HTML, CSS or native layout
+code. It accepts your existing entry objects and never changes their ownership or navigation state.
+
+```kotlin
+DomposablePaneScaffold(
+    layout = resolveDomposablePaneLayout(entries, wide) { pane(it.route) },
+    listLabel = "Catalog",
+    detailLabel = "Product details",
+    listFraction = 0.32f,
+    minListWidth = 260.dp,
+    maxListWidth = 360.dp,
+    retainedList = entries.firstOrNull { pane(it.route) is DomposablePane.List },
+    singlePaneRole = if (pane(entries.last().route) is DomposablePane.List)
+        DomposablePaneRole.List else DomposablePaneRole.Detail,
+    contentKey = { it.id },
+) { entry ->
+    RenderEntry(entry)
+}
+```
+
+The list fraction is computed from the full available pane width and then clamped to its bounds.
+Configure spacing, logical edge borders and other brand details with `listModifier` and
+`detailModifier`. Both panes receive labelled region semantics. `LocalDomposablePaneRole` is set
+only in the paired presentation so a standalone screen keeps its normal chrome. Native expanded
+panes fill a bounded parent height, so place the scaffold in a viewport-sized container; HTML panes
+stretch to the taller pane's natural content height.
+
+When `retainedList` is supplied, a compact detail hides that list without removing its composition.
+Its remembered drafts survive the resize. Hidden content occupies no layout space and is absent
+from keyboard navigation and accessibility. `DomposableVisibility` exposes the same behavior for
+other application-owned adaptive compositions.
+
 Reduced motion follows browser media queries, Android animator duration settings and iOS accessibility notifications. Pointer precision follows browser media queries and Android connected mouse/touchpad devices. iOS defaults to touch and desktop to precise; applications may override either preference through the adaptive API when they have more precise input information. Preference information is advisory; providers/features choose animations and targets.
 
 ## Responsive dimensions and wrapping

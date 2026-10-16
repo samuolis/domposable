@@ -2,8 +2,10 @@ package io.github.samuolis.domposable.ui
 
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableGradientStop
 import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableLayoutAxis
+import io.github.samuolis.domposable.foundation.DomposableLinearGradient
 import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.dp
@@ -106,6 +108,42 @@ class ModifierTest {
             DomposableModifierOperation.Offset(DomposableOffset(-4f, 6f)),
             DomposableModifier.offset(-4f, 6f).elements.single(),
         )
+    }
+
+    @Test fun gradientAndPaneOperationsKeepTheirOrderAndValidateInputs() {
+        val color = DomposableColor(0xFF4059AD)
+        val gradient =
+            DomposableLinearGradient(
+                DomposableLayoutAxis.Vertical,
+                listOf(
+                    DomposableGradientStop(color, 0f),
+                    DomposableGradientStop(DomposableColor(0x00000000), 1f),
+                ),
+            )
+        val chain =
+            DomposableModifier
+                .background(gradient, DomposableShape.Rounded(12.dp))
+                .fillMaxWidth(0.32f, min = 260.dp, max = 360.dp)
+                .pointerPassthrough()
+                .region("Competition details")
+                .border(1.dp, color, DomposableBorderEdge.End)
+
+        assertEquals(
+            DomposableModifierOperation.GradientBackground(gradient, DomposableShape.Rounded(12.dp)),
+            chain.elements[0],
+        )
+        assertEquals(DomposableModifierOperation.FillWidthFraction(0.32f, 260.dp, 360.dp), chain.elements[1])
+        assertEquals(DomposableModifierOperation.PointerPassthrough, chain.elements[2])
+        assertEquals(DomposableModifierOperation.Region("Competition details"), chain.elements[3])
+        assertEquals(
+            DomposableModifierOperation.EdgeBorder(1.dp, color, DomposableBorderEdge.End),
+            chain.elements[4],
+        )
+        assertFailsWith<IllegalArgumentException> { DomposableModifier.fillMaxWidth(Float.NaN) }
+        assertFailsWith<IllegalArgumentException> { DomposableModifier.fillMaxWidth(0f) }
+        assertFailsWith<IllegalArgumentException> { DomposableModifier.fillMaxWidth(1.01f) }
+        assertFailsWith<IllegalArgumentException> { DomposableModifier.fillMaxWidth(0.32f, 360.dp, 260.dp) }
+        assertFailsWith<IllegalArgumentException> { DomposableModifier.region(" ") }
     }
 
     @Test fun shapeClickAndChildLayoutOperationsArePortableElements() {

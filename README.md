@@ -126,6 +126,8 @@ DomposableMaterialTheme(
 
 Use `DomposableTheme.styles.button.copy(...)` for a local override. Nested themes inherit their enclosing brand values. Styles are composition-scoped, so different parts of an app can use different brands.
 
+Custom cards are shared composition too: use `DomposableBox` for overlapping image/content layers, a portable gradient for the scrim, and the same theme for controls. Application CSS is an escape hatch for a custom renderer, rather than a requirement for every custom layout. [Build a card without CSS](docs/custom-components.md#image-cards-and-overlays-without-application-css) · [Card and pane demo](https://samuolis.github.io/domposable/demo/#/composition).
+
 [Understand the API →](docs/how-it-works.md) · [Customize a design system →](docs/design-systems.md) · [Build adaptive layouts →](docs/adaptive.md)
 
 ### Start where your app is

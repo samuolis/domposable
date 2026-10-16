@@ -199,3 +199,15 @@ There is no shared Compose `DrawScope` that automatically translates arbitrary K
 Advanced focus, pointer gestures, nested scrolling, 3D graphics and platform inset policies are not automatically made portable by this extension API. Implement equivalent behavior in each supported renderer or keep it inside a platform-specific component. Never insert native Compose UI nodes into an HTML composition.
 
 The [shared example](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/ExtensionExample.kt) runs in the demo's **Custom components and modifiers** page. Tests exercise state retention, ordered padding, pointer interaction, HTML accessibility, native drawing and cross-platform screenshot captures.
+
+## Image overlays and proportional panes
+
+Paint a scrim with `background(DomposableLinearGradient(...))` and layer it in `DomposableBox`; Box children overlap on native and HTML. Gradient stops use positions from zero to one and must be ordered. Repeated positions create a hard color transition.
+
+Use `pointerPassthrough()` for a decorative scrim or a full-size content overlay. Native noninteractive layout already passes unhandled pointer input through. HTML makes the wrapper transparent to pointer input and restores it for descendant links, buttons, inputs, selects, textareas, button/link roles and focusable `tabindex` elements. A custom HTML click target must expose its interactive role or tabindex. Keyboard focus and semantics are preserved; this modifier does not disable controls.
+
+`fillMaxWidth(fraction, min, max)` takes a fraction of the original available width, then clamps it to the supplied bounds and parent constraints. This matches CSS percentage-plus-min/max sizing; it is different from constraining a native parent's width before applying a fraction. `border(width, color, edge)` supports logical Start/End edges as well as Top/Bottom, including RTL layouts.
+
+`region(label)` exposes a labelled section/traversal group. `DomposableVisibility(false)` keeps the content composed while excluding it from layout and accessibility. Use it when an adaptive layout should retain a pane's draft rather than recreating it after resizing. Prefer an ordinary `if` when the hidden content should be disposed.
+
+See the [CSS-free card and pane example](custom-components.md#image-cards-and-overlays-without-application-css).

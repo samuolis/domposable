@@ -9,6 +9,7 @@ import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableLayoutAxis
 import io.github.samuolis.domposable.foundation.DomposableLength
+import io.github.samuolis.domposable.foundation.DomposableLinearGradient
 import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableShape
@@ -60,6 +61,21 @@ sealed interface DomposableModifierOperation : DomposableModifierElement {
         val length: DomposableLength,
     ) : DomposableModifierOperation
 
+    data class FillWidthFraction(
+        val fraction: Float,
+        val minWidth: DomposableLength? = null,
+        val maxWidth: DomposableLength? = null,
+    ) : DomposableModifierOperation {
+        init {
+            require(fraction.isFinite() && fraction > 0f && fraction <= 1f) {
+                "Width fraction must be finite and greater than 0 and at most 1"
+            }
+            require(minWidth == null || maxWidth == null || minWidth.value <= maxWidth.value) {
+                "Minimum width must not exceed maximum width"
+            }
+        }
+    }
+
     data class MinWidth(
         val length: DomposableLength,
     ) : DomposableModifierOperation
@@ -73,6 +89,8 @@ sealed interface DomposableModifierOperation : DomposableModifierElement {
     ) : DomposableModifierOperation
 
     data object FillWidth : DomposableModifierOperation
+
+    data object PointerPassthrough : DomposableModifierOperation
 
     data object FillHeight : DomposableModifierOperation
 
@@ -93,11 +111,30 @@ sealed interface DomposableModifierOperation : DomposableModifierElement {
         val shape: DomposableShape,
     ) : DomposableModifierOperation
 
+    data class GradientBackground(
+        val gradient: DomposableLinearGradient,
+        val shape: DomposableShape,
+    ) : DomposableModifierOperation
+
     data class Border(
         val width: DomposableLength,
         val color: DomposableColor,
         val shape: DomposableShape,
     ) : DomposableModifierOperation
+
+    data class EdgeBorder(
+        val width: DomposableLength,
+        val color: DomposableColor,
+        val edge: DomposableBorderEdge,
+    ) : DomposableModifierOperation
+
+    data class Region(
+        val label: String,
+    ) : DomposableModifierOperation {
+        init {
+            require(label.isNotBlank()) { "Region labels must not be blank" }
+        }
+    }
 
     data class AspectRatio(
         val ratio: Float,
@@ -189,6 +226,8 @@ sealed interface DomposableModifierOperation : DomposableModifierElement {
 
 enum class DomposableClickRole { Button, Link, Checkbox, RadioButton, Switch, Image }
 
+enum class DomposableBorderEdge { Top, End, Bottom, Start }
+
 private fun DomposableModifier.append(operation: DomposableModifierOperation): DomposableModifier = then(operation)
 
 fun DomposableModifier.padding(all: DomposableLength): DomposableModifier = padding(DomposableInsets(all))
@@ -231,6 +270,12 @@ fun DomposableModifier.heightIn(
 fun DomposableModifier.constrainContentWidth(value: DomposableLength): DomposableModifier =
     append(DomposableModifierOperation.MaxWidth(value))
 
+fun DomposableModifier.fillMaxWidth(
+    fraction: Float,
+    min: DomposableLength? = null,
+    max: DomposableLength? = null,
+): DomposableModifier = append(DomposableModifierOperation.FillWidthFraction(fraction, min, max))
+
 fun DomposableModifier.minWidth(value: DomposableLength): DomposableModifier =
     append(DomposableModifierOperation.MinWidth(value))
 
@@ -242,6 +287,8 @@ fun DomposableModifier.maxHeight(value: DomposableLength): DomposableModifier =
 
 fun DomposableModifier.fillMaxWidth(): DomposableModifier = append(DomposableModifierOperation.FillWidth)
 
+fun DomposableModifier.pointerPassthrough(): DomposableModifier = append(DomposableModifierOperation.PointerPassthrough)
+
 fun DomposableModifier.fillMaxHeight(): DomposableModifier = append(DomposableModifierOperation.FillHeight)
 
 fun DomposableModifier.background(value: DomposableColor): DomposableModifier =
@@ -251,6 +298,11 @@ fun DomposableModifier.background(
     value: DomposableColor,
     shape: DomposableShape,
 ): DomposableModifier = append(DomposableModifierOperation.ShapeBackground(value, shape))
+
+fun DomposableModifier.background(
+    gradient: DomposableLinearGradient,
+    shape: DomposableShape = DomposableShape.Rectangle,
+): DomposableModifier = append(DomposableModifierOperation.GradientBackground(gradient, shape))
 
 fun DomposableModifier.clip(radius: DomposableLength): DomposableModifier =
     append(DomposableModifierOperation.Radius(radius))
@@ -263,6 +315,14 @@ fun DomposableModifier.border(
     color: DomposableColor,
     shape: DomposableShape = DomposableShape.Rectangle,
 ): DomposableModifier = append(DomposableModifierOperation.Border(width, color, shape))
+
+fun DomposableModifier.border(
+    width: DomposableLength,
+    color: DomposableColor,
+    edge: DomposableBorderEdge,
+): DomposableModifier = append(DomposableModifierOperation.EdgeBorder(width, color, edge))
+
+fun DomposableModifier.region(label: String): DomposableModifier = append(DomposableModifierOperation.Region(label))
 
 fun DomposableModifier.aspectRatio(ratio: Float): DomposableModifier {
     require(ratio.isFinite() && ratio > 0f) { "Aspect ratio must be finite and positive" }

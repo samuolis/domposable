@@ -31,6 +31,7 @@ nav:
       - Component coverage: coverage.md
   - Examples:
       - Custom components: custom-components.md
+      - Caller-owned browser history: caller-owned-browser-history.md
       - Custom modifiers and drawing: modifiers.md
       - Shopping app: shopping.md
       - Modular app and injection: modular-demo.md

@@ -18,6 +18,8 @@ fun <T> DomposableSegmentedButtons(
     showSelectedIcon: Boolean = true,
     allowReselect: Boolean = false,
     appearance: DomposableItemAppearance? = null,
+    equalWidth: Boolean = false,
+    selectedIcon: (@Composable () -> Unit)? = null,
 ) {
     require(options.map { it.value }.distinct().size == options.size) { "Choice values must be unique" }
     DomposableSegmentedButtons(
@@ -34,6 +36,8 @@ fun <T> DomposableSegmentedButtons(
                 showSelectedIcon = showSelectedIcon,
                 allowReselect = allowReselect,
                 appearance = appearance,
+                equalWidth = equalWidth,
+                selectedIcon = selectedIcon,
             ),
         modifier = modifier,
     )
