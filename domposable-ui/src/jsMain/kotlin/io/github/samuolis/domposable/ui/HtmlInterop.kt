@@ -295,8 +295,8 @@ private fun HtmlModifierBox(
 
                 is DomposableModifierOperation.FillWidthFraction -> {
                     property("width", "${operation.fraction * 100}%")
-                    operation.minWidth?.let { property("min-width", "${it.value}px") }
-                    operation.maxWidth?.let { property("max-width", "${it.value}px") }
+                    operation.minWidth?.let { property("min-width", "min(${it.value}px, 100%)") }
+                    operation.maxWidth?.let { property("max-width", "min(${it.value}px, 100%)") }
                 }
 
                 is DomposableModifierOperation.MinWidth -> {
