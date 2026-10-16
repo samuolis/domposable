@@ -36,10 +36,12 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -94,6 +96,10 @@ internal fun NativeTextField(
                         onClick()
                         true
                     })
+                }
+                // Stable Wasm exports EditableText without applying password semantics.
+                if (props.purpose == DomposableInputPurpose.Password && !props.passwordVisible) {
+                    editableText = AnnotatedString("•".repeat(props.value.length))
                 }
                 props.id?.let { testTag = it }
                 if (!props.showLabel) contentDescription = props.label

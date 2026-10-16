@@ -86,7 +86,8 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   // startup transition. Wait for one settled control rather than choosing one.
   await expect(page.getByRole('button', { name: 'Open Inbox live message', exact: true })).toHaveCount(1, { timeout: 60000 });
   await activate('Open Inbox live message');
-  const draft = page.getByRole('textbox');
+  const entry = page.getByRole('heading', { name: 'Inbox message', exact: true }).locator('..');
+  const draft = entry.getByRole('textbox');
   await draft.focus();
   const backing = page.locator('.compose-backing-field');
   await expect(backing).toBeFocused();

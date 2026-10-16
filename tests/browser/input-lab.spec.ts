@@ -87,7 +87,7 @@ test.describe('Stable Wasm comparison and bridge limits', () => {
   test('native help actions and Escape dismiss the overlay despite missing modal semantics', async ({ page }) => {
     const open = page.getByRole('button', { name: 'Open help', exact: true });
     const close = page.getByRole('button', { name: 'Close help', exact: true });
-    await activate(open);
+    await canvasClick(page, open);
     await expect(close).toHaveCount(1);
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.locator('[aria-modal="true"]')).toHaveCount(0);
@@ -96,9 +96,9 @@ test.describe('Stable Wasm comparison and bridge limits', () => {
     await page.waitForFunction(() => performance.getEntriesByType('resource')
       .some(resource => resource.name.includes('/notosanssymbols2/')));
     await page.screenshot({ path: 'build/screenshots/wasm/input-lab-help.png' });
-    await activate(close);
+    await canvasClick(page, close);
     await expect(close).toHaveCount(0);
-    await activate(open);
+    await canvasClick(page, open);
     await expect(close).toHaveCount(1);
     await page.locator('canvas').focus();
     await page.keyboard.press('Escape');
@@ -119,6 +119,7 @@ test.describe('Stable Wasm comparison and bridge limits', () => {
     }, null, 2));
     expect(findings.map(node => JSON.stringify(node)).sort()).toEqual([
       ...Array.from({ length: 2 }, () => ({ rule: 'aria-input-field-name', tag: 'DIV', role: 'textbox', orientation: null, text: '' })),
+      { rule: 'aria-roles', tag: 'CANVAS', role: 'generic', orientation: null, text: '' },
       { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: '◈ Domposable' },
       { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: 'Input and accessibility lab' },
     ].map(node => JSON.stringify(node)).sort());

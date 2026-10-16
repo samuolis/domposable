@@ -45,13 +45,15 @@ The [CMP 1.12.2 bridge source](https://repo.maven.apache.org/maven2/org/jetbrain
 | Toggles and tabs | Clickable nodes become buttons, overriding their checkbox, switch, radio or tab role | Native controls and appropriate roles |
 | Checked and disabled state | `aria-checked` and `aria-disabled` are not exported | Checked and disabled states follow shared values |
 | Dialogs | No dialog role, `aria-modal` or inert background; native overlay dismissal is tested separately | Modal semantics, focus isolation and restoration |
+| Assistive click delegates | Handlers can remain stale after overlay replacement; dismissal checks use native canvas pointer/keyboard input | Native browser event handlers |
+| Canvas role | Upstream canvas publishes `role="generic"`, rejected by axe | No canvas mirror needed |
 | Headings | Heading role without `aria-level` | Native heading elements |
 
 Tests record these omissions explicitly. They locate unnamed Wasm fields by existing test IDs or a unique enclosing form and verify real input/callback behavior. Pointer checks target the canvas where the old accessibility delegate cannot represent disabled state. Tests do not inject replacement roles, labels or ARIA state into the mirror.
 
 The WCAG audit runs all WCAG 2 A/AA axe rules without disabling any rule. Its exact node descriptors and counts are pinned; a changed or new finding fails CI and requires inspection. The report is written **before** the assertion, including on failure, to `build/accessibility/wasm-input-lab.json` in the Actions artifact. It is a regression audit with known failures, not a clean accessibility scan or conformance certification.
 
-The expected stable input-lab findings are two unnamed editable nodes (`aria-input-field-name`) and two headings without levels (`aria-required-attr`). State and modal omissions are checked separately because axe cannot detect every missing semantic. Findings from the 0.7.0 alpha bridge must not be used as evidence for this baseline.
+The expected stable input-lab findings are two unnamed editable nodes (`aria-input-field-name`) two headings without levels (`aria-required-attr`) and the upstream canvas role (`aria-roles`). State and modal omissions are checked separately because axe cannot detect every missing semantic. Findings from the 0.7.0 alpha bridge must not be used as evidence for this baseline.
 
 Wasm remains an experimental comparison. Physical screen-reader review is deferred, and these checks do not establish parity with HTML or native assistive technology. No stable 1.0 release is scheduled.
 

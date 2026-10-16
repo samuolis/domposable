@@ -1,7 +1,9 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
@@ -11,9 +13,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.text.AnnotatedString
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponentStyles
+import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableStateColors
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
@@ -35,6 +40,35 @@ import kotlin.test.assertEquals
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeTextFieldAppearanceTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun passwordSemanticsStayMaskedWithoutChangingTheEditedValue() {
+        val value = mutableStateOf("")
+        val visible = mutableStateOf(false)
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableTextField(
+                    DomposableTextFieldProps(
+                        value = value.value,
+                        onValueChange = { value.value = it },
+                        label = "Private phrase",
+                        id = "secret",
+                        purpose = DomposableInputPurpose.Password,
+                        passwordVisible = visible.value,
+                    ),
+                )
+            }
+        }
+        compose.onNodeWithTag("secret").performTextInput("Private 123")
+        compose.runOnIdle { assertEquals("Private 123", value.value) }
+        compose.onNodeWithTag("secret").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("•".repeat(11))),
+        )
+        compose.runOnIdle { visible.value = true }
+        compose.onNodeWithTag("secret").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("Private 123")),
+        )
+    }
 
     @Test
     fun themedReadonlyFieldKeepsLabelErrorAndNoTextEntryAction() {
