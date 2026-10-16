@@ -44,7 +44,8 @@ class GradientHtmlInteropTest {
         assertTrue(POINTER_PASSTHROUGH_CSS.contains("[data-domposable-pointer-passthrough]{pointer-events:none}"))
         assertTrue(
             POINTER_PASSTHROUGH_CSS.contains(
-                "[data-domposable-pointer-passthrough] :is(a,button,input,select,textarea,[role=button],[role=link],[tabindex]:not([tabindex='-1'])){pointer-events:auto}",
+                "[data-domposable-pointer-passthrough] :is(a,button,input,select,textarea," +
+                    "[role=button],[role=link],[tabindex]:not([tabindex='-1'])){pointer-events:auto}",
             ),
         )
     }

@@ -758,7 +758,7 @@ internal fun NativeBadge(
                 Modifier.semantics { props.label?.let { contentDescription = it } }
             },
         )
-    if (appearance.isEmpty() && props.contentPadding == null && props.minWidth == null && props.minHeight == null) {
+    if (appearance.isEmpty() && !props.hasCustomGeometry()) {
         val content: (@Composable androidx.compose.foundation.layout.RowScope.() -> Unit)? =
             props.content?.let { custom -> { custom() } } ?: props.text?.let { text -> { Text(text) } }
         Badge(nativeModifier, content = content)
@@ -799,6 +799,9 @@ internal fun NativeBadge(
         }
     }
 }
+
+private fun DomposableBadgeProps.hasCustomGeometry(): Boolean =
+    contentPadding != null || minWidth != null || minHeight != null
 
 @Composable
 internal fun NativeChip(

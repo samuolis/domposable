@@ -887,18 +887,17 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         classes("d-divider")
                         style {
                             appearance.color?.let { property("border-color", it.css()) }
-                            appearance.thickness?.let {
-                                if (props.orientation == DomposableOrientation.Horizontal) {
-                                    property("border-top-width", "${it.value}px")
-                                } else {
-                                    property("border-top", "0")
-                                    property(
-                                        "border-left",
-                                        "${it.value}px solid ${appearance.color?.css() ?: "var(--d-outline)"}",
-                                    )
-                                    property("height", "100%")
-                                    property("width", "${it.value}px")
-                                }
+                            if (props.orientation == DomposableOrientation.Vertical) {
+                                val thickness = appearance.thickness?.value ?: 1f
+                                property("border-top", "0")
+                                property(
+                                    "border-inline-start",
+                                    "${thickness}px solid ${appearance.color?.css() ?: "var(--d-outline)"}",
+                                )
+                                property("height", "100%")
+                                property("width", "${thickness}px")
+                            } else {
+                                appearance.thickness?.let { property("border-top-width", "${it.value}px") }
                             }
                         }
                     })
@@ -1909,7 +1908,7 @@ private const val MATERIAL_CSS = """
 .d-field-control{display:flex;align-items:center;gap:8px;min-height:56px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0;height:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent}
 .d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}
 .d-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{display:inline-grid;place-items:center;box-sizing:border-box;min-width:16px;width:max-content;height:16px;padding:0 4px;border-radius:999px;background:var(--d-primary);color:var(--d-on-primary);font-size:11px;line-height:16px;font-weight:500;font-variant-numeric:tabular-nums}.d-badge-dot{width:6px;min-width:6px;height:6px;padding:0}
-.d-divider{border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
+.d-divider{margin:0;padding:0;flex:none;align-self:stretch;border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
 .d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button,.d-navigation a{text-decoration:none;display:inline-flex;align-items:center;padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
 .d-tabs [aria-selected=true],.d-navigation [aria-current=page]{color:var(--d-primary);border-bottom:3px solid var(--d-primary)}
 .d-dialog{border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface);max-width:min(600px,90vw)}
