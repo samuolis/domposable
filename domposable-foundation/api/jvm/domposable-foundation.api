@@ -712,18 +712,20 @@ public final class io/github/samuolis/domposable/foundation/DomposableOrientatio
 public final class io/github/samuolis/domposable/foundation/DomposableProgressAppearance {
 	public static final field $stable I
 	public fun <init> ()V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Ljava/lang/Boolean;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component2-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component3-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun component4-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun component5-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
-	public final fun copy-TfobFAo (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;)Lio/github/samuolis/domposable/foundation/DomposableProgressAppearance;
-	public static synthetic fun copy-TfobFAo$default (Lio/github/samuolis/domposable/foundation/DomposableProgressAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableProgressAppearance;
+	public final fun component6 ()Ljava/lang/Boolean;
+	public final fun copy-K78fQFA (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Ljava/lang/Boolean;)Lio/github/samuolis/domposable/foundation/DomposableProgressAppearance;
+	public static synthetic fun copy-K78fQFA$default (Lio/github/samuolis/domposable/foundation/DomposableProgressAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Ljava/lang/Boolean;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableProgressAppearance;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getColor-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getIndicatorSize-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun getShowStopIndicator ()Ljava/lang/Boolean;
 	public final fun getStrokeWidth-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun getTrack-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getWaveSpeed-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;

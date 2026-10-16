@@ -151,6 +151,7 @@ data class DomposableProgressAppearance(
     val strokeWidth: DomposableLength? = null,
     val indicatorSize: DomposableLength? = null,
     val waveSpeed: DomposableLength? = null,
+    val showStopIndicator: Boolean? = null,
 )
 
 @Immutable

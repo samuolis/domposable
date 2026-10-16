@@ -1979,7 +1979,7 @@ private const val MATERIAL_CSS = """
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
 .d-snackbar-host>.d-snackbar-message{max-width:min(720px,100%);min-height:48px;box-shadow:0 3px 8px rgb(0 0 0 / .24);pointer-events:auto}
 .d-scroll-field-viewport::before,.d-scroll-field-viewport::after{content:"";display:block;height:62px;scroll-snap-align:none;pointer-events:none}
-.d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}
+.d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}.d-toggle:has(>.d-toggle-copy-visible:first-child){width:100%}
 .d-theme .d-chip.d-item-hittarget .d-chip-surface{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme .d-progress-wavy-linear{width:100%}
 .d-theme .d-navigation:not(.d-navigation-links):not([style*="column"]){display:flex;width:100%;min-height:80px;align-items:stretch;justify-content:space-around;gap:0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}

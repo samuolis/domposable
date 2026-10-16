@@ -2,7 +2,7 @@
 
 Domposable targets Material 3 component families through shared Compose calls. Native targets use Compose Multiplatform Material 3. Kotlin/JS renders semantic HTML. The standard and expressive themes share the same feature API.
 
-The inventory below is checked against the pinned `org.jetbrains.compose.material3:material3:1.13.0-alpha02` source artifact. It records the intended mapping, **not a claim that renderer and visual verification is complete**. This expansion is in progress in PR #35; release coverage must be backed by its renderer, interaction and screenshot checks.
+The inventory below maps the pinned `org.jetbrains.compose.material3:material3:1.13.0-alpha02` source artifact to shared Domposable components. See [platform coverage](coverage.md) for renderer boundaries and [compatibility](compatibility.md) for tested versions.
 
 Layout helpers, forms, disclosures, rich text, tables and charts are additional Domposable APIs. They are not upstream Material components. Android-specific system integrations and internal Material implementation utilities are outside the component catalog.
 
@@ -154,6 +154,23 @@ DomposableChip(
 ```
 
 `DomposableItemAppearance` separates the visual `minHeight` from `minimumInteractiveSize`, so a compact chip can retain a larger touch target. Its selected, disabled, focused, hovered and pressed colors belong to the actual control. Field colors distinguish unfocused, focused, error and disabled decoration; inner field padding and outline widths use the field appearance, while its outer modifier controls layout.
+
+## Linear progress appearance
+
+Set the stroke height and endpoint marker explicitly when adapting an existing design system:
+
+```kotlin
+DomposableProgress(
+    value = progress,
+    circular = false,
+    appearance = DomposableProgressAppearance(
+        strokeWidth = 4.dp,
+        showStopIndicator = false,
+    ),
+)
+```
+
+For determinate standard linear progress, `showStopIndicator = true` draws the endpoint marker and `false` omits it. A null value preserves the renderer default: native Material uses its default marker; HTML uses its native progress element. Explicit booleans use a semantic HTML bar so the same setting can be represented in CSS. Circular, wavy and indeterminate indicators keep their own presentation. `strokeWidth` sets the standard linear height as well as circular stroke thickness.
 
 ## Queued messages and badges
 

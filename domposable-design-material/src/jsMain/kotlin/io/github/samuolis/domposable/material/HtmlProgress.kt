@@ -23,6 +23,7 @@ import org.jetbrains.compose.web.dom.TagElement
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import kotlin.math.PI
+import kotlin.math.min
 
 private const val SVG_NAMESPACE = "http://www.w3.org/2000/svg"
 private const val PROGRESS_SCALE = 100
@@ -58,6 +59,11 @@ private fun HtmlStandardProgress(
             ?: appearance.indicatorSize?.value
             ?: DEFAULT_INDICATOR_SIZE
     val status = props.semantics == DomposableProgressSemantics.Status
+    val strokeWidth = appearance.strokeWidth?.value ?: 4f
+    if (!props.circular && props.value != null && appearance.showStopIndicator != null) {
+        HtmlExplicitLinearProgress(props, modifier, appearance)
+        return
+    }
     DomposableHtmlModifiers(modifier) {
         TagElement<HTMLElement>(if (status) "div" else "progress", applyAttrs = {
             domposableAttributes(modifier)
@@ -72,7 +78,7 @@ private fun HtmlStandardProgress(
                 appearance.color?.let { property("accent-color", it.css()) }
                 appearance.color?.let { property("--d-progress-color", it.css()) }
                 appearance.track?.let { property("--d-progress-track", it.css()) }
-                property("--d-progress-stroke", "${appearance.strokeWidth?.value ?: 4f}px")
+                property("--d-progress-stroke", "${strokeWidth}px")
                 if (props.circular) {
                     property("width", "${width}px")
                     property("height", "${height}px")
@@ -80,16 +86,76 @@ private fun HtmlStandardProgress(
                     property("border", "0")
                     property("border-radius", "50%")
                     property("background", progressRing(props.value))
-                    val mask = progressMask(appearance.strokeWidth?.value ?: 4f)
+                    val mask = progressMask(strokeWidth)
                     property("-webkit-mask", mask)
                     property("mask", mask)
                     if (props.value == null) property("animation", "d-progress-spin 1s linear infinite")
                 } else {
                     property("width", "100%")
-                    property("height", "${appearance.strokeWidth?.value ?: 4f}px")
+                    property("height", "${strokeWidth}px")
                 }
             }
         }) {}
+    }
+}
+
+@Composable
+private fun HtmlExplicitLinearProgress(
+    props: DomposableProgressProps,
+    modifier: DomposableModifier,
+    appearance: DomposableProgressAppearance,
+) {
+    val progress = props.value!!.coerceIn(0f, 1f)
+    val strokeWidth = appearance.strokeWidth?.value ?: 4f
+    val stopSize = min(4f, strokeWidth)
+    DomposableHtmlModifiers(modifier) {
+        Div(attrs = {
+            domposableAttributes(modifier)
+            progressSemantics(props, props.semantics == DomposableProgressSemantics.Status)
+            classes("d-progress", "d-progress-standard")
+            style {
+                property("position", "relative")
+                property("width", "100%")
+                property("height", "${strokeWidth}px")
+                property("--d-progress-stroke", "${strokeWidth}px")
+                property("overflow", "hidden")
+                property("border-radius", "999px")
+                property(
+                    "background-color",
+                    "var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))",
+                )
+                appearance.color?.let { property("--d-progress-color", it.css()) }
+                appearance.track?.let { property("--d-progress-track", it.css()) }
+            }
+        }) {
+            Div(attrs = {
+                attr("aria-hidden", "true")
+                style {
+                    property("position", "absolute")
+                    property("inset-block", "0")
+                    property("inset-inline-start", "0")
+                    property("width", "${progress * 100f}%")
+                    property("border-radius", "inherit")
+                    property("background-color", "var(--d-progress-color,var(--d-primary))")
+                }
+            }) {}
+            if (appearance.showStopIndicator == true) {
+                Div(attrs = {
+                    classes("d-progress-stop-indicator")
+                    attr("aria-hidden", "true")
+                    style {
+                        property("position", "absolute")
+                        property("inset-inline-end", "0")
+                        property("top", "50%")
+                        property("width", "${stopSize}px")
+                        property("height", "${stopSize}px")
+                        property("transform", "translateY(-50%)")
+                        property("border-radius", "50%")
+                        property("background-color", "var(--d-progress-color,var(--d-primary))")
+                    }
+                }) {}
+            }
+        }
     }
 }
 

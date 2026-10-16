@@ -178,6 +178,9 @@ test('selection descriptions stay beside the control and trailing controls reach
   const trailing = page.getByRole('checkbox', { name: 'Trailing control', exact: true });
   const rowBox = (await trailing.locator('..').boundingBox())!;
   const controlBox = (await trailing.boundingBox())!;
+  const parentBox = (await trailing.locator('../..').boundingBox())!;
+  expect(rowBox.width).toBeGreaterThan(300);
+  expect(Math.abs(rowBox.width - parentBox.width)).toBeLessThan(2);
   expect(Math.abs(rowBox.x + rowBox.width - controlBox.x - controlBox.width)).toBeLessThan(2);
 });
 

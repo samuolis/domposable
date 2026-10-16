@@ -30,6 +30,13 @@ class CatalogThemeTest {
     }
 
     @Test
+    fun progressStopIndicatorOverridePreservesRendererDefaultWhenUnspecified() {
+        assertNull(DomposableProgressAppearance().showStopIndicator)
+        assertEquals(false, DomposableProgressAppearance(showStopIndicator = false).showStopIndicator)
+        assertEquals(true, DomposableProgressAppearance(showStopIndicator = true).showStopIndicator)
+    }
+
+    @Test
     fun unspecifiedExpandedPaletteRolesPreserveRendererDefaults() {
         val palette = DomposableColors(primary = DomposableColor(0xFF123456))
         assertNull(palette.secondary)

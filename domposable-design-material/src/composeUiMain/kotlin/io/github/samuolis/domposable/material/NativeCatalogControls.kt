@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -1186,11 +1187,27 @@ internal fun NativeProgress(
             }, modifier = sizedModifier, color = color, trackColor = track, strokeWidth = stroke)
         }
     } else {
+        val linearModifier = appearance.strokeWidth?.let { native.height(it.value.dp) } ?: native
         val value = props.value
         if (value == null) {
-            LinearProgressIndicator(modifier = native, color = color, trackColor = track)
+            LinearProgressIndicator(modifier = linearModifier, color = color, trackColor = track)
         } else {
-            LinearProgressIndicator(progress = { value }, modifier = native, color = color, trackColor = track)
+            if (appearance.showStopIndicator == false) {
+                LinearProgressIndicator(
+                    progress = { value },
+                    modifier = linearModifier,
+                    color = color,
+                    trackColor = track,
+                    drawStopIndicator = {},
+                )
+            } else {
+                LinearProgressIndicator(
+                    progress = { value },
+                    modifier = linearModifier,
+                    color = color,
+                    trackColor = track,
+                )
+            }
         }
     }
 }
