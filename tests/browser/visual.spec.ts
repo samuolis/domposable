@@ -18,7 +18,8 @@ const materialSections = [
 async function pauseMaterialClock(page: Page) {
   const fixedTime = new Date('2026-10-15T12:00:00Z');
   await page.clock.install({ time: fixedTime });
-  await page.clock.pauseAt(fixedTime);
+  // Pause ahead of the installation instant so a slow browser cannot make it a past timestamp.
+  await page.clock.pauseAt(new Date(fixedTime.getTime() + 1000));
 }
 
 for (const [name, width, height, route] of [

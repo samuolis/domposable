@@ -2,6 +2,8 @@
 
 Both previews compile the same shared feature sources, theme tokens, application-owned models and navigation recipes. Choose a viewport and feature to compare how each renderer responds. Open each preview separately for browser controls and full-window testing.
 
+Wasm is an experimental visual comparison. Its stable CMP accessibility bridge has [known role, state and modal limitations](wasm.md); choose semantic HTML for accessible web forms.
+
 [HTML demo](https://samuolis.github.io/domposable/demo/) · [Wasm demo](https://samuolis.github.io/domposable/wasm/) · [Path URLs](https://samuolis.github.io/domposable/routes/tasks/welcome/)
 
 <label for="preview-width">Preview width</label>

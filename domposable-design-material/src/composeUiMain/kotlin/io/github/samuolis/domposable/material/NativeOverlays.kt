@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.TimePickerDialogDefaults
-import androidx.compose.material3.VibrantTimePickerDialog
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -112,21 +111,6 @@ internal fun NativeDialog(
                     shape = appearance.nativeShape(TimePickerDialogDefaults.shape),
                     containerColor = appearance.container?.nativeColor() ?: TimePickerDialogDefaults.containerColor,
                 ) { body() }
-            }
-
-            DomposableDialogVariant.VibrantTimePicker -> {
-                VibrantTimePickerDialog(
-                    onDismissRequest = props.onDismiss,
-                    confirmButton = confirm,
-                    dismissButton = close,
-                    modifier = modifier.toComposeModifier(),
-                    shape = appearance.nativeShape(TimePickerDialogDefaults.vibrantShape),
-                    containerColor =
-                        appearance.container?.nativeColor() ?: TimePickerDialogDefaults.vibrantContainerColor,
-                ) {
-                    Text(props.title)
-                    body()
-                }
             }
 
             DomposableDialogVariant.Basic, DomposableDialogVariant.FullScreen -> {

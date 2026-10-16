@@ -1305,7 +1305,6 @@ public final class io/github/samuolis/domposable/ui/DomposableDialogVariant : ja
 	public static final field DatePicker Lio/github/samuolis/domposable/ui/DomposableDialogVariant;
 	public static final field FullScreen Lio/github/samuolis/domposable/ui/DomposableDialogVariant;
 	public static final field TimePicker Lio/github/samuolis/domposable/ui/DomposableDialogVariant;
-	public static final field VibrantTimePicker Lio/github/samuolis/domposable/ui/DomposableDialogVariant;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableDialogVariant;
 	public static fun values ()[Lio/github/samuolis/domposable/ui/DomposableDialogVariant;
@@ -3516,7 +3515,6 @@ public abstract interface class io/github/samuolis/domposable/ui/DomposableTheme
 public final class io/github/samuolis/domposable/ui/DomposableTimePickerMode : java/lang/Enum {
 	public static final field Dial Lio/github/samuolis/domposable/ui/DomposableTimePickerMode;
 	public static final field Input Lio/github/samuolis/domposable/ui/DomposableTimePickerMode;
-	public static final field Scroll Lio/github/samuolis/domposable/ui/DomposableTimePickerMode;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableTimePickerMode;
 	public static fun values ()[Lio/github/samuolis/domposable/ui/DomposableTimePickerMode;

@@ -1,6 +1,6 @@
 {
   "artifact": "org.jetbrains.compose.material3:material3",
-  "version": "1.13.0-alpha02",
+  "version": "1.12.0-alpha03",
   "scope": "component families and supported public variants; excludes internal implementation utilities",
   "components": [
     {
@@ -34,7 +34,7 @@
       "upstream": [
         "ToggleButton",
         "ElevatedToggleButton",
-        "FilledTonalToggleButton",
+        "TonalToggleButton",
         "OutlinedToggleButton"
       ]
     },
@@ -194,9 +194,7 @@
       "upstream": [
         "TimePicker",
         "TimeInput",
-        "TimePickerDialog",
-        "TimeScroll",
-        "VibrantTimePickerDialog"
+        "TimePickerDialog"
       ]
     },
     {
@@ -383,9 +381,7 @@
       "category": "Selection",
       "upstream": [
         "DropdownMenu",
-        "DropdownMenuItem",
-        "CheckableDropdownMenuItem",
-        "SelectableDropdownMenuItem"
+        "DropdownMenuItem"
       ]
     },
     {

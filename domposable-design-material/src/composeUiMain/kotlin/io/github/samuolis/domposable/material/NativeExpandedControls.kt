@@ -28,17 +28,13 @@ import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedToggleButton
-import androidx.compose.material3.ElevatedToggleButtonDefaults
 import androidx.compose.material3.ExpandedDockedSearchBar
 import androidx.compose.material3.ExpandedDockedSearchBarWithGap
 import androidx.compose.material3.ExpandedFullScreenContainedSearchBar
 import androidx.compose.material3.ExpandedFullScreenSearchBar
-import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FilledTonalToggleButton
-import androidx.compose.material3.FilledTonalToggleButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.FloatingActionButtonMenu
@@ -53,7 +49,6 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedToggleButton
-import androidx.compose.material3.OutlinedToggleButtonDefaults
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
@@ -67,6 +62,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.TonalToggleButton
 import androidx.compose.material3.VerticalFloatingToolbar
 import androidx.compose.material3.carousel.CarouselItemScope
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
@@ -545,22 +541,20 @@ internal fun NativeToggleButton(
     val shapes =
         when (props.style) {
             DomposableButtonStyle.Elevated -> {
-                ElevatedToggleButtonDefaults.shapesFor(ElevatedToggleButtonDefaults.size)
+                ToggleButtonDefaults.shapesFor(ButtonDefaults.MinHeight)
             }
 
             DomposableButtonStyle.FilledTonal -> {
-                FilledTonalToggleButtonDefaults.shapesFor(
-                    FilledTonalToggleButtonDefaults.size,
-                )
+                ToggleButtonDefaults.shapesFor(ButtonDefaults.MinHeight)
             }
 
             DomposableButtonStyle.Outlined -> {
-                OutlinedToggleButtonDefaults.shapesFor(OutlinedToggleButtonDefaults.size)
+                ToggleButtonDefaults.shapesFor(ButtonDefaults.MinHeight)
             }
 
             DomposableButtonStyle.Filled, DomposableButtonStyle.Text -> {
                 ToggleButtonDefaults.shapesFor(
-                    ToggleButtonDefaults.size,
+                    ButtonDefaults.MinHeight,
                 )
             }
         }.let { defaults ->
@@ -572,7 +566,7 @@ internal fun NativeToggleButton(
     val colors =
         when (props.style) {
             DomposableButtonStyle.Elevated -> {
-                ElevatedToggleButtonDefaults.colors(
+                ToggleButtonDefaults.elevatedToggleButtonColors(
                     containerColor = container,
                     contentColor = contentColor,
                     disabledContainerColor =
@@ -585,7 +579,7 @@ internal fun NativeToggleButton(
             }
 
             DomposableButtonStyle.FilledTonal -> {
-                FilledTonalToggleButtonDefaults.colors(
+                ToggleButtonDefaults.tonalToggleButtonColors(
                     containerColor = container,
                     contentColor = contentColor,
                     disabledContainerColor =
@@ -598,7 +592,7 @@ internal fun NativeToggleButton(
             }
 
             DomposableButtonStyle.Outlined -> {
-                OutlinedToggleButtonDefaults.colors(
+                ToggleButtonDefaults.outlinedToggleButtonColors(
                     containerColor = container,
                     contentColor = contentColor,
                     disabledContainerColor =
@@ -611,7 +605,7 @@ internal fun NativeToggleButton(
             }
 
             DomposableButtonStyle.Filled, DomposableButtonStyle.Text -> {
-                ToggleButtonDefaults.colors(
+                ToggleButtonDefaults.toggleButtonColors(
                     containerColor = container,
                     contentColor = contentColor,
                     disabledContainerColor =
@@ -642,7 +636,7 @@ internal fun NativeToggleButton(
             }
 
             props.style == DomposableButtonStyle.Outlined -> {
-                OutlinedToggleButtonDefaults.border(enabled, props.checked)
+                if (!props.checked) ButtonDefaults.outlinedButtonBorder(enabled) else null
             }
 
             else -> {
@@ -663,7 +657,7 @@ internal fun NativeToggleButton(
     }
     val contentPadding =
         appearance.contentPadding?.nativePadding()
-            ?: ToggleButtonDefaults.contentPaddingFor(ToggleButtonDefaults.size, hasStartIcon = false)
+            ?: ButtonDefaults.contentPaddingFor(ButtonDefaults.MinHeight, hasStartIcon = false)
     when (props.style) {
         DomposableButtonStyle.Filled, DomposableButtonStyle.Text -> {
             ToggleButton(
@@ -690,8 +684,8 @@ internal fun NativeToggleButton(
                 border = customBorder,
                 contentPadding =
                     appearance.contentPadding?.nativePadding()
-                        ?: ElevatedToggleButtonDefaults.contentPaddingFor(
-                            ElevatedToggleButtonDefaults.size,
+                        ?: ButtonDefaults.contentPaddingFor(
+                            ButtonDefaults.MinHeight,
                             hasStartIcon = false,
                         ),
                 content = buttonContent,
@@ -699,7 +693,7 @@ internal fun NativeToggleButton(
         }
 
         DomposableButtonStyle.FilledTonal -> {
-            FilledTonalToggleButton(
+            TonalToggleButton(
                 props.checked,
                 props.onCheckedChange,
                 buttonModifier,
@@ -709,8 +703,8 @@ internal fun NativeToggleButton(
                 border = customBorder,
                 contentPadding =
                     appearance.contentPadding?.nativePadding()
-                        ?: FilledTonalToggleButtonDefaults.contentPaddingFor(
-                            FilledTonalToggleButtonDefaults.size,
+                        ?: ButtonDefaults.contentPaddingFor(
+                            ButtonDefaults.MinHeight,
                             hasStartIcon = false,
                         ),
                 content = buttonContent,
@@ -728,8 +722,8 @@ internal fun NativeToggleButton(
                 border = customBorder,
                 contentPadding =
                     appearance.contentPadding?.nativePadding()
-                        ?: OutlinedToggleButtonDefaults.contentPaddingFor(
-                            OutlinedToggleButtonDefaults.size,
+                        ?: ButtonDefaults.contentPaddingFor(
+                            ButtonDefaults.MinHeight,
                             hasStartIcon = false,
                         ),
                 content = buttonContent,

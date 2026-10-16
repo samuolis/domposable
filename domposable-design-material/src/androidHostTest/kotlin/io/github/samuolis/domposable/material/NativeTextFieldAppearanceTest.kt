@@ -1,7 +1,12 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
+import androidx.compose.runtime.saveable.SaveableStateRegistry
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
@@ -11,9 +16,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.text.AnnotatedString
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponentStyles
+import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableStateColors
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
@@ -29,12 +37,48 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeTextFieldAppearanceTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun passwordEditsStayMaskedAndOutOfSavedState() {
+        val value = mutableStateOf("")
+        val visible = mutableStateOf(false)
+        val registry = SaveableStateRegistry(null) { true }
+        compose.setContent {
+            CompositionLocalProvider(LocalSaveableStateRegistry provides registry) {
+                DomposableMaterialTheme {
+                    DomposableTextField(
+                        DomposableTextFieldProps(
+                            value = value.value,
+                            onValueChange = { value.value = it },
+                            label = "Private phrase",
+                            id = "secret",
+                            purpose = DomposableInputPurpose.Password,
+                            passwordVisible = visible.value,
+                        ),
+                    )
+                }
+            }
+        }
+        compose.onNodeWithTag("secret").performTextInput("Private 123")
+        compose.runOnIdle {
+            assertEquals("Private 123", value.value)
+            assertFalse(registry.performSave().toString().contains("Private 123"))
+        }
+        compose.onNodeWithTag("secret").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("•".repeat(11))),
+        )
+        compose.runOnIdle { visible.value = true }
+        compose.onNodeWithTag("secret").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("Private 123")),
+        )
+    }
 
     @Test
     fun themedReadonlyFieldKeepsLabelErrorAndNoTextEntryAction() {

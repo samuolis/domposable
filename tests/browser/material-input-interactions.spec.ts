@@ -41,10 +41,13 @@ test('time picker modes preserve and update controlled hour and minute values', 
   await typedTime.fill('12:15');
   await expect(page.getByTestId('material-selected-time')).toContainText('12:15');
   await switchMode.click();
-  const hour = picker.getByRole('spinbutton', { name: 'Hour', exact: true });
-  await expect(hour).toHaveAttribute('aria-valuenow', '12');
+  await expect(picker.locator('input[type="time"]')).toHaveCount(0);
+  await expect(page.getByTestId('material-selected-time')).toContainText('12:15');
+  await picker.getByRole('button', { name: 'Select hours', exact: true }).click();
+  const hour = picker.getByRole('button', { name: 'Hour 12', exact: true });
+  await expect(hour).toHaveAttribute('aria-pressed', 'true');
   await hour.focus();
-  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowDown');
   await expect(page.getByTestId('material-selected-time')).toContainText('13:15');
 });
 
@@ -53,6 +56,9 @@ test('autocomplete chooses with the keyboard without replacing its query separat
   const input = page.getByRole('combobox', { name: 'Favorite color' });
   await input.fill('Bl');
   await expect(input).toHaveAttribute('aria-expanded', 'true');
+  // Focus can expand the previous results before the edited query recomposes.
+  const suggestions = page.locator(`#${await input.getAttribute('aria-controls')}`);
+  await expect(suggestions.getByRole('option')).toHaveText(['Blue']);
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   await expect(input).toHaveValue('Blue');

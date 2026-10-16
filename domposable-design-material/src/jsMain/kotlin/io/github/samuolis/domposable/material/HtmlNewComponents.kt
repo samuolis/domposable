@@ -31,7 +31,6 @@ import io.github.samuolis.domposable.ui.DomposableMultiChoiceSegmentedButtonsPro
 import io.github.samuolis.domposable.ui.DomposableNavigationDrawerItemProps
 import io.github.samuolis.domposable.ui.DomposableNavigationDrawerProps
 import io.github.samuolis.domposable.ui.DomposablePullToRefreshProps
-import io.github.samuolis.domposable.ui.DomposableScrollFieldProps
 import io.github.samuolis.domposable.ui.DomposableSearchBarProps
 import io.github.samuolis.domposable.ui.DomposableSearchBarVariant
 import io.github.samuolis.domposable.ui.DomposableSplitButtonProps
@@ -1240,71 +1239,6 @@ internal fun HtmlTimePicker(
                         }
                     }
                 })
-            } else if (props.mode == DomposableTimePickerMode.Scroll) {
-                Span(attrs = {
-                    classes("d-time-value")
-                    attr("aria-live", "polite")
-                }) {
-                    Text(
-                        if (props.is24Hour) {
-                            "${props.hour.toString().padStart(
-                                2,
-                                '0',
-                            )}:${props.minute.toString().padStart(
-                                2,
-                                '0',
-                            )}"
-                        } else {
-                            "${((props.hour + 11) % 12) + 1}:${props.minute.toString().padStart(
-                                2,
-                                '0',
-                            )} ${if (props.hour < 12) "AM" else "PM"}"
-                        },
-                    )
-                }
-                HtmlScrollField(
-                    DomposableScrollFieldProps(
-                        itemCount = if (props.is24Hour) 24 else 12,
-                        selectedIndex = if (props.is24Hour) props.hour else (props.hour + 11) % 12,
-                        onSelectedIndexChange = { index ->
-                            val selectedHour =
-                                if (props.is24Hour) {
-                                    index
-                                } else {
-                                    val hour = (index + 1) % 12
-                                    hour + if (props.hour >= 12) 12 else 0
-                                }
-                            props.onTimeChange(selectedHour, props.minute)
-                        },
-                        label = "Hour",
-                        indexDescription = { index ->
-                            if (props.is24Hour) {
-                                index.toString().padStart(2, '0')
-                            } else {
-                                (
-                                    (
-                                        index +
-                                            1
-                                    ) %
-                                        12
-                                ).let { if (it == 0) 12 else it }.toString()
-                            }
-                        },
-                        enabled = formEnabled,
-                    ),
-                    DomposableModifier,
-                )
-                HtmlScrollField(
-                    DomposableScrollFieldProps(
-                        itemCount = 60,
-                        selectedIndex = props.minute,
-                        onSelectedIndexChange = { props.onTimeChange(props.hour, it) },
-                        label = "Minute",
-                        indexDescription = { it.toString().padStart(2, '0') },
-                        enabled = formEnabled,
-                    ),
-                    DomposableModifier,
-                )
             } else {
                 Span(attrs = {
                     classes("d-time-value")

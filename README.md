@@ -33,6 +33,8 @@ Domposable is a Kotlin Multiplatform UI library with optional integration helper
 - **Optional Material design system** — standard Material 3 components, selected expressive components and variants, with scoped theme styles. [Catalog and configuration](docs/material-catalog.md).
 - **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
 
+The supported baseline uses stable Compose Multiplatform core; optional design mappings do not force an alpha core upgrade. See [tested versions and upgrade policy](docs/compatibility.md).
+
 Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable. [Koin and Metro](docs/screens.md#one-entry-api-for-koin-and-metro) use the same generated entry API; existing frameworks can [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
 
 Build your own visual language with shared layouts and controls, theme an existing provider, or add custom native/HTML renderers and modifier decorations without changing Domposable. [Custom design systems](docs/design-systems.md#build-your-own-ui) keep feature code common across platforms.

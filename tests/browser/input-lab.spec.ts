@@ -1,137 +1,134 @@
 import { test, expect, Page, Locator } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { canvasClick, settledCapture } from './wasm-interactions';
 
 async function activate(control: Locator) {
-  // Compose's documented accessibility bridge invokes OnClick for a DOM click.
-  // Its mirror has pointer-events:none; this exercises assistive activation.
   await control.evaluate((element: HTMLElement) => element.click());
 }
 
-async function edit(page: Page, label: string, value: string, password = false) {
-  const field = page.getByRole('textbox', { name: new RegExp(`^${label}(?:\\s|$)`) });
+async function edit(page: Page, id: string, value: string, password = false) {
+  // Stable CMP publishes test IDs but does not merge field labels into its mirror.
+  const field = page.locator(`#${id}`);
   await field.focus();
   const backing = page.locator('.compose-backing-field');
   await expect(backing).toBeFocused();
   await expect(backing).toHaveAttribute('inputmode', password ? 'password' : 'text');
-  await expect(backing).toHaveText('');
+  if (password) await expect(backing).toHaveAttribute('type', 'password');
   await page.keyboard.insertText(value);
   await expect(field).toHaveText(password ? '•'.repeat(value.length) : value);
   return field;
 }
 
-test.describe('Wasm input and semantics', () => {
+test.describe('Stable Wasm comparison and bridge limits', () => {
   test.beforeEach(async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Wasm interaction support is currently verified in Chromium.');
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/wasm/#/inputs');
-    // First-frame readiness precedes Compose's debounced semantics publication.
-    await expect(page.getByRole('textbox', { name: 'Display name', exact: true })).toHaveCount(1, { timeout: 60000 });
+    await expect(page.locator('#input-name')).toHaveAttribute('role', 'textbox', { timeout: 20000 });
   });
 
-  test('Unicode editing and assistive activation update the shared feature', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeDisabled();
-    await edit(page, 'Display name', 'Žąsis 李');
-    const consent = page.getByRole('checkbox', { name: 'Allow local preview', exact: true });
+  test('Unicode editing and supported click delegates update the shared feature', async ({ page }) => {
+    await edit(page, 'input-name', 'Žąsis 李');
+    // CMP 1.12.2 maps all clickable semantics to buttons, including toggles.
+    const consent = page.getByRole('button', { name: 'Allow local preview', exact: true });
+    await expect(consent).not.toHaveAttribute('aria-checked');
     await activate(consent);
-    await expect(consent).toBeChecked();
-    await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeEnabled();
     await activate(page.getByRole('button', { name: 'Preview', exact: true }));
     await expect(page.getByText('Preview ready for Žąsis 李', { exact: true })).toHaveCount(1);
   });
 
   test('Tab traversal reaches the native editor and keyboard text updates the field', async ({ page }) => {
     await page.locator('canvas').focus();
-    // The reviewed phone layout orders header switch, shop action, then name.
-    for (let tab = 0; tab < 3; tab++) {
+    const backing = page.locator('.compose-backing-field');
+    for (let tab = 0; tab < 8; tab++) {
       await page.keyboard.press('Tab');
       await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+      if (await backing.count() && await backing.evaluate(element => element.matches(':focus'))) break;
     }
-    const backing = page.locator('.compose-backing-field');
     await expect(backing).toBeFocused();
     await expect(backing).toHaveAttribute('inputmode', 'text');
     await page.keyboard.insertText('Keyboard reached name');
     await expect(page.locator('#input-name')).toHaveText('Keyboard reached name');
   });
 
-  test('validation and disabled semantics follow callbacks without losing edits', async ({ page }) => {
-    const consent = page.getByRole('checkbox', { name: 'Allow local preview', exact: true });
-    await activate(consent);
-    await expect(consent).toBeChecked();
-    await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeEnabled();
-    await activate(page.getByRole('button', { name: 'Preview', exact: true }));
-    await expect(page.locator('#input-name')).toHaveAttribute('aria-label', /Enter your display name/);
-    // The pinned bridge exposes supporting error text in the name, but does not
-    // export Compose's Error semantics as aria-invalid; this gap is documented.
-    await expect(page.locator('#input-name')).not.toHaveAttribute('aria-invalid');
-    await edit(page, 'Display name', 'Retained edit');
-    const editing = page.getByRole('switch', { name: 'Editing enabled', exact: true });
-    await activate(editing);
-    await expect(page.locator('#input-name')).toBeDisabled();
-    await expect(consent).toBeDisabled();
-    await activate(consent);
-    await expect(consent).toBeChecked();
-    await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeDisabled();
-    await activate(editing);
-    await expect(page.locator('#input-name')).toBeEnabled();
+  test('native disabled interactions retain edits while the bridge omits disabled state', async ({ page }) => {
+    await edit(page, 'input-name', 'Retained edit');
+    const consent = page.getByRole('button', { name: 'Allow local preview', exact: true });
+    const editing = page.getByRole('button', { name: 'Editing enabled', exact: true });
+    await canvasClick(page, consent);
+    await canvasClick(page, editing);
+    await expect(page.locator('#input-name')).not.toHaveAttribute('aria-disabled');
+    await expect(consent).not.toHaveAttribute('aria-disabled');
+    // Exercise the actual disabled canvas control, not the incomplete assistive delegate.
+    await canvasClick(page, consent);
+    await canvasClick(page, editing);
     await expect(page.locator('#input-name')).toHaveText('Retained edit');
+    await canvasClick(page, page.getByRole('button', { name: 'Preview', exact: true }));
+    await expect(page.getByText('Preview ready for Retained edit', { exact: true })).toHaveCount(1);
   });
 
   test('password semantics are masked and the private field is not saved in browser history', async ({ page }) => {
-    await edit(page, 'Private phrase', 'Fake password 123', true);
+    await edit(page, 'input-secret', 'Fake password 123', true);
+    // Playwright serializes native password input.value: microsoft/playwright-mcp#1566.
     expect(await page.locator('#cmp_a11y_root').ariaSnapshot()).not.toContain('Fake password 123');
-    await activate(page.getByRole('tab', { name: 'Tasks', exact: true }));
+    await activate(page.getByRole('button', { name: 'Tasks', exact: true }));
     await expect(page).toHaveURL(/#\/tasks$/);
-    const stored = await page.evaluate(() => JSON.stringify(history.state));
-    expect(stored).not.toContain('Fake password 123');
+    expect(await page.evaluate(() => JSON.stringify(history.state))).not.toContain('Fake password 123');
     await page.goBack();
     await expect(page).toHaveURL(/#\/inputs$/);
     await page.reload();
-    await expect(page.getByRole('textbox', { name: 'Private phrase', exact: true })).toHaveText('');
+    await expect(page.locator('#input-secret')).toHaveText('');
   });
 
-  test('modal semantics make the background inert and both action and Escape dismiss it', async ({ page }) => {
+  test('native help actions and Escape dismiss the overlay despite stale modal semantics', async ({ page }) => {
     const open = page.getByRole('button', { name: 'Open help', exact: true });
-    await activate(open);
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toHaveAttribute('aria-modal', 'true');
-    await expect.poll(() => page.locator('#cmp_a11y_root').evaluate(element =>
-      [...element.children].map(child => (child as HTMLElement).inert))).toEqual([true, false]);
-    await page.waitForFunction(() => performance.getEntriesByType('resource')
-      .some(resource => resource.name.includes('/notosanssymbols2/')));
-    await page.screenshot({ path: 'build/screenshots/wasm/input-lab-help.png' });
-    await activate(dialog.getByRole('button', { name: 'Close help', exact: true }));
-    await expect(dialog).toHaveCount(0);
+    const close = page.getByRole('button', { name: 'Close help', exact: true });
+    const bounds = await open.boundingBox();
+    expect(bounds).not.toBeNull();
+    await page.mouse.move(0, 0);
+    const closed = await settledCapture(page);
+    await canvasClick(page, open);
+    await expect(close).toHaveCount(1);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(page.locator('[aria-modal="true"]')).toHaveCount(0);
     await expect.poll(() => page.locator('#cmp_a11y_root').evaluate(element =>
       [...element.children].every(child => !(child as HTMLElement).inert))).toBe(true);
-    await activate(open);
-    await expect(dialog).toHaveCount(1);
-    await page.locator('canvas').focus();
+    await page.mouse.move(0, 0);
+    const opened = await settledCapture(page);
+    expect(opened.equals(closed)).toBe(false);
+    mkdirSync('build/screenshots/wasm', { recursive: true });
+    writeFileSync('build/screenshots/wasm/input-lab-help.png', opened);
+    await canvasClick(page, close);
+    await page.mouse.move(0, 0);
+    // CMP 1.12 can leave its mirror attached to the dismissed dialog owner.
+    // Verify actual rendered dismissal rather than trusting that stale tree.
+    await expect.poll(async () => (await page.screenshot()).equals(closed)).toBe(true);
+    await page.mouse.click(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+    await page.mouse.move(0, 0);
+    await expect.poll(async () => (await page.screenshot()).equals(opened)).toBe(true);
     await page.keyboard.press('Escape');
-    await expect(dialog).toHaveCount(0);
+    await expect.poll(async () => (await page.screenshot()).equals(closed)).toBe(true);
   });
 
-  test('WCAG audit retains bounded upstream bridge findings and rejects new violations', async ({ page }) => {
+  test('WCAG audit records exact stable bridge findings and rejects new violations', async ({ page }) => {
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
     const findings = await page.evaluate(violations => violations.flatMap(violation => violation.nodes.map(node => {
       const element = new DOMParser().parseFromString(node.html, 'text/html').body.firstElementChild!;
       return { rule: violation.id, tag: element.tagName, role: element.getAttribute('role'),
         orientation: element.getAttribute('aria-orientation'), text: element.textContent?.trim() || '' };
     })), results.violations);
-    // These exact nodes are emitted by the pinned Compose 1.13.0-alpha02 bridge.
-    // No axe rule is disabled. A changed/new node or rule requires investigation.
-    // Material scaffold slots can change DOM order; retain the exact nodes and counts.
-    expect(findings.map(node => JSON.stringify(node)).sort()).toEqual([
-      { rule: 'aria-allowed-attr', tag: 'DIV', role: null, orientation: 'vertical', text: '' },
-      { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: '◈ Domposable' },
-      { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: 'Input and accessibility lab' },
-      ...['Tasks', 'Components', 'Recipes'].map(text => ({ rule: 'aria-required-parent', tag: 'DIV', role: 'tab', orientation: null, text })),
-      { rule: 'aria-roles', tag: 'CANVAS', role: 'generic', orientation: null, text: '' },
-    ].map(node => JSON.stringify(node)).sort());
+    // Export even on failure: a new bridge finding must be inspected, not silently accepted.
     mkdirSync('build/accessibility', { recursive: true });
     writeFileSync('build/accessibility/wasm-input-lab.json', JSON.stringify({
-      source: 'Compose 1.13.0-alpha02 semantics bridge', certification: false, findings, axe: results,
+      source: 'Compose 1.12.2 semantics bridge', certification: false, findings, axe: results,
     }, null, 2));
+    expect(findings.map(node => JSON.stringify(node)).sort()).toEqual([
+      ...Array.from({ length: 2 }, () => ({ rule: 'aria-input-field-name', tag: 'DIV', role: 'textbox', orientation: null, text: '' })),
+      { rule: 'aria-roles', tag: 'CANVAS', role: 'generic', orientation: null, text: '' },
+      { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: '◈ Domposable' },
+      { rule: 'aria-required-attr', tag: 'DIV', role: 'heading', orientation: null, text: 'Input and accessibility lab' },
+    ].map(node => JSON.stringify(node)).sort());
     await page.waitForFunction(() => performance.getEntriesByType('resource')
       .some(resource => resource.name.includes('/notosanssymbols2/')));
     await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));

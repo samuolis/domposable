@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
@@ -24,6 +23,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -36,10 +36,12 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -67,6 +69,9 @@ internal fun NativeTextField(
     props: DomposableTextFieldProps,
     modifier: DomposableModifier,
 ) {
+    if (props.purpose == DomposableInputPurpose.Password) {
+        DisposableEffect(Unit) { onDispose(protectPasswordBackingInput()) }
+    }
     val focusRequester = remember { FocusRequester() }
     val formEnabled = domposableFormEnabled()
     val shouldAutofocus = props.autofocus && props.enabled && formEnabled
@@ -94,6 +99,10 @@ internal fun NativeTextField(
                         onClick()
                         true
                     })
+                }
+                // Stable Wasm exports EditableText without applying password semantics.
+                if (props.purpose == DomposableInputPurpose.Password && !props.passwordVisible) {
+                    editableText = AnnotatedString("•".repeat(props.value.length))
                 }
                 props.id?.let { testTag = it }
                 if (!props.showLabel) contentDescription = props.label
@@ -208,7 +217,7 @@ internal fun NativeTextField(
         props.purpose == DomposableInputPurpose.Password && props.singleLine && !props.readOnly &&
             !customNativeDecoration
     if (securePassword) {
-        val secureState = rememberTextFieldState(props.value)
+        val secureState = remember { TextFieldState(props.value) }
         val currentValue by rememberUpdatedState(props.value)
         val currentChange by rememberUpdatedState(props.onValueChange)
         LaunchedEffect(secureState) {

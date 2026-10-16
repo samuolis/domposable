@@ -8,44 +8,65 @@ package io.github.samuolis.domposable.material
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.CheckableDropdownMenuItem
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.Label
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.ScrollField
-import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberScrollFieldState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableItemColors
@@ -60,19 +81,35 @@ import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.toComposeModifier
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+
+private const val SCROLL_FIELD_PAGE_COUNT = 100_000
 
 @Composable
-internal fun DomposableItemAppearance.nativeScrollFieldColors(): androidx.compose.material3.ScrollFieldColors =
+internal fun DomposableItemAppearance.nativeScrollFieldColors(
+    enabled: Boolean = true,
+): androidx.compose.material3.ScrollFieldColors =
     androidx.compose.material3.ScrollFieldDefaults.colors(
-        containerColor = colors.container?.nativeColor() ?: MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = colors.content?.nativeColor() ?: MaterialTheme.colorScheme.outline,
-        selectedContentColor = colors.selectedContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface,
-        disabledContainerColor =
-            colors.disabledContainer?.nativeColor() ?: MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.38f),
-        disabledContentColor =
-            colors.disabledContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-        disabledSelectedContentColor =
-            colors.disabledContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+        containerColor =
+            if (enabled) {
+                colors.container?.nativeColor() ?: MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                colors.disabledContainer?.nativeColor()
+                    ?: MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.38f)
+            },
+        unselectedContentColor =
+            if (enabled) {
+                colors.content?.nativeColor() ?: MaterialTheme.colorScheme.outline
+            } else {
+                colors.disabledContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            },
+        selectedContentColor =
+            if (enabled) {
+                colors.selectedContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface
+            } else {
+                colors.disabledContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            },
     )
 
 @Composable
@@ -91,21 +128,31 @@ private fun NativeScrollFieldContent(
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.scrollField
     val customItem = props.itemContent
-    val state = key(props.itemCount) { rememberScrollFieldState(props.itemCount, props.selectedIndex) }
+    val state =
+        key(props.itemCount) {
+            val middle = SCROLL_FIELD_PAGE_COUNT / 2
+            rememberPagerState(initialPage = middle - middle % props.itemCount + props.selectedIndex) {
+                SCROLL_FIELD_PAGE_COUNT
+            }
+        }
+    val scope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
     val latestCallback by rememberUpdatedState(props.onSelectedIndexChange)
     val selectedIndex by rememberUpdatedState(props.selectedIndex)
-    val enabled = props.enabled && domposableFormEnabled()
+    val enabled by rememberUpdatedState(props.enabled && domposableFormEnabled())
     LaunchedEffect(state) {
-        snapshotFlow { state.selectedOption }.drop(1).collect { index ->
+        snapshotFlow { state.currentPage % props.itemCount }.drop(1).collect { index ->
             if (index != selectedIndex) {
-                latestCallback(index)
+                if (enabled) latestCallback(index)
                 withFrameNanos { }
-                if (selectedIndex != index) state.selectedOption = selectedIndex
+                if (selectedIndex != index) state.scrollToOption(selectedIndex, props.itemCount)
             }
         }
     }
     LaunchedEffect(props.selectedIndex, state) {
-        if (state.selectedOption != props.selectedIndex) state.selectedOption = props.selectedIndex
+        if (state.currentPage % props.itemCount != props.selectedIndex) {
+            state.scrollToOption(props.selectedIndex, props.itemCount)
+        }
     }
     val shape = appearance.shape?.nativeShape() ?: androidx.compose.material3.ScrollFieldDefaults.shape
     val baseModifier =
@@ -127,95 +174,151 @@ private fun NativeScrollFieldContent(
                     Modifier.border(BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()), shape)
                 } ?: Modifier,
             )
-    val colors = appearance.nativeScrollFieldColors()
-    ScrollField(
+    val colors = appearance.nativeScrollFieldColors(enabled)
+    VerticalPager(
         state = state,
-        contentDescription = props.label,
-        modifier = baseModifier,
-        enabled = enabled,
-        colors = colors,
-        fieldAccessibilityDescription = props.indexDescription,
-        field = { index, selected, enabled ->
-            val itemColor =
-                when {
-                    !enabled -> {
-                        appearance.colors.disabledContent?.nativeColor()
-                            ?: MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        userScrollEnabled = enabled,
+        modifier =
+            baseModifier
+                .height(androidx.compose.material3.ScrollFieldDefaults.ScrollFieldHeight)
+                .indication(interactionSource, ripple())
+                .background(colors.containerColor, shape)
+                .onKeyEvent { event ->
+                    if (!enabled || event.type != KeyEventType.KeyDown) {
+                        return@onKeyEvent false
                     }
-
-                    selected -> {
-                        appearance.colors.selectedContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface
+                    val direction =
+                        when (event.key) {
+                            Key.DirectionDown -> 1
+                            Key.DirectionUp -> -1
+                            else -> return@onKeyEvent false
+                        }
+                    scope.launch {
+                        state.animateScrollToPage(
+                            (state.targetPage + direction).coerceIn(0, SCROLL_FIELD_PAGE_COUNT - 1),
+                        )
                     }
-
-                    else -> {
-                        appearance.colors.content?.nativeColor() ?: MaterialTheme.colorScheme.outline
-                    }
-                }
-            val itemBackground =
-                when {
-                    !enabled -> appearance.colors.disabledContainer?.nativeColor()
-                    selected -> appearance.colors.selectedContainer?.nativeColor()
-                    else -> appearance.colors.container?.nativeColor()
-                }
-            val itemBorder =
-                when {
-                    !enabled -> appearance.colors.disabledBorder
-                    selected -> appearance.colors.selectedBorder ?: appearance.colors.border
-                    else -> appearance.colors.border
-                }
-            val itemShape = appearance.shape?.nativeShape() ?: RectangleShape
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .then(itemBackground?.let { Modifier.background(it, itemShape) } ?: Modifier)
-                    .then(
-                        itemBorder?.let {
-                            Modifier.border(
-                                BorderStroke(
-                                    (
-                                        if (selected) {
-                                            appearance.selectedBorderWidth ?: appearance.borderWidth
-                                        } else {
-                                            appearance.borderWidth
-                                        }
-                                    ).value.dp,
-                                    it.nativeColor(),
-                                ),
-                                itemShape,
-                            )
-                        } ?: Modifier,
-                    ).then(appearance.contentPadding?.let { Modifier.padding(it.nativePadding()) } ?: Modifier),
-                contentAlignment = androidx.compose.ui.Alignment.Center,
-            ) {
-                val itemTextAppearance =
-                    if (selected) {
-                        appearance.selectedTextAppearance ?: appearance.textAppearance
-                    } else {
-                        appearance.textAppearance
-                    }
-                val textStyle =
-                    itemTextAppearance.nativeTextStyle(
-                        if (selected) {
-                            MaterialTheme.typography.displayLargeEmphasized
+                    true
+                }.focusable(enabled = enabled, interactionSource = interactionSource)
+                .clearAndSetSemantics {
+                    contentDescription = props.label
+                    stateDescription = props.indexDescription(state.targetPage % props.itemCount)
+                    progressBarRangeInfo =
+                        ProgressBarRangeInfo(
+                            state.targetPage.toFloat(),
+                            0f..(SCROLL_FIELD_PAGE_COUNT - 1).toFloat(),
+                            SCROLL_FIELD_PAGE_COUNT - 2,
+                        )
+                    if (!enabled) disabled()
+                    setProgress { target ->
+                        if (!enabled || !target.isFinite()) {
+                            false
                         } else {
-                            MaterialTheme.typography.displayMedium
-                        },
-                    )
-                if (customItem != null) {
-                    CompositionLocalProvider(
-                        LocalSaveableStateRegistry provides featureRegistry,
-                        androidx.compose.material3.LocalTextStyle provides textStyle,
-                        androidx.compose.material3.LocalContentColor provides itemColor,
-                    ) { customItem.invoke(index, selected, enabled) }
-                } else if (itemTextAppearance == null) {
-                    androidx.compose.material3.ScrollFieldDefaults
-                        .Item(index, selected, enabled, colors)
-                } else {
-                    Text(index.toString().padStart(2, '0'), style = textStyle, color = itemColor)
+                            val page = target.roundToInt().coerceIn(0, SCROLL_FIELD_PAGE_COUNT - 1)
+                            if (page == state.targetPage) {
+                                false
+                            } else {
+                                scope.launch { state.animateScrollToPage(page) }
+                                true
+                            }
+                        }
+                    }
+                },
+        pageSize = PageSize.Fixed(androidx.compose.material3.ScrollFieldDefaults.ScrollFieldHeight / 3),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        snapPosition = SnapPosition.Center,
+    ) { page ->
+        val index = page % props.itemCount
+        val selected = state.currentPage == page
+        val itemColor =
+            when {
+                !enabled -> {
+                    appearance.colors.disabledContent?.nativeColor()
+                        ?: MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                }
+
+                selected -> {
+                    appearance.colors.selectedContent?.nativeColor() ?: MaterialTheme.colorScheme.onSurface
+                }
+
+                else -> {
+                    appearance.colors.content?.nativeColor() ?: MaterialTheme.colorScheme.outline
                 }
             }
-        },
-    )
+        val itemBackground =
+            when {
+                !enabled -> appearance.colors.disabledContainer?.nativeColor()
+                selected -> appearance.colors.selectedContainer?.nativeColor()
+                else -> appearance.colors.container?.nativeColor()
+            }
+        val itemBorder =
+            when {
+                !enabled -> appearance.colors.disabledBorder
+                selected -> appearance.colors.selectedBorder ?: appearance.colors.border
+                else -> appearance.colors.border
+            }
+        val itemShape = appearance.shape?.nativeShape() ?: RectangleShape
+        Box(
+            Modifier
+                .fillMaxSize()
+                .focusProperties { canFocus = false }
+                .clickable(enabled = enabled) { scope.launch { state.animateScrollToPage(page) } }
+                .then(itemBackground?.let { Modifier.background(it, itemShape) } ?: Modifier)
+                .then(
+                    itemBorder?.let {
+                        Modifier.border(
+                            BorderStroke(
+                                (
+                                    if (selected) {
+                                        appearance.selectedBorderWidth ?: appearance.borderWidth
+                                    } else {
+                                        appearance.borderWidth
+                                    }
+                                ).value.dp,
+                                it.nativeColor(),
+                            ),
+                            itemShape,
+                        )
+                    } ?: Modifier,
+                ).then(appearance.contentPadding?.let { Modifier.padding(it.nativePadding()) } ?: Modifier),
+            contentAlignment = androidx.compose.ui.Alignment.Center,
+        ) {
+            val itemTextAppearance =
+                if (selected) {
+                    appearance.selectedTextAppearance ?: appearance.textAppearance
+                } else {
+                    appearance.textAppearance
+                }
+            val textStyle =
+                itemTextAppearance.nativeTextStyle(
+                    if (selected) {
+                        MaterialTheme.typography.displayLargeEmphasized
+                    } else {
+                        MaterialTheme.typography.displayMedium
+                    },
+                )
+            if (customItem != null) {
+                CompositionLocalProvider(
+                    LocalSaveableStateRegistry provides featureRegistry,
+                    androidx.compose.material3.LocalTextStyle provides textStyle,
+                    androidx.compose.material3.LocalContentColor provides itemColor,
+                ) { customItem.invoke(index, selected, enabled) }
+            } else if (itemTextAppearance == null) {
+                androidx.compose.material3.ScrollFieldDefaults
+                    .Item(index, selected, colors)
+            } else {
+                Text(index.toString().padStart(2, '0'), style = textStyle, color = itemColor)
+            }
+        }
+    }
+}
+
+private suspend fun PagerState.scrollToOption(
+    index: Int,
+    itemCount: Int,
+) {
+    val page = currentPage - currentPage % itemCount + index
+    scrollToPage(if (page >= SCROLL_FIELD_PAGE_COUNT) page - itemCount else page)
 }
 
 @Composable
@@ -374,19 +477,19 @@ internal fun NativeDropdownMenuItem(
                 },
             )
     val menuColors =
-        MenuDefaults.selectableItemColors(
+        MenuDefaults.selectableItemColors().copy(
             textColor = resolvedColors.content,
             containerColor = resolvedColors.container,
             leadingIconColor = resolvedColors.content,
-            trailingContentColor = resolvedColors.content,
+            trailingIconColor = resolvedColors.content,
             disabledTextColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
             disabledContainerColor = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
             disabledLeadingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-            disabledTrailingContentColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            disabledTrailingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
             selectedTextColor = resolvedColors.selectedContent,
             selectedContainerColor = resolvedColors.selectedContainer,
             selectedLeadingIconColor = resolvedColors.selectedContent,
-            selectedTrailingContentColor = resolvedColors.selectedContent,
+            selectedTrailingIconColor = resolvedColors.selectedContent,
         )
     val regularMenuColors =
         MenuDefaults.itemColors().copy(
@@ -401,7 +504,7 @@ internal fun NativeDropdownMenuItem(
         )
     when {
         checked != null -> {
-            CheckableDropdownMenuItem(
+            androidx.compose.material3.DropdownMenuItem(
                 checked = checked,
                 onCheckedChange = { value -> if (value != checked) props.onClick() },
                 text = text,
@@ -409,7 +512,7 @@ internal fun NativeDropdownMenuItem(
                 modifier = itemModifier,
                 leadingIcon = props.leadingIcon,
                 checkedLeadingIcon = selectedIcon,
-                trailingContent = trailing,
+                trailingIcon = trailing,
                 supportingText = supporting,
                 enabled = enabled,
                 colors = menuColors,
@@ -421,7 +524,7 @@ internal fun NativeDropdownMenuItem(
         }
 
         selected != null -> {
-            SelectableDropdownMenuItem(
+            androidx.compose.material3.DropdownMenuItem(
                 selected = selected,
                 onClick = props.onClick,
                 text = text,
@@ -429,7 +532,7 @@ internal fun NativeDropdownMenuItem(
                 modifier = itemModifier,
                 leadingIcon = props.leadingIcon,
                 selectedLeadingIcon = selectedIcon,
-                trailingContent = trailing,
+                trailingIcon = trailing,
                 supportingText = supporting,
                 enabled = enabled,
                 colors = menuColors,
@@ -447,7 +550,7 @@ internal fun NativeDropdownMenuItem(
                 shape = shape,
                 modifier = itemModifier,
                 leadingIcon = props.leadingIcon,
-                trailingContent = props.trailingContent,
+                trailingIcon = trailing,
                 supportingText = supporting,
                 enabled = enabled,
                 colors = regularMenuColors,

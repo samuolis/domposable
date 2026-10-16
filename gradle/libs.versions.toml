@@ -1,11 +1,11 @@
 [versions]
 kotlin = "2.4.21"
-compose = "1.13.0-alpha02"
+compose = "1.12.2"
 agp = "9.4.1"
 ksp = "2.3.12"
 dokka = "2.2.0"
 mavenPublish = "0.37.0"
-material3 = "1.13.0-alpha02"
+material3 = "1.12.0-alpha03"
 navigation3 = "1.1.2"
 navigation3Runtime = "1.1.7"
 lifecycle = "2.11.0"
@@ -18,7 +18,7 @@ kover = "0.9.11"
 coroutines = "1.11.0"
 kotlinxBrowser = "0.5.0"
 serialization = "1.11.0"
-composeStable = "1.12.1"
+composeAndroid = "1.12.1"
 coil = "3.6.3"
 ktor = "3.6.0"
 robolectric = "4.17"
@@ -50,11 +50,11 @@ coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinxBrowser" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
-compose-runtime-saveable = { module = "org.jetbrains.compose.runtime:runtime-saveable", version.ref = "composeStable" }
+compose-runtime-saveable = { module = "org.jetbrains.compose.runtime:runtime-saveable", version.ref = "compose" }
 savedstate-compose = { module = "org.jetbrains.androidx.savedstate:savedstate-compose", version.ref = "savedstate" }
 compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "compose" }
-android-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "composeStable" }
-android-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "composeStable" }
+android-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "composeAndroid" }
+android-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "composeAndroid" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
