@@ -1421,9 +1421,7 @@ internal fun NativeNavigationBar(
                         colors =
                             ShortNavigationBarItemDefaults.colors(
                                 selectedIconColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                                selectedTextColorTopIconPosition =
-                                    item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                                selectedTextColorStartIconPosition =
+                                selectedTextColor =
                                     item.selectedContent?.nativeColor() ?: Color.Unspecified,
                                 selectedIndicatorColor = item.selectedContainer?.nativeColor() ?: Color.Unspecified,
                                 unselectedIconColor = item.content?.nativeColor() ?: Color.Unspecified,

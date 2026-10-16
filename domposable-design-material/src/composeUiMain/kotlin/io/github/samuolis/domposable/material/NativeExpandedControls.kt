@@ -32,7 +32,6 @@ import androidx.compose.material3.ExpandedDockedSearchBar
 import androidx.compose.material3.ExpandedDockedSearchBarWithGap
 import androidx.compose.material3.ExpandedFullScreenContainedSearchBar
 import androidx.compose.material3.ExpandedFullScreenSearchBar
-import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -606,7 +605,7 @@ internal fun NativeToggleButton(
             }
 
             DomposableButtonStyle.Filled, DomposableButtonStyle.Text -> {
-                ToggleButtonDefaults.colors(
+                ToggleButtonDefaults.toggleButtonColors(
                     containerColor = container,
                     contentColor = contentColor,
                     disabledContainerColor =
@@ -658,7 +657,7 @@ internal fun NativeToggleButton(
     }
     val contentPadding =
         appearance.contentPadding?.nativePadding()
-            ?: ToggleButtonDefaults.contentPaddingFor(ButtonDefaults.MinHeight, hasStartIcon = false)
+            ?: ButtonDefaults.contentPaddingFor(ButtonDefaults.MinHeight, hasStartIcon = false)
     when (props.style) {
         DomposableButtonStyle.Filled, DomposableButtonStyle.Text -> {
             ToggleButton(
@@ -685,7 +684,7 @@ internal fun NativeToggleButton(
                 border = customBorder,
                 contentPadding =
                     appearance.contentPadding?.nativePadding()
-                        ?: ToggleButtonDefaults.contentPaddingFor(
+                        ?: ButtonDefaults.contentPaddingFor(
                             ButtonDefaults.MinHeight,
                             hasStartIcon = false,
                         ),
@@ -704,7 +703,7 @@ internal fun NativeToggleButton(
                 border = customBorder,
                 contentPadding =
                     appearance.contentPadding?.nativePadding()
-                        ?: ToggleButtonDefaults.contentPaddingFor(
+                        ?: ButtonDefaults.contentPaddingFor(
                             ButtonDefaults.MinHeight,
                             hasStartIcon = false,
                         ),
@@ -723,7 +722,7 @@ internal fun NativeToggleButton(
                 border = customBorder,
                 contentPadding =
                     appearance.contentPadding?.nativePadding()
-                        ?: ToggleButtonDefaults.contentPaddingFor(
+                        ?: ButtonDefaults.contentPaddingFor(
                             ButtonDefaults.MinHeight,
                             hasStartIcon = false,
                         ),

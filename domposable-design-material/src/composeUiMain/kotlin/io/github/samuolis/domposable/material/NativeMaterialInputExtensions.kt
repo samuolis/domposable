@@ -477,19 +477,19 @@ internal fun NativeDropdownMenuItem(
                 },
             )
     val menuColors =
-        MenuDefaults.selectableItemColors(
+        MenuDefaults.selectableItemColors().copy(
             textColor = resolvedColors.content,
             containerColor = resolvedColors.container,
             leadingIconColor = resolvedColors.content,
-            trailingContentColor = resolvedColors.content,
+            trailingIconColor = resolvedColors.content,
             disabledTextColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
             disabledContainerColor = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
             disabledLeadingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-            disabledTrailingContentColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            disabledTrailingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
             selectedTextColor = resolvedColors.selectedContent,
             selectedContainerColor = resolvedColors.selectedContainer,
             selectedLeadingIconColor = resolvedColors.selectedContent,
-            selectedTrailingContentColor = resolvedColors.selectedContent,
+            selectedTrailingIconColor = resolvedColors.selectedContent,
         )
     val regularMenuColors =
         MenuDefaults.itemColors().copy(
@@ -550,7 +550,7 @@ internal fun NativeDropdownMenuItem(
                 shape = shape,
                 modifier = itemModifier,
                 leadingIcon = props.leadingIcon,
-                trailingContent = props.trailingContent,
+                trailingIcon = trailing,
                 supportingText = supporting,
                 enabled = enabled,
                 colors = regularMenuColors,

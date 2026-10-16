@@ -59,6 +59,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
@@ -395,27 +396,27 @@ internal fun NativeListItem(
                     content = spacedHeadline,
                 )
             } else {
-                SegmentedListItem(
-                    shapes = shapes,
-                    modifier = nativeModifier,
-                    enabled = enabled,
+                ListItem(
+                    headlineContent = spacedHeadline,
+                    modifier = nativeModifier.clip(shapes.shape),
                     leadingContent = { props.leadingContent() },
                     trailingContent = { props.trailingContent() },
-                    overlineContent =
-                        props.overline?.let { text ->
-                            { Text(text) }
-                        },
-                    supportingContent =
-                        if (appearance.contentSpacing ==
-                            null
-                        ) {
-                            supporting
-                        } else {
-                            null
-                        },
-                    colors = selectedColors,
-                    contentPadding = appearance.contentPadding?.nativePadding() ?: ListItemDefaults.ContentPadding,
-                    content = spacedHeadline,
+                    overlineContent = props.overline?.let { text -> { Text(text) } },
+                    supportingContent = if (appearance.contentSpacing == null) supporting else null,
+                    colors =
+                        selectedColors.copy(
+                            containerColor = selectedColors.containerColor(enabled, props.selected, false),
+                            contentColor = selectedColors.contentColor(enabled, props.selected, false),
+                            leadingContentColor = selectedColors.leadingContentColor(enabled, props.selected, false),
+                            trailingContentColor = selectedColors.trailingContentColor(enabled, props.selected, false),
+                            overlineContentColor = selectedColors.overlineContentColor(enabled, props.selected, false),
+                            supportingContentColor =
+                                selectedColors.supportingContentColor(
+                                    enabled,
+                                    props.selected,
+                                    false,
+                                ),
+                        ),
                 )
             }
         } else if (click != null) {

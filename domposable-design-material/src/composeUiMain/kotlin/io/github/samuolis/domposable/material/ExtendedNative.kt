@@ -1,4 +1,7 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@file:OptIn(
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+    androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class,
+)
 
 package io.github.samuolis.domposable.material
 
@@ -22,7 +25,6 @@ import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.RangeSliderState
 import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -355,19 +357,15 @@ internal fun NativeRangeSlider(
 ) {
     val startInteraction = remember { MutableInteractionSource() }
     val endInteraction = remember { MutableInteractionSource() }
-    val state =
-        remember(props.range, props.steps) {
-            RangeSliderState(props.value.start, props.value.endInclusive, props.steps, trackRange = props.range)
-        }
-    state.startValue = props.value.start
-    state.endValue = props.value.endInclusive
     RangeSlider(
-        state = state,
+        value = props.value,
         onValueChange = props.onValueChange,
+        valueRange = props.range,
+        steps = props.steps,
         modifier = modifier.toComposeModifier(),
         enabled = props.enabled && domposableFormEnabled(),
-        startThumbInteractionSource = startInteraction,
-        endThumbInteractionSource = endInteraction,
+        startInteractionSource = startInteraction,
+        endInteractionSource = endInteraction,
         startThumb = {
             SliderDefaults.Thumb(
                 startInteraction,
