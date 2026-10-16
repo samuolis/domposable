@@ -7,6 +7,8 @@ export async function canvasClick(page: Page, control: Locator) {
 }
 
 export async function settledCapture(page: Page) {
+  await page.waitForFunction(() => performance.getEntriesByType('resource')
+    .some(resource => resource.name.includes('/notosanssymbols2/')));
   let previous: Buffer | undefined;
   await expect.poll(async () => {
     const current = await page.screenshot();

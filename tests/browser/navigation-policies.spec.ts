@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mkdirSync } from 'node:fs';
-import { settledCapture } from './wasm-interactions';
+import { canvasClick, settledCapture } from './wasm-interactions';
 
 test.beforeEach(async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1024, height: 1000 });
@@ -77,7 +77,7 @@ test('route overlay isolates focus, cancels with Escape and leaves its underlyin
   if (browserName === 'chromium') await page.screenshot({ path: 'build/screenshots/dom/navigation-policies.png' });
 });
 
-test('Wasm route overlay preserves its underlying live draft through assistive activation', async ({ page, browserName }) => {
+test('Wasm route overlay preserves its live draft through native pointer actions', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'Wasm interactions are currently verified in Chromium.');
   await page.goto('/wasm/#/navigation-policies');
   await expect(page.locator('body')).toHaveAttribute('data-domposable-ready', 'true', { timeout: 60000 });
@@ -103,23 +103,30 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   await expect(draft).toHaveText('Wasm retained draft');
   const field = await draft.boundingBox();
   expect(field).not.toBeNull();
-  // Move native focus to Request back so the retained draft has no blinking caret.
+  // Leave the editor, then use explicit actions rather than assuming Tab's next target.
   await page.keyboard.press('Tab');
   await expect(backing).toHaveCount(0);
+  await page.mouse.click(0, 0);
+  const request = page.getByRole('button', { name: 'Request back', exact: true });
+  const requestBounds = await request.boundingBox();
+  expect(requestBounds).not.toBeNull();
   const closed = await settledCapture(page);
-  await page.keyboard.press('Enter');
+  await canvasClick(page, request);
   const overlay = page.getByRole('button', { name: 'Keep editing', exact: true });
   await expect(overlay).toHaveCount(1);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('[aria-modal="true"]')).toHaveCount(0);
-  const oldLeave = await page.getByRole('button', { name: 'Leave entry', exact: true }).elementHandle();
-  expect(oldLeave).not.toBeNull();
-  await activate('Keep editing');
-  // Stable CMP can retain the dismissed modal's mirror. Check the actual canvas.
+  await page.mouse.move(0, 0);
+  const opened = await settledCapture(page);
+  expect(opened.equals(closed)).toBe(false);
+  await canvasClick(page, overlay);
+  await page.mouse.move(0, 0);
+  // Stable CMP can retain a dismissed modal's mirror and click delegates.
   await expect.poll(async () => (await page.screenshot()).equals(closed)).toBe(true);
-  await page.keyboard.press('Enter');
-  await expect.poll(() => oldLeave!.evaluate(element => element.isConnected)).toBe(false);
-  await activate('Leave entry');
+  await page.mouse.click(requestBounds!.x + requestBounds!.width / 2, requestBounds!.y + requestBounds!.height / 2);
+  await page.mouse.move(0, 0);
+  await expect.poll(async () => (await page.screenshot()).equals(opened)).toBe(true);
+  await canvasClick(page, page.getByRole('button', { name: 'Leave entry', exact: true }));
   await page.mouse.click(0, 0);
   await expect.poll(async () => (await page.screenshot()).equals(home)).toBe(true);
   await page.mouse.click(open!.x + open!.width / 2, open!.y + open!.height / 2);

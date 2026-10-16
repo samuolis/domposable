@@ -70,7 +70,8 @@ test.describe('Stable Wasm comparison and bridge limits', () => {
 
   test('password semantics are masked and the private field is not saved in browser history', async ({ page }) => {
     await edit(page, 'input-secret', 'Fake password 123', true);
-    expect(await page.locator('body').ariaSnapshot()).not.toContain('Fake password 123');
+    // Playwright serializes native password input.value: microsoft/playwright-mcp#1566.
+    expect(await page.locator('#cmp_a11y_root').ariaSnapshot()).not.toContain('Fake password 123');
     await activate(page.getByRole('button', { name: 'Tasks', exact: true }));
     await expect(page).toHaveURL(/#\/tasks$/);
     expect(await page.evaluate(() => JSON.stringify(history.state))).not.toContain('Fake password 123');
@@ -81,8 +82,6 @@ test.describe('Stable Wasm comparison and bridge limits', () => {
   });
 
   test('native help actions and Escape dismiss the overlay despite stale modal semantics', async ({ page }) => {
-    await page.waitForFunction(() => performance.getEntriesByType('resource')
-      .some(resource => resource.name.includes('/notosanssymbols2/')));
     const open = page.getByRole('button', { name: 'Open help', exact: true });
     const close = page.getByRole('button', { name: 'Close help', exact: true });
     const bounds = await open.boundingBox();
