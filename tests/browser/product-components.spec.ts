@@ -69,14 +69,14 @@ test('Wasm document controls execute the same feature callbacks', async ({ page,
   test.skip(browserName !== 'chromium', 'Wasm interactions are verified in Chromium.');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/wasm/#/product-components');
-  const email = page.getByRole('textbox', { name: /^Contact email/ });
+  const email = page.locator('[aria-label="Delivery preferences"]').getByRole('textbox');
   await expect(email).toHaveCount(1, { timeout: 60000 });
   await stableCapture(page, 'wasm', 'product-components');
   await email.focus();
   await expect(page.locator('.compose-backing-field')).toBeFocused();
   await page.keyboard.insertText('hello@example.com');
   const submit = page.getByRole('button', { name: 'Save preferences', exact: true });
-  await expect(submit).toBeEnabled();
+  await expect(submit).not.toHaveAttribute('aria-disabled');
   await submit.evaluate((element: HTMLElement) => element.click());
   await expect(page.getByText('Saved preferences for hello@example.com', { exact: true })).toHaveCount(1);
   await page.getByRole('button', { name: 'Shipping details', exact: true })

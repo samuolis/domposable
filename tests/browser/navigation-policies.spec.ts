@@ -86,7 +86,7 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   // startup transition. Wait for one settled control rather than choosing one.
   await expect(page.getByRole('button', { name: 'Open Inbox live message', exact: true })).toHaveCount(1, { timeout: 60000 });
   await activate('Open Inbox live message');
-  const draft = page.getByRole('textbox', { name: /^Inbox message live draft/ });
+  const draft = page.getByRole('textbox');
   await draft.focus();
   const backing = page.locator('.compose-backing-field');
   await expect(backing).toBeFocused();
@@ -96,15 +96,16 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   await page.keyboard.insertText('Wasm retained draft');
   await expect(draft).toHaveText('Wasm retained draft');
   await activate('Request back');
-  const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeAttached();
-  await expect(dialog).toHaveAttribute('aria-modal', 'true');
+  const overlay = page.getByRole('button', { name: 'Keep editing', exact: true });
+  await expect(overlay).toHaveCount(1);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('[aria-modal="true"]')).toHaveCount(0);
   await activate('Keep editing');
-  await expect(dialog).toHaveCount(0);
+  await expect(overlay).toHaveCount(0);
   await expect(draft).toHaveText('Wasm retained draft');
   await activate('Request back');
   await activate('Leave entry');
-  await expect(dialog).toHaveCount(0);
+  await expect(overlay).toHaveCount(0);
   await activate('Open Inbox live message');
   await expect(draft).toHaveText('Wasm retained draft');
 });

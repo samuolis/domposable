@@ -48,3 +48,5 @@ The Compose plugin, Runtime, UI and Foundation use a stable compatible baseline.
 ### Migration from 0.7.0
 
 The stable-core baseline removes `DomposableTimePickerMode.Scroll` and `DomposableDialogVariant.VibrantTimePicker`, which mapped to newer upstream APIs. Use `DomposableTimePickerMode.Dial` or `Input`, and `DomposableDialogVariant.TimePicker`. Other component families remain available on the compatible Material baseline. This is a breaking change and requires a pre-1.0 minor release; rebuild consumers rather than mixing the old and new binaries.
+
+The Wasm comparison retains the stable upstream accessibility bridge with [documented limits](wasm.md). Stable core compatibility does not imply browser accessibility parity; semantic HTML remains the primary web path.

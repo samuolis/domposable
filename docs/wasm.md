@@ -17,11 +17,15 @@ DomposableTextField(
 
 The example retains ordinary drafts through browser restoration. Its sample password stays in memory and is never registered with browser-history saveables; a page refresh clears it. The purpose controls native keyboard input and password masking, while HTML uses a native password input.
 
-## Automated guarantees
+## Supported baseline and test boundaries
 
-Chromium Wasm checks exercise the real Compose text-input bridge and accessibility action delegates. They verify Unicode text entry, masked password semantics, private values absent from saved browser history, field error/disabled state, checkbox callbacks, preview feedback, modal background isolation, and action/Escape dismissal. Native JVM tests exercise the same shared form's validation, disabled state and modal actions. HTML runs the native-control flow and a zero-violation WCAG 2 A/AA axe scan in Chromium, Firefox and WebKit.
+The Wasm comparison uses **Compose Multiplatform 1.12.2**. Its accessibility mirror is experimental and substantially more limited than the bridge used by Domposable 0.7.0, which depended on CMP 1.13 alpha. Semantic HTML is the primary web renderer; use it for browser forms and accessible web applications.
 
-The host explicitly enables Compose's semantics mirror:
+Chromium checks exercise native keyboard text input, Unicode, password masking and exclusion from browser history, controlled callbacks, disabled canvas interactions, navigation draft retention and action/Escape dismissal. Screenshot checks cover the shared layouts. These are functional and visual checks, not a guarantee of accessible Wasm controls.
+
+HTML retains native labelled controls, checked/disabled/error state, modal focus isolation and zero-violation WCAG 2 A/AA checks in Chromium, Firefox and WebKit. Native host tests retain their own form validation, state and dialog assertions.
+
+The comparison host explicitly enables the upstream mirror:
 
 ```kotlin
 ComposeViewport(document.getElementById("root")!!, configure = {
@@ -31,24 +35,25 @@ ComposeViewport(document.getElementById("root")!!, configure = {
 }
 ```
 
-The mirror lives in the canvas container's open shadow root. Compose publishes it asynchronously after rendering, so browser tests wait for the control's semantics rather than a fixed sleep or the first canvas frame. Text editing waits for the real backing editor to receive focus and the correct input mode before sending keyboard input. Assistive activation dispatches the mirror's DOM click, which the Compose bridge maps to the control's `OnClick` action; pointer rendering and keyboard input remain separate behavior checks.
+## Known stable-bridge limitations
 
-## Known bridge limitations
+The [CMP 1.12.2 bridge source](https://repo.maven.apache.org/maven2/org/jetbrains/compose/ui/ui-wasm-js/1.12.2/ui-wasm-js-1.12.2-sources.jar), `ComposeWebSemanticsListener`, exports only part of Compose semantics:
 
-The published **0.7.0** release used the Compose UI **1.13.0-alpha02** bridge and recorded these WCAG axe findings on the otherwise empty input lab. The stable-baseline update must review the new CI report before these findings can be claimed for its bridge:
+| Area | Stable Wasm comparison | Semantic HTML |
+| --- | --- | --- |
+| Field labels and validation | Field labels and errors are not merged into the editable node's accessible name; `aria-invalid` is absent | Native labels, associated error descriptions and `aria-invalid` |
+| Toggles and tabs | Clickable nodes become buttons, overriding their checkbox, switch, radio or tab role | Native controls and appropriate roles |
+| Checked and disabled state | `aria-checked` and `aria-disabled` are not exported | Checked and disabled states follow shared values |
+| Dialogs | No dialog role, `aria-modal` or inert background; native overlay dismissal is tested separately | Modal semantics, focus isolation and restoration |
+| Headings | Heading role without `aria-level` | Native heading elements |
 
-| Rule | Concrete finding |
-| --- | --- |
-| `aria-required-attr` | Two heading nodes omit `aria-level`. |
-| `aria-required-parent` | The three navigation tabs have no `tablist` ancestor. |
-| `aria-allowed-attr` | The scroll container has `aria-orientation` without a supporting role. |
-| `aria-roles` | The canvas exposes `role="generic"`, rejected by the pinned axe role inventory. |
+Tests record these omissions explicitly. They locate unnamed Wasm fields by existing test IDs or a unique enclosing form and verify real input/callback behavior. Pointer checks target the canvas where the old accessibility delegate cannot represent disabled state. Tests do not inject replacement roles, labels or ARIA state into the mirror.
 
-These are observed outputs of the [pinned Compose UI sources](https://repo.maven.apache.org/maven2/org/jetbrains/compose/ui/ui-wasm-js/1.13.0-alpha02/ui-wasm-js-1.13.0-alpha02-sources.jar), including `ComposeWebSemanticsListener`, `A11YImplementationUtils` and the viewport host. The regression audit runs every WCAG 2 A/AA rule without disabling rules and asserts the exact rule/node descriptors above. A new rule, node, label or count fails the check; a dependency update must review this evidence rather than copy an uninspected audit result. The full report is retained at `build/accessibility/wasm-input-lab.json` in the browser Actions artifact for 30 days.
+The WCAG audit runs all WCAG 2 A/AA axe rules without disabling any rule. Its exact node descriptors and counts are pinned; a changed or new finding fails CI and requires inspection. The report is written **before** the assertion, including on failure, to `build/accessibility/wasm-input-lab.json` in the Actions artifact. It is a regression audit with known failures, not a clean accessibility scan or conformance certification.
 
-The bridge also exposes supporting validation text in a field's accessible name but currently omits `aria-invalid`. The form test records that omission explicitly and verifies the actual error message. HTML exports `aria-invalid` and the associated error description. Axe cannot discover every missing state automatically, which is why role/state and interaction assertions run separately.
+The expected stable input-lab findings are two unnamed editable nodes (`aria-input-field-name`) and two headings without levels (`aria-required-attr`). State and modal omissions are checked separately because axe cannot detect every missing semantic. Findings from the 0.7.0 alpha bridge must not be used as evidence for this baseline.
 
-This is a regression audit with documented failures, not a clean accessibility scan or conformance certification. Wasm remains experimental. Physical screen-reader review is deferred, and automated checks do not establish parity with semantic HTML or native assistive technology. No stable 1.0 release is scheduled.
+Wasm remains an experimental comparison. Physical screen-reader review is deferred, and these checks do not establish parity with HTML or native assistive technology. No stable 1.0 release is scheduled.
 
 ## Reproduce
 
