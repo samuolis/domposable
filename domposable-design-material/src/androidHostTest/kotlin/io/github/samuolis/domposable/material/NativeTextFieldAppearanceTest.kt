@@ -1,7 +1,10 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
+import androidx.compose.runtime.saveable.SaveableStateRegistry
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -34,6 +37,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -42,25 +46,31 @@ class NativeTextFieldAppearanceTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
-    fun passwordSemanticsStayMaskedWithoutChangingTheEditedValue() {
+    fun passwordEditsStayMaskedAndOutOfSavedState() {
         val value = mutableStateOf("")
         val visible = mutableStateOf(false)
+        val registry = SaveableStateRegistry(null) { true }
         compose.setContent {
-            DomposableMaterialTheme {
-                DomposableTextField(
-                    DomposableTextFieldProps(
-                        value = value.value,
-                        onValueChange = { value.value = it },
-                        label = "Private phrase",
-                        id = "secret",
-                        purpose = DomposableInputPurpose.Password,
-                        passwordVisible = visible.value,
-                    ),
-                )
+            CompositionLocalProvider(LocalSaveableStateRegistry provides registry) {
+                DomposableMaterialTheme {
+                    DomposableTextField(
+                        DomposableTextFieldProps(
+                            value = value.value,
+                            onValueChange = { value.value = it },
+                            label = "Private phrase",
+                            id = "secret",
+                            purpose = DomposableInputPurpose.Password,
+                            passwordVisible = visible.value,
+                        ),
+                    )
+                }
             }
         }
         compose.onNodeWithTag("secret").performTextInput("Private 123")
-        compose.runOnIdle { assertEquals("Private 123", value.value) }
+        compose.runOnIdle {
+            assertEquals("Private 123", value.value)
+            assertFalse(registry.performSave().toString().contains("Private 123"))
+        }
         compose.onNodeWithTag("secret").assert(
             SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("•".repeat(11))),
         )

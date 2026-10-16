@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
@@ -218,7 +217,7 @@ internal fun NativeTextField(
         props.purpose == DomposableInputPurpose.Password && props.singleLine && !props.readOnly &&
             !customNativeDecoration
     if (securePassword) {
-        val secureState = rememberTextFieldState(props.value)
+        val secureState = remember { TextFieldState(props.value) }
         val currentValue by rememberUpdatedState(props.value)
         val currentChange by rememberUpdatedState(props.onValueChange)
         LaunchedEffect(secureState) {

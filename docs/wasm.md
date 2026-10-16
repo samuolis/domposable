@@ -15,7 +15,7 @@ DomposableTextField(
 )
 ```
 
-The example retains ordinary drafts through browser restoration. Its sample password stays in memory and is never registered with browser-history saveables; a page refresh clears it. The purpose controls native keyboard input and password masking, while HTML uses a native password input. Domposable also masks the stable Wasm accessibility mirror and sets its focused password backing editor to `type="password"`; CMP 1.12 otherwise leaves that editor as a plain text input.
+The example retains ordinary drafts through browser restoration. Its sample password stays in memory and is never registered with browser-history saveables; a page refresh clears it. The Material adapter keeps its internal password editor state in `remember`, leaving persistence to the application instead of automatically saving private text. The purpose controls native keyboard input and password masking, while HTML uses a native password input. Domposable also masks the stable Wasm accessibility mirror and sets its focused password backing editor to `type="password"`; CMP 1.12 otherwise leaves that editor as a plain text input.
 
 ## Supported baseline and test boundaries
 

@@ -9,7 +9,7 @@ Domposable uses plain semantic versions. Until 1.0, minor releases may change AP
 | iOS simulator arm64 | Same native renderer | XCUITest, unsigned app artifact | Same simulator fixtures | Application |
 | JVM desktop | Compose UI + Material3 | JVM tests and compiled consumer | Compose desktop test scene on Ubuntu | Application |
 | Kotlin/JS HTML | Native DOM + CSS + browser controls | Chromium, Firefox, WebKit; axe; inputs/focus/history/URLs | Chromium on Ubuntu, phone/tablet/wide | Hash or path history; or host router |
-| Kotlin/Wasm JS | Compose UI + Material3 | Chromium startup, history/restoration, Unicode input, password masking, disabled/error semantics and modal actions; bounded accessibility regression audit | Chromium on Ubuntu, phone/wide | Hash or path history; or host router |
+| Kotlin/Wasm JS | Compose UI + Material3 | Chromium startup, history/restoration, Unicode input, password privacy, disabled canvas interactions and modal actions; documented stable-bridge omissions and bounded accessibility regression audit | Chromium on Ubuntu, phone/wide | Hash or path history; or host router |
 
 Desktop and Wasm support are **experimental**. HTML and Wasm share the optional browser-history/saveable binding. Android, iOS and desktop leave URL ownership to the application. The [Wasm input guide](wasm.md) records the pinned Compose bridge's accessibility findings; its regression audit is not a clean WCAG scan. Physical screen-reader review is deferred.
 
