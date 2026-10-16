@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.mutableStateOf
