@@ -277,6 +277,15 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     appearance?.fontSize?.let { size -> style { property("font-size", "${size}px") } }
                     appearance?.lineHeight?.let { height -> style { property("line-height", "${height}px") } }
                     appearance?.fontWeight?.let { weight -> style { property("font-weight", weight.css()) } }
+                    appearance?.minLines?.takeIf { it > 1 }?.let { lines ->
+                        style {
+                            val inlineText = props.style != DomposableTextStyle.Title && props.headingLevel == null
+                            val clampsLines =
+                                appearance.maxLines != null && appearance.overflow == DomposableTextOverflow.Ellipsis
+                            if (inlineText && !clampsLines) property("display", "inline-block")
+                            property("min-height", "${lines}lh")
+                        }
+                    }
                     appearance?.maxLines?.let { lines ->
                         when (appearance.overflow) {
                             DomposableTextOverflow.Clip -> {

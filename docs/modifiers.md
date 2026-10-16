@@ -93,6 +93,29 @@ CompositionLocalProvider(LocalDomposableNativeModifierRenderer provides renderer
 
 This code belongs in the app's native renderer source set, with Compose UI imports. Native `dp` is `androidx.compose.ui.unit.dp`; shared feature dimensions use `foundation.dp`. The complete [compiled native example](https://github.com/samuolis/domposable/blob/main/demo/src/composeUiMain/kotlin/io/github/samuolis/domposable/demo/ExtensionExample.compose.kt) also insets the stroke and provides a platform-owned custom label.
 
+## Set HTML attributes in `jsMain`
+
+When writing a web adapter or an app-owned HTML component, use `htmlAttributes` for CSS, classes and attributes on the component's semantic element:
+
+```kotlin
+// jsMain only; import io.github.samuolis.domposable.ui.htmlAttributes
+DomposableText(
+    text = message,
+    modifier = DomposableModifier.htmlAttributes {
+        classes("app-message")
+        attr("data-message-kind", "notice")
+        style {
+            property("white-space", "pre-line")
+            property("overflow-wrap", "anywhere")
+        }
+    },
+)
+```
+
+This does not add a layout wrapper. It runs where the renderer attaches `testId` and `contentDescription`; it does not select or rewrite private descendants. Custom HTML renderers must call `domposableAttributes(modifier)` on their semantic element to support it. Prefer appearance parameters for shared colors, typography and geometry: a renderer can apply its own attributes/styles after this callback. Preserve accessible labels and native control behavior when adding attributes or events.
+
+`htmlAttributes` is available only to Kotlin/JS HTML code. Keep it inside `jsMain` adapters; use a typed app-owned modifier with native and HTML implementations when the feature itself needs a portable extension.
+
 ## Render custom HTML and CSS
 
 The HTML decoration hook returns a composable wrapper for elements it recognizes, or null to fall back to another handler. It can compose HTML, an SVG or canvas host, overlays and the remaining content. It does not require a library release for new CSS.

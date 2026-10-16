@@ -85,7 +85,7 @@ into element offsets or calls `scrollTo` from browser scroll events. See the com
 
 ## Material catalog and theme defaults
 
-The next 0.x minor expands the Material 3 and expressive catalog and groups all component defaults in `DomposableComponentStyles` and adds optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
+Version 0.7 expands the Material 3 and expressive catalog, groups component defaults in `DomposableComponentStyles`, and adds optional per-call overrides. Existing Kotlin calls retain defaults. The props/token/text-appearance data-class constructors and `copy` methods change their binary signatures; recompile consumers and custom providers together when upgrading. See [theme defaults and component overrides](design-systems.md#theme-defaults-and-component-overrides).
 
 Keep application component names as thin adapters. Map brand tokens into `DomposableButtonAppearance` or `DomposableTextFieldAppearance`, and call the standard control instead of maintaining another HTML button/input implementation. Preserve custom editor, diagram and camera renderers; they are separate from ordinary control styling.
 
@@ -100,3 +100,9 @@ This is a pre-1.0 **breaking ABI change**, requiring a minor release and recompi
 
 
 Theme configuration now groups **all** component defaults, including buttons and text fields, in `DomposableComponentStyles`. Replace `DomposableTokens(button = ..., textField = ...)` with `DomposableMaterialTheme(styles = DomposableComponentStyles(button = ..., textField = ...))`. Custom host integrations can use `DomposableTokens(components = DomposableComponentStyles(...))`. Access defaults through `DomposableTheme.styles`; the former `tokens.button` and `tokens.textField` fields move to `tokens.components`.
+
+## App-owned modifiers and text sizing
+
+Existing three-argument `DomposableHtmlModifiers(modifier, operationRenderer, content)` calls remain supported. Use the new overload with a named `decorationRenderer` only when an app-owned modifier needs HTML/SVG or other markup around its content. CSS and attribute changes on a wrapper can keep using the attribute handler. See [custom modifier examples](modifiers.md#render-custom-html-and-css).
+
+`DomposableTextAppearance(minLines = ...)` reserves a minimum number of text lines on native and HTML. It defaults to one; existing HTML text does not acquire a minimum-height override. If you also set `maxLines`, it must be at least `minLines`. Shared scale, rotation, shadow and min/max dimension helpers are optional additions; transformed content still needs room around it in its parent.

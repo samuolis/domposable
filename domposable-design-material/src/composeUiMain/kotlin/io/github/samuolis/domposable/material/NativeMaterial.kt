@@ -412,6 +412,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         textModifier,
                         color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
                         style = style,
+                        minLines = appearance.minLines,
                         maxLines = appearance.maxLines ?: Int.MAX_VALUE,
                         overflow = appearance.overflow.nativeOverflow(),
                     )

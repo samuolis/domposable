@@ -15,6 +15,7 @@ class ComponentAppearanceTest {
         assertNull(defaults.alignment)
         assertNull(defaults.decoration)
         assertNull(defaults.maxLines)
+        assertEquals(1, defaults.minLines)
         assertEquals(DomposableTextOverflow.Clip, defaults.overflow)
         assertNull(defaults.selectable)
         assertNull(defaults.liveRegion)
@@ -27,6 +28,7 @@ class ComponentAppearanceTest {
                 alignment = DomposableTextAlignment.End,
                 decoration = DomposableTextDecoration.Underline,
                 maxLines = 3,
+                minLines = 2,
                 overflow = DomposableTextOverflow.Ellipsis,
                 selectable = true,
                 liveRegion = DomposableLiveRegion.Polite,
@@ -37,6 +39,7 @@ class ComponentAppearanceTest {
         assertEquals(DomposableTextAlignment.End, appearance.alignment)
         assertEquals(DomposableTextDecoration.Underline, appearance.decoration)
         assertEquals(3, appearance.maxLines)
+        assertEquals(2, appearance.minLines)
         assertEquals(DomposableTextOverflow.Ellipsis, appearance.overflow)
         assertEquals(true, appearance.selectable)
         assertEquals(DomposableLiveRegion.Polite, appearance.liveRegion)
@@ -50,7 +53,9 @@ class ComponentAppearanceTest {
         }
         listOf(0, -1).forEach { lines ->
             assertFailsWith<IllegalArgumentException> { DomposableTextAppearance(maxLines = lines) }
+            assertFailsWith<IllegalArgumentException> { DomposableTextAppearance(minLines = lines) }
         }
+        assertFailsWith<IllegalArgumentException> { DomposableTextAppearance(minLines = 2, maxLines = 1) }
         listOf(Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY).forEach { spacing ->
             assertFailsWith<IllegalArgumentException> { DomposableTextAppearance(letterSpacing = spacing) }
         }

@@ -6,6 +6,8 @@ import io.github.samuolis.domposable.ui.DomposableHtmlModifierDecorationRenderer
 import io.github.samuolis.domposable.ui.DomposableHtmlModifierElementRenderer
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableText
+import io.github.samuolis.domposable.ui.htmlAttributes
 import org.jetbrains.compose.web.dom.Div
 
 @Composable
@@ -33,3 +35,16 @@ fun AttributeHtmlConsumer(
     renderer: DomposableHtmlModifierElementRenderer,
     content: @Composable () -> Unit,
 ) = DomposableHtmlModifiers(modifier, renderer, content)
+
+@Composable
+fun HtmlAttributesConsumer(text: String) {
+    DomposableText(
+        text,
+        modifier =
+            DomposableModifier.htmlAttributes {
+                classes("consumer-message")
+                attr("data-consumer", "published-js-api")
+                style { property("white-space", "pre-line") }
+            },
+    )
+}

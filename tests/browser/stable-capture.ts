@@ -24,4 +24,3 @@ export async function stableCapture(page: Page, platform: string, name: string, 
   await mkdir(`build/screenshots/${platform}`, { recursive: true });
   await writeFile(`build/screenshots/${platform}/${name}.png`, capture!);
 }
-

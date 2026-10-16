@@ -68,6 +68,7 @@ internal fun ModifierExtensionExample() {
         DomposableText("Portable graphics", headingLevel = 2)
         DomposableBox(
             DomposableModifier
+                .padding(12.dp)
                 .size(160.dp, 48.dp)
                 .shadow(4.dp, DomposableShape.Rounded(8.dp))
                 .rotate(5f)

@@ -51,12 +51,21 @@ private val updateDomposableScrollBinding: (HTMLElement, DomposableScrollBinding
 private fun domposableScrollBinding(element: HTMLElement): DomposableScrollBinding? =
     domposableScrollBindings.get(element) as? DomposableScrollBinding
 
+private data class HtmlAttributes(
+    val attributes: AttrsScope<*>.() -> Unit,
+) : DomposableModifierElement
+
+/** Applies app-owned attributes and styles directly to the rendered HTML element. */
+fun DomposableModifier.htmlAttributes(attributes: AttrsScope<*>.() -> Unit): DomposableModifier =
+    then(HtmlAttributes(attributes))
+
 /** Semantic attributes attach to the control, not to its layout wrappers. */
 fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableModifier) {
     modifier.elements.forEach { element ->
         when (element) {
             is DomposableModifierOperation.Description -> attr("aria-label", element.text)
             is DomposableModifierOperation.TestId -> attr("data-testid", element.value)
+            is HtmlAttributes -> element.attributes(this)
             else -> Unit
         }
     }
@@ -117,7 +126,9 @@ fun DomposableHtmlModifiers(
     val layout = modifier.elements.filter(::isChildLayoutOperation)
     val visual =
         modifier.elements.filterNot(::isChildLayoutOperation).filterNot {
-            it is DomposableModifierOperation.Description || it is DomposableModifierOperation.TestId
+            it is DomposableModifierOperation.Description ||
+                it is DomposableModifierOperation.TestId ||
+                it is HtmlAttributes
         }
     if (layout.isEmpty()) {
         HtmlModifierBox(visual, 0, renderer, decoration, content)

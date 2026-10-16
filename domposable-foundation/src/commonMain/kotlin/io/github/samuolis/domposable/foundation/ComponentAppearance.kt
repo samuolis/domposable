@@ -22,11 +22,14 @@ data class DomposableTextAppearance(
     val role: DomposableTypographyRole? = null,
     val emphasized: Boolean = false,
     val color: DomposableColor? = null,
+    val minLines: Int = 1,
 ) {
     init {
         require(fontSize == null || (fontSize.isFinite() && fontSize > 0f))
         require(lineHeight == null || (lineHeight.isFinite() && lineHeight > 0f))
+        require(minLines > 0)
         require(maxLines == null || maxLines > 0)
+        require(maxLines == null || minLines <= maxLines)
         require(letterSpacing == null || letterSpacing.isFinite())
     }
 }

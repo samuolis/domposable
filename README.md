@@ -155,7 +155,7 @@ HTML and Wasm support optional browser history, hash or path URLs and portable e
 
 ## Examples
 
-- [Custom components and modifiers](docs/custom-components.md): shared component APIs, app-owned CSS/HTML decoration and native `drawBehind`.
+- [Custom components and modifiers](docs/custom-components.md): shared component APIs, app-owned CSS/HTML decoration and native `drawBehind`. Web adapters can also [attach CSS and attributes directly](docs/modifiers.md#set-html-attributes-in-jsmain).
 - [Component parameter reference](docs/component-reference.md) and [modifier signatures](docs/modifier-reference.md): generated from the current API.
 
 | Example | What to explore | Open |
