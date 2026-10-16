@@ -131,7 +131,7 @@ fun DomposableHtmlModifiers(
                 it is HtmlAttributes
         }
     if (layout.isEmpty()) {
-        HtmlModifierBox(visual, 0, renderer, decoration, content)
+        HtmlModifierBox(visual, 0, renderer, decoration, false, content)
     } else {
         Div(attrs = {
             attr("data-domposable-layout-item", "true")
@@ -159,7 +159,7 @@ fun DomposableHtmlModifiers(
                     }
                 }
             }
-        }) { HtmlModifierBox(visual, 0, renderer, decoration, content) }
+        }) { HtmlModifierBox(visual, 0, renderer, decoration, false, content) }
     }
 }
 
@@ -169,6 +169,7 @@ private fun HtmlModifierBox(
     index: Int,
     operationRenderer: DomposableHtmlModifierElementRenderer?,
     decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
+    fillAvailableHeight: Boolean,
     content: @Composable () -> Unit,
 ) {
     if (index == elements.size) {
@@ -180,23 +181,60 @@ private fun HtmlModifierBox(
     if (operation == null) {
         val decoration = decorationRenderer?.invoke(element)
         if (decoration != null) {
-            decoration { HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, content) }
+            decoration {
+                HtmlModifierBox(
+                    elements,
+                    index + 1,
+                    operationRenderer,
+                    decorationRenderer,
+                    fillAvailableHeight,
+                    content,
+                )
+            }
             return
         }
         Div(attrs = {
+            if (fillAvailableHeight) {
+                style {
+                    property("display", "grid")
+                    property("grid-template-columns", "minmax(0, 1fr)")
+                    property("grid-template-rows", "minmax(0, 1fr)")
+                }
+            }
             val attributes =
                 operationRenderer?.invoke(element)
                     ?: error("No HTML renderer handled application modifier element ${element::class.simpleName}")
             attributes()
         }) {
-            HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, content)
+            HtmlModifierBox(
+                elements,
+                index + 1,
+                operationRenderer,
+                decorationRenderer,
+                fillAvailableHeight,
+                content,
+            )
         }
         return
     }
+    val wrapContentSize = operation is DomposableModifierOperation.WrapContentSize
+    val establishesHeight =
+        operation is DomposableModifierOperation.Height ||
+            operation is DomposableModifierOperation.MinHeight ||
+            operation is DomposableModifierOperation.MaxHeight ||
+            operation == DomposableModifierOperation.FillHeight
+    // CSS block height stops at each nested wrapper; Compose passes these constraints through to its child.
+    val childFillsHeight = establishesHeight || (fillAvailableHeight && !wrapContentSize)
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
         style {
             property("box-sizing", "border-box")
+            if ((fillAvailableHeight && !wrapContentSize) || establishesHeight) {
+                property("display", "grid")
+                property("grid-template-columns", "minmax(0, 1fr)")
+                property("grid-template-rows", "minmax(0, 1fr)")
+            }
+            if (fillAvailableHeight && wrapContentSize) property("height", "100%")
             when (operation) {
                 is DomposableModifierOperation.Padding -> {
                     property("padding-block-start", "${operation.insets.top.value}px")
@@ -398,7 +436,7 @@ private fun HtmlModifierBox(
             }
         }
     }) {
-        HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, content)
+        HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, childFillsHeight, content)
     }
 }
 

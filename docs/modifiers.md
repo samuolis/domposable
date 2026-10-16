@@ -180,6 +180,8 @@ Use this **instead of** installing a decoration handler for the same element. `A
 
 A decoration must render its content once, preserve its state and semantics, and avoid covering interactive content. Mark purely decorative markup `aria-hidden` and disable its pointer events. Your renderer owns sizing, positioning, disposal of external resources and accessibility. Unhandled custom elements fail explicitly rather than silently disappearing. Built-in operations keep their library implementations; use a custom element for app behavior.
 
+To forward an allocated height through your decoration, give its root `display: grid` and `grid-template: minmax(0, 1fr) / minmax(0, 1fr)`, with overlays positioned absolutely. The child then stretches into the available area. An ordinary block wrapper keeps its children at intrinsic height; use that when your component intentionally owns its sizing. Built-in height modifiers propagate constraints through subsequent built-in wrappers, while `wrapContentSize` restores intrinsic content sizing inside its aligned slot.
+
 ## Drawing and advanced platform APIs
 
 There is no shared Compose `DrawScope` that automatically translates arbitrary Kotlin canvas code into HTML. Choose a shared intent, such as `.appAccentFrame(color)`, then implement its native drawing and HTML/CSS/SVG equivalent in the app. Feature code remains common.

@@ -24,6 +24,10 @@ test('app-owned decoration preserves ordered padding, state and pointer interact
   await expect(draft).toHaveValue('A retained app draft');
   await expect(page.getByTestId('app-counter-label')).toHaveText('Custom counter: 1');
   const graphics = page.getByTestId('modifier-graphics');
+  await expect(graphics).toHaveCSS('height', '48px');
+  await expect(
+    graphics.locator('xpath=ancestor::*[@data-domposable-modifier="Shadow"]'),
+  ).toHaveCSS('height', '48px');
   await expect(graphics.locator('xpath=ancestor::*[@data-domposable-modifier="Scale"]')).toHaveCSS('transform', 'matrix(0.9, 0, 0, 0.9, 0, 0)');
   await expect(graphics.locator('xpath=ancestor::*[@data-domposable-modifier="Rotation"]')).not.toHaveCSS('transform', 'none');
   await expect(graphics.locator('xpath=ancestor::*[@data-domposable-modifier="Shadow"]')).not.toHaveCSS('box-shadow', 'none');
