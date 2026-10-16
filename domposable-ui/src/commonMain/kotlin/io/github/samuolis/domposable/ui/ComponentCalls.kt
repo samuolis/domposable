@@ -393,6 +393,7 @@ fun DomposableNavigationBar(
     appearance: DomposableItemAppearance? = null,
     short: Boolean = false,
     label: String = "Application",
+    webLayout: DomposableWebNavigationLayout = DomposableWebNavigationLayout.Material,
 ) = DomposableNavigationBar(
     DomposableNavigationBarProps(
         items,
@@ -402,6 +403,7 @@ fun DomposableNavigationBar(
         appearance = appearance,
         short = short,
         label = label,
+        webLayout = webLayout,
     ),
     modifier,
 )

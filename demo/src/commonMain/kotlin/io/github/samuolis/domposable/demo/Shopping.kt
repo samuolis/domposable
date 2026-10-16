@@ -51,6 +51,7 @@ import io.github.samuolis.domposable.ui.DomposableScaffold
 import io.github.samuolis.domposable.ui.DomposableSurface
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTheme
+import io.github.samuolis.domposable.ui.DomposableWebNavigationLayout
 import io.github.samuolis.domposable.ui.fillMaxHeight
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.padding
@@ -175,6 +176,8 @@ fun ShoppingApp(
                             else -> 1
                         }
                     DomposableNavigationBar(
+                        label = "Shop",
+                        webLayout = DomposableWebNavigationLayout.Links,
                         items =
                             listOf(
                                 DomposableNavigationItem("Discover", href = href(CatalogRoute.Home)),

@@ -22,11 +22,12 @@ internal fun HtmlButton(
     props: DomposableButtonProps,
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
+    respectFormEnabled: Boolean = true,
 ) {
     val tokens = LocalDomposableTokens.current
     val appearance = props.appearance ?: tokens.button
     val customAppearance = appearance != DomposableButtonAppearance()
-    val formEnabled = domposableFormEnabled()
+    val formEnabled = !respectFormEnabled || domposableFormEnabled()
     val useEnabledColors = (props.enabled && formEnabled) || props.loading
     DomposableHtmlModifiers(modifier) {
         Button(attrs = {

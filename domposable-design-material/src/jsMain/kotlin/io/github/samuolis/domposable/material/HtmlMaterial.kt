@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableAutocomplete
+import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableControlPlacement
 import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
@@ -32,6 +33,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.DomposableTypographyRole
 import io.github.samuolis.domposable.ui.DomposableBadgedBoxProps
+import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableDataTableProps
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
@@ -48,8 +50,10 @@ import io.github.samuolis.domposable.ui.DomposableNavigationItem
 import io.github.samuolis.domposable.ui.DomposableScrollFieldProps
 import io.github.samuolis.domposable.ui.DomposableSnackbarHostProps
 import io.github.samuolis.domposable.ui.DomposableValueChartProps
+import io.github.samuolis.domposable.ui.DomposableWebNavigationLayout
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.background
+import io.github.samuolis.domposable.ui.contentDescription
 import io.github.samuolis.domposable.ui.domposableAttributes
 import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.height
@@ -1062,6 +1066,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         attr("aria-label", props.label)
                         classes("d-navigation")
                         if (props.short) classes("d-navigation-short")
+                        if (props.webLayout == DomposableWebNavigationLayout.Links) classes("d-navigation-links")
                         style { itemAppearance(appearance) }
                         style {
                             property(
@@ -1225,11 +1230,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         }) {
                             H2(attrs = { attr("id", titleId) }) { Text(props.title) }
                             content()
-                            Button(attrs = {
-                                attr("type", "button")
-                                attr("aria-label", "Close ${props.title}")
-                                onClick { props.onDismiss() }
-                            }) { Text("Close") }
+                            HtmlButton(
+                                DomposableButtonProps(props.onDismiss, style = DomposableButtonStyle.Text),
+                                DomposableModifier.contentDescription("Close ${props.title}"),
+                                { Text("Close") },
+                                respectFormEnabled = false,
+                            )
                         }
                     }
                 }
@@ -1591,7 +1597,7 @@ private fun HtmlToggle(
         Label(attrs = {
             classes("d-toggle")
             onClick { it.stopPropagation() }
-            style { property("gap", "${labelSpacing.value.takeIf { it > 0f } ?: 10f}px") }
+            style { property("gap", "${labelSpacing.value}px") }
         }) {
             @Composable fun control() {
                 Input(InputType.Checkbox, attrs = {
@@ -1771,10 +1777,12 @@ private fun HtmlModal(
         }) {
             H2(attrs = { id(titleId) }) { Text(title) }
             content()
-            Button(attrs = {
-                attr("type", "button")
-                onClick { dismiss() }
-            }) { Text("Close") }
+            HtmlButton(
+                DomposableButtonProps({ dismiss() }, style = DomposableButtonStyle.Text),
+                DomposableModifier,
+                { Text("Close") },
+                respectFormEnabled = false,
+            )
         }
     }
 }
@@ -1932,16 +1940,18 @@ private const val MATERIAL_CSS = """
 .d-theme .d-chip.d-item-hittarget .d-chip-surface{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme-expressive .d-chip{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme .d-progress-wavy-linear{width:100%}
-.d-theme .d-navigation:not([style*="column"]){display:flex;width:100%;min-height:80px;align-items:stretch;justify-content:space-around;gap:0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}
-.d-theme .d-navigation:not([style*="column"])>button,.d-theme .d-navigation:not([style*="column"])>a{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:80px;padding:8px 12px;border:0;border-radius:0;background:transparent;color:var(--d-item-content,var(--d-on-surface));font-size:12px;line-height:16px;text-align:center}
-.d-theme .d-navigation:not([style*="column"])>button[aria-current=page],.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]{border:0;background:transparent;color:var(--d-item-selected-content,var(--d-on-secondary-container,var(--d-primary)))}
-.d-theme .d-navigation:not([style*="column"])>button>svg:first-child,.d-theme .d-navigation:not([style*="column"])>a>svg:first-child{display:block;box-sizing:content-box;width:24px;height:24px;padding:4px 20px;border-radius:999px;transition:background-color 150ms ease}
-.d-theme .d-navigation:not([style*="column"])>button>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not([style*="column"])>a>span[aria-hidden=true]:first-child{display:grid;width:64px;height:32px;place-items:center;border-radius:999px;transition:background-color 150ms ease}
-.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>span[aria-hidden=true]:first-child{background:var(--d-item-selected-container,var(--d-secondary-container,var(--d-variant)))}
-.d-theme .d-navigation:not([style*="column"]).d-navigation-short{min-height:56px}
-.d-theme .d-navigation:not([style*="column"]).d-navigation-short>button,.d-theme .d-navigation-short:not([style*="column"])>a{min-height:56px}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"]){display:flex;width:100%;min-height:80px;align-items:stretch;justify-content:space-around;gap:0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:80px;padding:8px 12px;border:0;border-radius:0;background:transparent;color:var(--d-item-content,var(--d-on-surface));font-size:12px;line-height:16px;text-align:center}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page],.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]{border:0;background:transparent;color:var(--d-item-selected-content,var(--d-on-secondary-container,var(--d-primary)))}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button>svg:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a>svg:first-child{display:block;box-sizing:content-box;width:24px;height:24px;padding:4px 20px;border-radius:999px;transition:background-color 150ms ease}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a>span[aria-hidden=true]:first-child{display:grid;width:64px;height:32px;place-items:center;border-radius:999px;transition:background-color 150ms ease}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page]>svg:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]>svg:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page]>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]>span[aria-hidden=true]:first-child{background:var(--d-item-selected-container,var(--d-secondary-container,var(--d-variant)))}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"]).d-navigation-short{min-height:56px}
+.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"]).d-navigation-short>button,.d-theme .d-navigation-short:not([style*="column"])>a{min-height:56px}
 .d-theme .d-navigation[style*="column"]{min-width:80px;align-items:stretch;gap:4px;padding:12px;background:var(--d-surface-container,var(--d-surface))}
 .d-theme .d-navigation[style*="column"]>button,.d-theme .d-navigation[style*="column"]>a{min-height:56px;border-radius:var(--d-item-radius,28px);text-align:start}
-@media(forced-colors:active){.d-theme .d-navigation:not([style*="column"])>button[aria-current=page],.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]{outline:1px solid Highlight}.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>svg:first-child,.d-theme .d-navigation:not([style*="column"])>button[aria-current=page]>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not([style*="column"])>a[aria-current=page]>span[aria-hidden=true]:first-child{background:Highlight;color:HighlightText}}
+@media(forced-colors:active){.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page],.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]{outline:1px solid Highlight}.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page]>svg:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]>svg:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page]>span[aria-hidden=true]:first-child,.d-theme .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]>span[aria-hidden=true]:first-child{background:Highlight;color:HighlightText}}
+.d-theme .d-navigation.d-navigation-links{width:auto;min-height:0;padding:0;align-items:center;gap:8px;background:transparent}
+.d-theme .d-navigation.d-navigation-links>a,.d-theme .d-navigation.d-navigation-links>button{flex:0 0 auto;min-height:44px;padding:12px}
 @media(forced-colors:active){.d-theme .d-toggle input[type=checkbox],.d-theme .d-toggle input[type=radio],.d-theme .d-toggle input[role=switch]{appearance:auto;forced-color-adjust:auto;background-image:none;background-color:ButtonFace;border-color:ButtonText}.d-theme .d-toggle input:checked{accent-color:Highlight}.d-theme .d-toggle input:focus-visible{outline:2px solid Highlight;outline-offset:3px}}
 """

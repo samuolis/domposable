@@ -382,6 +382,9 @@ data class DomposableTabsProps(
     }
 }
 
+/** HTML navigation presentation; native targets retain Material navigation. */
+enum class DomposableWebNavigationLayout { Material, Links }
+
 @DomposableComponent("NavigationBar")
 data class DomposableNavigationBarProps(
     val items: List<DomposableNavigationItem>,
@@ -391,6 +394,7 @@ data class DomposableNavigationBarProps(
     val appearance: DomposableItemAppearance? = null,
     val short: Boolean = false,
     val label: String = "Application",
+    val webLayout: DomposableWebNavigationLayout = DomposableWebNavigationLayout.Material,
 )
 
 @DomposableComponent("Menu")

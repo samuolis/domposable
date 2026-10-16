@@ -552,7 +552,7 @@ fun ComponentCatalogScreen(
         DomposableText("Component catalog", style = DomposableTextStyle.Title)
         DomposableText("Explore the same controls through native Compose UI and semantic HTML.")
         DomposableFlowRow(gap = 8.dp) {
-            DomposableBadge(text = "41 renderers")
+            DomposableBadge(text = "Shared components")
             DomposableChip(label = "Theme tokens", onClick = {}, selected = true)
             DomposableLink("Renderer contracts", "https://samuolis.github.io/domposable/design-systems/")
         }
@@ -601,7 +601,6 @@ fun ComponentCatalogScreen(
             DomposableButton("Open sheet", { sheet = true })
             DomposableButton("Open menu", { menu = true })
         }
-        DomposableText("Keyed collections", style = DomposableTextStyle.Title)
         DomposableText("Keyed collections", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableLazyRow(
             items = (1..6).toList(),

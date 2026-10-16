@@ -6,6 +6,10 @@ The inventory below is checked against the pinned `org.jetbrains.compose.materia
 
 Layout helpers, forms, disclosures, rich text, tables and charts are additional Domposable APIs. They are not upstream Material components. Android-specific system integrations and internal Material implementation utilities are outside the component catalog.
 
+![Material selection controls from the same shared feature on Android and semantic HTML](assets/examples/material-selection.png)
+
+![Expressive feedback from the same shared feature on Android and semantic HTML](assets/examples/material-feedback.png)
+
 | Family | Shared API | Material variants in scope |
 | --- | --- | --- |
 | Actions | `DomposableButton` | `Button`, `ElevatedButton`, `FilledTonalButton`, `OutlinedButton`, `TextButton` |
@@ -262,3 +266,5 @@ Floating toolbars and action menus participate in their caller's layout. Put the
 - [Official Material components](https://developer.android.com/develop/ui/compose/components)
 - [Material 3 release/API changes](https://developer.android.com/jetpack/androidx/releases/compose-material3)
 - [Compose Multiplatform releases](https://github.com/JetBrains/compose-multiplatform/releases)
+
+For website headers, set `DomposableNavigationBar(webLayout = DomposableWebNavigationLayout.Links, ...)` to render compact HTML links with browser URL and current-page semantics. The default is the Material navigation bar; native targets retain their Material presentation. The shopping demo uses this option to keep its web header compact.

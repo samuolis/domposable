@@ -176,6 +176,10 @@ The fictional Fieldwork shop shares its catalogue, cart and feature composables.
 
 ![The same delivery preferences feature on Android and semantic HTML](docs/assets/examples/selection-controls.png)
 
+![Material selection controls on Android and semantic HTML](docs/assets/examples/material-selection.png)
+
+See the [Material catalog](docs/material-catalog.md) for standard and expressive variants, theme configuration and per-component overrides.
+
 </details>
 
 ### A modular app for feature teams

@@ -71,3 +71,31 @@ test('playground launcher opens the standalone shop', async ({page}) => {
   await expect(page).toHaveURL(/\/shop\/$/);
   await expect(page.getByRole('heading',{name:'FIELDWORK'})).toBeVisible();
 });
+
+
+test('shop header keeps compact website navigation and current-page links', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/shop/');
+  const navigation = page.getByRole('navigation', { name: 'Shop', exact: true });
+  const brand = page.getByRole('heading', { name: 'FIELDWORK', exact: true });
+  await expect(navigation).toBeVisible();
+  const navBox = await navigation.boundingBox();
+  const brandBox = await brand.boundingBox();
+  expect(navBox!.width).toBeLessThan(600);
+  expect(Math.abs(navBox!.y + navBox!.height / 2 - brandBox!.y - brandBox!.height / 2)).toBeLessThan(30);
+  await expect(navigation.getByRole('link', { name: 'Discover', exact: true })).toHaveAttribute('aria-current', 'page');
+  await navigation.getByRole('link', { name: 'Shop all', exact: true }).click();
+  await expect(page).toHaveURL(/\/shop\/collection\/$/);
+  await expect(navigation.getByRole('link', { name: 'Shop all', exact: true })).toHaveAttribute('aria-current', 'page');
+});
+
+test('built-in dialog dismissal uses the themed text button', async ({ page }) => {
+  await page.goto('/#/inputs');
+  await page.getByRole('button', { name: 'Open help', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Input help', exact: true });
+  const dismiss = dialog.getByRole('button', { name: 'Close', exact: true });
+  await expect(dismiss).toBeEnabled();
+  await expect(dismiss).toHaveClass(/d-button-text/);
+  await dismiss.click();
+  await expect(dialog).toBeHidden();
+});
