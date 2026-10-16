@@ -264,14 +264,19 @@ internal fun HtmlSegmentedButtons(
             style { itemAppearance(appearance) }
         }) {
             props.labels.forEachIndexed { index, label ->
+                val canSelect = formEnabled && props.enabled && props.optionEnabled[index]
                 Label(attrs = { classes("d-segment") }) {
                     Input(InputType.Radio, attrs = {
                         attr("name", group)
                         checked(index == props.selectedIndex)
-                        if (!props.enabled || !formEnabled || !props.optionEnabled[index]) disabled()
+                        if (!canSelect) disabled()
                         props.optionTestTags[index]?.let { attr("data-testid", it) }
+                        onClick {
+                            if (canSelect && props.allowReselect && index == props.selectedIndex) {
+                                props.onSelect(index)
+                            }
+                        }
                         onChange {
-                            val canSelect = formEnabled && props.enabled && props.optionEnabled[index]
                             val selectionChanged = props.allowReselect || index != props.selectedIndex
                             if (canSelect && it.value && selectionChanged) {
                                 props.onSelect(index)

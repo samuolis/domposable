@@ -15,6 +15,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -30,8 +31,11 @@ import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableColors
 import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
+import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableShapes
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTokens
@@ -41,6 +45,7 @@ import io.github.samuolis.domposable.ui.DomposableCheckboxProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableRadioButton
 import io.github.samuolis.domposable.ui.DomposableRadioButtonProps
+import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.DomposableTabs
 import io.github.samuolis.domposable.ui.DomposableTheme
 import io.github.samuolis.domposable.ui.testId
@@ -61,18 +66,35 @@ class NativeCatalogAppearanceTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    fun segmentedControlsHonorTheirConfiguredMinimumHeight() {
+        compose.setContent {
+            DomposableMaterialTheme(
+                styles =
+                    DomposableComponentStyles(
+                        segmentedButtons = DomposableItemAppearance(minHeight = DomposableLength(72f)),
+                    ),
+            ) {
+                DomposableSegmentedButtons(
+                    listOf("Day", "Week"),
+                    0,
+                    {},
+                    "Period",
+                    modifier = DomposableModifier.testId("period"),
+                )
+            }
+        }
+        compose.onNodeWithTag("period").assertHeightIsAtLeast(72.dp)
+    }
+
+    @Test
     fun nestedThemeStylesInheritBrandValuesAndRestoreTheOuterTheme() {
         val colors = DomposableColors(primary = DomposableColor(0xFF77503B))
         val typography = DomposableTypography(bodySize = 18f, fontFamily = "Brand")
         val shapes = DomposableShapes(small = DomposableShape.Circle)
         val styles =
             DomposableComponentStyles(
-                button =
-                    DomposableButtonAppearance(
-                        minHeight =
-                            io.github.samuolis.domposable.foundation
-                                .DomposableLength(48f),
-                    ),
+                button = DomposableButtonAppearance(minHeight = DomposableLength(48f)),
+                card = DomposableSurfaceAppearance(container = DomposableColor(0xFFF3E8DE)),
             )
         var nestedColors: DomposableColors? = null
         var nestedTypography: DomposableTypography? = null

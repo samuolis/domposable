@@ -1495,7 +1495,9 @@ internal fun NativeSegmentedButtons(
                     selected = selected,
                     onClick = { if (props.allowReselect || !selected) props.onSelect(index) },
                     enabled = enabled,
-                    modifier = props.optionTestTags[index]?.let { Modifier.testTag(it) } ?: Modifier,
+                    modifier =
+                        (props.optionTestTags[index]?.let { Modifier.testTag(it) } ?: Modifier)
+                            .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier),
                     shape =
                         appearance.shape?.nativeShape() ?: SegmentedButtonDefaults.itemShape(index, props.labels.size),
                     interactionSource = interaction,

@@ -21,6 +21,19 @@ test('selection controls and chips use Material-sized visual surfaces', async ({
   await expect(chipSurface).toHaveCSS('border-top-left-radius', '8px');
 });
 
+test('segmented controls apply theme geometry without shrinking the hit target', async ({ page }) => {
+  await page.goto('/#/material/selection');
+  await page.getByRole('switch', { name: 'Component overrides', exact: true }).check();
+  const group = page.getByRole('radiogroup', { name: 'Period', exact: true });
+  const segment = group.locator('label').first();
+  const surface = segment.locator('.d-segment-surface');
+  await expect(segment).toHaveCSS('min-height', '64px');
+  await expect(surface).toHaveCSS('min-height', '40px');
+  await expect(surface).toHaveCSS('padding', '8px 12px');
+  await expect(surface).toHaveCSS('gap', '8px');
+  await expect(surface).toHaveCSS('border-top-width', '3px');
+});
+
 test('text fields, badges, and progress use Material default dimensions', async ({ page }) => {
   await page.goto('/#/material/inputs');
   const field = page.getByRole('textbox', { name: 'Outlined field' });

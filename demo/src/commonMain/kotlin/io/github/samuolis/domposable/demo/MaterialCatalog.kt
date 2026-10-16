@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableCheckboxAppearance
 import io.github.samuolis.domposable.foundation.DomposableChipVariant
+import io.github.samuolis.domposable.foundation.DomposableChoiceOption
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableControlPlacement
@@ -16,6 +17,7 @@ import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
 import io.github.samuolis.domposable.foundation.DomposableFabSize
 import io.github.samuolis.domposable.foundation.DomposableFontWeight
 import io.github.samuolis.domposable.foundation.DomposableIconButtonVariant
+import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableItemColors
 import io.github.samuolis.domposable.foundation.DomposableOrientation
@@ -171,6 +173,14 @@ internal fun materialCatalogTokens(
                                     selectedContent = OnWarmContainer,
                                 ),
                         ),
+                    segmentedButtons =
+                        DomposableItemAppearance(
+                            minHeight = 40.dp,
+                            minimumInteractiveSize = 64.dp,
+                            contentPadding = DomposableInsets(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
+                            contentSpacing = 8.dp,
+                            selectedBorderWidth = 3.dp,
+                        ),
                     progress = DomposableProgressAppearance(color = WarmAccent),
                 )
             } else {
@@ -251,6 +261,8 @@ internal fun MaterialSelection() {
         mutableStateOf(DomposableToggleState.Indeterminate)
     }
     var selected by rememberSaveable { mutableStateOf(0) }
+    var periodActions by remember { mutableStateOf(0) }
+    var allowPeriodReselect by remember { mutableStateOf(true) }
     var multiple by remember { mutableStateOf(setOf(0, 2)) }
     var value by rememberSaveable { mutableStateOf(0.4f) }
     var range by remember { mutableStateOf(0.2f..0.8f) }
@@ -287,7 +299,16 @@ internal fun MaterialSelection() {
             ),
     )
     DomposableChip("Elevated filter", { checked = !checked }, selected = checked, elevated = true)
-    DomposableSegmentedButtons(listOf("Day", "Week", "Month"), selected, { selected = it }, "Period")
+    DomposableSegmentedButtons(
+        options = listOf("Day", "Week", "Month").mapIndexed { index, label -> DomposableChoiceOption(index, label) },
+        selectedValue = selected,
+        onSelectionChange = {
+            selected = it
+            periodActions++
+        },
+        label = "Period",
+        allowReselect = allowPeriodReselect,
+    )
     DomposableMultiChoiceSegmentedButtons(listOf("Email", "Push", "SMS"), multiple, { multiple = it }, "Channels")
     DomposableLabel(label = { DomposableText("Volume ${(value * 100).toInt()}") }) {
         DomposableSlider(value, { value = it }, "Volume")
@@ -354,4 +375,6 @@ internal fun MaterialSelection() {
                 colors = DomposableSelectionColors(disabledSelected = WarmAccent),
             ),
     )
+    DomposableCheckbox(allowPeriodReselect, { allowPeriodReselect = it }, "Allow period reselection")
+    DomposableText("Period actions: $periodActions", modifier = DomposableModifier.testId("period-actions"))
 }
