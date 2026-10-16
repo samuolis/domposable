@@ -1,15 +1,10 @@
 import { test, expect, Page, Locator } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { canvasClick, settledCapture } from './wasm-interactions';
 
 async function activate(control: Locator) {
   await control.evaluate((element: HTMLElement) => element.click());
-}
-
-async function canvasClick(page: Page, control: Locator) {
-  const bounds = await control.boundingBox();
-  expect(bounds).not.toBeNull();
-  await page.mouse.click(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
 }
 
 async function edit(page: Page, id: string, value: string, password = false) {
@@ -85,25 +80,36 @@ test.describe('Stable Wasm comparison and bridge limits', () => {
     await expect(page.locator('#input-secret')).toHaveText('');
   });
 
-  test('native help actions and Escape dismiss the overlay despite missing modal semantics', async ({ page }) => {
+  test('native help actions and Escape dismiss the overlay despite stale modal semantics', async ({ page }) => {
+    await page.waitForFunction(() => performance.getEntriesByType('resource')
+      .some(resource => resource.name.includes('/notosanssymbols2/')));
     const open = page.getByRole('button', { name: 'Open help', exact: true });
     const close = page.getByRole('button', { name: 'Close help', exact: true });
+    const bounds = await open.boundingBox();
+    expect(bounds).not.toBeNull();
+    await page.mouse.move(0, 0);
+    const closed = await settledCapture(page);
     await canvasClick(page, open);
     await expect(close).toHaveCount(1);
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.locator('[aria-modal="true"]')).toHaveCount(0);
     await expect.poll(() => page.locator('#cmp_a11y_root').evaluate(element =>
       [...element.children].every(child => !(child as HTMLElement).inert))).toBe(true);
-    await page.waitForFunction(() => performance.getEntriesByType('resource')
-      .some(resource => resource.name.includes('/notosanssymbols2/')));
-    await page.screenshot({ path: 'build/screenshots/wasm/input-lab-help.png' });
+    await page.mouse.move(0, 0);
+    const opened = await settledCapture(page);
+    expect(opened.equals(closed)).toBe(false);
+    mkdirSync('build/screenshots/wasm', { recursive: true });
+    writeFileSync('build/screenshots/wasm/input-lab-help.png', opened);
     await canvasClick(page, close);
-    await expect(close).toHaveCount(0);
-    await canvasClick(page, open);
-    await expect(close).toHaveCount(1);
-    await page.locator('canvas').focus();
+    await page.mouse.move(0, 0);
+    // CMP 1.12 can leave its mirror attached to the dismissed dialog owner.
+    // Verify actual rendered dismissal rather than trusting that stale tree.
+    await expect.poll(async () => (await page.screenshot()).equals(closed)).toBe(true);
+    await page.mouse.click(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+    await page.mouse.move(0, 0);
+    await expect.poll(async () => (await page.screenshot()).equals(opened)).toBe(true);
     await page.keyboard.press('Escape');
-    await expect(close).toHaveCount(0);
+    await expect.poll(async () => (await page.screenshot()).equals(closed)).toBe(true);
   });
 
   test('WCAG audit records exact stable bridge findings and rejects new violations', async ({ page }) => {

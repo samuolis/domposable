@@ -44,8 +44,8 @@ The [CMP 1.12.2 bridge source](https://repo.maven.apache.org/maven2/org/jetbrain
 | Field labels and validation | Field labels and errors are not merged into the editable node's accessible name; `aria-invalid` is absent | Native labels, associated error descriptions and `aria-invalid` |
 | Toggles and tabs | Clickable nodes become buttons, overriding their checkbox, switch, radio or tab role | Native controls and appropriate roles |
 | Checked and disabled state | `aria-checked` and `aria-disabled` are not exported | Checked and disabled states follow shared values |
-| Dialogs | No dialog role, `aria-modal` or inert background; native overlay dismissal is tested separately | Modal semantics, focus isolation and restoration |
-| Assistive click delegates | Handlers can remain stale after overlay replacement; dismissal checks use native canvas pointer/keyboard input | Native browser event handlers |
+| Dialogs | No dialog role, `aria-modal` or inert background; the mirror can retain a dismissed dialog owner. Pointer/Escape dismissal is verified against settled rendered frames | Modal semantics, focus isolation and restoration |
+| Assistive click delegates | Handlers and the mirrored tree can remain stale after overlay replacement; dismissal checks use native canvas pointer/keyboard input and rendered-frame comparisons | Native browser event handlers |
 | Canvas role | Upstream canvas publishes `role="generic"`, rejected by axe | No canvas mirror needed |
 | Headings | Heading role without `aria-level` | Native heading elements |
 

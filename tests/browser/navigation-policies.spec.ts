@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mkdirSync } from 'node:fs';
+import { settledCapture } from './wasm-interactions';
 
 test.beforeEach(async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1024, height: 1000 });
@@ -85,6 +86,10 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   // NavDisplay briefly mirrors both outgoing and incoming entries during its
   // startup transition. Wait for one settled control rather than choosing one.
   await expect(page.getByRole('button', { name: 'Open Inbox live message', exact: true })).toHaveCount(1, { timeout: 60000 });
+  const open = await page.getByRole('button', { name: 'Open Inbox live message', exact: true }).boundingBox();
+  expect(open).not.toBeNull();
+  await page.mouse.move(0, 0);
+  const home = await settledCapture(page);
   await activate('Open Inbox live message');
   const entry = page.getByRole('heading', { name: 'Inbox message', exact: true }).locator('..');
   const draft = entry.getByRole('textbox');
@@ -96,17 +101,30 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await page.keyboard.insertText('Wasm retained draft');
   await expect(draft).toHaveText('Wasm retained draft');
-  await activate('Request back');
+  const field = await draft.boundingBox();
+  expect(field).not.toBeNull();
+  // Move native focus to Request back so the retained draft has no blinking caret.
+  await page.keyboard.press('Tab');
+  await expect(backing).not.toBeFocused();
+  const closed = await settledCapture(page);
+  await page.keyboard.press('Enter');
   const overlay = page.getByRole('button', { name: 'Keep editing', exact: true });
   await expect(overlay).toHaveCount(1);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('[aria-modal="true"]')).toHaveCount(0);
+  const oldLeave = await page.getByRole('button', { name: 'Leave entry', exact: true }).elementHandle();
+  expect(oldLeave).not.toBeNull();
   await activate('Keep editing');
-  await expect(overlay).toHaveCount(0);
-  await expect(draft).toHaveText('Wasm retained draft');
-  await activate('Request back');
+  // Stable CMP can retain the dismissed modal's mirror. Check the actual canvas.
+  await expect.poll(async () => (await page.screenshot()).equals(closed)).toBe(true);
+  await page.keyboard.press('Enter');
+  await expect.poll(() => oldLeave!.evaluate(element => element.isConnected)).toBe(false);
   await activate('Leave entry');
-  await expect(overlay).toHaveCount(0);
-  await activate('Open Inbox live message');
-  await expect(draft).toHaveText('Wasm retained draft');
+  await page.mouse.click(0, 0);
+  await expect.poll(async () => (await page.screenshot()).equals(home)).toBe(true);
+  await page.mouse.click(open!.x + open!.width / 2, open!.y + open!.height / 2);
+  await settledCapture(page);
+  await page.mouse.click(field!.x + field!.width / 2, field!.y + field!.height / 2);
+  await expect(backing).toBeFocused();
+  await expect(backing).toHaveValue('Wasm retained draft');
 });
