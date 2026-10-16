@@ -105,7 +105,7 @@ test('Wasm route overlay preserves its underlying live draft through assistive a
   expect(field).not.toBeNull();
   // Move native focus to Request back so the retained draft has no blinking caret.
   await page.keyboard.press('Tab');
-  await expect(backing).not.toBeFocused();
+  await expect(backing).toHaveCount(0);
   const closed = await settledCapture(page);
   await page.keyboard.press('Enter');
   const overlay = page.getByRole('button', { name: 'Keep editing', exact: true });
