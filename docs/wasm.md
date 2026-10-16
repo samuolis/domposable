@@ -53,7 +53,7 @@ Tests record these omissions explicitly. They locate unnamed Wasm fields by exis
 
 The WCAG audit runs all WCAG 2 A/AA axe rules without disabling any rule. Its exact node descriptors and counts are pinned; a changed or new finding fails CI and requires inspection. The report is written **before** the assertion, including on failure, to `build/accessibility/wasm-input-lab.json` in the Actions artifact. It is a regression audit with known failures, not a clean accessibility scan or conformance certification.
 
-The expected stable input-lab findings are two unnamed editable nodes (`aria-input-field-name`) two headings without levels (`aria-required-attr`) and the upstream canvas role (`aria-roles`). State and modal omissions are checked separately because axe cannot detect every missing semantic. Findings from the 0.7.0 alpha bridge must not be used as evidence for this baseline.
+The expected stable input-lab findings are two unnamed editable nodes (`aria-input-field-name`), two headings without levels (`aria-required-attr`) and the upstream canvas role (`aria-roles`). State and modal omissions are checked separately because axe cannot detect every missing semantic. Findings from the 0.7.0 alpha bridge must not be used as evidence for this baseline.
 
 Wasm remains an experimental comparison. Physical screen-reader review is deferred, and these checks do not establish parity with HTML or native assistive technology. No stable 1.0 release is scheduled.
 

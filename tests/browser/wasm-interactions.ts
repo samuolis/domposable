@@ -16,4 +16,3 @@ export async function settledCapture(page: Page) {
   }, { intervals: [250] }).toBe(true);
   return previous!;
 }
-
