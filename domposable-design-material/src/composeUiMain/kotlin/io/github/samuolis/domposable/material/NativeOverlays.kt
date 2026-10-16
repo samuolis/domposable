@@ -113,22 +113,6 @@ internal fun NativeDialog(
                 ) { body() }
             }
 
-            DomposableDialogVariant.VibrantTimePicker -> {
-                // The vibrant dialog shell is 1.13-only; keep its slots on the stable dialog API.
-                TimePickerDialog(
-                    onDismissRequest = props.onDismiss,
-                    confirmButton = confirm,
-                    dismissButton = close,
-                    title = { Text(props.title) },
-                    modifier = modifier.toComposeModifier(),
-                    shape = appearance.nativeShape(MaterialTheme.shapes.extraLarge),
-                    containerColor =
-                        appearance.container?.nativeColor() ?: MaterialTheme.colorScheme.surfaceContainer,
-                ) {
-                    body()
-                }
-            }
-
             DomposableDialogVariant.Basic, DomposableDialogVariant.FullScreen -> {
                 BasicAlertDialog(
                     onDismissRequest = props.onDismiss,

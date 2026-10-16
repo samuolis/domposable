@@ -44,3 +44,7 @@ HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm use
 Domposable supports Android API 24 and newer. The library modules, demo and published-consumer fixtures use the same minimum; applications upgrading must also set `minSdk = 24` or higher.
 
 The Compose plugin, Runtime, UI and Foundation use a stable compatible baseline. The optional Material provider is compiled against that baseline; it must not raise the core to a prerelease version. On Wasm, mixing older compile-time UI dependencies with newer runtime UI can bundle incompatible Skiko JavaScript glue; the startup checks exercise the actual browser bundle.
+
+### Migration from 0.7.0
+
+The stable-core baseline removes `DomposableTimePickerMode.Scroll` and `DomposableDialogVariant.VibrantTimePicker`, which mapped to newer upstream APIs. Use `DomposableTimePickerMode.Dial` or `Input`, and `DomposableDialogVariant.TimePicker`. Other component families remain available on the compatible Material baseline. This is a breaking change and requires a pre-1.0 minor release; rebuild consumers rather than mixing the old and new binaries.

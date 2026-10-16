@@ -103,7 +103,6 @@ final enum class io.github.samuolis.domposable.ui/DomposableDialogVariant : kotl
     enum entry DatePicker // io.github.samuolis.domposable.ui/DomposableDialogVariant.DatePicker|null[0]
     enum entry FullScreen // io.github.samuolis.domposable.ui/DomposableDialogVariant.FullScreen|null[0]
     enum entry TimePicker // io.github.samuolis.domposable.ui/DomposableDialogVariant.TimePicker|null[0]
-    enum entry VibrantTimePicker // io.github.samuolis.domposable.ui/DomposableDialogVariant.VibrantTimePicker|null[0]
 
     final val entries // io.github.samuolis.domposable.ui/DomposableDialogVariant.entries|#static{}entries[0]
         final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.ui/DomposableDialogVariant> // io.github.samuolis.domposable.ui/DomposableDialogVariant.entries.<get-entries>|<get-entries>#static(){}[0]
@@ -236,7 +235,6 @@ final enum class io.github.samuolis.domposable.ui/DomposableSwipeDirection : kot
 final enum class io.github.samuolis.domposable.ui/DomposableTimePickerMode : kotlin/Enum<io.github.samuolis.domposable.ui/DomposableTimePickerMode> { // io.github.samuolis.domposable.ui/DomposableTimePickerMode|null[0]
     enum entry Dial // io.github.samuolis.domposable.ui/DomposableTimePickerMode.Dial|null[0]
     enum entry Input // io.github.samuolis.domposable.ui/DomposableTimePickerMode.Input|null[0]
-    enum entry Scroll // io.github.samuolis.domposable.ui/DomposableTimePickerMode.Scroll|null[0]
 
     final val entries // io.github.samuolis.domposable.ui/DomposableTimePickerMode.entries|#static{}entries[0]
         final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.ui/DomposableTimePickerMode> // io.github.samuolis.domposable.ui/DomposableTimePickerMode.entries.<get-entries>|<get-entries>#static(){}[0]

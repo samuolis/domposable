@@ -32,7 +32,7 @@ enum class DomposableListItemPosition { Only, First, Middle, Last }
 
 enum class DomposableDatePickerMode { Calendar, Input }
 
-enum class DomposableTimePickerMode { Dial, Input, Scroll }
+enum class DomposableTimePickerMode { Dial, Input }
 
 enum class DomposableCarouselVariant { MultiBrowse, Uncontained, CenteredHero }
 
@@ -237,7 +237,7 @@ enum class DomposableDrawerVariant { Modal, Dismissible, Permanent }
 
 enum class DomposableSearchBarVariant { FullScreen, Docked, ContainedFullScreen, DockedWithGap, AppBar }
 
-enum class DomposableDialogVariant { Alert, Basic, DatePicker, TimePicker, VibrantTimePicker, FullScreen }
+enum class DomposableDialogVariant { Alert, Basic, DatePicker, TimePicker, FullScreen }
 
 enum class DomposableBottomAppBarVariant { Standard, Flexible }
 

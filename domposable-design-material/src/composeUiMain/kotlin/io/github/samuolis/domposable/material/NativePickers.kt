@@ -205,11 +205,6 @@ internal fun NativeTimePicker(
             DomposableTimePickerMode.Dial -> {
                 TimePicker(state, colors = colors)
             }
-
-            DomposableTimePickerMode.Scroll -> {
-                // TimeScroll is 1.13-only; stable M3 uses the shared controlled wheel renderer.
-                NativeTimeScroll(state, colors)
-            }
         }
     }
 }

@@ -259,7 +259,7 @@ DomposableTimePicker(
     hour = hour,
     minute = minute,
     onTimeChange = onTimeChange,
-    mode = DomposableTimePickerMode.Scroll,
+    mode = DomposableTimePickerMode.Input,
 )
 DomposableScrollField(
     itemCount = 24,
@@ -270,7 +270,7 @@ DomposableScrollField(
 )
 ```
 
-A slider uses `orientation = DomposableOrientation.Vertical` for vertical adjustment. `topToBottom` sets the vertical value direction. Time inputs support dial, typed and scroll modes; search supports full-screen, docked, contained and app-bar variants. These are component options, independent of the application's navigation approach.
+A slider uses `orientation = DomposableOrientation.Vertical` for vertical adjustment. `topToBottom` sets the vertical value direction. Time inputs support dial and typed modes; search supports full-screen, docked, contained and app-bar variants. These are component options, independent of the application's navigation approach.
 
 
 A modal bottom sheet is the default. Use `modal = false` for a standard sheet inside the caller's layout; it does not make the background inert or trap focus. `DomposableScrim` is available for custom overlay hosts. Supply a label when it can be clicked to dismiss an overlay, and keep the modal's focus and dismissal policy in its host.
@@ -319,8 +319,6 @@ DomposableFlowRow(gap = 12.dp) {
 }
 ```
 
-## Baseline-native picker variants
+## Supported picker variants
 
-`DomposableTimePickerMode.Scroll` composes the shared controlled wheel renderer for hours and minutes, with AM/PM controls in 12-hour mode. It supports keyboard adjustment, accessibility actions, disabled forms and caller-owned values. It does not require the newer upstream `TimeScroll` implementation.
-
-`DomposableDialogVariant.VibrantTimePicker` uses the baseline Material time-picker dialog with expressive shape and container defaults. Title, content, confirmation and dismissal slots are retained; its layout follows the supported baseline rather than the newer upstream vibrant dialog shell. Override its appearance or provide a custom renderer when a different layout is required.
+Time pickers support `Dial` and `Input`; dialogs support the baseline `TimePicker` variant. The newer upstream `TimeScroll` and `VibrantTimePickerDialog` require the 1.13 alpha dependency stack and are excluded. `DomposableScrollField` remains available because the compatible Material baseline already provides that component.
