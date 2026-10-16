@@ -2300,6 +2300,32 @@ public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Rotation : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (F)V
+	public final fun component1 ()F
+	public final fun copy (F)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Rotation;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Rotation;FILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Rotation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDegrees ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Scale : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public fun <init> (FF)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun copy (FF)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scale;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scale;FFILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scale;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getX ()F
+	public final fun getY ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Scroll : io/github/samuolis/domposable/ui/DomposableModifierOperation {
 	public static final field $stable I
 	public fun <init> (Lio/github/samuolis/domposable/foundation/DomposableOrientation;)V
@@ -2308,6 +2334,20 @@ public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$
 	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scroll;Lio/github/samuolis/domposable/foundation/DomposableOrientation;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Scroll;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOrientation ()Lio/github/samuolis/domposable/foundation/DomposableOrientation;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableModifierOperation$Shadow : io/github/samuolis/domposable/ui/DomposableModifierOperation {
+	public static final field $stable I
+	public synthetic fun <init> (FLio/github/samuolis/domposable/foundation/DomposableShape;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1--zYZv-Q ()F
+	public final fun component2 ()Lio/github/samuolis/domposable/foundation/DomposableShape;
+	public final fun copy-seJEgBQ (FLio/github/samuolis/domposable/foundation/DomposableShape;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Shadow;
+	public static synthetic fun copy-seJEgBQ$default (Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Shadow;FLio/github/samuolis/domposable/foundation/DomposableShape;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifierOperation$Shadow;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElevation--zYZv-Q ()F
+	public final fun getShape ()Lio/github/samuolis/domposable/foundation/DomposableShape;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3733,15 +3773,23 @@ public final class io/github/samuolis/domposable/ui/ModifierKt {
 	public static final fun fillMaxSize (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun fillMaxWidth (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun height-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun heightIn-Xivfcqc (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static synthetic fun heightIn-Xivfcqc$default (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun horizontalScroll (Lio/github/samuolis/domposable/ui/DomposableModifier;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun horizontalScroll (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/ui/DomposableScrollState;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun maxHeight-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun maxWidth-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun minHeight-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun minWidth-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun offset (Lio/github/samuolis/domposable/ui/DomposableModifier;FF)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun padding (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableInsets;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun padding-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun padding-sp7on5w (Lio/github/samuolis/domposable/ui/DomposableModifier;FF)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun rotate (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun scale (Lio/github/samuolis/domposable/ui/DomposableModifier;FF)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static synthetic fun scale$default (Lio/github/samuolis/domposable/ui/DomposableModifier;FFILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun shadow-poF2Rhk (Lio/github/samuolis/domposable/ui/DomposableModifier;FLio/github/samuolis/domposable/foundation/DomposableShape;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static synthetic fun shadow-poF2Rhk$default (Lio/github/samuolis/domposable/ui/DomposableModifier;FLio/github/samuolis/domposable/foundation/DomposableShape;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun size-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun size-sp7on5w (Lio/github/samuolis/domposable/ui/DomposableModifier;FF)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun testId (Lio/github/samuolis/domposable/ui/DomposableModifier;Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposableModifier;
@@ -3750,6 +3798,8 @@ public final class io/github/samuolis/domposable/ui/ModifierKt {
 	public static final fun weight (Lio/github/samuolis/domposable/ui/DomposableModifier;FZ)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static synthetic fun weight$default (Lio/github/samuolis/domposable/ui/DomposableModifier;FZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun width-8jShoPA (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static final fun widthIn-Xivfcqc (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;)Lio/github/samuolis/domposable/ui/DomposableModifier;
+	public static synthetic fun widthIn-Xivfcqc$default (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun wrapContentSize (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableAlignment;Lio/github/samuolis/domposable/foundation/DomposableAlignment;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static synthetic fun wrapContentSize$default (Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableAlignment;Lio/github/samuolis/domposable/foundation/DomposableAlignment;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static final fun zIndex (Lio/github/samuolis/domposable/ui/DomposableModifier;F)Lio/github/samuolis/domposable/ui/DomposableModifier;

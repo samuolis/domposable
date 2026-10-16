@@ -197,16 +197,44 @@ component's name instead of dropping content.
 
 ## Extend portable modifiers
 
+See the [modifier guide](modifiers.md) for supported operations, complete native/HTML decoration examples and platform boundaries.
+
+An ordinary Kotlin extension can combine existing operations. It works on every renderer without additional platform code:
+
+```kotlin
+fun DomposableModifier.contentGutter(inset: DomposableLength = 16.dp): DomposableModifier =
+    fillMaxWidth().padding(inset)
+
+DomposableColumn(DomposableModifier.contentGutter(24.dp)) {
+    FeatureContent()
+}
+```
+
+Import these types and operations from `ui` and `foundation`, as in the theme examples. Parameters are typed values, and chaining returns a new modifier. Reusing a base modifier does not change its previous consumers. Compose built-in operations rather than inspecting or rewriting an existing chain.
+
 Use built-in operations for constraints, shape, border, child weight/alignment and controlled
 scrolling. A product-specific operation can implement `DomposableModifierElement` and be appended
 with `modifier.then(element)`; the single ordered `elements` chain keeps it in place between
 built-in operations.
 
-Native providers consume `toComposeModifier(operationRenderer = ...)`. HTML providers consume
+```kotlin
+data class BrandElevation(val level: Int) : DomposableModifierElement {
+    init { require(level in 0..3) }
+}
+
+fun DomposableModifier.brandElevation(level: Int): DomposableModifier =
+    then(BrandElevation(level))
+```
+
+`BrandElevation` belongs to the application's design system. Its native and HTML handlers translate each level into the appropriate shadow; the common feature only calls `.brandElevation(2)`.
+
+Native providers consume `toComposeModifier(operationRenderer = ...)`. HTML content decorators use `LocalDomposableHtmlModifierDecorationRenderer` or the explicit `decorationRenderer` parameter to compose markup around the remaining chain. Attribute-only HTML providers consume
 `DomposableHtmlModifiers(modifier, operationRenderer = ...)`. Providers can also install
 `LocalDomposableNativeModifierRenderer` or `LocalDomposableHtmlModifierRenderer` for their
 children. Each custom element needs native and HTML handling. An unhandled element fails visibly;
 it is never silently discarded. Keep product token roles in that provider, outside feature code.
+
+Keep the extension boundary small: portable modifiers describe layout, drawing, input and semantics. Component-specific parameters, such as a button's selected colors or a field's error styling, belong in that component's props or appearance. Do not expose mutable internal fields, arbitrary property-name setters or DOM/CSS objects in the shared modifier API. A missing portable behavior can become a typed custom element without changing the framework's built-in operation set.
 
 Inside native Row, Column and Box renderer content, install the respective
 `ProvideDomposableRowModifierScope`, `ProvideDomposableColumnModifierScope` or

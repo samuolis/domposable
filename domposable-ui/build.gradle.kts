@@ -61,8 +61,8 @@ kotlin {
         iosMain.dependsOn(composeUiMain)
         jsMain {
             dependencies {
-                implementation(libs.compose.html)
-                implementation(libs.kotlinx.browser)
+                api(libs.compose.html)
+                api(libs.kotlinx.browser)
             }
         }
     }

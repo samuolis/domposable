@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test('expressive theme keeps ordinary card shapes and explicit overrides', async ({ page }) => {
   await page.goto('/#/material/surfaces');
   const card = page.locator('.d-card').filter({ has: page.getByText('Filled card', { exact: true }) });
+  await expect(page.getByRole('switch', { name: 'Expressive theme', exact: true })).not.toBeChecked();
   await expect(card).toHaveCSS('border-top-left-radius', '12px');
   await page.getByRole('switch', { name: 'Expressive theme', exact: true }).check();
   await expect(page.locator('.d-theme-expressive')).toBeVisible();

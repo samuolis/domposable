@@ -28,6 +28,8 @@ class VisualTest : VisualCapture() {
 
     @Test fun catalog() = capture("catalog", DemoRoute.Catalog)
 
+    @Test fun extensions() = capture("extensions", DemoRoute.Extensions)
+
     @Test fun extendedComponents() = capture("extended-components", DemoRoute.ExtendedCatalog)
 
     @Test fun recipes() = capture("recipes", DemoRoute.Recipes)

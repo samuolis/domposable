@@ -1,0 +1,35 @@
+package example.consumer
+
+import androidx.compose.runtime.Composable
+import io.github.samuolis.domposable.ui.DomposableHtmlModifierDecoration
+import io.github.samuolis.domposable.ui.DomposableHtmlModifierDecorationRenderer
+import io.github.samuolis.domposable.ui.DomposableHtmlModifierElementRenderer
+import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
+import io.github.samuolis.domposable.ui.DomposableModifier
+import org.jetbrains.compose.web.dom.Div
+
+@Composable
+fun DecoratedHtmlConsumer(
+    modifier: DomposableModifier,
+    content: @Composable () -> Unit,
+) {
+    val renderer: DomposableHtmlModifierDecorationRenderer = { element ->
+        if (element is ConsumerFrame) {
+            val decoration: DomposableHtmlModifierDecoration = { inner ->
+                Div(attrs = { style { property("border", "2px solid ${element.color.css()}") } }) { inner() }
+            }
+            decoration
+        } else {
+            null
+        }
+    }
+    DomposableHtmlModifiers(modifier, decorationRenderer = renderer, content = content)
+}
+
+// The existing three-argument call remains source-compatible.
+@Composable
+fun AttributeHtmlConsumer(
+    modifier: DomposableModifier,
+    renderer: DomposableHtmlModifierElementRenderer,
+    content: @Composable () -> Unit,
+) = DomposableHtmlModifiers(modifier, renderer, content)

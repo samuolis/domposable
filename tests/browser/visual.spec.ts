@@ -48,6 +48,7 @@ for (const [name, width, height, route] of [
   ['tasks-phone', 390, 844, 'tasks'], ['tasks-tablet', 768, 900, 'tasks'],
   ['tasks-wide', 1440, 900, 'tasks'], ['catalog-phone', 390, 844, 'catalog'],
   ['catalog-wide', 1440, 900, 'catalog'], ['extended-components', 1024, 1100, 'components'], ['recipes-wide', 1440, 900, 'recipes'], ['collection-measured', 1024, 900, 'collection-recipes'],
+  ['extensions-phone', 390, 844, 'extensions'], ['extensions-wide', 1440, 900, 'extensions'],
 ] as const) {
   test(`DOM visual ${name}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
@@ -75,6 +76,7 @@ for (const [name, width, height, route] of [
   ['tasks-phone', 390, 844, 'tasks'], ['tasks-wide', 1440, 900, 'tasks'],
   ['catalog-wide', 1440, 900, 'catalog'], ['extended-components', 1024, 1100, 'components'], ['recipes-wide', 1440, 900, 'recipes'], ['collection-measured', 1024, 900, 'collection-recipes'],
   ['navigation-policies', 1024, 1000, 'navigation-policies'],
+  ['extensions', 1440, 900, 'extensions'],
 ] as const) {
   test(`Wasm visual ${name}`, async ({ page }) => {
     const errors: string[] = [];

@@ -120,6 +120,28 @@ sealed interface DomposableModifierOperation : DomposableModifierElement {
         val value: Float,
     ) : DomposableModifierOperation
 
+    data class Scale(
+        val x: Float,
+        val y: Float,
+    ) : DomposableModifierOperation {
+        init {
+            require(x.isFinite() && y.isFinite()) { "Scale must be finite" }
+        }
+    }
+
+    data class Rotation(
+        val degrees: Float,
+    ) : DomposableModifierOperation {
+        init {
+            require(degrees.isFinite()) { "Rotation must be finite" }
+        }
+    }
+
+    data class Shadow(
+        val elevation: DomposableLength,
+        val shape: DomposableShape,
+    ) : DomposableModifierOperation
+
     data class Click(
         val onClick: () -> Unit,
         val label: String,
@@ -182,6 +204,30 @@ fun DomposableModifier.height(value: DomposableLength): DomposableModifier =
 
 fun DomposableModifier.size(value: DomposableLength): DomposableModifier = width(value).height(value)
 
+fun DomposableModifier.maxWidth(value: DomposableLength): DomposableModifier = constrainContentWidth(value)
+
+fun DomposableModifier.widthIn(
+    min: DomposableLength? = null,
+    max: DomposableLength? = null,
+): DomposableModifier {
+    require(min == null || max == null || min.value <= max.value) { "Minimum width must not exceed maximum width" }
+    var result = this
+    min?.let { result = result.minWidth(it) }
+    max?.let { result = result.maxWidth(it) }
+    return result
+}
+
+fun DomposableModifier.heightIn(
+    min: DomposableLength? = null,
+    max: DomposableLength? = null,
+): DomposableModifier {
+    require(min == null || max == null || min.value <= max.value) { "Minimum height must not exceed maximum height" }
+    var result = this
+    min?.let { result = result.minHeight(it) }
+    max?.let { result = result.maxHeight(it) }
+    return result
+}
+
 fun DomposableModifier.constrainContentWidth(value: DomposableLength): DomposableModifier =
     append(DomposableModifierOperation.MaxWidth(value))
 
@@ -242,6 +288,22 @@ fun DomposableModifier.alpha(value: Float): DomposableModifier {
     require(value.isFinite() && value in 0f..1f)
     return append(DomposableModifierOperation.Opacity(value))
 }
+
+/** Visual transform around the center; measured layout size is unchanged. Negative values mirror content. */
+fun DomposableModifier.scale(
+    x: Float,
+    y: Float = x,
+): DomposableModifier = append(DomposableModifierOperation.Scale(x, y))
+
+/** Clockwise visual rotation in degrees, without changing measured layout size. */
+fun DomposableModifier.rotate(degrees: Float): DomposableModifier =
+    append(DomposableModifierOperation.Rotation(degrees))
+
+/** Native elevation or a CSS shadow. Does not clip content; use clip separately when needed. */
+fun DomposableModifier.shadow(
+    elevation: DomposableLength,
+    shape: DomposableShape = DomposableShape.Rectangle,
+): DomposableModifier = append(DomposableModifierOperation.Shadow(elevation, shape))
 
 fun DomposableModifier.clickable(
     label: String,

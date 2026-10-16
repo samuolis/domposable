@@ -22,6 +22,15 @@ typealias DomposableHtmlModifierElementRenderer =
 val LocalDomposableHtmlModifierRenderer =
     staticCompositionLocalOf<DomposableHtmlModifierElementRenderer?> { null }
 
+/** App-owned HTML/SVG decoration around the remaining ordered modifier chain. Render content once. */
+typealias DomposableHtmlModifierDecoration = @Composable (content: @Composable () -> Unit) -> Unit
+
+/** Return null for unhandled elements, allowing the attribute renderer to handle them. */
+typealias DomposableHtmlModifierDecorationRenderer = (DomposableModifierElement) -> DomposableHtmlModifierDecoration?
+
+val LocalDomposableHtmlModifierDecorationRenderer =
+    staticCompositionLocalOf<DomposableHtmlModifierDecorationRenderer?> { null }
+
 private data class DomposableScrollBinding(
     val state: DomposableScrollState,
     val orientation: DomposableOrientation,
@@ -93,15 +102,25 @@ fun DomposableHtmlModifiers(
     modifier: DomposableModifier,
     operationRenderer: DomposableHtmlModifierElementRenderer? = null,
     content: @Composable () -> Unit,
+) = DomposableHtmlModifiers(modifier, operationRenderer, decorationRenderer = null, content)
+
+/** A matching decoration owns the element; returning null falls back to attribute handling. */
+@Composable
+fun DomposableHtmlModifiers(
+    modifier: DomposableModifier,
+    operationRenderer: DomposableHtmlModifierElementRenderer? = null,
+    decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
+    content: @Composable () -> Unit,
 ) {
     val renderer = operationRenderer ?: LocalDomposableHtmlModifierRenderer.current
+    val decoration = decorationRenderer ?: LocalDomposableHtmlModifierDecorationRenderer.current
     val layout = modifier.elements.filter(::isChildLayoutOperation)
     val visual =
         modifier.elements.filterNot(::isChildLayoutOperation).filterNot {
             it is DomposableModifierOperation.Description || it is DomposableModifierOperation.TestId
         }
     if (layout.isEmpty()) {
-        HtmlModifierBox(visual, 0, renderer, content)
+        HtmlModifierBox(visual, 0, renderer, decoration, content)
     } else {
         Div(attrs = {
             attr("data-domposable-layout-item", "true")
@@ -129,7 +148,7 @@ fun DomposableHtmlModifiers(
                     }
                 }
             }
-        }) { HtmlModifierBox(visual, 0, renderer, content) }
+        }) { HtmlModifierBox(visual, 0, renderer, decoration, content) }
     }
 }
 
@@ -138,6 +157,7 @@ private fun HtmlModifierBox(
     elements: List<DomposableModifierElement>,
     index: Int,
     operationRenderer: DomposableHtmlModifierElementRenderer?,
+    decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
     content: @Composable () -> Unit,
 ) {
     if (index == elements.size) {
@@ -147,13 +167,18 @@ private fun HtmlModifierBox(
     val element = elements[index]
     val operation = element as? DomposableModifierOperation
     if (operation == null) {
+        val decoration = decorationRenderer?.invoke(element)
+        if (decoration != null) {
+            decoration { HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, content) }
+            return
+        }
         Div(attrs = {
             val attributes =
                 operationRenderer?.invoke(element)
                     ?: error("No HTML renderer handled application modifier element ${element::class.simpleName}")
             attributes()
         }) {
-            HtmlModifierBox(elements, index + 1, operationRenderer, content)
+            HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, content)
         }
         return
     }
@@ -251,6 +276,29 @@ private fun HtmlModifierBox(
                     property("opacity", operation.value.toString())
                 }
 
+                is DomposableModifierOperation.Scale -> {
+                    property("transform", "scale(${operation.x},${operation.y})")
+                }
+
+                is DomposableModifierOperation.Rotation -> {
+                    property("transform", "rotate(${operation.degrees}deg)")
+                }
+
+                is DomposableModifierOperation.Shadow -> {
+                    applyCssShape(operation.shape)
+                    val elevation = operation.elevation.value
+                    property(
+                        "box-shadow",
+                        if (elevation ==
+                            0f
+                        ) {
+                            "none"
+                        } else {
+                            "0 ${elevation}px ${elevation * 2}px rgb(0 0 0 / .24)"
+                        },
+                    )
+                }
+
                 is DomposableModifierOperation.Click -> {
                     property("cursor", "pointer")
                 }
@@ -339,7 +387,7 @@ private fun HtmlModifierBox(
             }
         }
     }) {
-        HtmlModifierBox(elements, index + 1, operationRenderer, content)
+        HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, content)
     }
 }
 

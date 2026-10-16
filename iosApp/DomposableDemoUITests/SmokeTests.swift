@@ -3,6 +3,23 @@ import Vision
 import ImageIO
 
 final class SmokeTests: XCTestCase {
+    func testAppComponentsAndModifiers() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launch()
+        ready(app, "Task workspace")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Components")).firstMatch.tap()
+        ready(app, "Component catalog")
+        tapVisible(app, "More components")
+        ready(app, "More shared components")
+        tapVisible(app, "Custom components and modifiers")
+        ready(app, "App-owned components and modifiers")
+        capture(app, "extensions", renderedText: "Custom counter: 0")
+        tapVisible(app, "Increment custom counter")
+        ready(app, "Custom counter: 1")
+        tapVisible(app, "Change frame color")
+        ready(app, "Custom counter: 1")
+    }
     private func ready(_ app: XCUIApplication, _ title: String) {
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", title)).firstMatch.waitForExistence(timeout: 30))
     }

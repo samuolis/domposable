@@ -21,6 +21,7 @@ import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableMeasure
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableModifierElement
 import io.github.samuolis.domposable.ui.DomposableRangeSlider
 import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.DomposableSelect
@@ -37,6 +38,10 @@ import io.github.samuolis.domposable.ui.size
 class FeatureModel {
     var label by mutableStateOf("Public artifact consumer")
 }
+
+data class ConsumerFrame(
+    val color: io.github.samuolis.domposable.foundation.DomposableColor,
+) : DomposableModifierElement
 
 @Composable
 fun Feature(

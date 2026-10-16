@@ -137,6 +137,8 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 
 ## Complete vocabulary
 
+The [complete parameter reference](component-reference.md) lists every current renderer contract with types, required parameters and defaults. See [custom components](custom-components.md) and [modifier extensions](modifiers.md) for app-owned UI.
+
 | Family | Components |
 | --- | --- |
 | Theme | Theme |
@@ -150,10 +152,7 @@ The feature owns dismissal and application effects. HTML uses a modal dialog wit
 
 Every component has direct arguments and a `Props` overload. Keep props for renderer customization or reusable configuration; ordinary feature code can use the calls above. See [design-system customization](design-systems.md), [adaptive examples](adaptive.md) and [platform boundaries](coverage.md).
 
-The additional controls demos share the same source for native, HTML and Wasm. Published 0.3.0 has
-42 renderer contracts; the 0.4 API adds Form, Disclosure, RichHtml, LineChart, ValueChart
-and DataTable. Check [release versions](https://github.com/samuolis/domposable/releases) before
-selecting Maven dependencies.
+The demos share the same feature code for native Compose, HTML and Wasm. The generated reference and API site describe the current source; choose a published version from [Releases](https://github.com/samuolis/domposable/releases) and consult the [migration guide](migration.md) when upgrading.
 
 ## Documents, rich inputs and data
 

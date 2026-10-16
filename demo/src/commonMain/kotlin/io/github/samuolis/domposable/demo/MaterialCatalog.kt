@@ -79,7 +79,7 @@ fun MaterialCatalogScreen(
     section: String = "actions",
     onSection: (String) -> Unit = {},
 ) {
-    var expressive by rememberSaveable { mutableStateOf(true) }
+    var expressive by rememberSaveable { mutableStateOf(false) }
     var customized by rememberSaveable { mutableStateOf(false) }
     val tokens = materialCatalogTokens(expressive, customized)
     DomposableMaterialTheme(
