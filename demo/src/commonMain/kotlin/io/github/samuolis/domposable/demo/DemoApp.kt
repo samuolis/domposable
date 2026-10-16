@@ -241,7 +241,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
             }
 
             path.startsWith("/caller-history/") -> {
-                DemoRoute.CallerHistory(path.removePrefix("/caller-history/"))
+                DemoRoute.CallerHistory(path.removePrefix("/caller-history/").trimEnd('/').ifEmpty { "home" })
             }
 
             path == "/navigation-policies" -> {

@@ -75,6 +75,7 @@ test('Wasm document controls execute the same feature callbacks', async ({ page,
   await email.focus();
   await expect(page.locator('.compose-backing-field')).toBeFocused();
   await page.keyboard.insertText('hello@example.com');
+  await expect(email).toHaveText('hello@example.com');
   const submit = page.getByRole('button', { name: 'Save preferences', exact: true });
   await expect(submit).not.toHaveAttribute('aria-disabled');
   await submit.evaluate((element: HTMLElement) => element.click());

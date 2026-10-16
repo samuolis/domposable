@@ -27,7 +27,7 @@ fun main() {
                             .substringBefore('?')
                             .substringBefore('#')
                     val page = current.removePrefix("/caller-history/")
-                    if (page == current) "home" else page.ifEmpty { "home" }
+                    if (page == current) "home" else page.trimEnd('/').ifEmpty { "home" }
                 },
             )
             LaunchedEffect(route) {

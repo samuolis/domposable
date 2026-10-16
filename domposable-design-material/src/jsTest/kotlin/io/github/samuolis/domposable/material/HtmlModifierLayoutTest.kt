@@ -7,10 +7,13 @@ import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableColumn
+import io.github.samuolis.domposable.ui.DomposableImage
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.fillMaxHeight
+import io.github.samuolis.domposable.ui.fillMaxSize
+import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.htmlAttributes
 import io.github.samuolis.domposable.ui.maxHeight
@@ -35,6 +38,47 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlModifierLayoutTest {
+    @Test
+    fun fillMaxSizeImageUsesTheBoundedBoxHeightThroughWidthWrapper() {
+        val cases =
+            listOf(
+                Triple("bounded", DomposableModifier.fillMaxSize(), 240),
+                Triple("padded", DomposableModifier.fillMaxWidth().padding(DomposableLength(10f)).fillMaxHeight(), 220),
+                Triple("fixed", DomposableModifier.height(DomposableLength(100f)).fillMaxHeight(), 100),
+                Triple(
+                    "minimum",
+                    DomposableModifier.fillMaxWidth().minHeight(DomposableLength(100f)).fillMaxHeight(),
+                    240,
+                ),
+                Triple(
+                    "maximum",
+                    DomposableModifier.fillMaxWidth().maxHeight(DomposableLength(100f)).fillMaxHeight(),
+                    100,
+                ),
+            )
+        val root = document.createElement("div")
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    cases.forEach { (name, modifier, _) ->
+                        DomposableBox(DomposableModifier.height(DomposableLength(240f))) {
+                            DomposableImage(INTRINSIC_IMAGE, null, modifier.testId("$name-image"))
+                        }
+                    }
+                }
+            }
+        try {
+            cases.forEach { (name, _, expectedHeight) ->
+                val image = root.querySelector("[data-testid=$name-image]") as HTMLElement
+                assertEquals(expectedHeight, image.offsetHeight, "$name image height")
+            }
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
     @Test
     fun fixedHeightFlowsThroughGraphicsWrappersToTheBackgroundAndContent() {
         val root = document.createElement("div")
@@ -298,3 +342,7 @@ private fun assertVerticalScrollLayout(
         "$testId offset=$offset, scrollHeight=${scrollport.scrollHeight}",
     )
 }
+
+private const val INTRINSIC_IMAGE =
+    "data:image/svg+xml," +
+        "%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3C/svg%3E"

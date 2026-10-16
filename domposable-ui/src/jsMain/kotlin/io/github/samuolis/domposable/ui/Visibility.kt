@@ -10,6 +10,7 @@ actual fun DomposableVisibility(
     content: @Composable () -> Unit,
 ) {
     Div(attrs = {
+        attr("data-domposable-visibility", "")
         style { property("display", if (visible) "contents" else "none") }
         if (!visible) attr("aria-hidden", "true")
     }) {

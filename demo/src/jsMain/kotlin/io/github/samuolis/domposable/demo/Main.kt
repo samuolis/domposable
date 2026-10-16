@@ -50,7 +50,17 @@ fun main() {
                 callerHistoryFallback = {
                     val current = currentDemoPath(base)
                     val page = current.removePrefix("/caller-history/")
-                    if (page == current) "home" else page.substringBefore('?').substringBefore('#').ifEmpty { "home" }
+                    if (page ==
+                        current
+                    ) {
+                        "home"
+                    } else {
+                        page
+                            .substringBefore('?')
+                            .substringBefore('#')
+                            .trimEnd('/')
+                            .ifEmpty { "home" }
+                    }
                 },
             )
         }

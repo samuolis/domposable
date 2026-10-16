@@ -201,6 +201,31 @@ private fun HtmlModifierBox(
     }
     val element = elements[index]
     val operation = element as? DomposableModifierOperation
+    val fillHeightAhead =
+        operation != DomposableModifierOperation.FillHeight &&
+            elements.asSequence().drop(index).firstOrNull { candidate ->
+                when (candidate) {
+                    DomposableModifierOperation.FillHeight,
+                    is DomposableModifierOperation.Height,
+                    is DomposableModifierOperation.WrapContentSize,
+                    -> {
+                        true
+                    }
+
+                    is DomposableModifierOperation.Scroll -> {
+                        candidate.orientation == DomposableOrientation.Vertical
+                    }
+
+                    is DomposableModifierOperation.StatefulScroll -> {
+                        candidate.orientation ==
+                            DomposableOrientation.Vertical
+                    }
+
+                    else -> {
+                        false
+                    }
+                }
+            } == DomposableModifierOperation.FillHeight
     if (operation == null) {
         val decoration = decorationRenderer?.invoke(element)
         if (decoration != null) {
@@ -217,11 +242,12 @@ private fun HtmlModifierBox(
             return
         }
         Div(attrs = {
-            if (fillAvailableHeight) {
+            if (fillAvailableHeight || fillHeightAhead) {
                 style {
                     property("display", "grid")
                     property("grid-template-columns", "minmax(0, 1fr)")
                     property("grid-template-rows", "minmax(0, 1fr)")
+                    if (fillHeightAhead) property("height", "100%")
                 }
             }
             val attributes =
@@ -253,9 +279,12 @@ private fun HtmlModifierBox(
             operation is DomposableModifierOperation.MaxHeight ||
             operation == DomposableModifierOperation.FillHeight
     // CSS block height stops at each nested wrapper; Compose passes these constraints through to its child.
-    val childFillsHeight = !verticalScroll && (establishesHeight || (fillAvailableHeight && !wrapContentSize))
+    val childFillsHeight =
+        !verticalScroll &&
+            (establishesHeight || (fillAvailableHeight && !wrapContentSize) || fillHeightAhead)
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
+        if (fillHeightAhead) attr("data-domposable-fill-height-ahead", "")
         if (operation == DomposableModifierOperation.PointerPassthrough) {
             attr("data-domposable-pointer-passthrough", "")
         }
@@ -266,6 +295,7 @@ private fun HtmlModifierBox(
                 property("grid-template-columns", "minmax(0, 1fr)")
                 property("grid-template-rows", "minmax(0, 1fr)")
             }
+            if (fillHeightAhead) property("height", "100%")
             if (fillAvailableHeight && wrapContentSize) property("height", "100%")
             if (operation == DomposableModifierOperation.PointerPassthrough) property("pointer-events", "none")
             when (operation) {
