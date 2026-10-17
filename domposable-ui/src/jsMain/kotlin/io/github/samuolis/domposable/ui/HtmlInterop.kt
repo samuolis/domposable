@@ -63,6 +63,7 @@ internal val POINTER_PASSTHROUGH_CSS =
     """
     [data-domposable-pointer-passthrough]{pointer-events:none}
     [data-domposable-pointer-passthrough] :is(a,button,input,select,textarea,[role=button],[role=link],[tabindex]:not([tabindex='-1'])){pointer-events:auto}
+    [data-domposable-pointer-passthrough]:is(a,button,input,select,textarea,[role=button],[role=link],[tabindex]:not([tabindex='-1'])){pointer-events:auto}
     """.trimIndent()
 
 /** Applies app-owned attributes and styles directly to the rendered HTML element. */
@@ -151,11 +152,13 @@ fun DomposableHtmlModifiers(
                 it is DomposableModifierOperation.TestId ||
                 it is HtmlAttributes
         }
+    val pointerPassthrough = visual.contains(DomposableModifierOperation.PointerPassthrough)
     if (layout.isEmpty()) {
-        HtmlModifierBox(visual, 0, renderer, decoration, false, content)
+        HtmlModifierBox(visual, 0, renderer, decoration, false, pointerPassthrough, content)
     } else {
         Div(attrs = {
             attr("data-domposable-layout-item", "true")
+            if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
             style {
                 childLayoutSizing(visual)
                 property("box-sizing", "border-box")
@@ -183,7 +186,7 @@ fun DomposableHtmlModifiers(
                     }
                 }
             }
-        }) { HtmlModifierBox(visual, 0, renderer, decoration, false, content) }
+        }) { HtmlModifierBox(visual, 0, renderer, decoration, true, pointerPassthrough, content) }
     }
 }
 
@@ -194,6 +197,7 @@ private fun HtmlModifierBox(
     operationRenderer: DomposableHtmlModifierElementRenderer?,
     decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
     fillAvailableHeight: Boolean,
+    pointerPassthrough: Boolean,
     content: @Composable () -> Unit,
 ) {
     if (index == elements.size) {
@@ -237,12 +241,14 @@ private fun HtmlModifierBox(
                     operationRenderer,
                     decorationRenderer,
                     fillAvailableHeight,
+                    pointerPassthrough,
                     content,
                 )
             }
             return
         }
         Div(attrs = {
+            if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
             if (fillAvailableHeight || fillHeightAhead) {
                 style {
                     property("display", "grid")
@@ -262,6 +268,7 @@ private fun HtmlModifierBox(
                 operationRenderer,
                 decorationRenderer,
                 fillAvailableHeight,
+                pointerPassthrough,
                 content,
             )
         }
@@ -286,7 +293,7 @@ private fun HtmlModifierBox(
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
         if (fillHeightAhead) attr("data-domposable-fill-height-ahead", "")
-        if (operation == DomposableModifierOperation.PointerPassthrough) {
+        if (pointerPassthrough) {
             attr("data-domposable-pointer-passthrough", "")
         }
         style {
@@ -531,7 +538,15 @@ private fun HtmlModifierBox(
         if (operation == DomposableModifierOperation.PointerPassthrough) {
             TagElement<HTMLElement>("style", applyAttrs = {}) { Text(POINTER_PASSTHROUGH_CSS) }
         }
-        HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, childFillsHeight, content)
+        HtmlModifierBox(
+            elements,
+            index + 1,
+            operationRenderer,
+            decorationRenderer,
+            childFillsHeight,
+            pointerPassthrough,
+            content,
+        )
     }
 }
 
