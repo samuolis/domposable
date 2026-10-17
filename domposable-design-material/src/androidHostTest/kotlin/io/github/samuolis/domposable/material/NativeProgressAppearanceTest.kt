@@ -66,28 +66,33 @@ class NativeProgressAppearanceTest {
         compose.setContent {
             DomposableMaterialTheme {
                 Column {
-                    DomposableProgress(
-                        modifier = DomposableModifier.testId("without-stop").width(DomposableLength(200f)),
-                        value = 0.25f,
-                        circular = false,
-                        appearance = progressAppearance(showStopIndicator = false),
-                    )
-                    Spacer(Modifier.height(48.dp))
-                    DomposableProgress(
-                        modifier = DomposableModifier.testId("with-stop").width(DomposableLength(200f)),
-                        value = 0.25f,
-                        circular = false,
-                        appearance = progressAppearance(showStopIndicator = true),
-                    )
+                    DomposableProgressVariant.entries.forEach { variant ->
+                        DomposableProgress(
+                            modifier = DomposableModifier.testId("without-stop-$variant").width(DomposableLength(200f)),
+                            value = 0.25f,
+                            circular = false,
+                            appearance = progressAppearance(showStopIndicator = false),
+                            variant = variant,
+                        )
+                        Spacer(Modifier.height(48.dp))
+                        DomposableProgress(
+                            modifier = DomposableModifier.testId("with-stop-$variant").width(DomposableLength(200f)),
+                            value = 0.25f,
+                            circular = false,
+                            appearance = progressAppearance(showStopIndicator = true),
+                            variant = variant,
+                        )
+                    }
                 }
             }
         }
 
-        val withoutStop = compose.onNodeWithTag("without-stop").captureToImage().toPixelMap()
-        val withStop = compose.onNodeWithTag("with-stop").captureToImage().toPixelMap()
-
-        assertFalse(withoutStop.hasRedPixelInLastQuarter())
-        assertTrue(withStop.hasRedPixelInLastQuarter())
+        DomposableProgressVariant.entries.forEach { variant ->
+            val withoutStop = compose.onNodeWithTag("without-stop-$variant").captureToImage().toPixelMap()
+            val withStop = compose.onNodeWithTag("with-stop-$variant").captureToImage().toPixelMap()
+            assertFalse(withoutStop.hasRedPixelInLastQuarter())
+            assertTrue(withStop.hasRedPixelInLastQuarter())
+        }
     }
 
     @Test
@@ -160,6 +165,7 @@ class NativeProgressAppearanceTest {
             track = DomposableColor(0xFFFFFFFF),
             strokeWidth = DomposableLength(12f),
             showStopIndicator = showStopIndicator,
+            waveSpeed = DomposableLength(0f),
         )
 
     private fun PixelMap.hasRedPixelInLastQuarter(): Boolean {

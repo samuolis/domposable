@@ -24,6 +24,8 @@ test('Material progress and loading indicators render controlled state, expressi
   const wavyLinear = page.getByRole('progressbar', { name: 'Linear download Wavy', exact: true });
   await expect(wavyLinear).toHaveAttribute('aria-valuenow', '60');
   await expect(wavyLinear).toHaveClass(/d-progress-wavy-linear/);
+  await expect(wavyLinear.locator('..')).toHaveCSS('height', '10px');
+  await expect(wavyLinear.locator('.d-progress-stop-indicator')).toHaveCount(1);
   const linearPath = wavyLinear.locator('.d-wave-active');
   await expect(linearPath).not.toHaveAttribute('stroke-dasharray');
   const clipping = await linearPath.evaluate(element => getComputedStyle(element).clipPath);

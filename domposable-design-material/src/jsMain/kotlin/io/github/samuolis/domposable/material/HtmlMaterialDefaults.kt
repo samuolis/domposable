@@ -123,4 +123,5 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-carousel-track{height:100%;align-items:center}.d-carousel-item{display:flex;align-items:center;height:100%}.d-carousel-item>.d-card{flex:none}
 .d-carousel-controls{position:absolute;inset-inline:0;bottom:8px;opacity:0;transition:opacity 120ms ease}.d-carousel:hover>.d-carousel-controls,.d-carousel:focus-within>.d-carousel-controls{opacity:1}
 .d-loading-contained{padding:0}.d-loading-contained .d-loading-determinate,.d-loading-contained .d-loading-morph-contained{fill:var(--d-progress-color,var(--d-on-primary-container))}
+.d-progress-wavy-linear{display:flex}
 """

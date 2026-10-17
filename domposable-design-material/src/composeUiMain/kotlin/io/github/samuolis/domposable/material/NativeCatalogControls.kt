@@ -1210,6 +1210,14 @@ internal fun NativeProgress(
                             strokePixels,
                             cap = StrokeCap.Round,
                         ),
+                    stopSize =
+                        if (appearance.showStopIndicator ==
+                            false
+                        ) {
+                            0.dp
+                        } else {
+                            WavyProgressIndicatorDefaults.LinearTrackStopIndicatorSize
+                        },
                     waveSpeed = waveSpeed,
                 )
             }

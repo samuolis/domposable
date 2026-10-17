@@ -356,6 +356,16 @@ private fun HtmlWavyProgress(
             } else {
                 activePath.setAttribute("style", "clip-path:inset(-50% ${(1f - fraction) * PROGRESS_SCALE}% -50% 0)")
             }
+            if (!circular && fraction != null && appearance.showStopIndicator != false) {
+                document.createElementNS(SVG_NAMESPACE, "circle").also { stop ->
+                    stop.setAttribute("class", "d-progress-stop-indicator")
+                    stop.setAttribute("cx", "${actualWidth - 2f}")
+                    stop.setAttribute("cy", "${height / 2f}")
+                    stop.setAttribute("r", "2")
+                    stop.setAttribute("fill", "var(--d-progress-color,var(--d-primary))")
+                    svg.appendChild(stop)
+                }
+            }
         }
     }
 }
