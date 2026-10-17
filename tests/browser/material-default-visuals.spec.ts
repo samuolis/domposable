@@ -352,6 +352,12 @@ test('Material defaults keep component surfaces compact and preserve explicit th
     })(),
   }));
   expect(outline.color).toBe(outline.token);
+  const icon = page.getByRole('button', { name: 'Favorite FilledTonal', exact: true });
+  await expect(icon).toHaveCSS('width', '40px');
+  await expect(icon).toHaveCSS('height', '40px');
+  await expect(icon.locator('..')).toHaveCSS('height', '48px');
+  await expect(page.locator('.d-button-group')).toHaveCSS('height', '48px');
+  await expect(page.locator('.d-split-button')).toHaveCSS('height', '48px');
   const extended = page.getByRole('button', { name: 'Compose', exact: true });
   await expect(extended).toContainText('Compose');
   await expect(extended).toHaveCSS('height', '56px');

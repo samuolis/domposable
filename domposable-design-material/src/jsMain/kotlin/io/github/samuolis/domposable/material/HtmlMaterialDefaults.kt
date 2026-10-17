@@ -50,8 +50,8 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-theme .d-navigation-rail>[aria-current=page]{border:0;background:transparent;color:var(--d-item-selected-content,var(--d-on-secondary-container))}
 .d-navigation-rail>button>span[aria-hidden=true],.d-navigation-rail>a>span[aria-hidden=true]{display:grid;place-items:center;width:max-content;min-width:44px;height:32px;padding-inline:16px;font-size:16px;line-height:24px;border-radius:999px}
 .d-navigation-rail>[aria-current=page]>span[aria-hidden=true]{background:var(--d-item-selected-container,var(--d-secondary-container))}
-.d-wide-navigation-rail:not(.d-wide-navigation-rail-expanded){width:96px;flex-basis:96px;align-items:stretch;gap:0;padding-block:12px}
-.d-wide-navigation-rail-item-compact{flex-direction:column;gap:4px;min-height:80px;padding:8px 0;font-size:12px;line-height:16px;border-radius:0;background:transparent}
+.d-wide-navigation-rail:not(.d-wide-navigation-rail-expanded){width:96px;flex-basis:96px;align-items:stretch;gap:4px;padding-block:44px}
+.d-wide-navigation-rail-item-compact{flex-direction:column;gap:4px;min-height:64px;padding:4px 0;font-size:14px;line-height:20px;border-radius:0;background:transparent}
 .d-wide-navigation-rail-item-compact[aria-current=page]{background:transparent}
 .d-rail-icon{display:grid;place-items:center;width:56px;height:32px;border-radius:999px}
 .d-wide-navigation-rail-item-compact[aria-current=page] .d-rail-icon{background:var(--d-item-selected-container,var(--d-secondary-container))}
@@ -124,4 +124,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-carousel-controls{position:absolute;inset-inline:0;bottom:8px;opacity:0;transition:opacity 120ms ease}.d-carousel:hover>.d-carousel-controls,.d-carousel:focus-within>.d-carousel-controls{opacity:1}
 .d-loading-contained{padding:0}.d-loading-contained .d-loading-determinate,.d-loading-contained .d-loading-morph-contained{fill:var(--d-progress-color,var(--d-on-primary-container))}
 .d-progress-wavy-linear{display:flex}
+.d-theme .d-icon-button{position:relative;width:40px;height:40px;min-width:40px;min-height:40px;padding:0}
+.d-button-hit-target>.d-icon-button::after,.d-button-hit-target>.d-fab::after{content:"";position:absolute;left:50%;right:auto;top:50%;width:max(100%,48px);height:max(100%,48px);transform:translate(-50%,-50%)}
+.d-split-button{min-height:48px;align-items:center;gap:2px}.d-split-button>.d-button:first-child{padding-inline:16px;border-start-end-radius:8px;border-end-end-radius:8px}.d-split-button>.d-button:last-child{width:48px;min-width:48px;padding-inline:0;border-start-start-radius:8px;border-end-start-radius:8px;border-inline-start:0}
 """

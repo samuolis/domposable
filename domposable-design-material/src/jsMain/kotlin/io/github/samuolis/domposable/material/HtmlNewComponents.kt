@@ -17,6 +17,7 @@ import io.github.samuolis.domposable.ui.DomposableAutocompleteProps
 import io.github.samuolis.domposable.ui.DomposableBottomAppBarProps
 import io.github.samuolis.domposable.ui.DomposableBottomSheetScaffoldProps
 import io.github.samuolis.domposable.ui.DomposableButtonGroupProps
+import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableCarouselProps
 import io.github.samuolis.domposable.ui.DomposableDatePickerMode
 import io.github.samuolis.domposable.ui.DomposableDatePickerProps
@@ -107,16 +108,14 @@ internal fun HtmlButtonGroup(
             style { property("gap", "${props.spacing.value}px") }
         }) {
             props.items.forEach { item ->
-                Button(attrs = {
-                    attr("type", "button")
-                    if (!item.enabled || !formEnabled) disabled()
-                    classes("d-button")
-                    style { styleAppearance(appearance, item.enabled) }
-                    onClick { if (item.enabled && formEnabled) item.onClick() }
-                }) {
-                    item.icon?.let { Span(attrs = { attr("aria-hidden", "true") }) { it() } }
-                    Text(item.label)
-                }
+                HtmlButton(
+                    DomposableButtonProps(item.onClick, item.enabled && formEnabled, appearance = appearance),
+                    DomposableModifier,
+                    content = {
+                        item.icon?.let { Span(attrs = { attr("aria-hidden", "true") }) { it() } }
+                        Text(item.label)
+                    },
+                )
             }
         }
     }

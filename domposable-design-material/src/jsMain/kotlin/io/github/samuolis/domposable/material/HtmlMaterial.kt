@@ -344,114 +344,119 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val tokens = LocalDomposableTokens.current
                 val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
-                    Button(attrs = {
-                        domposableAttributes(modifier)
-                        attr("type", "button")
-                        attr("aria-label", props.label)
-                        classes("d-icon-button")
-                        classes(
-                            "d-icon-button-${props.variant.name.lowercase().replace("filledtonal", "filled-tonal")}",
-                        )
-                        props.checked?.let { attr("aria-pressed", it.toString()) }
-                        if (!enabled) attr("disabled", "")
-                        style {
-                            val checked = props.checked == true
-                            val variantContainer =
-                                when (props.variant) {
-                                    DomposableIconButtonVariant.Standard -> {
-                                        if (checked) {
-                                            tokens.colors.secondaryContainer
-                                                ?: tokens.colors.surfaceVariant
-                                        } else {
+                    MaterialButtonHitTarget(modifier, appearance.minHeight?.value) {
+                        Button(attrs = {
+                            domposableAttributes(modifier)
+                            attr("type", "button")
+                            attr("aria-label", props.label)
+                            classes("d-icon-button")
+                            classes(
+                                "d-icon-button-${props.variant.name.lowercase().replace(
+                                    "filledtonal",
+                                    "filled-tonal",
+                                )}",
+                            )
+                            props.checked?.let { attr("aria-pressed", it.toString()) }
+                            if (!enabled) attr("disabled", "")
+                            style {
+                                val checked = props.checked == true
+                                val variantContainer =
+                                    when (props.variant) {
+                                        DomposableIconButtonVariant.Standard -> {
+                                            if (checked) {
+                                                tokens.colors.secondaryContainer
+                                                    ?: tokens.colors.surfaceVariant
+                                            } else {
+                                                null
+                                            }
+                                        }
+
+                                        DomposableIconButtonVariant.Filled -> {
+                                            if (props.checked == false) {
+                                                tokens.colors.surfaceContainerHighest
+                                                    ?: tokens.colors.surfaceVariant
+                                            } else {
+                                                tokens.colors.primary
+                                            }
+                                        }
+
+                                        DomposableIconButtonVariant.FilledTonal -> {
+                                            tokens.colors.secondaryContainer ?: tokens.colors.surfaceVariant
+                                        }
+
+                                        DomposableIconButtonVariant.Outlined -> {
                                             null
                                         }
                                     }
-
-                                    DomposableIconButtonVariant.Filled -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.surfaceContainerHighest
-                                                ?: tokens.colors.surfaceVariant
-                                        } else {
-                                            tokens.colors.primary
+                                val variantContent =
+                                    when (props.variant) {
+                                        DomposableIconButtonVariant.Standard -> {
+                                            if (checked) {
+                                                tokens.colors.onSecondaryContainer
+                                                    ?: tokens.colors.onSurface
+                                            } else {
+                                                tokens.colors.onSurface
+                                            }
                                         }
-                                    }
 
-                                    DomposableIconButtonVariant.FilledTonal -> {
-                                        tokens.colors.secondaryContainer ?: tokens.colors.surfaceVariant
-                                    }
+                                        DomposableIconButtonVariant.Filled -> {
+                                            if (props.checked == false) {
+                                                tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
+                                            } else {
+                                                tokens.colors.onPrimary
+                                            }
+                                        }
 
-                                    DomposableIconButtonVariant.Outlined -> {
-                                        null
-                                    }
-                                }
-                            val variantContent =
-                                when (props.variant) {
-                                    DomposableIconButtonVariant.Standard -> {
-                                        if (checked) {
-                                            tokens.colors.onSecondaryContainer
-                                                ?: tokens.colors.onSurface
-                                        } else {
+                                        DomposableIconButtonVariant.FilledTonal -> {
+                                            tokens.colors.onSecondaryContainer ?: tokens.colors.onSurface
+                                        }
+
+                                        DomposableIconButtonVariant.Outlined -> {
                                             tokens.colors.onSurface
                                         }
                                     }
-
-                                    DomposableIconButtonVariant.Filled -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
-                                        } else {
-                                            tokens.colors.onPrimary
-                                        }
-                                    }
-
-                                    DomposableIconButtonVariant.FilledTonal -> {
-                                        tokens.colors.onSecondaryContainer ?: tokens.colors.onSurface
-                                    }
-
-                                    DomposableIconButtonVariant.Outlined -> {
-                                        tokens.colors.onSurface
-                                    }
+                                appearance.container?.let { property("background", it.css()) }
+                                    ?: variantContainer?.let { property("background", it.css()) }
+                                appearance.content?.let { property("color", it.css()) }
+                                    ?: property("color", variantContent.css())
+                                appearance.border?.let { property("border-color", it.css()) }
+                                if (appearance.border == null &&
+                                    props.variant ==
+                                    DomposableIconButtonVariant.Outlined
+                                ) {
+                                    property("border-color", tokens.colors.outline.css())
                                 }
-                            appearance.container?.let { property("background", it.css()) }
-                                ?: variantContainer?.let { property("background", it.css()) }
-                            appearance.content?.let { property("color", it.css()) }
-                                ?: property("color", variantContent.css())
-                            appearance.border?.let { property("border-color", it.css()) }
-                            if (appearance.border == null &&
-                                props.variant ==
-                                DomposableIconButtonVariant.Outlined
-                            ) {
-                                property("border-color", tokens.colors.outline.css())
+                                if (props.variant ==
+                                    DomposableIconButtonVariant.Outlined &&
+                                    appearance.borderWidth == null
+                                ) {
+                                    property("border-width", "1px")
+                                }
+                                (if (enabled) appearance.container else appearance.disabledContainer)?.let {
+                                    property(
+                                        "background",
+                                        it.css(),
+                                    )
+                                }
+                                (if (enabled) appearance.content else appearance.disabledContent)?.let {
+                                    property(
+                                        "color",
+                                        it.css(),
+                                    )
+                                }
+                                (if (enabled) appearance.border else appearance.disabledBorder)?.let {
+                                    property("border", "${appearance.borderWidth?.value ?: 1f}px solid ${it.css()}")
+                                }
+                                appearance.borderWidth?.let { property("border-width", "${it.value}px") }
+                                appearance.shape?.let { materialShape(it) }
+                                appearance.minHeight?.let { property("min-height", "${it.value}px") }
+                                appearance.minWidth?.let { property("min-width", "${it.value}px") }
+                                appearance.contentPadding?.let { property("padding", it.cssPadding()) }
+                                appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                             }
-                            if (props.variant ==
-                                DomposableIconButtonVariant.Outlined &&
-                                appearance.borderWidth == null
-                            ) {
-                                property("border-width", "1px")
-                            }
-                            (if (enabled) appearance.container else appearance.disabledContainer)?.let {
-                                property(
-                                    "background",
-                                    it.css(),
-                                )
-                            }
-                            (if (enabled) appearance.content else appearance.disabledContent)?.let {
-                                property(
-                                    "color",
-                                    it.css(),
-                                )
-                            }
-                            (if (enabled) appearance.border else appearance.disabledBorder)?.let {
-                                property("border", "${appearance.borderWidth?.value ?: 1f}px solid ${it.css()}")
-                            }
-                            appearance.borderWidth?.let { property("border-width", "${it.value}px") }
-                            appearance.shape?.let { materialShape(it) }
-                            appearance.minHeight?.let { property("min-height", "${it.value}px") }
-                            appearance.minWidth?.let { property("min-width", "${it.value}px") }
-                            appearance.contentPadding?.let { property("padding", it.cssPadding()) }
-                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
-                        }
-                        onClick { if (enabled) props.onClick() }
-                    }) { content() }
+                            onClick { if (enabled) props.onClick() }
+                        }) { content() }
+                    }
                 }
             },
             textField = { props, modifier, _ -> HtmlTextField(props, modifier) },

@@ -717,6 +717,13 @@ internal fun NativeWideNavigationRailItem(
     modifier: DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.wideNavigationRailItem
+    val enabled = props.enabled && domposableFormEnabled()
+    val interaction =
+        remember {
+            androidx.compose.foundation.interaction
+                .MutableInteractionSource()
+        }
+    val resolved = appearance.resolveInteractionColors(interaction, props.selected, enabled)
     WideNavigationRailItem(
         selected = props.selected,
         onClick = props.onClick,
@@ -724,11 +731,36 @@ internal fun NativeWideNavigationRailItem(
         label = {
             Text(
                 props.label,
-                style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
+                style =
+                    (
+                        if (props.selected) {
+                            appearance.selectedTextAppearance ?: appearance.textAppearance
+                        } else {
+                            appearance.textAppearance
+                        }
+                    ).nativeTextStyle(MaterialTheme.typography.labelLarge),
             )
         },
         railExpanded = props.railExpanded,
-        modifier = modifier.toComposeModifier(),
-        enabled = props.enabled && domposableFormEnabled(),
+        modifier =
+            modifier
+                .toComposeModifier()
+                .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier),
+        enabled = enabled,
+        interactionSource = interaction,
+        indicatorPadding =
+            appearance.contentPadding?.nativePadding()
+                ?: androidx.compose.material3.WideNavigationRailItemDefaults
+                    .indicatorPadding(props.railExpanded),
+        colors =
+            androidx.compose.material3.WideNavigationRailItemDefaults.colors(
+                selectedIconColor = resolved.selectedContent,
+                selectedTextColor = resolved.selectedContent,
+                selectedIndicatorColor = resolved.selectedContainer,
+                unselectedIconColor = resolved.content,
+                unselectedTextColor = resolved.content,
+                disabledIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                disabledTextColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            ),
     )
 }
