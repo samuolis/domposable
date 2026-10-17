@@ -17,9 +17,11 @@ internal fun StyleScope.sliderMarks(
         }
     val gradients =
         fractions
-            .filterNot { fraction -> fraction * 100f == endPercent || fraction * 100f == startPercent }
-            .map { fraction ->
-                val percent = fraction * 100f
+            .filterNot { fraction ->
+                fraction * SliderPercentScale == endPercent ||
+                    fraction * SliderPercentScale == startPercent
+            }.map { fraction ->
+                val percent = fraction * SliderPercentScale
                 val active = percent <= endPercent && (startPercent == null || percent >= startPercent)
                 val color =
                     if (active) "var(--d-slider-active-tick-current)" else "var(--d-slider-inactive-tick-current)"
@@ -29,3 +31,5 @@ internal fun StyleScope.sliderMarks(
             }
     property("--d-slider-marks", gradients.joinToString(",").ifEmpty { "linear-gradient(transparent,transparent)" })
 }
+
+private const val SliderPercentScale = 100f
