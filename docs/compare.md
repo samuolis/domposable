@@ -56,3 +56,5 @@ The Material routes pin the same regular, medium and bold Roboto font files in b
 CI captures all nine component families in eight themes at 390 px and 1280 px. It captures the beginning and end of long families, plus hover, press and keyboard focus for checkbox, switch, radio and slider. The resulting 464 HTML / pixel difference / Wasm panels are exported in the CI evidence artifact. These diagnostic panels complement regression baselines; producing an image does not establish visual parity.
 
 The demo font files come from [Roboto](https://github.com/googlefonts/roboto-2/tree/38062f4b4a0be4346d07a928408da21602545e9e), with the Apache 2.0 license included in the demo resources. They apply only to comparison routes.
+
+Wasm capture automation waits for positioned accessibility nodes and settled keyboard frames, then checks the painted focus ring before taking selection-control focus screenshots. Stable CMP can replace bridge nodes during layout; a connected DOM node alone does not establish native focus or valid bounds.

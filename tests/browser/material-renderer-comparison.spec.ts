@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Locator } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const themes = ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-light', 'overrides-dark', 'expressive-light', 'expressive-dark'];
@@ -25,6 +25,7 @@ for (const theme of themes) {
         await mkdir(directory, { recursive: true });
         const errors: string[] = [];
         const htmlBounds = new Map<string, { x: number; y: number; width: number; height: number }>();
+        const focusColors = new Map<string, string>();
         for (const renderer of ['html', 'wasm'] as const) {
           const context = await browser.newContext({ viewport: { width, height: 1800 }, deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'UTC' });
           try {
@@ -56,7 +57,8 @@ for (const theme of themes) {
                   ? page.getByLabel(target.name, { exact: true }).first()
                   : page.getByRole(renderer === 'wasm' ? 'button' : target.role, { name: target.name, exact: true }).first();
                 await expect(control).toBeAttached();
-                const measured = await control.boundingBox();
+                if (renderer !== 'wasm' || target.key !== 'slider') await expect(control).toBeVisible();
+                const measured = renderer === 'wasm' && target.key === 'slider' ? null : await visibleBounds(control);
                 if (renderer === 'html') {
                   expect(measured?.width).toBeGreaterThan(0);
                   htmlBounds.set(target.key, measured!);
@@ -79,14 +81,28 @@ for (const theme of themes) {
                   // Reset pointer focus before traversing the fixture's declared keyboard order.
                   await page.reload();
                   await ready(page, renderer, route, family, theme);
-                  await page.locator('canvas').first().focus();
-                  for (let index = 0; index < target.tabs; index++) await page.keyboard.press('Tab');
+                  await page.bringToFront();
+                  const canvas = page.locator('canvas').first();
+                  await canvas.focus();
+                  await expect(canvas).toBeFocused();
+                  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+                  for (let index = 0; index < target.tabs; index++) {
+                    await page.keyboard.press('Tab');
+                    // CMP applies keyboard focus on its next frame, as in the editor traversal test.
+                    await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+                  }
                 } else {
                   await control.focus();
                   await page.keyboard.press("Tab");
                   await page.keyboard.press("Shift+Tab");
                   await expect(control).toBeFocused();
                   expect(await control.evaluate(element => element.matches(":focus-visible"))).toBe(true);
+                  if (target.key !== 'slider') focusColors.set(target.key, await control.locator('..').evaluate(element => getComputedStyle(element).outlineColor));
+                }
+                if (renderer === 'wasm' && target.key !== 'slider') {
+                  const focusedBounds = await visibleBounds(control);
+                  expect(focusedBounds?.width).toBeGreaterThan(0);
+                  await expectFocusRing(page, focusedBounds!, focusColors.get(target.key)!);
                 }
                 await capture(page, `${directory}/${renderer}${suffix}-focus.png`, targetGolden && `${targetGolden}-focus.png`);
               }
@@ -128,4 +144,37 @@ async function capture(page: Page, path: string, golden?: string) {
     await mkdir(golden.slice(0, golden.lastIndexOf('/')), { recursive: true });
     await writeFile(golden, previous!);
   }
+}
+
+// Verify actual canvas paint: the stable CMP bridge does not expose native keyboard focus.
+async function expectFocusRing(page: Page, bounds: { x: number; y: number; height: number }, color: string) {
+  await expect.poll(async () => {
+    const image = (await page.screenshot({ animations: 'disabled', caret: 'hide', scale: 'css' })).toString('base64');
+    return page.evaluate(async ({ image, bounds, color }) => {
+      const decoded = new Image();
+      decoded.src = `data:image/png;base64,${image}`;
+      await decoded.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = decoded.width;
+      canvas.height = decoded.height;
+      const context = canvas.getContext('2d')!;
+      context.drawImage(decoded, 0, 0);
+      // The shared three-pixel ring is three pixels outside the whole hit target.
+      const actual = context.getImageData(Math.floor(bounds.x - 5), Math.floor(bounds.y + bounds.height / 2), 1, 1).data;
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+      const expected = context.getImageData(0, 0, 1, 1).data;
+      return [0, 1, 2].every(index => Math.abs(actual[index] - expected[index]) <= 12);
+    }, { image, bounds, color });
+  }, { timeout: 10000, intervals: [100, 250] }).toBe(true);
+}
+
+async function visibleBounds(control: Locator) {
+  let bounds: { x: number; y: number; width: number; height: number } | null = null;
+  // CMP replaces bridge nodes during layout; resolve again if a measured node detached.
+  await expect.poll(async () => {
+    bounds = await control.boundingBox();
+    return !!bounds && bounds.width > 0 && bounds.height > 0;
+  }, { timeout: 10000, intervals: [100, 250] }).toBe(true);
+  return bounds!;
 }
