@@ -67,6 +67,7 @@ class NativeSegmentedLayoutTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun intrinsicSegmentsKeepMultiwordLabelsOnOneLineWhenSpaceAllows() {
         compose.setContent {
             DomposableMaterialTheme {
