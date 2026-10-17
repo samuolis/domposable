@@ -35,6 +35,7 @@ class NativeKeyboardFocusTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun keyboardFocusPaintsTheThemeRingOutsideTheSelectionHitTarget() {
         lateinit var manager: InputModeManager
         var primary = Color.Unspecified

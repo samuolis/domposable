@@ -1007,13 +1007,16 @@ internal fun HtmlDatePicker(
             attr("aria-label", "Date picker")
             style { surfaceAppearance(appearance) }
         }) {
-            if (props.showModeToggle) {
-                Button(attrs = {
-                    attr("type", "button")
-                    if (!formEnabled) disabled()
-                    onClick {
-                        if (formEnabled) {
-                            modeChange.invoke(
+            HtmlDatePickerHeading(
+                title = "Select date",
+                selection = props.selectedDateMillis?.let(::shortDateLabel) ?: "Select date",
+                toggleLabel = if (mode == DomposableDatePickerMode.Calendar) "Enter date" else "Choose date",
+                mode = mode,
+                enabled = formEnabled,
+                onToggle =
+                    if (props.showModeToggle) {
+                        {
+                            modeChange(
                                 if (mode ==
                                     DomposableDatePickerMode.Calendar
                                 ) {
@@ -1023,11 +1026,10 @@ internal fun HtmlDatePicker(
                                 },
                             )
                         }
-                    }
-                }) {
-                    Text(if (mode == DomposableDatePickerMode.Calendar) "Enter date" else "Choose date")
-                }
-            }
+                    } else {
+                        null
+                    },
+            )
             if (mode == DomposableDatePickerMode.Input) {
                 val id = remember { "d-date-${nextCatalogId++}" }
                 Input(InputType.Date, attrs = {
@@ -1090,13 +1092,20 @@ internal fun HtmlDateRangePicker(
             attr("aria-label", "Date range")
             style { surfaceAppearance(appearance) }
         }) {
-            if (props.showModeToggle) {
-                Button(attrs = {
-                    attr("type", "button")
-                    if (!formEnabled) disabled()
-                    onClick {
-                        if (formEnabled) {
-                            modeChange.invoke(
+            HtmlDatePickerHeading(
+                title = "Select dates",
+                selection =
+                    listOf(props.startDateMillis, props.endDateMillis).joinToString("–") {
+                        it?.let(::shortDateLabel)
+                            ?: "Select date"
+                    },
+                toggleLabel = if (mode == DomposableDatePickerMode.Calendar) "Enter dates" else "Choose dates",
+                mode = mode,
+                enabled = formEnabled,
+                onToggle =
+                    if (props.showModeToggle) {
+                        {
+                            modeChange(
                                 if (mode ==
                                     DomposableDatePickerMode.Calendar
                                 ) {
@@ -1106,19 +1115,10 @@ internal fun HtmlDateRangePicker(
                                 },
                             )
                         }
-                    }
-                }) {
-                    Text(
-                        if (mode ==
-                            DomposableDatePickerMode.Calendar
-                        ) {
-                            "Enter dates"
-                        } else {
-                            "Choose dates"
-                        },
-                    )
-                }
-            }
+                    } else {
+                        null
+                    },
+            )
             if (mode == DomposableDatePickerMode.Input) {
                 Label(forId = startId) { Text("Start date") }
                 Input(InputType.Date, attrs = {
@@ -1171,10 +1171,6 @@ internal fun HtmlDateRangePicker(
                     }
                 })
             } else {
-                Div(attrs = { classes("d-date-range-fields") }) {
-                    Span { Text("Start date: ${props.startDateMillis?.let(::dateLabel) ?: "Choose a date"}") }
-                    Span { Text("End date: ${props.endDateMillis?.let(::dateLabel) ?: "Choose a date"}") }
-                }
                 HtmlCalendar(
                     month = visibleMonth,
                     selected = null,
@@ -1224,71 +1220,28 @@ internal fun HtmlTimePicker(
             style { surfaceAppearance(appearance) }
         }) {
             if (props.mode == DomposableTimePickerMode.Input) {
-                Label(forId = id) { Text("Time") }
-                Input(InputType.Time, attrs = {
-                    id(id)
-                    attr("aria-label", "Time")
-                    attr("step", "60")
-                    if (!formEnabled) disabled()
-                    value("${props.hour.toString().padStart(2, '0')}:${props.minute.toString().padStart(2, '0')}")
-                    onChange { event ->
-                        val pieces = event.value.split(":")
-                        if (pieces.size >= 2) {
-                            val hour = pieces[0].toIntOrNull()
-                            val minute = pieces[1].toIntOrNull()
-                            if (hour != null && minute != null && formEnabled) {
-                                if (hour in 0..23 && minute in 0..59) {
-                                    props.onTimeChange(hour, minute)
-                                }
-                            }
-                        }
-                    }
-                })
+                HtmlTimeInput(props, id, formEnabled)
             } else {
-                Span(attrs = {
-                    classes("d-time-value")
-                    attr("aria-live", "polite")
-                }) {
-                    Text(
-                        if (props.is24Hour) {
-                            "${props.hour.toString().padStart(
-                                2,
-                                '0',
-                            )}:${props.minute.toString().padStart(
-                                2,
-                                '0',
-                            )}"
-                        } else {
-                            "${((props.hour + 11) % 12) + 1}:${props.minute.toString().padStart(
-                                2,
-                                '0',
-                            )} ${if (props.hour < 12) "AM" else "PM"}"
-                        },
-                    )
-                }
+                HtmlTimeHeading(props, selectingHour, formEnabled, { selectingHour = it })
                 Div(attrs = { classes("d-time-dial") }) {
+                    val innerHours = selectingHour && props.is24Hour
                     Div(attrs = {
                         classes("d-time-dial-controls")
                         attr("role", "group")
                         attr("aria-label", "Select ${if (selectingHour) "hour" else "minute"}")
+                        val angle = if (selectingHour) (props.hour % 12) * 30 else props.minute * 6
+                        val inner = innerHours && (props.hour == 0 || props.hour > 12)
+                        style {
+                            property("--d-clock-angle", "${angle}deg")
+                            property("--d-clock-radius", if (inner) "69px" else "101px")
+                        }
                     }) {
                         val values = if (selectingHour) (if (props.is24Hour) 0..23 else 1..12) else (0..55 step 5)
-                        values.forEachIndexed { index, value ->
-                            val selected =
-                                if (selectingHour) {
-                                    (
-                                        if (props.is24Hour) {
-                                            value == props.hour
-                                        } else {
-                                            value ==
-                                                ((props.hour + 11) % 12) + 1
-                                        }
-                                    )
-                                } else {
-                                    value == props.minute
-                                }
-                            val angle = if (values.count() == 0) 0 else index * 360.0 / values.count()
-                            val radius = if (selectingHour && props.is24Hour && value >= 12) 68 else 108
+                        values.forEach { value ->
+                            val displayedHour = if (props.is24Hour) props.hour else ((props.hour + 11) % 12) + 1
+                            val selected = value == if (selectingHour) displayedHour else props.minute
+                            val angle = if (selectingHour) (value % 12) * 30 else value * 6
+                            val radius = if (innerHours && (value == 0 || value > 12)) 69 else 101
                             Button(attrs = {
                                 attr("type", "button")
                                 attr(
@@ -1349,22 +1302,18 @@ internal fun HtmlTimePicker(
                                         }
                                     }
                                 }
-                            }) { Text(value.toString().padStart(2, '0')) }
+                            }) {
+                                Text(
+                                    if (selectingHour &&
+                                        value in 1..12
+                                    ) {
+                                        value.toString()
+                                    } else {
+                                        value.toString().padStart(2, '0')
+                                    },
+                                )
+                            }
                         }
-                    }
-                    Button(attrs = {
-                        attr("type", "button")
-                        if (!formEnabled) disabled()
-                        attr("aria-label", if (selectingHour) "Select minutes" else "Select hours")
-                        onClick { if (formEnabled) selectingHour = !selectingHour }
-                    }) { Text(if (selectingHour) "Minutes" else "Hours") }
-                    if (!props.is24Hour) {
-                        Button(attrs = {
-                            attr("type", "button")
-                            if (!formEnabled) disabled()
-                            attr("aria-label", if (props.hour < 12) "Switch to PM" else "Switch to AM")
-                            onClick { if (formEnabled) props.onTimeChange((props.hour + 12) % 24, props.minute) }
-                        }) { Text(if (props.hour < 12) "AM" else "PM") }
                     }
                 }
             }
@@ -1713,7 +1662,8 @@ private fun HtmlCalendar(
         mutableStateOf(selected ?: rangeStart ?: month)
     }
     val first = monthStart(month)
-    val offset = (utcWeekday(first) + 6) % 7
+    val weekStart = calendarFirstWeekday()
+    val offset = (utcWeekday(first) - weekStart + 7) % 7
     val dayCount = daysInMonth(month)
     val totalCells = ((offset + dayCount + 6) / 7) * 7
     val firstDay = first - offset * 86_400_000L
@@ -1776,11 +1726,12 @@ private fun HtmlCalendar(
             attr("role", "row")
             classes("d-calendar-week")
         }) {
-            listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").forEach { day ->
+            repeat(7) { column ->
+                val day = (weekStart + column) % 7
                 Span(attrs = {
                     attr("role", "columnheader")
-                    attr("aria-label", day)
-                }) { Text(day.take(3)) }
+                    attr("aria-label", calendarWeekdayLabel(day, narrow = false))
+                }) { Text(calendarWeekdayLabel(day, narrow = true)) }
             }
         }
         repeat(totalCells / 7) { row ->
@@ -1814,6 +1765,7 @@ private fun HtmlCalendar(
                                 attr("type", "button")
                                 attr("aria-label", dateLabel(day))
                                 if (day == selected || rangeSelected) attr("aria-pressed", "true")
+                                if (day == currentDayMillis()) attr("aria-current", "date")
                                 attr(
                                     "tabindex",
                                     if (day == focusedDay ||
@@ -1858,15 +1810,15 @@ private fun HtmlCalendar(
                                                 "Home" -> {
                                                     -(
                                                         (
-                                                            utcWeekday(day) +
-                                                                6
+                                                            utcWeekday(day) - weekStart +
+                                                                7
                                                         ) %
                                                             7
                                                     )
                                                 }
 
                                                 "End" -> {
-                                                    6 - ((utcWeekday(day) + 6) % 7)
+                                                    6 - ((utcWeekday(day) - weekStart + 7) % 7)
                                                 }
 
                                                 else -> {
