@@ -1,11 +1,17 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
+import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableItemColors
+import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.DomposableSegmentedButtonsProps
 import org.junit.Rule
@@ -71,6 +77,16 @@ class NativeSegmentedLayoutTest {
                         onSelect = {},
                         label = "Delivery speed",
                         equalWidth = false,
+                        optionTestTags = listOf("first", "middle", "last"),
+                        appearance =
+                            DomposableItemAppearance(
+                                colors =
+                                    DomposableItemColors(
+                                        border = DomposableColor(0xFF0000FF),
+                                        selectedBorder = DomposableColor(0xFFFF0000),
+                                    ),
+                                selectedBorderWidth = 3.dp,
+                            ),
                     ),
                 )
             }
@@ -80,5 +96,8 @@ class NativeSegmentedLayoutTest {
             .onNodeWithText("Same day", useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
         assertEquals(1, layouts.single().lineCount)
+        val selected = compose.onNodeWithTag("first").captureToImage().toPixelMap()
+        val seam = selected[selected.width - 1, selected.height / 2]
+        assertTrue(seam.red > seam.blue, "The selected border must paint over its neighbour")
     }
 }

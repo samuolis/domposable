@@ -323,7 +323,11 @@ for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 
     await control.hover();
     expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.08');
     await page.mouse.down();
-    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
+    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.172');
+    if (name === 'Enabled unselected switch') {
+      await expect(control).toHaveCSS('background-size', '28px 28px');
+      await expect(control).toHaveCSS('background-position', '0px 50%');
+    }
     await page.mouse.up();
     await page.mouse.move(0, 0);
     await page.keyboard.press('Tab');

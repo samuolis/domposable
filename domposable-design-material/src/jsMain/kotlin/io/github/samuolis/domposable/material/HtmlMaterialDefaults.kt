@@ -160,4 +160,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-autocomplete[data-variant=filled] .d-autocomplete-control{border-width:0 0 var(--d-input-outline-width,1px);border-radius:4px 4px 0 0;background:var(--d-input-container,var(--d-surface-container-highest))}
 .d-autocomplete[data-variant=filled]:focus-within>label,.d-autocomplete[data-variant=filled][data-filled=true]>label{top:12px;background:transparent}
 .d-autocomplete[data-variant=filled]:focus-within input,.d-autocomplete[data-variant=filled][data-filled=true] input{padding-top:16px}
+.d-toggle input[role=switch]:active:not(:disabled){background-size:28px 28px;background-position:0 center;transition:none}
+.d-toggle input[role=switch]:checked:active:not(:disabled){background-position:100% center}
+.d-toggle:has(input:enabled):hover:active::before{opacity:.172}
 """

@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -114,6 +115,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableCardVariant
 import io.github.samuolis.domposable.foundation.DomposableCheckboxAppearance
@@ -1545,10 +1547,10 @@ internal fun NativeSegmentedButtons(
     ) {
         SingleChoiceSegmentedButtonRow(modifier.toComposeModifier().semantics { contentDescription = props.label }) {
             props.labels.forEachIndexed { index, label ->
+                val selected = index == props.selectedIndex
+                val interaction = remember { MutableInteractionSource() }
                 val renderButton: @Composable () -> Unit = {
-                    val selected = index == props.selectedIndex
                     val enabled = props.enabled && props.optionEnabled[index] && domposableFormEnabled()
-                    val interaction = remember { MutableInteractionSource() }
                     val resolved = appearance.resolveInteractionColors(interaction, selected, enabled)
                     val borderColor = if (selected) resolved.selectedBorder else resolved.border
                     val borderWidth =
@@ -1617,7 +1619,16 @@ internal fun NativeSegmentedButtons(
                 if (props.equalWidth) {
                     renderButton()
                 } else {
-                    Box(Modifier.width(androidx.compose.foundation.layout.IntrinsicSize.Max)) { renderButton() }
+                    val pressed by interaction.collectIsPressedAsState()
+                    val hovered by interaction.collectIsHoveredAsState()
+                    val focused by interaction.collectIsFocusedAsState()
+                    val interactionCount = listOf(pressed, hovered, focused).count { it }
+                    val selectedLayer = if (selected) SELECTED_SEGMENT_Z_INDEX else 0f
+                    Box(
+                        Modifier
+                            .width(androidx.compose.foundation.layout.IntrinsicSize.Max)
+                            .zIndex(selectedLayer + interactionCount),
+                    ) { renderButton() }
                 }
             }
         }
@@ -1658,3 +1669,6 @@ private fun DomposableButtonAppearance.isDefaultNativeButtonAppearance(): Boolea
         pressedScale == 1f,
         hoveredScale == 1f,
     ).all { it }
+
+// Material raises selected borders above overlapping neighbouring segments.
+private const val SELECTED_SEGMENT_Z_INDEX = 5f
