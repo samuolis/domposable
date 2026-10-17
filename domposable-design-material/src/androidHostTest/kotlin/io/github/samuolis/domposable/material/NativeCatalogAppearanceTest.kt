@@ -33,6 +33,7 @@ import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
+import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableShapes
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
@@ -63,6 +64,29 @@ import kotlin.test.assertSame
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeCatalogAppearanceTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun unselectedCheckboxColorsStyleTheOutlineWithoutFillingTheBox() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                val colors =
+                    DomposableCheckboxAppearance(
+                        colors =
+                            DomposableSelectionColors(
+                                unselected = DomposableColor(0xFF006B5F),
+                                disabledUnselected = DomposableColor(0xFF79747E),
+                            ),
+                    ).nativeCheckboxColors()
+                SideEffect {
+                    assertEquals(Color.Transparent, colors.uncheckedBoxColor)
+                    assertEquals(Color.Transparent, colors.disabledUncheckedBoxColor)
+                    assertEquals(Color(0xFF006B5F), colors.uncheckedBorderColor)
+                    assertEquals(Color(0xFF79747E), colors.disabledUncheckedBorderColor)
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
 
     @Test
     fun segmentedControlsHonorTheirConfiguredMinimumHeight() {

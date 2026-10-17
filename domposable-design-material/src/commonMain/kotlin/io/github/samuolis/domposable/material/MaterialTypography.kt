@@ -9,7 +9,7 @@ import io.github.samuolis.domposable.foundation.DomposableTypographyRole
 private val MaterialTypeScale =
     mapOf(
         DomposableTypographyRole.DisplayLarge to
-            DomposableTextAppearance(fontSize = 57f, lineHeight = 64f, letterSpacing = -0.25f),
+            DomposableTextAppearance(fontSize = 57f, lineHeight = 64f, letterSpacing = -0.2f),
         DomposableTypographyRole.DisplayMedium to DomposableTextAppearance(fontSize = 45f, lineHeight = 52f),
         DomposableTypographyRole.DisplaySmall to DomposableTextAppearance(fontSize = 36f, lineHeight = 44f),
         DomposableTypographyRole.HeadlineLarge to DomposableTextAppearance(fontSize = 32f, lineHeight = 40f),
@@ -21,7 +21,7 @@ private val MaterialTypeScale =
                 fontSize = 16f,
                 lineHeight = 24f,
                 fontWeight = DomposableFontWeight.Medium,
-                letterSpacing = 0.15f,
+                letterSpacing = 0.2f,
             ),
         DomposableTypographyRole.TitleSmall to
             DomposableTextAppearance(
@@ -33,7 +33,7 @@ private val MaterialTypeScale =
         DomposableTypographyRole.BodyLarge to
             DomposableTextAppearance(fontSize = 16f, lineHeight = 24f, letterSpacing = 0.5f),
         DomposableTypographyRole.BodyMedium to
-            DomposableTextAppearance(fontSize = 14f, lineHeight = 20f, letterSpacing = 0.25f),
+            DomposableTextAppearance(fontSize = 14f, lineHeight = 20f, letterSpacing = 0.2f),
         DomposableTypographyRole.BodySmall to
             DomposableTextAppearance(fontSize = 12f, lineHeight = 16f, letterSpacing = 0.4f),
         DomposableTypographyRole.LabelLarge to

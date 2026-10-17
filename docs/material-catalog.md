@@ -8,6 +8,14 @@ The supported baseline uses stable Compose Multiplatform core. Material 3 has a 
 
 Layout helpers, forms, disclosures, rich text, tables and charts are additional Domposable APIs. They are not upstream Material components. Android-specific system integrations and internal Material implementation utilities are outside the component catalog.
 
+## Compare themes and states
+
+Use the [HTML / Compose UI comparison](compare.md) to place the same shared component calls beside each other. Choose **Material · states** for checked, unchecked, mixed, disabled, slider endpoints and range handles. The other Material scenes cover each component family. Both frames receive the same explicit light, dark, brand, component-override or expressive theme and viewport.
+
+Material geometry, colors and state styling belong in the renderer; an app should not need CSS to repair a default checkbox or slider. CI also captures hover, press and keyboard focus, publishes direct difference panels, and keeps ordinary visual regression checks. The measured report identifies remaining differences rather than treating two independently passing screenshots as proof of a match. Font rasterization and platform input behavior can still vary.
+
+## Component inventory
+
 ![Material selection controls from the same shared feature on Android and semantic HTML](assets/examples/material-selection.png)
 
 ![Expressive feedback from the same shared feature on Android and semantic HTML](assets/examples/material-feedback.png)

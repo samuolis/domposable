@@ -18,15 +18,15 @@ class HtmlControlledToggleTest {
         val composition =
             renderComposable(root) {
                 DomposableMaterialTheme {
-                    DomposableCheckbox(false, { requested += it }, "Checkbox")
-                    DomposableSwitch(false, { requested += it }, "Switch")
+                    DomposableCheckbox(false, { requested += it }, "Checkbox", showLabel = false)
+                    DomposableSwitch(false, { requested += it }, "Switch", showLabel = false)
                 }
             }
         try {
             val inputs = root.querySelectorAll("input")
             for (index in 0 until inputs.length) {
                 val input = inputs.item(index) as HTMLInputElement
-                input.click()
+                (input.parentElement as org.w3c.dom.HTMLElement).click()
                 assertFalse(input.checked)
             }
             assertEquals(listOf(true, true), requested)

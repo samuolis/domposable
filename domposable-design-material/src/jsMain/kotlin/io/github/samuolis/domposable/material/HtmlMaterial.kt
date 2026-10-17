@@ -526,7 +526,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val labelId = remember { "d-radio-label-${nextInputId++}" }
                 val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
-                    TagElement<HTMLElement>(if (props.showLabel) "label" else "span", applyAttrs = {
+                    TagElement<HTMLElement>("label", applyAttrs = {
                         classes("d-toggle")
                         onClick { it.stopPropagation() }
                         style { property("gap", "${appearance.labelSpacing.value}px") }
@@ -546,7 +546,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     )
                                     property(
                                         "--d-control-unselected",
-                                        appearance.colors.unselected.cssOr("var(--d-outline)"),
+                                        appearance.colors.unselected.cssOr(
+                                            "var(--d-on-surface-variant,var(--d-outline))",
+                                        ),
                                     )
                                     property(
                                         "--d-control-disabled-selected",
@@ -1618,7 +1620,7 @@ private fun HtmlToggle(
                 DomposableSelectionColors()
         }
     DomposableHtmlModifiers(modifier) {
-        TagElement<HTMLElement>(if (showLabel) "label" else "span", applyAttrs = {
+        TagElement<HTMLElement>("label", applyAttrs = {
             classes("d-toggle")
             onClick { it.stopPropagation() }
             style { property("gap", "${labelSpacing.value}px") }
@@ -1644,7 +1646,10 @@ private fun HtmlToggle(
                                 property("--d-switch-checked-border", it.checkedBorder.cssOr("transparent"))
                                 property("--d-switch-checked-icon", it.checkedIcon.cssOr("var(--d-on-primary)"))
                                 property("--d-switch-unchecked-thumb", it.uncheckedThumb.cssOr("var(--d-outline)"))
-                                property("--d-switch-unchecked-track", it.uncheckedTrack.cssOr("var(--d-surface)"))
+                                property(
+                                    "--d-switch-unchecked-track",
+                                    it.uncheckedTrack.cssOr("var(--d-surface-container-highest,var(--d-variant))"),
+                                )
                                 property("--d-switch-unchecked-border", it.uncheckedBorder.cssOr("var(--d-outline)"))
                                 property("--d-switch-unchecked-icon", it.uncheckedIcon.cssOr("var(--d-on-surface)"))
                                 property(
@@ -1696,7 +1701,10 @@ private fun HtmlToggle(
                             }
                         } else {
                             property("--d-control-selected", colors.selected.cssOr("var(--d-primary)"))
-                            property("--d-control-unselected", colors.unselected.cssOr("var(--d-outline)"))
+                            property(
+                                "--d-control-unselected",
+                                colors.unselected.cssOr("var(--d-on-surface-variant,var(--d-outline))"),
+                            )
                             property(
                                 "--d-control-disabled-selected",
                                 colors.disabledSelected.cssOr("color-mix(in srgb,var(--d-on-surface) 38%,transparent)"),
@@ -1913,7 +1921,7 @@ private const val MATERIAL_CSS = """
 @media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}.d-button-spinner{animation:none!important}}
 @media(forced-colors:active){.d-button:not(:disabled):focus-visible{outline:2px solid Highlight;outline-offset:3px;box-shadow:none}}
 .d-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-outline));border-radius:2px;background:transparent;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
+.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-on-surface-variant,var(--d-outline)));border-radius:2px;background:transparent;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
 .d-toggle input[type=checkbox]:not([role=switch]){position:relative}.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{margin:2px}
 .d-toggle input[type=checkbox]:not([role=switch]):checked{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary))}
 .d-toggle input[type=checkbox]:not([role=switch]):checked::after,.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{content:"";position:absolute;inset:-2px;pointer-events:none;background:var(--d-control-checkmark,var(--d-on-primary));mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10 8 14 16 6' fill='none' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") center/20px 20px no-repeat}
@@ -1924,7 +1932,7 @@ private const val MATERIAL_CSS = """
 .d-toggle input[type=checkbox]:not([role=switch]):checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background-color:var(--d-control-disabled-selected,var(--d-primary))}
 .d-toggle input[type=checkbox]:not([role=switch]):disabled::after{background:var(--d-control-disabled-checkmark,var(--d-surface))}
 .d-toggle input[type=radio]:checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-disabled-selected,var(--d-primary)) 0 42%,transparent 46%)}
-.d-toggle input[role=switch]{appearance:none;flex:0 0 52px;width:52px;height:32px;margin:0;border:2px solid var(--d-switch-unchecked-border,var(--d-outline));border-radius:999px;background-color:var(--d-switch-unchecked-track,var(--d-surface));background-image:radial-gradient(circle closest-side,var(--d-switch-unchecked-thumb,var(--d-outline)) 0 98%,transparent 100%);background-size:16px 16px;background-position:6px center;background-repeat:no-repeat;transition:background-color 150ms ease,border-color 150ms ease,background-position 150ms ease,background-size 150ms ease}
+.d-toggle input[role=switch]{appearance:none;flex:0 0 52px;width:52px;height:32px;margin:0;border:2px solid var(--d-switch-unchecked-border,var(--d-outline));border-radius:999px;background-color:var(--d-switch-unchecked-track,var(--d-surface-container-highest,var(--d-variant)));background-image:radial-gradient(circle closest-side,var(--d-switch-unchecked-thumb,var(--d-outline)) 0 98%,transparent 100%);background-size:16px 16px;background-position:6px center;background-repeat:no-repeat;transition:background-color 150ms ease,border-color 150ms ease,background-position 150ms ease,background-size 150ms ease}
 .d-toggle input[role=switch]:checked{border-color:var(--d-switch-checked-border,transparent);background-color:var(--d-switch-checked-track,var(--d-primary));background-image:radial-gradient(circle closest-side,var(--d-switch-checked-thumb,var(--d-on-primary)) 0 98%,transparent 100%);background-size:24px 24px;background-position:calc(100% - 2px) center}
 .d-toggle input[role=switch]:disabled{opacity:1;border-color:var(--d-switch-disabled-unchecked-border);background-color:var(--d-switch-disabled-unchecked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-unchecked-thumb) 0 98%,transparent 100%)}
 .d-toggle input[role=switch]:checked:disabled{border-color:var(--d-switch-disabled-checked-border);background-color:var(--d-switch-disabled-checked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-checked-thumb) 0 98%,transparent 100%)}
@@ -2007,7 +2015,7 @@ private const val MATERIAL_CSS = """
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
 .d-snackbar-host>.d-snackbar-message{max-width:min(720px,100%);min-height:48px;box-shadow:0 3px 8px rgb(0 0 0 / .24);pointer-events:auto}
 .d-scroll-field-viewport::before,.d-scroll-field-viewport::after{content:"";display:block;height:62px;scroll-snap-align:none;pointer-events:none}
-.d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}.d-toggle:has(>.d-toggle-copy-visible:first-child){width:100%}
+.d-theme .d-toggle{min-height:48px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}.d-toggle:has(>.d-toggle-copy-visible:first-child){width:100%}
 .d-theme .d-chip.d-item-hittarget .d-chip-surface{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme .d-progress-wavy-linear{width:100%}
 .d-theme .d-navigation:not(.d-navigation-links):not([style*="column"]){display:flex;width:100%;min-height:80px;align-items:stretch;justify-content:space-around;gap:0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}

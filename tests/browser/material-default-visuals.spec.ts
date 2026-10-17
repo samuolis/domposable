@@ -26,6 +26,22 @@ test('selection controls and chips use Material-sized visual surfaces', async ({
   await expect(toggle).toHaveCSS('appearance', 'none');
   await expect(toggle).toHaveCSS('width', '52px');
   await expect(toggle).toHaveCSS('height', '32px');
+  await expect(checkbox.locator('..')).toHaveCSS('min-height', '48px');
+  const defaultColors = await checkbox.evaluate(control => {
+    const theme = getComputedStyle(control.closest('.d-theme')!);
+    const resolve = (token: string) => {
+      const swatch = document.createElement('span');
+      swatch.style.color = theme.getPropertyValue(token).trim();
+      return swatch.style.color;
+    };
+    return {
+      outline: getComputedStyle(control).borderTopColor,
+      expectedOutline: resolve('--d-on-surface-variant'),
+      expectedTrack: resolve('--d-surface-container-highest'),
+    };
+  });
+  expect(defaultColors.outline).toBe(defaultColors.expectedOutline);
+  expect(await toggle.evaluate(control => getComputedStyle(control).backgroundColor)).toBe(defaultColors.expectedTrack);
 
   const filterChip = page.locator('.d-chip-filter').first();
   const chipSurface = (await filterChip.evaluate(element => element.classList.contains('d-item-hittarget')))

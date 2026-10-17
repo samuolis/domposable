@@ -19,6 +19,9 @@ for (const theme of themes) {
           const context = await browser.newContext({ viewport: { width, height: 1800 }, deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'UTC' });
           try {
             const page = await context.newPage();
+            const golden = family === 'states' && width === 390
+              ? `build/screenshots/${renderer === 'html' ? 'dom' : 'wasm'}/material-states-${theme}`
+              : undefined;
             page.on('pageerror', error => errors.push(`${renderer}: ${error.message}`));
             await page.goto(`${renderer === 'wasm' ? '/wasm/' : '/'}#${route}`);
             if (renderer === 'wasm') {
@@ -32,17 +35,17 @@ for (const theme of themes) {
             await page.waitForLoadState('networkidle');
             await page.evaluate(() => document.fonts.ready);
             await page.clock.install();
-            await capture(page, `${directory}/${renderer}.png`);
+            await capture(page, `${directory}/${renderer}.png`, golden && `${golden}-rest.png`);
             if (family === 'states') {
               const control = page.getByRole(renderer === 'wasm' ? 'button' : 'checkbox', { name: 'Enabled unselected checkbox', exact: true });
               const bounds = await control.boundingBox();
               expect(bounds).not.toBeNull();
               await page.clock.resume();
               await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
-              await capture(page, `${directory}/${renderer}-hover.png`);
+              await capture(page, `${directory}/${renderer}-hover.png`, golden && `${golden}-hover.png`);
               await page.clock.resume();
               await page.mouse.down();
-              await capture(page, `${directory}/${renderer}-pressed.png`);
+              await capture(page, `${directory}/${renderer}-pressed.png`, golden && `${golden}-pressed.png`);
               await page.clock.resume();
               await page.mouse.up();
               await page.mouse.move(0, 0);
@@ -53,7 +56,7 @@ for (const theme of themes) {
                 await control.focus();
                 await expect(control).toBeFocused();
               }
-              await capture(page, `${directory}/${renderer}-focus.png`);
+              await capture(page, `${directory}/${renderer}-focus.png`, golden && `${golden}-focus.png`);
             }
           } finally {
             await context.close();
@@ -66,7 +69,7 @@ for (const theme of themes) {
 }
 
 
-async function capture(page: Page, path: string) {
+async function capture(page: Page, path: string, golden?: string) {
   const now = await page.evaluate(() => Date.now());
   await page.clock.pauseAt(new Date(now + 1000));
   let previous: Buffer | undefined;
@@ -77,4 +80,8 @@ async function capture(page: Page, path: string) {
     return stable;
   }, { timeout: 20000, intervals: [250, 500] }).toBe(true);
   await writeFile(path, previous!);
+  if (golden) {
+    await mkdir(golden.slice(0, golden.lastIndexOf('/')), { recursive: true });
+    await writeFile(golden, previous!);
+  }
 }

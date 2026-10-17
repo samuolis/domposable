@@ -17,6 +17,7 @@ import io.github.samuolis.domposable.ui.DomposableTooltipProps
 import io.github.samuolis.domposable.ui.DomposableTopAppBarProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableAttributes
+import io.github.samuolis.domposable.ui.domposableFormEnabled
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.dom.Button
