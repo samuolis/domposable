@@ -12,12 +12,21 @@ class MaterialTypographyParityTest {
             DomposableTypography(bodySize = 18f, titleSize = 28f, labelSize = 15f, lineHeight = 1.6f),
         ).forEach { tokens ->
             val native = tokens.nativeTypography()
-            tokens.materialTypeScale().forEach { (role, html) ->
-                val expected = native.nativeRoleStyle(role)
-                assertEquals(expected.fontSize.value, html.fontSize!!, 0.0001f, "$role size")
-                assertEquals(expected.lineHeight.value, html.lineHeight!!, 0.0001f, "$role line height")
-                assertEquals(expected.letterSpacing.value, html.letterSpacing!!, 0.0001f, "$role letter spacing")
-                assertEquals(expected.fontWeight, html.fontWeight!!.native(), "$role weight")
+            for (emphasized in listOf(false, true)) {
+                tokens.materialTypeScale(emphasized).forEach { (role, html) ->
+                    val expected =
+                        if (emphasized) {
+                            native.nativeEmphasizedRoleStyle(
+                                role,
+                            )
+                        } else {
+                            native.nativeRoleStyle(role)
+                        }
+                    assertEquals(expected.fontSize.value, html.fontSize!!, 0.0001f, "$role size")
+                    assertEquals(expected.lineHeight.value, html.lineHeight!!, 0.0001f, "$role line height")
+                    assertEquals(expected.letterSpacing.value, html.letterSpacing!!, 0.0001f, "$role letter spacing")
+                    assertEquals(expected.fontWeight, html.fontWeight!!.native(), "$role weight")
+                }
             }
         }
     }

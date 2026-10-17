@@ -59,10 +59,15 @@ private val MaterialTypeScale =
             ),
     )
 
-internal fun DomposableTypography.materialTypeScale(): Map<DomposableTypographyRole, DomposableTextAppearance> =
-    MaterialTypeScale.mapValues { (role, _) -> materialTypeStyle(role) }
+internal fun DomposableTypography.materialTypeScale(
+    emphasized: Boolean = false,
+): Map<DomposableTypographyRole, DomposableTextAppearance> =
+    MaterialTypeScale.mapValues { (role, _) -> materialTypeStyle(role, emphasized) }
 
-internal fun DomposableTypography.materialTypeStyle(role: DomposableTypographyRole): DomposableTextAppearance {
+internal fun DomposableTypography.materialTypeStyle(
+    role: DomposableTypographyRole,
+    emphasized: Boolean = false,
+): DomposableTextAppearance {
     val base = MaterialTypeScale.getValue(role)
     val size =
         when (role) {
@@ -74,7 +79,19 @@ internal fun DomposableTypography.materialTypeStyle(role: DomposableTypographyRo
     return base.copy(
         fontSize = size,
         lineHeight = if (role == DomposableTypographyRole.BodyLarge) bodySize * lineHeight else base.lineHeight,
-        fontWeight = base.fontWeight ?: DomposableFontWeight.Normal,
+        fontWeight =
+            if (emphasized) {
+                when (role) {
+                    DomposableTypographyRole.TitleMedium, DomposableTypographyRole.TitleSmall,
+                    DomposableTypographyRole.LabelLarge, DomposableTypographyRole.LabelMedium,
+                    DomposableTypographyRole.LabelSmall,
+                    -> DomposableFontWeight.Bold
+
+                    else -> DomposableFontWeight.Medium
+                }
+            } else {
+                base.fontWeight ?: DomposableFontWeight.Normal
+            },
         letterSpacing = base.letterSpacing ?: 0f,
     )
 }

@@ -23,7 +23,16 @@ internal fun DomposableTextAppearance?.nativeTextStyle(base: TextStyle): TextSty
         this?.role?.let { role ->
             if (this.emphasized) tokens.emphasizedRoles[role] ?: tokens.roles[role] else tokens.roles[role]
         }
-    val roleBase = this?.role?.let { MaterialTheme.typography.nativeRoleStyle(it) } ?: base
+    val roleBase =
+        this?.role?.let {
+            if (this.emphasized) {
+                MaterialTheme.typography.nativeEmphasizedRoleStyle(
+                    it,
+                )
+            } else {
+                MaterialTheme.typography.nativeRoleStyle(it)
+            }
+        } ?: base
     return this.nativeTextStyleDirect(roleStyle?.nativeTextStyleDirect(roleBase) ?: roleBase)
 }
 
@@ -57,12 +66,44 @@ internal fun androidx.compose.material3.Typography.nativeRoleStyle(role: Domposa
         DomposableTypographyRole.LabelSmall -> labelSmall
     }
 
+internal fun androidx.compose.material3.Typography.nativeEmphasizedRoleStyle(
+    role: DomposableTypographyRole,
+): TextStyle =
+    when (role) {
+        DomposableTypographyRole.DisplayLarge -> displayLargeEmphasized
+        DomposableTypographyRole.DisplayMedium -> displayMediumEmphasized
+        DomposableTypographyRole.DisplaySmall -> displaySmallEmphasized
+        DomposableTypographyRole.HeadlineLarge -> headlineLargeEmphasized
+        DomposableTypographyRole.HeadlineMedium -> headlineMediumEmphasized
+        DomposableTypographyRole.HeadlineSmall -> headlineSmallEmphasized
+        DomposableTypographyRole.TitleLarge -> titleLargeEmphasized
+        DomposableTypographyRole.TitleMedium -> titleMediumEmphasized
+        DomposableTypographyRole.TitleSmall -> titleSmallEmphasized
+        DomposableTypographyRole.BodyLarge -> bodyLargeEmphasized
+        DomposableTypographyRole.BodyMedium -> bodyMediumEmphasized
+        DomposableTypographyRole.BodySmall -> bodySmallEmphasized
+        DomposableTypographyRole.LabelLarge -> labelLargeEmphasized
+        DomposableTypographyRole.LabelMedium -> labelMediumEmphasized
+        DomposableTypographyRole.LabelSmall -> labelSmallEmphasized
+    }
+
 internal fun DomposableTypography.nativeTypography(defaults: Typography = Typography()): Typography {
     val base =
         defaults.copy(
             bodyLarge = defaults.bodyLarge.copy(fontSize = bodySize.sp, lineHeight = (bodySize * lineHeight).sp),
             titleLarge = defaults.titleLarge.copy(fontSize = titleSize.sp),
             labelLarge = defaults.labelLarge.copy(fontSize = labelSize.sp),
+            bodyLargeEmphasized =
+                defaults.bodyLargeEmphasized.copy(
+                    fontSize = bodySize.sp,
+                    lineHeight =
+                        (
+                            bodySize *
+                                lineHeight
+                        ).sp,
+                ),
+            titleLargeEmphasized = defaults.titleLargeEmphasized.copy(fontSize = titleSize.sp),
+            labelLargeEmphasized = defaults.labelLargeEmphasized.copy(fontSize = labelSize.sp),
         )
     return withConfiguredEmphasizedRoles(withConfiguredRoles(base))
 }

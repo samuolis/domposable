@@ -51,7 +51,7 @@ HTML renders semantic elements and native browser controls. Wasm renders Compose
 
 ## Reproducible component comparisons
 
-The Material routes pin the same regular and medium Roboto font files in both hosts, so font metrics do not depend on the browser or operating system. The library does not bundle a font or change your native Material font family: configure native typography in the host and use the matching CSS family through `DomposableMaterialTheme(typography = ...)` for HTML. The comparison host demonstrates both sides.
+The Material routes pin the same regular, medium and bold Roboto font files in both hosts, so font metrics do not depend on the browser or operating system. The library does not bundle a font or change your native Material font family: configure native typography in the host and use the matching CSS family through `DomposableMaterialTheme(typography = ...)` for HTML. The comparison host demonstrates both sides.
 
 CI captures all nine component families in eight themes at 390 px and 1280 px. It captures the beginning and end of long families, plus hover, press and keyboard focus for checkbox, switch, radio and slider. The resulting 464 HTML / pixel difference / Wasm panels are exported in the CI evidence artifact. These diagnostic panels complement regression baselines; producing an image does not establish visual parity.
 

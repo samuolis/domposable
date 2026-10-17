@@ -141,11 +141,12 @@ private fun StyleScope.applyTypographyTokens(tokens: DomposableTokens) {
     property("--d-label", "${typography.labelSize}px")
     property("--d-line-height", typography.lineHeight.toString())
     val defaults = typography.materialTypeScale()
+    val emphasizedDefaults = typography.materialTypeScale(emphasized = true)
     DomposableTypographyRole.values().forEach { role ->
         val roleName = role.name.toKebabCase()
         applyTypographyRole("--d-type-$roleName", defaults.getValue(role))
         applyTypographyRole("--d-type-$roleName", typography.roles[role])
-        applyTypographyRole("--d-type-$roleName-emphasized", defaults.getValue(role))
+        applyTypographyRole("--d-type-$roleName-emphasized", emphasizedDefaults.getValue(role))
         applyTypographyRole("--d-type-$roleName-emphasized", typography.roles[role])
         applyTypographyRole("--d-type-$roleName-emphasized", typography.emphasizedRoles[role])
     }
