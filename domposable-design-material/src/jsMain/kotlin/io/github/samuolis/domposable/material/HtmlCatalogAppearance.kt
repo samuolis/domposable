@@ -159,6 +159,13 @@ internal fun StyleScope.sliderColors(
                 "color-mix(in srgb,var(--d-on-surface) 12%,transparent)"
             },
     )
+    sliderTickColors(colors, enabled)
+}
+
+private fun StyleScope.sliderTickColors(
+    colors: DomposableSliderColors,
+    enabled: Boolean,
+) {
     property(
         "--d-slider-active-tick-current",
         (if (enabled) colors.activeTick else colors.disabledActiveTick)?.css()

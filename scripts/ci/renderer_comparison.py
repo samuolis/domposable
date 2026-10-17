@@ -22,6 +22,14 @@ def comparison(html, wasm):
     return panel([html, highlight, wasm], ['HTML', 'Pixel difference', 'Compose UI / Wasm']), changed / (html.width * html.height)
 
 
+def capture_states(family):
+    if family != 'states':
+        return ['rest', 'end']
+    return ['rest', 'hover', 'pressed', 'focus'] + [
+        f'{control}-{state}' for control in ['switch', 'radio', 'slider'] for state in ['hover', 'pressed', 'focus']
+    ]
+
+
 def main():
     output = ROOT / 'build/renderer-report'
     output.mkdir(parents=True, exist_ok=True)
@@ -31,7 +39,7 @@ def main():
             for width in [390, 1280]:
                 name = f'{theme}-{family}-{width}'
                 captures = ROOT / 'build/renderer-comparison' / name
-                for state in ['rest', 'hover', 'pressed', 'focus'] if family == 'states' else ['rest']:
+                for state in capture_states(family):
                     suffix = '' if state == 'rest' else '-' + state
                     data, ratio = comparison(png((captures / f'html{suffix}.png').read_bytes()), png((captures / f'wasm{suffix}.png').read_bytes()))
                     image = f'{name}{suffix}.png'

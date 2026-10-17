@@ -4,10 +4,16 @@ from pathlib import Path
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'ci'))
-from renderer_comparison import comparison
+from renderer_comparison import comparison, capture_states
 
 
 class RendererComparisonTest(unittest.TestCase):
+    def test_inventory_includes_scrolled_families_and_each_control_interaction(self):
+        self.assertEqual(['rest', 'end'], capture_states('inputs'))
+        self.assertEqual(13, len(capture_states('states')))
+        self.assertIn('slider-focus', capture_states('states'))
+        self.assertIn('radio-pressed', capture_states('states'))
+
     def test_exact_pixels_have_no_difference(self):
         data, ratio = comparison(Image.new('RGB', (20, 20), 'white'), Image.new('RGB', (20, 20), 'white'))
         self.assertTrue(data.startswith(b'\x89PNG'))

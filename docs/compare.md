@@ -42,6 +42,8 @@ Wasm is an experimental visual comparison. Its stable CMP accessibility bridge h
 })();
 </script>
 
+CI captures both the top and bottom of each component family so lower controls, including time pickers and wheels, remain covered. The states fixture also compares checkbox, switch, radio and slider hover, press and keyboard focus across the eight themes. The stable Wasm accessibility bridge exposes slider labels without their bounds, so those pointer captures use the shared fixture's measured HTML coordinates and native keyboard traversal. This is canvas interaction coverage, not semantic-slider accessibility support.
+
 The side-by-side frames intentionally scroll horizontally when their selected viewport exceeds the space on this page. This preserves the chosen **actual feature width**, rather than scaling pixels and pretending it is a phone layout.
 
 HTML renders semantic elements and native browser controls. Wasm renders Compose UI and offers different text, input and accessibility behavior. The isolated Material scenes remove application chrome so control geometry, palettes and states can be compared directly at equal viewports. Renderer comparison reports expose remaining differences; an independent golden image passing does not prove HTML/Compose parity. Text rasterization and platform input behavior still depend on the renderer. See the [compatibility table](compatibility.md) for tested behavior, browser-history differences and current limitations.

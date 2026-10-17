@@ -1737,8 +1737,7 @@ private fun HtmlToggle(
                     }
                     onChange {
                         if (effectiveEnabled) onChange(indeterminate || it.value)
-                        // Match controlled native toggles when the application declines a change.
-                        it.target.checked = checkedValue
+                        // Compose HTML restores checked state; indeterminate is our custom DOM property.
                         it.target.asDynamic().indeterminate = indeterminate
                     }
                 })

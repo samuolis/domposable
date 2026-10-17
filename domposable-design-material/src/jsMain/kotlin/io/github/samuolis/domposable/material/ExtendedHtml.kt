@@ -375,8 +375,6 @@ internal fun HtmlRangeSlider(
                                 }
                             props.onValueChange(next)
                         }
-                        // Preserve controlled values, including a clamped or declined request.
-                        event.target.value = current.toString()
                     }
                 })
             }
