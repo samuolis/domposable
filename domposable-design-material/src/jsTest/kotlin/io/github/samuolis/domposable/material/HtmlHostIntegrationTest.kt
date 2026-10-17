@@ -126,17 +126,19 @@ class HtmlHostIntegrationTest {
     @Test
     fun embeddedCustomFieldActionRemainsAboveTheInput() =
         withHost(content = {
-            DomposableTextField(
-                DomposableTextFieldProps(
-                    value = "secret",
-                    onValueChange = {},
-                    label = "Password",
-                    trailingIcon = {
-                        Button(attrs = { attr("data-testid", "field-action") }) { Text("Show") }
-                    },
-                ),
-                DomposableModifier.width(280.dp),
-            )
+            DomposableCard {
+                DomposableTextField(
+                    DomposableTextFieldProps(
+                        value = "secret",
+                        onValueChange = {},
+                        label = "Password",
+                        trailingIcon = {
+                            Button(attrs = { attr("data-testid", "field-action") }) { Text("Show") }
+                        },
+                    ),
+                    DomposableModifier.width(280.dp),
+                )
+            }
         }) { root ->
             val action = root.querySelector("[data-testid=field-action]") as HTMLElement
             val bounds = action.getBoundingClientRect()
