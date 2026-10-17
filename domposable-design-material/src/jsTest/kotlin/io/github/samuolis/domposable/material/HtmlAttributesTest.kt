@@ -26,7 +26,12 @@ class HtmlAttributesTest {
                             DomposableModifier.testId("ranker-title").htmlAttributes {
                                 classes("app-owned-text")
                                 attr("data-app-kind", "title")
-                                style { property("color", "rgb(17, 34, 51)") }
+                                style {
+                                    property("color", "rgb(17, 34, 51)")
+                                    property("font-size", "21px")
+                                    property("line-height", "25px")
+                                    property("font-weight", "600")
+                                }
                             },
                     )
                 }
@@ -44,6 +49,9 @@ class HtmlAttributesTest {
             assertEquals("title", text.getAttribute("data-app-kind"))
             assertEquals("ranker-title", text.getAttribute("data-testid"))
             assertEquals("rgb(17, 34, 51)", window.getComputedStyle(text).color)
+            assertEquals("21px", window.getComputedStyle(text).fontSize)
+            assertEquals("25px", window.getComputedStyle(text).lineHeight)
+            assertEquals("600", window.getComputedStyle(text).fontWeight)
         } finally {
             composition.dispose()
             root.parentNode?.removeChild(root)

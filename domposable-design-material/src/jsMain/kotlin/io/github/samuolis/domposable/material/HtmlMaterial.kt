@@ -263,10 +263,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }
 
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
-                    style {
-                        applyCatalogTextAppearance(DomposableTextAppearance(role = role))
-                        appearance?.let { applyCatalogTextAppearance(it) }
-                    }
+                    style { appearance?.let { applyCatalogTextAppearance(it) } }
                     (props.color ?: appearance?.color)?.let { style { property("color", it.css()) } }
                     appearance?.minLines?.takeIf { it > 1 }?.let { lines ->
                         style {
@@ -311,6 +308,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         props.headingLevel != null
                     ) {
                         TagElement<HTMLElement>("h${props.headingLevel ?: 2}", applyAttrs = {
+                            style { applyCatalogTextAppearance(DomposableTextAppearance(role = role)) }
                             domposableAttributes(modifier)
                             classes("d-title")
                             props.color?.let { style { property("color", it.css()) } }
@@ -318,6 +316,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         }) { Text(props.text) }
                     } else {
                         Span(attrs = {
+                            style { applyCatalogTextAppearance(DomposableTextAppearance(role = role)) }
                             domposableAttributes(modifier)
                             classes(
                                 if (props.style ==
