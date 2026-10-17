@@ -7,11 +7,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.foundation.DomposableAlignment
+import io.github.samuolis.domposable.foundation.DomposableLayoutAxis
+import io.github.samuolis.domposable.foundation.DomposableLinearGradient
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSize
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.TagElement
+import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLElement
 
 /** Application-owned HTML adapter for an open [DomposableModifierElement]. */
@@ -55,6 +59,12 @@ private data class HtmlAttributes(
     val attributes: AttrsScope<*>.() -> Unit,
 ) : DomposableModifierElement
 
+internal val POINTER_PASSTHROUGH_CSS =
+    """
+    [data-domposable-pointer-passthrough]{pointer-events:none}
+    [data-domposable-pointer-passthrough] :is(a,button,input,select,textarea,[role=button],[role=link],[tabindex]:not([tabindex='-1'])){pointer-events:auto}
+    """.trimIndent()
+
 /** Applies app-owned attributes and styles directly to the rendered HTML element. */
 fun DomposableModifier.htmlAttributes(attributes: AttrsScope<*>.() -> Unit): DomposableModifier =
     then(HtmlAttributes(attributes))
@@ -63,10 +73,21 @@ fun DomposableModifier.htmlAttributes(attributes: AttrsScope<*>.() -> Unit): Dom
 fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableModifier) {
     modifier.elements.forEach { element ->
         when (element) {
-            is DomposableModifierOperation.Description -> attr("aria-label", element.text)
-            is DomposableModifierOperation.TestId -> attr("data-testid", element.value)
-            is HtmlAttributes -> element.attributes(this)
-            else -> Unit
+            is DomposableModifierOperation.Description -> {
+                attr("aria-label", element.text)
+            }
+
+            is DomposableModifierOperation.TestId -> {
+                attr("data-testid", element.value)
+            }
+
+            is HtmlAttributes -> {
+                element.attributes(this)
+            }
+
+            else -> {
+                Unit
+            }
         }
     }
 }
@@ -140,6 +161,8 @@ fun DomposableHtmlModifiers(
                 layout.forEach { element ->
                     when (element) {
                         is DomposableModifierOperation.Weight -> {
+                            property("min-width", "0")
+                            property("min-height", "0")
                             property("flex-grow", element.weight.toString())
                             property("flex-shrink", if (element.fill) "1" else "0")
                             property("flex-basis", if (element.fill) "0px" else "auto")
@@ -178,6 +201,31 @@ private fun HtmlModifierBox(
     }
     val element = elements[index]
     val operation = element as? DomposableModifierOperation
+    val fillHeightAhead =
+        operation != DomposableModifierOperation.FillHeight &&
+            elements.asSequence().drop(index).firstOrNull { candidate ->
+                when (candidate) {
+                    DomposableModifierOperation.FillHeight,
+                    is DomposableModifierOperation.Height,
+                    is DomposableModifierOperation.WrapContentSize,
+                    -> {
+                        true
+                    }
+
+                    is DomposableModifierOperation.Scroll -> {
+                        candidate.orientation == DomposableOrientation.Vertical
+                    }
+
+                    is DomposableModifierOperation.StatefulScroll -> {
+                        candidate.orientation ==
+                            DomposableOrientation.Vertical
+                    }
+
+                    else -> {
+                        false
+                    }
+                }
+            } == DomposableModifierOperation.FillHeight
     if (operation == null) {
         val decoration = decorationRenderer?.invoke(element)
         if (decoration != null) {
@@ -194,11 +242,12 @@ private fun HtmlModifierBox(
             return
         }
         Div(attrs = {
-            if (fillAvailableHeight) {
+            if (fillAvailableHeight || fillHeightAhead) {
                 style {
                     property("display", "grid")
                     property("grid-template-columns", "minmax(0, 1fr)")
                     property("grid-template-rows", "minmax(0, 1fr)")
+                    if (fillHeightAhead) property("height", "100%")
                 }
             }
             val attributes =
@@ -230,9 +279,15 @@ private fun HtmlModifierBox(
             operation is DomposableModifierOperation.MaxHeight ||
             operation == DomposableModifierOperation.FillHeight
     // CSS block height stops at each nested wrapper; Compose passes these constraints through to its child.
-    val childFillsHeight = !verticalScroll && (establishesHeight || (fillAvailableHeight && !wrapContentSize))
+    val childFillsHeight =
+        !verticalScroll &&
+            (establishesHeight || (fillAvailableHeight && !wrapContentSize) || fillHeightAhead)
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
+        if (fillHeightAhead) attr("data-domposable-fill-height-ahead", "")
+        if (operation == DomposableModifierOperation.PointerPassthrough) {
+            attr("data-domposable-pointer-passthrough", "")
+        }
         style {
             property("box-sizing", "border-box")
             if (childFillsHeight) {
@@ -240,7 +295,9 @@ private fun HtmlModifierBox(
                 property("grid-template-columns", "minmax(0, 1fr)")
                 property("grid-template-rows", "minmax(0, 1fr)")
             }
+            if (fillHeightAhead) property("height", "100%")
             if (fillAvailableHeight && wrapContentSize) property("height", "100%")
+            if (operation == DomposableModifierOperation.PointerPassthrough) property("pointer-events", "none")
             when (operation) {
                 is DomposableModifierOperation.Padding -> {
                     property("padding-block-start", "${operation.insets.top.value}px")
@@ -261,6 +318,12 @@ private fun HtmlModifierBox(
                     property("max-width", "${operation.length.value}px")
                 }
 
+                is DomposableModifierOperation.FillWidthFraction -> {
+                    property("width", "${operation.fraction * 100}%")
+                    operation.minWidth?.let { property("min-width", "min(${it.value}px, 100%)") }
+                    operation.maxWidth?.let { property("max-width", "min(${it.value}px, 100%)") }
+                }
+
                 is DomposableModifierOperation.MinWidth -> {
                     property("min-width", "${operation.length.value}px")
                 }
@@ -277,6 +340,10 @@ private fun HtmlModifierBox(
                     property("width", "100%")
                 }
 
+                DomposableModifierOperation.PointerPassthrough -> {
+                    Unit
+                }
+
                 DomposableModifierOperation.FillHeight -> {
                     property("height", "100%")
                 }
@@ -287,6 +354,11 @@ private fun HtmlModifierBox(
 
                 is DomposableModifierOperation.ShapeBackground -> {
                     property("background", operation.color.css())
+                    applyCssShape(operation.shape)
+                }
+
+                is DomposableModifierOperation.GradientBackground -> {
+                    property("background", operation.gradient.css())
                     applyCssShape(operation.shape)
                 }
 
@@ -303,6 +375,14 @@ private fun HtmlModifierBox(
                 is DomposableModifierOperation.Border -> {
                     property("border", "${operation.width.value}px solid ${operation.color.css()}")
                     applyCssShape(operation.shape)
+                }
+
+                is DomposableModifierOperation.EdgeBorder -> {
+                    property(operation.edge.cssProperty(), "${operation.width.value}px solid ${operation.color.css()}")
+                }
+
+                is DomposableModifierOperation.Region -> {
+                    Unit
                 }
 
                 is DomposableModifierOperation.AspectRatio -> {
@@ -433,6 +513,11 @@ private fun HtmlModifierBox(
                 }
             }
 
+            is DomposableModifierOperation.Region -> {
+                attr("role", "region")
+                attr("aria-label", operation.label)
+            }
+
             is DomposableModifierOperation.StatefulScroll -> {
                 domposableScrollState(operation.state, operation.orientation)
             }
@@ -442,9 +527,30 @@ private fun HtmlModifierBox(
             }
         }
     }) {
+        if (operation == DomposableModifierOperation.PointerPassthrough) {
+            TagElement<HTMLElement>("style", applyAttrs = {}) { Text(POINTER_PASSTHROUGH_CSS) }
+        }
         HtmlModifierBox(elements, index + 1, operationRenderer, decorationRenderer, childFillsHeight, content)
     }
 }
+
+internal fun DomposableLinearGradient.css(): String {
+    val direction =
+        when (axis) {
+            DomposableLayoutAxis.Horizontal -> "to right"
+            DomposableLayoutAxis.Vertical -> "to bottom"
+        }
+    val stops = stops.joinToString(", ") { "${it.color.css()} ${it.position * 100}%" }
+    return "linear-gradient($direction, $stops)"
+}
+
+internal fun DomposableBorderEdge.cssProperty(): String =
+    when (this) {
+        DomposableBorderEdge.Top -> "border-block-start"
+        DomposableBorderEdge.End -> "border-inline-end"
+        DomposableBorderEdge.Bottom -> "border-block-end"
+        DomposableBorderEdge.Start -> "border-inline-start"
+    }
 
 private fun isChildLayoutOperation(element: DomposableModifierElement): Boolean =
     element is DomposableModifierOperation.Weight ||

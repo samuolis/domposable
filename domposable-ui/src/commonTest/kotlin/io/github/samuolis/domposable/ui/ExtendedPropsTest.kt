@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.ui
 
+import androidx.compose.runtime.Composable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -17,10 +18,19 @@ class ExtendedPropsTest {
     @Test fun segmentSelectionUsesAnExistingChoiceOrExplicitlyHasNoSelection() {
         val props = DomposableSegmentedButtonsProps(listOf("Home", "Office"), 1, {}, "Address")
         assertEquals(1, props.selectedIndex)
+        assertEquals(false, props.equalWidth)
+        assertEquals(true, props.copy(equalWidth = true).equalWidth)
         assertEquals(-1, props.copy(selectedIndex = -1).selectedIndex)
         assertFailsWith<IllegalArgumentException> { props.copy(selectedIndex = -2) }
         assertFailsWith<IllegalArgumentException> { props.copy(selectedIndex = 2) }
         assertFailsWith<IllegalArgumentException> { props.copy(labels = emptyList()) }
+    }
+
+    @Test fun segmentedButtonsKeepTheDefaultIconUnlessACustomSlotIsProvided() {
+        val props = DomposableSegmentedButtonsProps(listOf("Home"), 0, {}, "Address")
+        assertEquals(null, props.selectedIcon)
+        val customIcon: @Composable () -> Unit = {}
+        assertEquals(customIcon, props.copy(selectedIcon = customIcon).selectedIcon)
     }
 
     @Test fun rangeCannotCrossEscapeItsBoundsOrContainNonFiniteValues() {

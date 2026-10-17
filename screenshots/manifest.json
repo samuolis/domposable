@@ -18,7 +18,8 @@
     "material-feedback",
     "material-gestures",
     "material-scaffold",
-    "extensions"
+    "extensions",
+    "composition"
   ],
   "desktop": [
     "tasks",
@@ -39,7 +40,8 @@
     "material-feedback",
     "material-gestures",
     "material-scaffold",
-    "extensions"
+    "extensions",
+    "composition"
   ],
   "ios": [
     "tasks",
@@ -61,7 +63,8 @@
     "material-feedback",
     "material-gestures",
     "material-scaffold",
-    "extensions"
+    "extensions",
+    "composition"
   ],
   "dom": [
     "tasks-phone",
@@ -91,7 +94,9 @@
     "material-gestures",
     "material-scaffold",
     "extensions-phone",
-    "extensions-wide"
+    "extensions-wide",
+    "composition-phone",
+    "composition-wide"
   ],
   "wasm": [
     "tasks-phone",
@@ -111,6 +116,8 @@
     "material-feedback",
     "material-gestures",
     "material-scaffold",
-    "extensions"
+    "extensions",
+    "composition-phone",
+    "composition-wide"
   ]
 }

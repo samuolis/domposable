@@ -140,16 +140,21 @@ def references(root=ROOT):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--check', action='store_true')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--check', action='store_true')
+    mode.add_argument('--output-dir', type=Path, help='Export compiled references for review without replacing checked-in docs')
     args = parser.parse_args()
+    output = args.output_dir or ROOT/'docs'
+    if not args.check:
+        output.mkdir(parents=True, exist_ok=True)
     for name, content in references().items():
-        path = ROOT/'docs'/name
+        path = output/name
         if args.check:
             if not path.exists() or path.read_text() != content:
                 raise SystemExit(f'{path.relative_to(ROOT)} is stale. Run ./gradlew dokkaGenerate then python3 scripts/ci/api_reference.py')
         else:
             path.write_text(content)
-        print(f'{"Verified" if args.check else "Generated"} {path.relative_to(ROOT)}')
+        print(f'{"Verified" if args.check else "Generated"} {path}')
 
 if __name__ == '__main__':
     main()

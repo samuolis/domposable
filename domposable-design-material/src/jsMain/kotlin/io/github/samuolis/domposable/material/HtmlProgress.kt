@@ -175,7 +175,10 @@ private fun HtmlWavyProgress(
             ?: appearance.indicatorSize?.value
             ?: if (props.circular) DEFAULT_INDICATOR_SIZE else 12f
     val fillsWidth =
-        !props.circular && modifier.elements.any { it == DomposableModifierOperation.FillWidth }
+        !props.circular &&
+            modifier.elements.any {
+                it == DomposableModifierOperation.FillWidth || it is DomposableModifierOperation.FillWidthFraction
+            }
 
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {

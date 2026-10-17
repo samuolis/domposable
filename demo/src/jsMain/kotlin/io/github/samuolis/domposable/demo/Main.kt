@@ -36,9 +36,42 @@ fun main() {
             window.location.hash
                 .removePrefix("#")
                 .startsWith("/shop")
+    val initialPath = currentDemoPath(base)
+    val initialRoute = DemoCodec.decode(initialPath) ?: DemoRoute.Tasks
     renderComposable(
         rootElementId = "root",
-    ) { if (shop) ShoppingApp(browserUrls = urls) else DemoApp(browserUrls = urls) }
+    ) {
+        if (shop) {
+            ShoppingApp(browserUrls = urls)
+        } else {
+            DemoApp(
+                initialRoute = initialRoute,
+                browserUrls = urls,
+                callerHistoryFallback = {
+                    val current = currentDemoPath(base)
+                    val page = current.removePrefix("/caller-history/")
+                    if (page ==
+                        current
+                    ) {
+                        "home"
+                    } else {
+                        page
+                            .substringBefore('?')
+                            .substringBefore('#')
+                            .trimEnd('/')
+                            .ifEmpty { "home" }
+                    }
+                },
+            )
+        }
+    }
+}
+
+private fun currentDemoPath(base: String?): String {
+    val fragmentPath = window.location.hash.removePrefix("#")
+    val path = fragmentPath.takeIf { it.startsWith("/") } ?: window.location.pathname
+    val withoutBase = if (base == null) path else path.removePrefix(base.trimEnd('/')).ifEmpty { "/" }
+    return withoutBase.substringBefore('?').substringBefore('#')
 }
 
 @Composable

@@ -78,6 +78,8 @@ data class DomposableSegmentedButtonsProps(
     val showSelectedIcon: Boolean = true,
     val allowReselect: Boolean = true,
     val appearance: DomposableItemAppearance? = null,
+    val equalWidth: Boolean = false,
+    val selectedIcon: (@Composable () -> Unit)? = null,
 ) {
     init {
         require(optionEnabled.size == labels.size && optionTestTags.size == labels.size) {

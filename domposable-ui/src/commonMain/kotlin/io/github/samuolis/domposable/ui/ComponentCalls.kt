@@ -292,7 +292,14 @@ fun DomposableBadge(
     modifier: DomposableModifier = DomposableModifier,
     appearance: DomposableSurfaceAppearance? = null,
     label: String? = null,
-) = DomposableBadge(DomposableBadgeProps(text, appearance = appearance, label = label), modifier)
+    contentPadding: io.github.samuolis.domposable.foundation.DomposableInsets? = null,
+    minWidth: DomposableLength? = null,
+    minHeight: DomposableLength? = null,
+    content: (@Composable () -> Unit)? = null,
+) = DomposableBadge(
+    DomposableBadgeProps(text, appearance, label, contentPadding, minWidth, minHeight, content),
+    modifier,
+)
 
 @Composable
 fun DomposableChip(
@@ -327,7 +334,11 @@ fun DomposableAvatar(
     description: String,
     modifier: DomposableModifier = DomposableModifier,
     appearance: DomposableSurfaceAppearance? = null,
-) = DomposableAvatar(DomposableAvatarProps(initials, description, appearance = appearance), modifier)
+    content: (@Composable () -> Unit)? = null,
+) = DomposableAvatar(
+    DomposableAvatarProps(initials, description, appearance = appearance, content = content),
+    modifier,
+)
 
 @Composable
 fun DomposableBanner(
@@ -522,8 +533,19 @@ fun DomposableSegmentedButtons(
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
     appearance: DomposableItemAppearance? = null,
+    equalWidth: Boolean = false,
+    selectedIcon: (@Composable () -> Unit)? = null,
 ) = DomposableSegmentedButtons(
-    DomposableSegmentedButtonsProps(labels, selectedIndex, onSelect, label, enabled, appearance = appearance),
+    DomposableSegmentedButtonsProps(
+        labels,
+        selectedIndex,
+        onSelect,
+        label,
+        enabled,
+        appearance = appearance,
+        equalWidth = equalWidth,
+        selectedIcon = selectedIcon,
+    ),
     modifier,
 )
 

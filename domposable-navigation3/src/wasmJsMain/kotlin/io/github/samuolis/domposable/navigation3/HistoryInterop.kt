@@ -24,6 +24,11 @@ private external fun pushHistoryState(
 
 internal actual fun browserHistoryState(): String? = readHistoryState()
 
+@JsFun("() => window.history.state === null")
+private external fun isHistoryStateNull(): Boolean
+
+internal actual fun browserHistoryStateIsNull(): Boolean = isHistoryStateNull()
+
 internal actual fun replaceBrowserHistoryState(
     value: String,
     url: String?,

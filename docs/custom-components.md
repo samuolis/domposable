@@ -28,9 +28,52 @@ fun CounterCard(
 
 No registration or platform implementation is needed. The installed provider renders the constituent controls. The app owns its public parameters and state; add the slots, callbacks and appearance values your component needs.
 
+## Image cards and overlays without application CSS
+
+A product-specific card does not need a product-specific HTML renderer. Compose its image,
+scrim and content with shared primitives in `commonMain`. `DomposableBox` overlays its children
+on every renderer; `boxAlignment` places an individual layer within it.
+
+```kotlin
+@Composable
+fun EventHero(image: String, title: String) {
+    val scrim = DomposableLinearGradient(
+        axis = DomposableLayoutAxis.Vertical,
+        stops = listOf(
+            DomposableGradientStop(DomposableColor(0x00000000), 0f),
+            DomposableGradientStop(DomposableColor(0xDD000000), 1f),
+        ),
+    )
+    DomposableCard {
+        DomposableBox(DomposableModifier.fillMaxWidth().height(240.dp)) {
+            DomposableImage(image, null, DomposableModifier.fillMaxSize(),
+                scale = DomposableImageScale.Crop)
+            DomposableBox(DomposableModifier.fillMaxSize().background(scrim)) {}
+            DomposableText(
+                title,
+                modifier = DomposableModifier
+                    .boxAlignment(DomposableAlignment.Start, DomposableAlignment.End)
+                    .padding(20.dp),
+                appearance = DomposableTextAppearance(color = DomposableColor(0xFFFFFFFF)),
+            )
+        }
+    }
+}
+```
+
+The theme supplies card appearance, typography and shapes. Use modifier parameters for layout
+and explicit style overrides only for the parts that differ from those defaults. Domain data,
+navigation callbacks and the card's content remain application code. CSS and native drawing
+stay inside Domposable's renderers.
+
+[Run the shared card and pane example](https://samuolis.github.io/domposable/demo/#/composition)
+or read its [single common Kotlin implementation](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/SharedComposition.kt).
+
 ## Own the platform markup or drawing
 
-Use a shared contract when a component needs its own native widget or HTML structure. The compiled example declares:
+Use this escape hatch for an external widget or behavior that the shared primitives cannot express.
+Ordinary cards, dashboards, forms and adaptive layouts should compose shared primitives first.
+For a genuinely platform-specific integration, the compiled example declares:
 
 ```kotlin
 @Composable

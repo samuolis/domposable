@@ -265,7 +265,23 @@ internal fun HtmlSegmentedButtons(
         }) {
             props.labels.forEachIndexed { index, label ->
                 val canSelect = formEnabled && props.enabled && props.optionEnabled[index]
-                Label(attrs = { classes("d-segment") }) {
+                Label(attrs = {
+                    classes("d-segment")
+                    if (props.equalWidth) {
+                        style {
+                            property("flex", "1 1 0")
+                            property(
+                                "min-width",
+                                "${appearance.minimumInteractiveSize?.value ?: 0f}px",
+                            )
+                        }
+                    }
+                    if (index > 0) {
+                        style {
+                            property("margin-inline-start", "-${appearance.borderWidth.value}px")
+                        }
+                    }
+                }) {
                     Input(InputType.Radio, attrs = {
                         attr("name", group)
                         checked(index == props.selectedIndex)
@@ -285,13 +301,21 @@ internal fun HtmlSegmentedButtons(
                     })
                     Span(attrs = {
                         classes("d-segment-surface")
-                        style { itemAppearance(appearance, index == props.selectedIndex) }
+                        style {
+                            itemAppearance(appearance, index == props.selectedIndex)
+                            if (props.equalWidth) {
+                                property("flex", "1")
+                                property("justify-content", "center")
+                            }
+                        }
                     }) {
                         if (props.showSelectedIcon && index == props.selectedIndex) {
                             Span(attrs = {
                                 attr("aria-hidden", "true")
                                 classes("d-segment-checkmark")
-                            }) { Text("✓") }
+                            }) {
+                                props.selectedIcon?.invoke() ?: Text("✓")
+                            }
                         }
                         Text(label)
                     }

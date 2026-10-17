@@ -23,3 +23,13 @@ class ApiReferenceTest(unittest.TestCase):
         with self.assertRaises(ValueError): parameter('not a parameter')
         self.assertEqual('-domposable-button-props', slug('DomposableButtonProps'))
         self.assertEqual('`A&#124;B`', code('A|B'))
+
+    def test_export_uses_separate_directory_without_replacing_docs(self):
+        import api_reference
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'review'
+            with patch.object(sys, 'argv', ['api_reference.py', '--output-dir', str(output)]), patch.object(api_reference, 'references', return_value={'component-reference.md': 'compiled API'}):
+                api_reference.main()
+            self.assertEqual('compiled API', (output / 'component-reference.md').read_text())

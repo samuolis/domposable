@@ -26,12 +26,14 @@ for (const [name, width, height, route] of [
   ['tasks-phone', 390, 844, 'tasks'], ['tasks-tablet', 768, 900, 'tasks'],
   ['tasks-wide', 1440, 900, 'tasks'], ['catalog-phone', 390, 844, 'catalog'],
   ['catalog-wide', 1440, 900, 'catalog'], ['extended-components', 1024, 1100, 'components'], ['recipes-wide', 1440, 900, 'recipes'], ['collection-measured', 1024, 900, 'collection-recipes'],
+  ['composition-phone', 390, 844, 'composition'], ['composition-wide', 1440, 1000, 'composition'],
   ['extensions-phone', 390, 844, 'extensions'], ['extensions-wide', 1440, 900, 'extensions'],
 ] as const) {
   test(`DOM visual ${name}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.goto(`/#/${route}`);
     await expect(page.locator('main h1, main h2').first()).toBeVisible();
+    if (route === 'composition') await expect(page.getByTestId('shared-card-loaded')).toBeVisible();
     await stableCapture(page, 'dom', name);
   });
 }
@@ -54,6 +56,7 @@ for (const [name, width, height, route] of [
   ['tasks-phone', 390, 844, 'tasks'], ['tasks-wide', 1440, 900, 'tasks'],
   ['catalog-wide', 1440, 900, 'catalog'], ['extended-components', 1024, 1100, 'components'], ['recipes-wide', 1440, 900, 'recipes'], ['collection-measured', 1024, 900, 'collection-recipes'],
   ['navigation-policies', 1024, 1000, 'navigation-policies'],
+  ['composition-phone', 390, 844, 'composition'], ['composition-wide', 1440, 1000, 'composition'],
   ['extensions', 1440, 900, 'extensions'],
 ] as const) {
   test(`Wasm visual ${name}`, async ({ page }) => {
@@ -88,7 +91,9 @@ test('DOM visual shop-cart-phone', async ({ page }) => {
   await page.getByRole('link', { name: 'Bag (1)', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your bag' })).toBeVisible();
   await expect(page.locator('main img').first()).toHaveAttribute('data-testid', /-loaded$/);
-  await stableCapture(page, 'dom', 'shop-cart-phone');
+  await stableCapture(page, 'dom', 'shop-cart-phone', async () => {
+    await expect(page.getByRole('heading', { name: 'Your bag' })).toBeVisible();
+  });
 });
 for (const [name, width, height] of [['shop-phone',390,844],['shop-wide',1440,900]] as const) {
   test(`Wasm visual ${name}`, async ({ page }) => {

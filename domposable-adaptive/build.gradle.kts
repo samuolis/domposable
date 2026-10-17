@@ -33,6 +33,7 @@ kotlin {
                 dependencies {
                     api(libs.compose.runtime)
                     api(project(":domposable-foundation"))
+                    api(project(":domposable-ui"))
                 }
             }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
