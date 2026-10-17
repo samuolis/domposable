@@ -11,13 +11,13 @@ for (const theme of themes) {
     for (const width of [390, 1280]) {
       test(`renderer comparison ${theme} ${family} ${width}`, async ({ browser }) => {
         test.setTimeout(90000);
-        const context = await browser.newContext({ viewport: { width, height: 1800 }, deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'UTC' });
         const route = `/material/compare/${theme}/${family}`;
         const directory = `build/renderer-comparison/${theme}-${family}-${width}`;
         await mkdir(directory, { recursive: true });
         const errors: string[] = [];
-        try {
-          for (const renderer of ['html', 'wasm']) {
+        for (const renderer of ['html', 'wasm']) {
+          const context = await browser.newContext({ viewport: { width, height: 1800 }, deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'UTC' });
+          try {
             const page = await context.newPage();
             page.on('pageerror', error => errors.push(`${renderer}: ${error.message}`));
             await page.goto(`${renderer === 'wasm' ? '/wasm/' : '/'}#${route}`);
@@ -29,6 +29,7 @@ for (const theme of themes) {
               await expect(page.getByTestId('material-comparison')).toBeVisible();
               await expect(page.getByRole('heading', { name: `${family} · ${theme}`, exact: true })).toBeVisible();
             }
+            await page.waitForLoadState('networkidle');
             await page.evaluate(() => document.fonts.ready);
             await page.clock.install();
             await capture(page, `${directory}/${renderer}.png`);
@@ -54,12 +55,11 @@ for (const theme of themes) {
               }
               await capture(page, `${directory}/${renderer}-focus.png`);
             }
-            await page.close();
+          } finally {
+            await context.close();
           }
-          expect(errors).toEqual([]);
-        } finally {
-          await context.close();
         }
+        expect(errors).toEqual([]);
       });
     }
   }

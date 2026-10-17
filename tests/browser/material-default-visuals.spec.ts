@@ -181,7 +181,8 @@ test('selection descriptions stay beside the control and trailing controls reach
   const parentBox = (await trailing.locator('../..').boundingBox())!;
   expect(rowBox.width).toBeGreaterThan(300);
   expect(Math.abs(rowBox.width - parentBox.width)).toBeLessThan(2);
-  expect(Math.abs(rowBox.x + rowBox.width - controlBox.x - controlBox.width)).toBeLessThan(2);
+  await expect(trailing).toHaveCSS('margin-inline-end', '2px');
+  expect(Math.abs(rowBox.x + rowBox.width - controlBox.x - controlBox.width - 2)).toBeLessThan(2);
 });
 
 test('explicit disabled selection colors are not faded or ignored', async ({ page }) => {

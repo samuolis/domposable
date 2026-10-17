@@ -1717,7 +1717,12 @@ private fun HtmlToggle(
                             )
                         }
                     }
-                    onChange { if (effectiveEnabled) onChange(indeterminate || it.value) }
+                    onChange {
+                        if (effectiveEnabled) onChange(indeterminate || it.value)
+                        // Match controlled native toggles when the application declines a change.
+                        it.target.checked = checkedValue
+                        it.target.asDynamic().indeterminate = indeterminate
+                    }
                 })
             }
 
@@ -1910,12 +1915,21 @@ private const val MATERIAL_CSS = """
 .d-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-outline));border-radius:2px;background:transparent;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
 .d-toggle input[type=checkbox]:not([role=switch]){position:relative}.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{margin:2px}
-.d-toggle input[type=checkbox]:not([role=switch]):checked,.d-toggle input[type=checkbox]:not([role=switch]):indeterminate{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary))}
-.d-toggle input[type=checkbox]:not([role=switch]):checked::after,.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{content:"";position:absolute;inset:-2px;pointer-events:none;background:var(--d-control-checkmark,var(--d-on-primary));mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10 8 14 16 6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center/20px 20px no-repeat}
-.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10H16' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center/20px 20px no-repeat}
+.d-toggle input[type=checkbox]:not([role=switch]):checked{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary))}
+.d-toggle input[type=checkbox]:not([role=switch]):checked::after,.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{content:"";position:absolute;inset:-2px;pointer-events:none;background:var(--d-control-checkmark,var(--d-on-primary));mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10 8 14 16 6' fill='none' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") center/20px 20px no-repeat}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary))}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10H16' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") center/20px 20px no-repeat}
 .d-toggle input[type=radio]{border-radius:50%;background-color:transparent}.d-toggle input[type=radio]:checked{border-color:var(--d-control-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-selected,var(--d-primary)) 0 42%,transparent 46%)}
 .d-toggle input[type=checkbox]:not([role=switch]):disabled,.d-toggle input[type=radio]:disabled{border-color:var(--d-control-disabled-unselected,color-mix(in srgb,var(--d-on-surface) 38%,transparent));opacity:1}
-.d-toggle input[type=checkbox]:not([role=switch]):checked:disabled,.d-slider{appearance:none;width:100%;height:48px;margin:0;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
+.d-toggle input[type=checkbox]:not([role=switch]):checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background-color:var(--d-control-disabled-selected,var(--d-primary))}
+.d-toggle input[type=checkbox]:not([role=switch]):disabled::after{background:var(--d-control-disabled-checkmark,var(--d-surface))}
+.d-toggle input[type=radio]:checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-disabled-selected,var(--d-primary)) 0 42%,transparent 46%)}
+.d-toggle input[role=switch]{appearance:none;flex:0 0 52px;width:52px;height:32px;margin:0;border:2px solid var(--d-switch-unchecked-border,var(--d-outline));border-radius:999px;background-color:var(--d-switch-unchecked-track,var(--d-surface));background-image:radial-gradient(circle closest-side,var(--d-switch-unchecked-thumb,var(--d-outline)) 0 98%,transparent 100%);background-size:16px 16px;background-position:6px center;background-repeat:no-repeat;transition:background-color 150ms ease,border-color 150ms ease,background-position 150ms ease,background-size 150ms ease}
+.d-toggle input[role=switch]:checked{border-color:var(--d-switch-checked-border,transparent);background-color:var(--d-switch-checked-track,var(--d-primary));background-image:radial-gradient(circle closest-side,var(--d-switch-checked-thumb,var(--d-on-primary)) 0 98%,transparent 100%);background-size:24px 24px;background-position:calc(100% - 2px) center}
+.d-toggle input[role=switch]:disabled{opacity:1;border-color:var(--d-switch-disabled-unchecked-border);background-color:var(--d-switch-disabled-unchecked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-unchecked-thumb) 0 98%,transparent 100%)}
+.d-toggle input[role=switch]:checked:disabled{border-color:var(--d-switch-disabled-checked-border);background-color:var(--d-switch-disabled-checked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-checked-thumb) 0 98%,transparent 100%)}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate:disabled{border-color:var(--d-control-disabled-selected);background-color:var(--d-control-disabled-selected)}
+.d-slider{appearance:none;width:100%;height:48px;margin:0;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
 .d-slider::-webkit-slider-runnable-track{height:16px;border-radius:8px;background:linear-gradient(to right,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-outline)) 100%)}
 .d-slider::-moz-range-track{height:16px;border-radius:8px;background:var(--d-slider-inactive-current,var(--d-outline))}
 .d-slider::-moz-range-progress{height:16px;border-radius:8px;background:var(--d-slider-active-current,var(--d-primary))}
