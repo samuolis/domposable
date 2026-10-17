@@ -161,6 +161,8 @@ Install one binding for the application's stack. The codec must encode an absolu
 
 A server should serve the app entry for every path below the base, while serving assets normally. For example, an nginx deployment at `/workspace/` can use `try_files $uri $uri/ /workspace/index.html;` in that location. Use a matching asset base URL so nested pages load bundles from the application root.
 
+Domposable is a client-rendered SPA and does not provide SSR. Static entry pages load the application; feature content is composed in the browser after JavaScript runs.
+
 GitHub Pages has no general rewrite rule. This repository emits static entry pages for the known demo paths, with a `<base>` for bundles. They return HTTP 200 on direct loads. Its `404.html` redirects other paths inside `/domposable/routes/` through the entry point, then restores the path before composing. That fallback initially returns HTTP 404 and should not be treated as SEO pre-rendering. Arbitrary data-backed routes need appropriate hosting if that distinction matters.
 
 For a Kobweb site, use its page/router API and do not install a second browser history owner. HTML and Wasm share the optional hash/path history binding. A path-mode host must serve the entry point below its configured base; GitHub Pages demos use hash mode for the Wasm entry point.

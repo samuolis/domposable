@@ -1,5 +1,7 @@
 # Compatibility and tested boundaries
 
+**Web rendering:** Domposable uses Compose HTML to render a single-page application (SPA) in the browser. It does not provide server-side rendering (SSR). JavaScript must run to compose feature content. Hash/path URLs and static hosting entry pages do not change this rendering model.
+
 Domposable uses plain semantic versions. Until 1.0, minor releases may change APIs; the table describes this repository's CI coverage. Both browser demos use the **same `DemoApp` feature sources**.
 
 | Target | Renderer | UI/behavior checks | Visual baselines | URL owner |

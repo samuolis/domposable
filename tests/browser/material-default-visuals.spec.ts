@@ -212,3 +212,29 @@ test('selection label and description styles configure color and spacing indepen
   await expect(description).toHaveCSS('color', 'rgb(64, 45, 33)');
   await expect(description.locator('..')).toHaveCSS('gap', '4px');
 });
+
+for (const theme of ['light', 'dark', 'brand-light', 'brand-dark']) {
+  test(`selection geometry and disabled colors in ${theme}`, async ({ page, browserName }) => {
+    await page.goto(`/#/material/compare/${theme}/states`);
+    const checked = page.getByRole('checkbox', { name: 'Enabled selected checkbox', exact: true });
+    await expect(checked).toBeChecked();
+    await expect(checked).toHaveCSS('width', '20px');
+    await expect(checked).toHaveCSS('height', '20px');
+    expect(await checked.evaluate(element => getComputedStyle(element, '::after').maskImage)).toContain('M4');
+    const disabled = page.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true });
+    await expect(disabled).toBeDisabled();
+    await expect(disabled).toBeChecked();
+    const slider = page.getByRole('slider', { name: 'Slider 0.5', exact: true }).first();
+    await expect(slider).toHaveCSS('height', '48px');
+    if (browserName === 'chromium') {
+      // Chromium does not expose thumb paint geometry through getComputedStyle; the direct renderer report captures it.
+      await expect(slider).toHaveCSS('appearance', 'none');
+    }
+    await slider.focus();
+    await expect(slider).toBeFocused();
+    const disabledSlider = page.getByRole('slider', { name: 'Slider 0.5', exact: true }).last();
+    await expect(disabledSlider).toBeDisabled();
+    expect(await disabledSlider.evaluate(element => getComputedStyle(element).getPropertyValue('--d-slider-thumb-current')))
+      .toContain('38%');
+  });
+}

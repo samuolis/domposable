@@ -7,9 +7,12 @@ Wasm is an experimental visual comparison. Its stable CMP accessibility bridge h
 [HTML demo](https://samuolis.github.io/domposable/demo/) · [Wasm demo](https://samuolis.github.io/domposable/wasm/) · [Path URLs](https://samuolis.github.io/domposable/routes/tasks/welcome/)
 
 <label for="preview-width">Preview width</label>
-<select id="preview-width"><option value="390">Phone · 390 px</option><option value="768">Tablet · 768 px</option><option value="1440" selected>Wide · 1440 px</option></select>
+<select id="preview-width"><option value="390">Phone · 390 px</option><option value="768">Tablet · 768 px</option><option value="640">Component panel · 640 px</option><option value="1440" selected>Wide · 1440 px</option></select>
 <label for="preview-route">Feature</label>
-<select id="preview-route"><option value="tasks">Tasks</option><option value="catalog">Components</option><option value="components">Selection and feedback</option><option value="recipes">Navigation recipes</option><option value="shop">Fieldwork storefront</option><option value="shop/collection">Shop collection</option></select>
+<select id="preview-route"><option value="tasks">Tasks</option><option value="catalog">Components</option><option value="components">Selection and feedback</option><option value="recipes">Navigation recipes</option><option value="shop">Fieldwork storefront</option><option value="shop/collection">Shop collection</option><option value="compare/states">Material · states</option><option value="compare/actions">Material · actions</option><option value="compare/selection">Material · selection</option><option value="compare/inputs">Material · inputs</option><option value="compare/surfaces">Material · surfaces</option><option value="compare/navigation">Material · navigation</option><option value="compare/feedback">Material · feedback</option><option value="compare/gestures">Material · gestures</option><option value="compare/scaffold">Material · scaffold</option></select>
+<label for="preview-theme">Component theme</label>
+<select id="preview-theme"><option value="light">Light</option><option value="dark">Dark</option><option value="brand-light">Brand Light</option><option value="brand-dark">Brand Dark</option><option value="overrides-light">Overrides Light</option><option value="overrides-dark">Overrides Dark</option><option value="expressive-light">Expressive Light</option><option value="expressive-dark">Expressive Dark</option></select>
+<p>The theme selector applies to the Material comparison scenes. Both frames receive the same explicit theme and component calls; the states scene shows enabled, disabled, checked, unchecked, mixed and slider endpoints together.</p>
 <div class="comparison">
   <section><h2>Semantic HTML · Kotlin/JS</h2><div class="preview-scroll"><iframe title="Domposable semantic HTML preview" src="../demo/#/tasks" loading="lazy"></iframe></div></section>
   <section><h2>Compose UI · Kotlin/Wasm</h2><div class="preview-scroll"><iframe title="Domposable Wasm preview" src="../wasm/#/tasks" loading="lazy"></iframe></div></section>
@@ -19,19 +22,26 @@ Wasm is an experimental visual comparison. Its stable CMP accessibility bridge h
 (() => {
   const width = document.getElementById('preview-width');
   const route = document.getElementById('preview-route');
+  const theme = document.getElementById('preview-theme');
   const frames = [...document.querySelectorAll('.comparison iframe')];
   width.addEventListener('change', () => frames.forEach(frame => {
     frame.style.width = width.value + 'px';
     frame.style.height = width.value === '390' ? '844px' : '900px';
   }));
-  route.addEventListener('change', () => frames.forEach((frame, index) => {
-    // A hash-only change would keep the previous application shell mounted.
-    // Changing the fixture query forces both hosts to read the initial route.
-    frame.src = (index ? '../wasm/' : '../demo/') + '?preview=' + encodeURIComponent(route.value) + '#/' + route.value;
-  }));
+  const update = () => {
+    const path = route.value.startsWith('compare/')
+      ? 'material/compare/' + theme.value + '/' + route.value.slice('compare/'.length)
+      : route.value;
+    frames.forEach((frame, index) => {
+      // Reload the host so both renderers initialize the same theme and state.
+      frame.src = (index ? '../wasm/' : '../demo/') + '?preview=' + encodeURIComponent(path) + '#/' + path;
+    });
+  };
+  route.addEventListener('change', update);
+  theme.addEventListener('change', update);
 })();
 </script>
 
 The side-by-side frames intentionally scroll horizontally when their selected viewport exceeds the space on this page. This preserves the chosen **actual feature width**, rather than scaling pixels and pretending it is a phone layout.
 
-HTML renders semantic elements and native browser controls. Wasm renders Compose UI and offers different text, input and accessibility behavior. Layouts are intentionally adaptive, not pixel-identical. See the [compatibility table](compatibility.md) for tested behavior, browser-history differences and current limitations.
+HTML renders semantic elements and native browser controls. Wasm renders Compose UI and offers different text, input and accessibility behavior. The isolated Material scenes remove application chrome so control geometry, palettes and states can be compared directly at equal viewports. Renderer comparison reports expose remaining differences; an independent golden image passing does not prove HTML/Compose parity. Text rasterization and platform input behavior still depend on the renderer. See the [compatibility table](compatibility.md) for tested behavior, browser-history differences and current limitations.

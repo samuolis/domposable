@@ -25,3 +25,18 @@ test('comparison reloads the Wasm feature rather than only changing its hash', a
   await expect(wasm.locator('body')).toHaveAttribute('data-domposable-ready', 'true', { timeout: 60000 });
   await expect(wasm.locator('canvas').first()).toBeVisible();
 });
+
+
+test('component comparison initializes equal theme and state routes in both frames', async ({ page }) => {
+  await page.goto('/compare/');
+  await page.getByLabel('Preview width', { exact: true }).selectOption('640');
+  await page.getByLabel('Feature', { exact: true }).selectOption('compare/states');
+  await page.getByLabel('Component theme', { exact: true }).selectOption('brand-dark');
+  const html = page.frameLocator('iframe[title="Domposable semantic HTML preview"]');
+  await expect(html.getByRole('heading', { name: 'states · brand-dark', exact: true })).toBeVisible();
+  await expect(html.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true })).toBeDisabled();
+  await expect(html.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true })).toBeChecked();
+  const wasm = page.locator('iframe[title="Domposable Wasm preview"]');
+  await expect(wasm).toHaveAttribute('src', /#\/material\/compare\/brand-dark\/states$/);
+  expect(await html.locator('body').evaluate(() => window.innerWidth)).toBe(640);
+});

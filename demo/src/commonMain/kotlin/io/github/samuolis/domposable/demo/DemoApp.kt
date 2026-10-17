@@ -224,7 +224,10 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
                 DemoRoute.Catalog
             }
 
-            path.startsWith("/material/") && path.removePrefix("/material/") in MaterialSections -> {
+            path.startsWith("/material/") && (
+                path.removePrefix("/material/") in MaterialSections ||
+                    materialComparisonPath(path.removePrefix("/material/"))
+            ) -> {
                 DemoRoute.Material(path.removePrefix("/material/"))
             }
 
@@ -349,6 +352,10 @@ fun DemoApp(
     browserUrls: DomposableBrowserUrls = DomposableBrowserUrls.Hash,
     callerHistoryFallback: () -> String = { "home" },
 ) {
+    if (initialRoute is DemoRoute.Material && materialComparisonPath(initialRoute.section)) {
+        MaterialComparisonScreen(initialRoute.section)
+        return
+    }
     var shopping by rememberSaveable { mutableStateOf(false) }
     if (shopping) {
         ShoppingApp(browserUrls = browserUrls, onExit = { shopping = false })

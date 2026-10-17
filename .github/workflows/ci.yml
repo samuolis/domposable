@@ -77,6 +77,9 @@ jobs:
           npx playwright test --config playwright.integrations.config.ts
       - run: python scripts/ci/browser_preview.py
       - run: npx playwright test
+      - name: Export direct HTML and Compose UI theme comparisons
+        if: always()
+        run: python scripts/ci/renderer_comparison.py
       - name: Compare or export reviewed-platform visual captures
         if: always()
         env:
@@ -115,6 +118,8 @@ jobs:
             build/generated-reference/
             build/screenshots/
             build/visual-report/
+            build/renderer-comparison/
+            build/renderer-report/
             build/benchmarks/
             build/accessibility/
             **/build/reports/tests/

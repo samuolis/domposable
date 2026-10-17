@@ -75,7 +75,7 @@ fun ContactsPage(ctx: PageContext) {
 
 Let **Kobweb own page routes and browser history**. Pass navigation callbacks into the feature. Do not install `DomposableBrowserHistory` on the same page: two history owners can disagree about the current URL and back button. Domposable's internal in-memory Navigation 3 host can still manage a feature-local flow when its entries are independent of page navigation.
 
-The application applies Kobweb's own Gradle plugin and page processor. It exports `/`, `/contacts` and the explicit dynamic route `/contacts/alex`. CI checks that shared content is present with JavaScript disabled, then tests input, navigation, browser history, direct reloads and accessibility in Chromium, Firefox and WebKit. This validates pre-rendering for these exported routes, rather than implying server rendering or SEO guarantees for every shared feature.
+The application applies Kobweb's own Gradle plugin and page processor. It exports `/`, `/contacts` and the explicit dynamic route `/contacts/alex`. CI checks that shared content is present with JavaScript disabled, then tests input, navigation, browser history, direct reloads and accessibility in Chromium, Firefox and WebKit. This validates Kobweb’s build-time static pre-rendering for these exported routes. Domposable itself is a browser-rendered SPA and provides no SSR; this host integration does not imply server rendering or SEO guarantees for every shared feature.
 
 ```sh
 # Development server; stop it with :kobweb-example:kobwebStop.

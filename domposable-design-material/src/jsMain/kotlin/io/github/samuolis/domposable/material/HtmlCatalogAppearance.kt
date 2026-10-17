@@ -142,15 +142,22 @@ internal fun StyleScope.sliderColors(
     ).forEach { (role, color) -> color?.let { property("--d-slider-$role", it.css()) } }
     property(
         "--d-slider-thumb-current",
-        (if (enabled) colors.thumb else colors.disabledThumb)?.css() ?: "var(--d-primary)",
+        (if (enabled) colors.thumb else colors.disabledThumb)?.css()
+            ?: if (enabled) "var(--d-primary)" else "color-mix(in srgb,var(--d-on-surface) 38%,transparent)",
     )
     property(
         "--d-slider-active-current",
-        (if (enabled) colors.activeTrack else colors.disabledActiveTrack)?.css() ?: "var(--d-primary)",
+        (if (enabled) colors.activeTrack else colors.disabledActiveTrack)?.css()
+            ?: if (enabled) "var(--d-primary)" else "color-mix(in srgb,var(--d-on-surface) 38%,transparent)",
     )
     property(
         "--d-slider-inactive-current",
-        (if (enabled) colors.inactiveTrack else colors.disabledInactiveTrack)?.css() ?: "var(--d-outline)",
+        (if (enabled) colors.inactiveTrack else colors.disabledInactiveTrack)?.css()
+            ?: if (enabled) {
+                "var(--d-secondary-container,var(--d-variant))"
+            } else {
+                "color-mix(in srgb,var(--d-on-surface) 12%,transparent)"
+            },
     )
 }
 
