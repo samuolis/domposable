@@ -89,6 +89,26 @@ class NativeCatalogAppearanceTest {
     }
 
     @Test
+    fun disabledCheckboxUsesItsExplicitCheckmarkWithThePinnedMaterialRenderer() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                val appearance =
+                    DomposableCheckboxAppearance(
+                        checkmark = DomposableColor(0xFF006B5F),
+                        disabledCheckmark = DomposableColor(0xFF946749),
+                    )
+                val enabled = appearance.nativeCheckboxColors()
+                val disabled = appearance.nativeCheckboxColors(enabled = false)
+                SideEffect {
+                    assertEquals(Color(0xFF006B5F), enabled.checkedCheckmarkColor)
+                    assertEquals(Color(0xFF946749), disabled.checkedCheckmarkColor)
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    @Test
     fun segmentedControlsHonorTheirConfiguredMinimumHeight() {
         compose.setContent {
             DomposableMaterialTheme(

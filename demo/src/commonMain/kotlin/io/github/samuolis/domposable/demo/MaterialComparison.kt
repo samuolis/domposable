@@ -165,12 +165,12 @@ private fun MaterialControlStates() {
         ComparisonRow(if (enabled) "Mixed" else "Disabled mixed") {
             DomposableCheckbox(false, {}, "Mixed checkbox", enabled = enabled, showLabel = false, indeterminate = true)
         }
-        for (value in listOf(0f, 0.5f, 1f)) {
-            ComparisonRow("${if (enabled) "Value" else "Disabled"} $value") {
+        for ((value, label) in listOf(0f to "0", 0.5f to "0.5", 1f to "1")) {
+            ComparisonRow("${if (enabled) "Value" else "Disabled"} $label") {
                 DomposableSlider(
                     value,
                     {},
-                    "Slider $value",
+                    "Slider $label",
                     enabled = enabled,
                     modifier = DomposableModifier.width(240.dp),
                 )

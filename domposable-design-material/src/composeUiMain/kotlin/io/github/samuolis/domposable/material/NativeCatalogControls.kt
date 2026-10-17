@@ -409,14 +409,14 @@ internal fun NativeCheckbox(
                     state = ToggleableState.Indeterminate,
                     onClick = null,
                     enabled = formEnabled,
-                    colors = appearance.nativeCheckboxColors(),
+                    colors = appearance.nativeCheckboxColors(formEnabled),
                 )
             } else {
                 Checkbox(
                     checked = props.checked,
                     onCheckedChange = null,
                     enabled = formEnabled,
-                    colors = appearance.nativeCheckboxColors(),
+                    colors = appearance.nativeCheckboxColors(formEnabled),
                 )
             }
         },

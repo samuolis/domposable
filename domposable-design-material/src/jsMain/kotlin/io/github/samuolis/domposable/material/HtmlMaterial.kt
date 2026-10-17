@@ -629,52 +629,63 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             100f,
                         )
                 DomposableHtmlModifiers(modifier) {
-                    Input(InputType.Range, attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-slider")
-                        if (props.orientation == DomposableOrientation.Vertical) {
-                            classes("d-slider-vertical")
-                            attr("aria-orientation", "vertical")
-                        } else {
-                            attr("aria-orientation", "horizontal")
-                        }
-                        value(props.value.toString())
-                        attr("aria-label", props.label)
-                        attr("min", props.range.start.toString())
-                        attr("max", props.range.endInclusive.toString())
-                        attr(
-                            "step",
-                            if (props.steps ==
-                                0
-                            ) {
-                                "any"
-                            } else {
-                                ((props.range.endInclusive - props.range.start) / (props.steps + 1)).toString()
-                            },
-                        )
-                        if (!enabled) disabled()
+                    Div(attrs = {
+                        classes("d-slider-surface")
+                        if (props.orientation == DomposableOrientation.Vertical) classes("d-slider-surface-vertical")
                         style {
                             sliderColors(colors, enabled)
                             property("--d-slider-progress", "$percent%")
                             sliderMarks(
                                 props.steps,
                                 percent,
-                                vertical = props.orientation == DomposableOrientation.Vertical,
-                                reversed = props.orientation == DomposableOrientation.Vertical && !props.topToBottom,
+                                vertical =
+                                    props.orientation == DomposableOrientation.Vertical,
+                                reversed =
+                                    props.orientation == DomposableOrientation.Vertical && !props.topToBottom,
                             )
                             if (props.orientation == DomposableOrientation.Vertical) {
                                 property("--d-slider-direction", if (props.topToBottom) "bottom" else "top")
-                                property("writing-mode", "vertical-lr")
-                                property("direction", if (props.topToBottom) "ltr" else "rtl")
                             }
                         }
-                        onInput {
-                            it.target.value
-                                .toFloatOrNull()
-                                ?.takeIf { enabled }
-                                ?.let(props.onValueChange)
-                        }
-                    })
+                    }) {
+                        Input(InputType.Range, attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-slider")
+                            if (props.orientation == DomposableOrientation.Vertical) {
+                                classes("d-slider-vertical")
+                                attr("aria-orientation", "vertical")
+                            } else {
+                                attr("aria-orientation", "horizontal")
+                            }
+                            value(props.value.toString())
+                            attr("aria-label", props.label)
+                            attr("min", props.range.start.toString())
+                            attr("max", props.range.endInclusive.toString())
+                            attr(
+                                "step",
+                                if (props.steps ==
+                                    0
+                                ) {
+                                    "any"
+                                } else {
+                                    ((props.range.endInclusive - props.range.start) / (props.steps + 1)).toString()
+                                },
+                            )
+                            if (!enabled) disabled()
+                            style {
+                                if (props.orientation == DomposableOrientation.Vertical) {
+                                    property("writing-mode", "vertical-lr")
+                                    property("direction", if (props.topToBottom) "ltr" else "rtl")
+                                }
+                            }
+                            onInput {
+                                it.target.value
+                                    .toFloatOrNull()
+                                    ?.takeIf { enabled }
+                                    ?.let(props.onValueChange)
+                            }
+                        })
+                    }
                 }
             },
             card = { props, modifier, content ->
@@ -1726,7 +1737,7 @@ private fun HtmlToggle(
                                 ),
                             )
                             property("--d-control-checkmark", checkmark.cssOr("var(--d-on-primary)"))
-                            property("--d-control-disabled-checkmark", disabledCheckmark.cssOr("var(--d-surface)"))
+                            property("--d-control-disabled-checkmark", disabledCheckmark.cssOr("var(--d-on-primary)"))
                             property(
                                 "accent-color",
                                 (if (effectiveEnabled) colors.selected else colors.disabledSelected).cssOr(
@@ -1915,7 +1926,8 @@ private const val MATERIAL_CSS = """
 .d-field input[type=search]{appearance:none;-webkit-appearance:none}
 .d-field input[type=search]::-webkit-search-decoration,.d-field input[type=search]::-webkit-search-cancel-button,.d-field input[type=search]::-webkit-search-results-button,.d-field input[type=search]::-webkit-search-results-decoration{display:none}
 .d-field-control{display:flex;align-items:center;gap:8px;min-height:56px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0;height:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent}
-.d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:48px;min-width:48px}.d-toggle:not(:has(.d-toggle-copy-visible)){justify-content:center}.d-toggle input{width:20px;height:20px}
+.d-error{color:var(--d-error)}.d-toggle{position:relative;display:flex;gap:10px;align-items:center;min-height:48px;min-width:48px}.d-toggle:not(:has(.d-toggle-copy-visible)){justify-content:center}.d-toggle input{width:20px;height:20px}
+.d-toggle::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--d-on-surface);opacity:0}.d-toggle:has(input:enabled):hover::before{opacity:.08}.d-toggle:has(input:enabled:focus-visible)::before,.d-toggle:has(input:enabled):active::before{opacity:.1}
 .d-avatar{position:relative;display:inline-grid;place-items:center;overflow:hidden;flex:none;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{display:inline-grid;place-items:center;box-sizing:border-box;min-width:16px;width:max-content;height:16px;padding:0 4px;border-radius:999px;background:var(--d-primary);color:var(--d-on-primary);font-size:11px;line-height:16px;font-weight:500;font-variant-numeric:tabular-nums}.d-badge-dot{width:6px;min-width:6px;height:6px;padding:0}
 .d-divider{margin:0;padding:0;flex:none;align-self:stretch;border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
 .d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button,.d-navigation a{text-decoration:none;display:inline-flex;align-items:center;padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
@@ -1934,7 +1946,7 @@ private const val MATERIAL_CSS = """
 @media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}.d-button-spinner{animation:none!important}}
 @media(forced-colors:active){.d-button:not(:disabled):focus-visible{outline:2px solid Highlight;outline-offset:3px;box-shadow:none}}
 .d-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-on-surface-variant,var(--d-outline)));border-radius:2px;background:transparent;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
+.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-on-surface-variant,var(--d-outline)));border-radius:2px;background:transparent;background-clip:padding-box;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
 .d-toggle input[type=checkbox]:not([role=switch]){position:relative}.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{margin:2px}
 .d-toggle input[type=checkbox]:not([role=switch]):checked{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary))}
 .d-toggle input[type=checkbox]:not([role=switch]):checked::after,.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{content:"";position:absolute;inset:-2px;pointer-events:none;background:var(--d-control-checkmark,var(--d-on-primary));mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10 8 14 16 6' fill='none' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") center/20px 20px no-repeat}
@@ -1951,9 +1963,10 @@ private const val MATERIAL_CSS = """
 .d-toggle input[role=switch]:checked:disabled{border-color:var(--d-switch-disabled-checked-border);background-color:var(--d-switch-disabled-checked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-checked-thumb) 0 98%,transparent 100%)}
 .d-toggle input[type=checkbox]:not([role=switch]):indeterminate:disabled{border-color:var(--d-control-disabled-selected);background-color:var(--d-control-disabled-selected)}
 .d-slider{appearance:none;width:100%;height:48px;margin:0;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
-.d-slider{--d-slider-direction:right;--d-slider-track-paint:var(--d-slider-marks,linear-gradient(transparent,transparent)),linear-gradient(to var(--d-slider-direction),var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) 100%)}
-.d-slider::-webkit-slider-runnable-track{height:16px;border-radius:8px;background:var(--d-slider-track-paint)}
-.d-slider::-moz-range-track{height:16px;border-radius:8px;background:var(--d-slider-track-paint)}.d-slider::-moz-range-progress{background:transparent}
+.d-slider-surface{--d-slider-track-paint:var(--d-slider-marks,linear-gradient(transparent,transparent)),linear-gradient(to var(--d-slider-direction),var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) 100%)}
+.d-slider-surface{position:relative;width:100%;height:48px;--d-slider-direction:right}.d-slider-surface::before{content:"";position:absolute;inset:16px 2px;border-radius:8px;background:var(--d-slider-track-paint);pointer-events:none}.d-slider-surface-vertical{width:48px;height:160px}.d-slider-surface-vertical::before{inset:2px 16px}.d-slider-surface>.d-slider{display:block;position:absolute;inset:0}
+.d-slider::-webkit-slider-runnable-track{height:16px;border-radius:8px;background:transparent}
+.d-slider::-moz-range-track{height:16px;border-radius:8px;background:transparent}.d-slider::-moz-range-progress{background:transparent}
 .d-slider-vertical{height:160px;width:48px;touch-action:pan-x}.d-slider-vertical::-webkit-slider-runnable-track{height:100%;width:16px}.d-slider-vertical::-moz-range-track{height:100%;width:16px}
 .d-slider::-webkit-slider-thumb{appearance:none;width:4px;height:44px;margin-top:-14px;border:0;border-radius:999px;background:var(--d-slider-thumb-current,var(--d-primary))}
 .d-slider::-moz-range-thumb{width:4px;height:44px;border:0;border-radius:999px;background:var(--d-slider-thumb-current,var(--d-primary))}

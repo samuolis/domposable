@@ -275,16 +275,62 @@ test('app-owned control labels do not leave invisible layout gaps', async ({ pag
 });
 
 
-test('stepped sliders paint markers and continuous sliders retain their end stop', async ({ page, browserName }) => {
+test('stepped sliders paint markers and continuous sliders retain their end stop', async ({ page }) => {
   await page.goto('/#/material/compare/light/states');
-  const pseudo = browserName === 'firefox' ? '::-moz-range-track' : '::-webkit-slider-runnable-track';
-  const tracks = await page.locator('input[type=range]:enabled').evaluateAll((controls, pseudo) => controls.map(control => ({
-    step: control.getAttribute('step'),
-    image: getComputedStyle(control, pseudo).backgroundImage,
-  })), pseudo);
-  const stepped = tracks.find(track => track.step === '0.25')!;
-  expect(stepped.image.match(/radial-gradient/g)).toHaveLength(4);
-  expect(stepped.image).toContain('linear-gradient');
-  const continuous = tracks.find(track => track.step === 'any')!;
-  expect(continuous.image.match(/radial-gradient/g)).toHaveLength(1);
+  for (const name of ['Stepped slider', 'Slider 0.5']) {
+    const slider = page.getByRole('slider', { name, exact: true }).first();
+    const screenshot = await slider.screenshot({ scale: 'css' });
+    await test.info().attach(name, { body: screenshot, contentType: 'image/png' });
+    // Inspect actual paint: Chromium and WebKit do not expose native track pseudo styles.
+    const samples = await page.evaluate(async ({ image, stepped }) => {
+      const bitmap = new Image();
+      bitmap.src = `data:image/png;base64,${image}`;
+      await bitmap.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const context = canvas.getContext('2d')!;
+      context.drawImage(bitmap, 0, 0);
+      const fractions = stepped ? [0, 0.25, 0.75, 1] : [1];
+      return fractions.map(fraction => {
+        const x = Math.round(10 + (bitmap.width - 20) * fraction);
+        const y = Math.floor(bitmap.height / 2);
+        return {
+          marker: Array.from(context.getImageData(x, y, 1, 1).data).slice(0, 3),
+          track: Array.from(context.getImageData(x - (fraction === 0 ? -4 : 4), y, 1, 1).data).slice(0, 3),
+          active: fraction < 0.5,
+        };
+      });
+    }, { image: screenshot.toString('base64'), stepped: name === 'Stepped slider' });
+    for (const sample of samples) {
+      const primary = [87, 70, 178];
+      const container = [232, 222, 248];
+      for (const [actual, expected] of [
+        [sample.marker, sample.active ? container : primary],
+        [sample.track, sample.active ? primary : container],
+      ]) {
+        actual.forEach((channel, index) => expect(Math.abs(channel - expected[index])).toBeLessThanOrEqual(12));
+      }
+    }
+  }
 });
+
+for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 'Enabled unselected radio']) {
+  test(`selection feedback paints hover, press and keyboard focus for ${name}`, async ({ page }) => {
+    await page.goto('/#/material/compare/light/states');
+    const control = page.getByLabel(name, { exact: true });
+    const row = control.locator('..');
+    await control.hover();
+    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.08');
+    await page.mouse.down();
+    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
+    await page.mouse.up();
+    await page.mouse.move(0, 0);
+    await control.focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Shift+Tab');
+    await expect(control).toBeFocused();
+    expect(await control.evaluate(element => element.matches(':focus-visible'))).toBe(true);
+    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
+  });
+}

@@ -83,7 +83,10 @@ for (const theme of themes) {
                   for (let index = 0; index < target.tabs; index++) await page.keyboard.press('Tab');
                 } else {
                   await control.focus();
+                  await page.keyboard.press("Tab");
+                  await page.keyboard.press("Shift+Tab");
                   await expect(control).toBeFocused();
+                  expect(await control.evaluate(element => element.matches(":focus-visible"))).toBe(true);
                 }
                 await capture(page, `${directory}/${renderer}${suffix}-focus.png`, targetGolden && `${targetGolden}-focus.png`);
               }
