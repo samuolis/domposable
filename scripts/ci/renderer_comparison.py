@@ -31,12 +31,15 @@ def main():
             for width in [390, 1280]:
                 name = f'{theme}-{family}-{width}'
                 captures = ROOT / 'build/renderer-comparison' / name
-                data, ratio = comparison(png((captures / 'html.png').read_bytes()), png((captures / 'wasm.png').read_bytes()))
-                (output / f'{name}.png').write_bytes(data)
-                rows.append({'theme': theme, 'family': family, 'width': width, 'changed_pixels': ratio, 'image': f'{name}.png'})
+                for state in ['rest', 'hover', 'pressed', 'focus'] if family == 'states' else ['rest']:
+                    suffix = '' if state == 'rest' else '-' + state
+                    data, ratio = comparison(png((captures / f'html{suffix}.png').read_bytes()), png((captures / f'wasm{suffix}.png').read_bytes()))
+                    image = f'{name}{suffix}.png'
+                    (output / image).write_bytes(data)
+                    rows.append({'theme': theme, 'family': family, 'width': width, 'state': state, 'changed_pixels': ratio, 'image': image})
     (output / 'report.json').write_text(json.dumps(rows, indent=2) + '\n')
-    summary = '### HTML / Compose UI renderer differences\n\nThese measurements expose renderer differences; they are not a claim of visual parity or a replacement for regression gates.\n\n| Theme | Family | Width | Changed pixels |\n| --- | --- | --- | --- |\n'
-    summary += ''.join(f"| {r['theme']} | {r['family']} | {r['width']} | {r['changed_pixels']:.2%} |\n" for r in rows)
+    summary = '### HTML / Compose UI renderer differences\n\nThese measurements expose renderer differences; they are not a claim of visual parity or a replacement for regression gates.\n\n| Theme | Family | Width | Interaction | Changed pixels |\n| --- | --- | --- | --- | --- |\n'
+    summary += ''.join(f"| {r['theme']} | {r['family']} | {r['width']} | {r['state']} | {r['changed_pixels']:.2%} |\n" for r in rows)
     (output / 'report.md').write_text(summary)
     if path := os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(path, 'a') as stream:

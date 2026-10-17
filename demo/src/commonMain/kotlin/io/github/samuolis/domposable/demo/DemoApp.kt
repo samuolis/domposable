@@ -224,10 +224,7 @@ internal object DemoCodec : DomposableRouteCodec<DemoRoute> {
                 DemoRoute.Catalog
             }
 
-            path.startsWith("/material/") && (
-                path.removePrefix("/material/") in MaterialSections ||
-                    materialComparisonPath(path.removePrefix("/material/"))
-            ) -> {
+            materialCatalogPath(path) -> {
                 DemoRoute.Material(path.removePrefix("/material/"))
             }
 

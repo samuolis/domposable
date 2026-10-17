@@ -3,7 +3,6 @@ package io.github.samuolis.domposable.demo
 import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableColor
-import io.github.samuolis.domposable.foundation.DomposableColors
 import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
@@ -16,12 +15,15 @@ import io.github.samuolis.domposable.ui.DomposableRow
 import io.github.samuolis.domposable.ui.DomposableSlider
 import io.github.samuolis.domposable.ui.DomposableSwitch
 import io.github.samuolis.domposable.ui.DomposableText
+import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.verticalScroll
 import io.github.samuolis.domposable.ui.width
+
+private const val COMPARISON_PATH_SEGMENTS = 3
 
 internal val ComparisonThemes =
     listOf(
@@ -38,7 +40,8 @@ internal val ComparisonFamilies = listOf("states") + MaterialSections
 
 internal fun materialComparisonPath(path: String): Boolean {
     val parts = path.split('/')
-    return parts.size == 3 && parts[0] == "compare" && parts[1] in ComparisonThemes && parts[2] in ComparisonFamilies
+    return parts.size == COMPARISON_PATH_SEGMENTS && parts[0] == "compare" && parts[1] in ComparisonThemes &&
+        parts[2] in ComparisonFamilies
 }
 
 /** The same route, theme, state and composition on both appliers; no application chrome. */
@@ -48,7 +51,8 @@ internal fun MaterialComparisonScreen(path: String) {
     val dark = theme.endsWith("dark")
     val branded = theme.startsWith("brand")
     val base = materialCatalogTokens(theme.startsWith("expressive"), theme.startsWith("overrides"))
-    val colors = comparisonColors(base.colors, dark, branded)
+    val palette = if (dark) DarkComparisonColors else LightComparisonColors
+    val colors = if (branded) palette.copy(primary = if (dark) DarkBrandPrimary else LightBrandPrimary) else palette
     DomposableMaterialTheme(
         colors = colors,
         typography = base.typography,
@@ -67,6 +71,7 @@ internal fun MaterialComparisonScreen(path: String) {
         DomposableColumn(
             DomposableModifier
                 .fillMaxSize()
+                .background(colors.surface)
                 .verticalScroll()
                 .padding(16.dp)
                 .testId("material-comparison"),
@@ -88,37 +93,61 @@ internal fun MaterialComparisonScreen(path: String) {
     }
 }
 
-private fun comparisonColors(
-    base: DomposableColors,
-    dark: Boolean,
-    branded: Boolean,
-): DomposableColors =
-    base.copy(
-        primary =
-            DomposableColor(
-                if (dark) {
-                    if (branded) {
-                        0xFF83D5C5
-                    } else {
-                        0xFFC8BFFF
-                    }
-                } else if (branded) {
-                    0xFF006B5F
-                } else {
-                    0xFF5746B2
-                },
-            ),
-        onPrimary = DomposableColor(if (dark) 0xFF182F2B else 0xFFFFFFFF),
-        surface = DomposableColor(if (dark) 0xFF141218 else 0xFFFCFAFF),
-        onSurface = DomposableColor(if (dark) 0xFFE6E0E9 else 0xFF242137),
-        surfaceVariant = DomposableColor(if (dark) 0xFF49454F else 0xFFF0EDF8),
-        onSurfaceVariant = DomposableColor(if (dark) 0xFFCAC4D0 else 0xFF49454F),
-        secondaryContainer = DomposableColor(if (dark) 0xFF49445C else 0xFFE8DEF8),
-        onSecondaryContainer = DomposableColor(if (dark) 0xFFE8DEF8 else 0xFF1D192B),
-        outline = DomposableColor(if (dark) 0xFF938F99 else 0xFF79747E),
-        outlineVariant = DomposableColor(if (dark) 0xFF49454F else 0xFFCAC4D0),
-        error = DomposableColor(if (dark) 0xFFF2B8B5 else 0xFFB3261E),
+private val LightBrandPrimary = DomposableColor(0xFF006B5F)
+private val DarkBrandPrimary = DomposableColor(0xFF83D5C5)
+private val LightComparisonColors =
+    DemoTokens.colors.copy(
+        onSurfaceVariant = DomposableColor(0xFF49454F),
+        secondaryContainer = DomposableColor(0xFFE8DEF8),
+        onSecondaryContainer = DomposableColor(0xFF1D192B),
+        outline = DomposableColor(0xFF79747E),
+        outlineVariant = DomposableColor(0xFFCAC4D0),
+        error = DomposableColor(0xFFB3261E),
     )
+private val DarkComparisonColors =
+    DemoTokens.colors.copy(
+        primary = DomposableColor(0xFFC8BFFF),
+        onPrimary = DomposableColor(0xFF2F2157),
+        surface = DomposableColor(0xFF141218),
+        onSurface = DomposableColor(0xFFE6E0E9),
+        surfaceVariant = DomposableColor(0xFF49454F),
+        onSurfaceVariant = DomposableColor(0xFFCAC4D0),
+        secondary = DomposableColor(0xFFCCC2DC),
+        onSecondary = DomposableColor(0xFF332D41),
+        secondaryContainer = DomposableColor(0xFF49445C),
+        onSecondaryContainer = DomposableColor(0xFFE8DEF8),
+        primaryContainer = DomposableColor(0xFF4F378B),
+        onPrimaryContainer = DomposableColor(0xFFEADDFF),
+        tertiary = DomposableColor(0xFFEFB8C8),
+        onTertiary = DomposableColor(0xFF492532),
+        tertiaryContainer = DomposableColor(0xFF633B48),
+        onTertiaryContainer = DomposableColor(0xFFFFD8E4),
+        outline = DomposableColor(0xFF938F99),
+        outlineVariant = DomposableColor(0xFF49454F),
+        error = DomposableColor(0xFFF2B8B5),
+        onError = DomposableColor(0xFF601410),
+        errorContainer = DomposableColor(0xFF8C1D18),
+        onErrorContainer = DomposableColor(0xFFF9DEDC),
+        background = DomposableColor(0xFF141218),
+        onBackground = DomposableColor(0xFFE6E0E9),
+        inverseSurface = DomposableColor(0xFFE6E0E9),
+        inverseOnSurface = DomposableColor(0xFF322F35),
+        inversePrimary = DomposableColor(0xFF6750A4),
+        surfaceTint = DomposableColor(0xFFC8BFFF),
+        surfaceBright = DomposableColor(0xFF3B383E),
+        surfaceDim = DomposableColor(0xFF141218),
+        surfaceContainer = DomposableColor(0xFF211F26),
+        surfaceContainerHigh = DomposableColor(0xFF2B2930),
+        surfaceContainerHighest = DomposableColor(0xFF36343B),
+        surfaceContainerLow = DomposableColor(0xFF1D1B20),
+        surfaceContainerLowest = DomposableColor(0xFF0F0D13),
+    )
+
+internal fun materialCatalogPath(path: String): Boolean {
+    if (!path.startsWith("/material/")) return false
+    val section = path.removePrefix("/material/")
+    return section in MaterialSections || materialComparisonPath(section)
+}
 
 @Composable
 private fun MaterialControlStates() {

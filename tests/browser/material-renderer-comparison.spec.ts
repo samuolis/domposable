@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const themes = ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-light', 'overrides-dark', 'expressive-light', 'expressive-dark'];
@@ -31,9 +31,29 @@ for (const theme of themes) {
             }
             await page.evaluate(() => document.fonts.ready);
             await page.clock.install();
-            await page.clock.pauseAt(new Date(Date.now() + 1000));
-            const image = await page.screenshot({ animations: 'disabled', caret: 'hide', scale: 'css' });
-            await writeFile(`${directory}/${renderer}.png`, image);
+            await capture(page, `${directory}/${renderer}.png`);
+            if (family === 'states') {
+              const control = page.getByRole(renderer === 'wasm' ? 'button' : 'checkbox', { name: 'Enabled unselected checkbox', exact: true });
+              const bounds = await control.boundingBox();
+              expect(bounds).not.toBeNull();
+              await page.clock.resume();
+              await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+              await capture(page, `${directory}/${renderer}-hover.png`);
+              await page.clock.resume();
+              await page.mouse.down();
+              await capture(page, `${directory}/${renderer}-pressed.png`);
+              await page.clock.resume();
+              await page.mouse.up();
+              await page.mouse.move(0, 0);
+              if (renderer === 'wasm') {
+                await page.locator('canvas').first().focus();
+                await page.keyboard.press('Tab');
+              } else {
+                await control.focus();
+                await expect(control).toBeFocused();
+              }
+              await capture(page, `${directory}/${renderer}-focus.png`);
+            }
             await page.close();
           }
           expect(errors).toEqual([]);
@@ -43,4 +63,18 @@ for (const theme of themes) {
       });
     }
   }
+}
+
+
+async function capture(page: Page, path: string) {
+  const now = await page.evaluate(() => Date.now());
+  await page.clock.pauseAt(new Date(now + 1000));
+  let previous: Buffer | undefined;
+  await expect.poll(async () => {
+    const image = await page.screenshot({ animations: 'disabled', caret: 'hide', scale: 'css' });
+    const stable = previous?.equals(image) ?? false;
+    previous = image;
+    return stable;
+  }, { timeout: 20000, intervals: [250, 500] }).toBe(true);
+  await writeFile(path, previous!);
 }
