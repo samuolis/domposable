@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
@@ -115,18 +116,23 @@ class NativeCatalogAppearanceTest {
                 styles =
                     DomposableComponentStyles(
                         segmentedButtons = DomposableItemAppearance(minHeight = DomposableLength(72f)),
+                        tabs = DomposableItemAppearance(minHeight = DomposableLength(72f)),
                     ),
             ) {
-                DomposableSegmentedButtons(
-                    listOf("Day", "Week"),
-                    0,
-                    {},
-                    "Period",
-                    modifier = DomposableModifier.testId("period"),
-                )
+                Column {
+                    DomposableTabs(listOf("First", "Second"), 0, {}, modifier = DomposableModifier.testId("tall-tabs"))
+                    DomposableSegmentedButtons(
+                        listOf("Day", "Week"),
+                        0,
+                        {},
+                        "Period",
+                        modifier = DomposableModifier.testId("period"),
+                    )
+                }
             }
         }
         compose.onNodeWithTag("period").assertHeightIsAtLeast(72.dp)
+        compose.onNodeWithTag("tall-tabs").assertHeightIsAtLeast(72.dp)
     }
 
     @Test

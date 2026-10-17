@@ -2,6 +2,12 @@ package io.github.samuolis.domposable.demo
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import io.github.samuolis.domposable.demo.generated.resources.Res
@@ -18,6 +24,13 @@ internal actual fun MaterialComparisonFont(content: @Composable () -> Unit) {
             Font(Res.font.comparison_medium, FontWeight.Medium),
             Font(Res.font.comparison_bold, FontWeight.Bold),
         )
+    val resolver = LocalFontFamilyResolver.current
+    var ready by remember(family) { mutableStateOf(false) }
+    LaunchedEffect(family, resolver) {
+        resolver.preload(family)
+        ready = true
+    }
+    if (!ready) return
     val base = MaterialTheme.typography
     val typography =
         base.copy(

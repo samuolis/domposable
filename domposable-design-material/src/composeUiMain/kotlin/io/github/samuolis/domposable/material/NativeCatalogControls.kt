@@ -1294,6 +1294,7 @@ internal fun NativeTabs(
             val border = if (selected) item.selectedBorder ?: item.border else item.border
             val tabModifier =
                 Modifier
+                    .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier)
                     .then(appearance.shape?.let { Modifier.clip(it.nativeShape()) } ?: Modifier)
                     .then(background?.let { Modifier.background(it.nativeColor()) } ?: Modifier)
                     .then(

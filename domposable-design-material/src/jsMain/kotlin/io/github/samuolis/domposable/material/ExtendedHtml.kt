@@ -6,6 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant
+import io.github.samuolis.domposable.foundation.DomposableTypographyRole
 import io.github.samuolis.domposable.ui.DomposableFloatingActionButtonProps
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModifier
@@ -42,63 +45,93 @@ internal fun HtmlTopAppBar(
     modifier: DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.topAppBar
+    val variant = props.variant
+    val titleRole =
+        when (variant) {
+            DomposableTopAppBarVariant.Small,
+            DomposableTopAppBarVariant.CenterAligned,
+            -> DomposableTypographyRole.TitleLarge
+
+            DomposableTopAppBarVariant.Medium -> DomposableTypographyRole.HeadlineSmall
+
+            DomposableTopAppBarVariant.LargeFlexible -> DomposableTypographyRole.DisplaySmall
+
+            else -> DomposableTypographyRole.HeadlineMedium
+        }
+    val subtitleRole =
+        when (variant) {
+            DomposableTopAppBarVariant.LargeFlexible -> DomposableTypographyRole.TitleMedium
+
+            DomposableTopAppBarVariant.MediumFlexible,
+            DomposableTopAppBarVariant.TwoRows,
+            -> DomposableTypographyRole.LabelLarge
+
+            else -> DomposableTypographyRole.BodySmall
+        }
+    val height =
+        when (variant) {
+            DomposableTopAppBarVariant.Small, DomposableTopAppBarVariant.CenterAligned -> {
+                "64px"
+            }
+
+            DomposableTopAppBarVariant.Medium -> {
+                "112px"
+            }
+
+            DomposableTopAppBarVariant.MediumFlexible, DomposableTopAppBarVariant.TwoRows -> {
+                if (props.subtitle == null) "112px" else "136px"
+            }
+
+            DomposableTopAppBarVariant.LargeFlexible -> {
+                if (props.subtitle == null) "120px" else "152px"
+            }
+
+            else -> {
+                "152px"
+            }
+        }
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
-            classes("d-app-bar", "d-app-bar-${props.variant.name.lowercase()}")
+            classes("d-app-bar", "d-app-bar-${variant.name.lowercase()}")
+            if (variant != DomposableTopAppBarVariant.Small && variant != DomposableTopAppBarVariant.CenterAligned) {
+                classes("d-app-bar-expanded")
+            }
             style {
                 surfaceAppearance(appearance)
-                if (props.variant == io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.TwoRows) {
-                    property("display", "flex")
-                    property("flex-direction", "column")
-                    property("align-items", "stretch")
-                }
-                property(
-                    "min-height",
-                    when (props.variant) {
-                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.Small,
-                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.CenterAligned,
-                        -> "64px"
-
-                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.Medium,
-                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.MediumFlexible,
-                        -> "112px"
-
-                        io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.TwoRows -> "120px"
-
-                        else -> "152px"
-                    },
-                )
-                if (props.variant ==
-                    io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.CenterAligned
-                ) {
-                    property("position", "relative")
-                }
+                property("min-height", height)
+                property("--d-app-bar-height", height)
             }
         }) {
-            if (props.variant == io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant.TwoRows) {
-                Div(attrs = { classes("d-app-bar-row") }) {
-                    props.navigationIcon()
+            Div(attrs = { classes("d-app-bar-navigation") }) { props.navigationIcon() }
+            Div(attrs = { classes("d-app-bar-heading") }) {
+                Div(attrs = {
+                    classes("d-app-bar-copy")
+                    materialAppBarCopyLayout(variant)
+                }) {
                     H2(attrs = {
                         classes("d-app-bar-title")
-                        attr("data-variant", props.variant.name.lowercase())
+                        attr("data-variant", variant.name.lowercase())
+                        style {
+                            val text = appearance.textAppearance
+                            applyCatalogTextAppearance(
+                                text?.copy(role = text.role ?: titleRole)
+                                    ?: DomposableTextAppearance(role = titleRole),
+                            )
+                        }
                     }) { Text(props.title) }
-                    Div(attrs = { classes("d-app-bar-actions") }) { props.actions() }
+                    props.subtitle?.let { subtitle ->
+                        Span(attrs = {
+                            classes("d-app-bar-subtitle")
+                            style {
+                                applyCatalogTextAppearance(DomposableTextAppearance(role = subtitleRole))
+                                property("color", appearance.content?.css() ?: "var(--d-on-surface-variant)")
+                            }
+                        }) { Text(subtitle) }
+                    }
                 }
-                Div(attrs = { classes("d-app-bar-second-row") }) {
-                    props.subtitle?.let { Span { Text(it) } }
-                }
-            } else {
-                props.navigationIcon()
-                Div(attrs = { classes("d-app-bar-heading") }) {
-                    H2(attrs = {
-                        classes("d-app-bar-title")
-                        attr("data-variant", props.variant.name.lowercase())
-                    }) { Text(props.title) }
-                    props.subtitle?.let { Span(attrs = { classes("d-app-bar-subtitle") }) { Text(it) } }
-                }
-                Div(attrs = { classes("d-app-bar-actions") }) { props.actions() }
             }
+            Div(attrs = { classes("d-app-bar-actions") }) { props.actions() }
         }
     }
 }

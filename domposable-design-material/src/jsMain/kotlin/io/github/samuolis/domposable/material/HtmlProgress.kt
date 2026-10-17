@@ -119,7 +119,7 @@ private fun HtmlStandardProgress(
                 val circumference = 2f * PI.toFloat() * radius
                 val fraction = props.value?.coerceIn(0f, 1f) ?: 0.25f
                 val active = fraction * circumference
-                val gap = min(active, stroke + 4f)
+                val gap = min(active, (stroke + 4f) * (2f * radius) / width)
                 appendProgressCircle(
                     svg,
                     width,

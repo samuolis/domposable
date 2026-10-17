@@ -434,3 +434,27 @@ test('feedback and surface defaults retain Material colors and geometry', async 
   const surface = page.locator('.d-surface').filter({ hasText: 'Local surface override' }).last();
   await expect(surface).toHaveCSS('border-top-left-radius', '0px');
 });
+
+test('app bar variants use Material heights and typography', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1800 });
+  await page.goto('/#/material/compare/light/navigation');
+  for (const [variant, height, fontSize] of [
+    ['small', '64px', '24px'], ['centeraligned', '64px', '24px'],
+    ['medium', '112px', '24px'], ['large', '152px', '28px'],
+    ['mediumflexible', '112px', '28px'], ['largeflexible', '120px', '36px'],
+    ['tworows', '112px', '28px'],
+  ]) {
+    const bar = page.locator(`.d-app-bar-${variant}`).first();
+    await expect(bar).toHaveCSS('min-height', height);
+    await expect(bar.locator('.d-app-bar-title')).toHaveCSS('font-size', fontSize);
+    await expect(bar.locator('.d-app-bar-title')).toHaveCSS('font-weight', '400');
+  }
+  const bottom = page.locator('.d-bottom-app-bar').first();
+  expect((await bottom.boundingBox())!.width).toBe(358);
+  const subtitleBar = page.locator('.d-app-bar').filter({ has: page.getByRole('heading', { name: 'Flexible heading with subtitle', exact: true }) });
+  await expect(subtitleBar).toHaveCSS('min-height', '136px');
+  await expect(subtitleBar.locator('.d-app-bar-subtitle')).toHaveCSS('font-size', '14px');
+  await expect(subtitleBar.getByRole('button', { name: 'Go back', exact: true })).toBeVisible();
+  await expect(subtitleBar.getByRole('button', { name: 'More actions', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Custom title typography', exact: true })).toHaveCSS('font-size', '31px');
+});
