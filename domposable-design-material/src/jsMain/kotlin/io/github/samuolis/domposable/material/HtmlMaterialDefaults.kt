@@ -146,7 +146,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-field{min-width:min(280px,100%);max-width:100%}
 .d-field>.d-helper,.d-field>.d-error{padding-inline:16px;font-size:var(--d-type-body-small-size);line-height:var(--d-type-body-small-line-height);letter-spacing:var(--d-type-body-small-letter-spacing);color:var(--d-on-surface-variant)}
 .d-field>.d-error{color:var(--d-error)}
-.d-search-bar,.d-autocomplete{width:100%;min-width:0}
+.d-search-bar{width:min(360px,100%);min-width:0}.d-autocomplete{width:100%;min-width:0}
 .d-search-control{border-width:var(--d-input-outline-width,0px);border-radius:999px;background:var(--d-input-container,var(--d-surface-container-high))}
 .d-search-control:focus-within{border-width:var(--d-input-outline-focused-width,0px);background:var(--d-input-container-focused,var(--d-input-container,var(--d-surface-container-high)))}
 .d-search-control input{font:inherit;line-height:24px;letter-spacing:.5px}

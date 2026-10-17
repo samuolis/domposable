@@ -466,6 +466,10 @@ test('input defaults and filled cards use their native Material roles', async ({
   expect((await page.locator('.d-field').first().boundingBox())!.width).toBe(280);
   const search = page.getByRole('combobox', { name: 'Search products', exact: true });
   await expect(search).toHaveAttribute('placeholder', 'Search products');
+  expect((await page.locator('.d-search-control').boundingBox())!.width).toBe(358);
+  await page.setViewportSize({ width: 1280, height: 1800 });
+  expect((await page.locator('.d-search-control').boundingBox())!.width).toBe(360);
+  await page.setViewportSize({ width: 390, height: 1800 });
   await expect(page.locator('.d-search-control')).toHaveCSS('border-radius', '999px');
   await expect(page.locator('.d-search-control')).toHaveCSS('background-color', 'rgb(236, 230, 240)');
   const autocomplete = page.locator('.d-autocomplete');
