@@ -984,9 +984,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         onClick { if (enabled) props.onClick() }
                     }) {
                         Span(attrs = { classes("d-chip-surface") }) {
-                            props.leadingIcon?.let { Span(attrs = { classes("d-chip-icon") }) { it() } }
+                            Span(attrs = { classes("d-chip-icon") }) { props.leadingIcon?.invoke() }
                             Span(attrs = { classes("d-chip-label") }) { Text(props.label) }
-                            props.trailingIcon?.let { Span(attrs = { classes("d-chip-icon") }) { it() } }
+                            Span(attrs = { classes("d-chip-icon") }) { props.trailingIcon?.invoke() }
                         }
                     }
                 }

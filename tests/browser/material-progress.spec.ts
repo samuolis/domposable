@@ -64,3 +64,36 @@ test('Material progress and loading indicators render controlled state, expressi
   await expect(uncontained.locator('.d-loading-morph-0')).toHaveCSS('animation-name', 'none');
   await expect(contained.locator('.d-loading-morph-0')).toHaveCSS('animation-name', 'none');
 });
+
+test('circular wave paints only its controlled progress arc', async ({ page }) => {
+  await page.goto('/#/material/compare/light/feedback');
+  const indicator = page.getByRole('progressbar', { name: 'Download Wavy', exact: true });
+  const points = await indicator.locator('.d-wave-active').evaluate(element => {
+    const path = element as SVGPathElement;
+    const host = path.closest('.d-progress-wavy')!.getBoundingClientRect();
+    return [0.3, 0.8].map(fraction => {
+      const point = path.getPointAtLength(path.getTotalLength() * fraction).matrixTransform(path.getScreenCTM()!);
+      return { x: point.x - host.x, y: point.y - host.y };
+    });
+  });
+  const screenshot = await indicator.screenshot({ scale: 'css' });
+  await test.info().attach('controlled-wave-paint', { body: screenshot, contentType: 'image/png' });
+  const painted = await page.evaluate(async ({ image, points }) => {
+    const bitmap = new Image();
+    bitmap.src = `data:image/png;base64,${image}`;
+    await bitmap.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext('2d')!;
+    context.drawImage(bitmap, 0, 0);
+    return points.map(({ x, y }) => {
+      const pixels = context.getImageData(Math.round(x) - 1, Math.round(y) - 1, 3, 3).data;
+      for (let offset = 0; offset < pixels.length; offset += 4) {
+        if ([87, 70, 178].every((channel, index) => Math.abs(pixels[offset + index] - channel) <= 12)) return true;
+      }
+      return false;
+    });
+  }, { image: screenshot.toString('base64'), points });
+  expect(painted).toEqual([true, false]);
+});

@@ -325,6 +325,13 @@ private fun HtmlWavyProgress(
                     PROGRESS_SCALE.toString(),
                 )
             val activePath = appendSvgPath(svg, trackPath, "d-wave-active", PROGRESS_SCALE.toString())
+            if (circular) {
+                // Normalized dash lengths must scale with the circle, unlike linear pixel strokes.
+                val stroke = (appearance.strokeWidth?.value ?: 4f) * PROGRESS_SCALE / width
+                listOf(track, activePath).forEach {
+                    it.setAttribute("style", "vector-effect:none;stroke-width:$stroke")
+                }
+            }
             if (fraction != null) {
                 if (circular) {
                     val gap = 6f
