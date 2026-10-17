@@ -65,6 +65,8 @@ final class SmokeTests: XCTestCase {
         // App screenshots can crop with portrait coordinates during iPad rotation.
         // Accessibility can expose the next scene while the GPU still paints the previous one.
         // Require both the expected visible text and a full second of identical frames.
+        // Warm Vision's cold recognition model before measuring scene-settling time.
+        _ = renderedText(XCUIScreen.main.screenshot(), contains: text)
         var previous: Data?
         var settled: XCUIScreenshot?
         var unchangedSince = Date()

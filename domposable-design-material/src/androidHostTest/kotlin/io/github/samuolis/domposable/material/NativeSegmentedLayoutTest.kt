@@ -1,7 +1,11 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.text.TextLayoutResult
 import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.DomposableSegmentedButtonsProps
 import org.junit.Rule
@@ -9,11 +13,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36])
+@Config(sdk = [36], qualifiers = "w390dp-h500dp-mdpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeSegmentedLayoutTest {
     @get:Rule val compose = createComposeRule()
 
@@ -52,5 +58,27 @@ class NativeSegmentedLayoutTest {
         val widths = widths(true)
         assertEquals(widths[0], widths[1], 1f)
         assertEquals(widths[0], widths[2], 1f)
+    }
+
+    @Test
+    fun intrinsicSegmentsKeepMultiwordLabelsOnOneLineWhenSpaceAllows() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableSegmentedButtons(
+                    DomposableSegmentedButtonsProps(
+                        labels = listOf("Standard", "Express", "Same day"),
+                        selectedIndex = 0,
+                        onSelect = {},
+                        label = "Delivery speed",
+                        equalWidth = false,
+                    ),
+                )
+            }
+        }
+        val layouts = mutableListOf<TextLayoutResult>()
+        compose
+            .onNodeWithText("Same day", useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        assertEquals(1, layouts.single().lineCount)
     }
 }

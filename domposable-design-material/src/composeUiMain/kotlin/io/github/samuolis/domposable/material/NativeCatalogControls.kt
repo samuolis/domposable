@@ -1614,7 +1614,11 @@ internal fun NativeSegmentedButtons(
                     ) { Text(label, style = labelAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge)) }
                 }
                 // Material's segment installs weight itself; a Box makes unequal-width items intrinsic.
-                if (props.equalWidth) renderButton() else Box { renderButton() }
+                if (props.equalWidth) {
+                    renderButton()
+                } else {
+                    Box(Modifier.width(androidx.compose.foundation.layout.IntrinsicSize.Max)) { renderButton() }
+                }
             }
         }
     }
