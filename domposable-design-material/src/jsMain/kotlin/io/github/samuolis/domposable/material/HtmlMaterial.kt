@@ -525,11 +525,20 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val labelId = remember { "d-radio-label-${nextInputId++}" }
                 val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
-                    TagElement<HTMLElement>("label", applyAttrs = {
-                        classes("d-toggle")
-                        onClick { it.stopPropagation() }
-                        style { property("gap", "${appearance.labelSpacing.value}px") }
-                    }) {
+                    TagElement<HTMLElement>(
+                        if (props.showLabel ||
+                            props.description != null
+                        ) {
+                            "label"
+                        } else {
+                            "span"
+                        },
+                        applyAttrs = {
+                            classes("d-toggle")
+                            selectionContainerClick()
+                            style { property("gap", "${appearance.labelSpacing.value}px") }
+                        },
+                    ) {
                         @Composable fun control() {
                             Input(InputType.Radio, attrs = {
                                 domposableAttributes(modifier)
@@ -967,11 +976,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         attr("aria-label", props.label)
                         attr("aria-pressed", props.selected.toString())
                         classes("d-chip", "d-chip-${props.variant.name.lowercase()}")
+                        if (props.elevated) classes("d-chip-elevated")
                         if (appearance.minimumInteractiveSize != null) classes("d-item-hittarget")
                         if (!enabled) disabled()
                         style {
                             itemAppearance(appearance, props.selected)
-                            if (props.elevated) property("box-shadow", "0 2px 6px rgb(0 0 0 / .22)")
+                            if (props.elevated) property("box-shadow", "0 1px 3px rgb(0 0 0 / .24)")
                         }
                         onClick { if (enabled) props.onClick() }
                     }) {
@@ -1609,6 +1619,17 @@ private var nextInputId = 0
 
 internal fun nextMaterialInputId(): String = "d-input-${nextInputId++}"
 
+private fun AttrsScope<HTMLElement>.selectionContainerClick() {
+    onClick { event ->
+        event.stopPropagation()
+        val host = event.currentTarget as? HTMLElement
+        if (host?.tagName != "LABEL" && event.target != host?.querySelector("input")) {
+            event.preventDefault()
+            (host?.querySelector("input") as? HTMLElement)?.click()
+        }
+    }
+}
+
 @Composable
 private fun HtmlToggle(
     checkedValue: Boolean,
@@ -1641,9 +1662,9 @@ private fun HtmlToggle(
                 DomposableSelectionColors()
         }
     DomposableHtmlModifiers(modifier) {
-        TagElement<HTMLElement>("label", applyAttrs = {
+        TagElement<HTMLElement>(if (showLabel) "label" else "span", applyAttrs = {
             classes("d-toggle")
-            onClick { it.stopPropagation() }
+            selectionContainerClick()
             style { property("gap", "${labelSpacing.value}px") }
         }) {
             @Composable fun control() {
@@ -1772,7 +1793,12 @@ private fun HtmlToggle(
                     description?.let {
                         Span(attrs = {
                             id(descriptionId)
-                            style { descriptionAppearance?.let { applyCatalogTextAppearance(it) } }
+                            style {
+                                applyCatalogTextAppearance(
+                                    descriptionAppearance
+                                        ?: DomposableTextAppearance(role = DomposableTypographyRole.BodySmall),
+                                )
+                            }
                         }) { Text(it) }
                     }
                 }
@@ -1898,7 +1924,7 @@ private fun HtmlTheme(
 internal fun InstallDomposableMaterialStyles() {
     DisposableEffect(Unit) {
         val style = document.createElement("style")
-        style.textContent = MATERIAL_CSS
+        style.textContent = MATERIAL_CSS + MATERIAL_DEFAULTS_CSS
         document.head!!.appendChild(style)
         onDispose { style.remove() }
     }

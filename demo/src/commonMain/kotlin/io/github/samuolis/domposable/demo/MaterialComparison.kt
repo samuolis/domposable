@@ -54,46 +54,51 @@ internal fun MaterialComparisonScreen(path: String) {
     val base = materialCatalogTokens(theme.startsWith("expressive"), theme.startsWith("overrides"))
     val palette = if (dark) DarkComparisonColors else LightComparisonColors
     val colors = if (branded) palette.copy(primary = if (dark) DarkBrandPrimary else LightBrandPrimary) else palette
-    DomposableMaterialTheme(
-        colors = colors,
-        typography = base.typography,
-        shapes = base.shapes,
-        styles = base.components,
-        designLanguage =
-            if (theme.startsWith(
-                    "expressive",
-                )
-            ) {
-                DomposableDesignLanguage.Expressive
-            } else {
-                DomposableDesignLanguage.Standard
-            },
-    ) {
-        DomposableSurface(DomposableModifier.fillMaxSize(), color = colors.surface) {
-            DomposableColumn(
-                DomposableModifier
-                    .fillMaxSize()
-                    .verticalScroll()
-                    .padding(16.dp)
-                    .testId("material-comparison"),
-                gap = 16.dp,
-            ) {
-                DomposableText("$family · $theme", style = DomposableTextStyle.Title, headingLevel = 1)
-                when (family) {
-                    "states" -> MaterialControlStates()
-                    "actions" -> MaterialActions()
-                    "selection" -> MaterialSelection()
-                    "inputs" -> MaterialInputs()
-                    "surfaces" -> MaterialSurfaces()
-                    "navigation" -> MaterialNavigation()
-                    "feedback" -> MaterialFeedback()
-                    "gestures" -> MaterialGestures()
-                    "scaffold" -> MaterialScaffold()
+    MaterialComparisonFont {
+        DomposableMaterialTheme(
+            colors = colors,
+            typography = base.typography.copy(fontFamily = "DomposableComparison, sans-serif"),
+            shapes = base.shapes,
+            styles = base.components,
+            designLanguage =
+                if (theme.startsWith(
+                        "expressive",
+                    )
+                ) {
+                    DomposableDesignLanguage.Expressive
+                } else {
+                    DomposableDesignLanguage.Standard
+                },
+        ) {
+            DomposableSurface(DomposableModifier.fillMaxSize(), color = colors.surface) {
+                DomposableColumn(
+                    DomposableModifier
+                        .fillMaxSize()
+                        .verticalScroll()
+                        .padding(16.dp)
+                        .testId("material-comparison"),
+                    gap = 16.dp,
+                ) {
+                    DomposableText("$family · $theme", style = DomposableTextStyle.Title, headingLevel = 1)
+                    when (family) {
+                        "states" -> MaterialControlStates()
+                        "actions" -> MaterialActions()
+                        "selection" -> MaterialSelection()
+                        "inputs" -> MaterialInputs()
+                        "surfaces" -> MaterialSurfaces()
+                        "navigation" -> MaterialNavigation()
+                        "feedback" -> MaterialFeedback()
+                        "gestures" -> MaterialGestures()
+                        "scaffold" -> MaterialScaffold()
+                    }
                 }
             }
         }
     }
 }
+
+@Composable
+internal expect fun MaterialComparisonFont(content: @Composable () -> Unit)
 
 private val LightBrandPrimary = DomposableColor(0xFF006B5F)
 private val DarkBrandPrimary = DomposableColor(0xFF83D5C5)

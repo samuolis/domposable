@@ -334,3 +334,34 @@ for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 
     expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
   });
 }
+
+
+test('Material defaults keep component surfaces compact and preserve explicit theme overrides', async ({ page }) => {
+  await page.goto('/#/material/compare/light/actions');
+  const filled = page.getByRole('button', { name: 'Filled', exact: true });
+  await expect(filled).toHaveCSS('height', '40px');
+  const outlined = page.getByRole('button', { name: 'Outlined', exact: true });
+  const outline = await outlined.evaluate(element => ({
+    color: getComputedStyle(element).color,
+    token: (() => {
+      const color = document.createElement('span').style;
+      color.color = getComputedStyle(element.closest('.d-theme')!).getPropertyValue('--d-on-surface-variant').trim();
+      return color.color;
+    })(),
+  }));
+  expect(outline.color).toBe(outline.token);
+  const extended = page.getByRole('button', { name: 'Compose', exact: true });
+  await expect(extended).toContainText('Compose');
+  await page.goto('/#/material/compare/light/selection');
+  const chip = page.locator('.d-chip-assist').first();
+  await expect(chip).toHaveCSS('height', '32px');
+  await expect(chip).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await page.goto('/#/material/compare/light/surfaces');
+  const card = page.locator('.d-card').filter({ has: page.getByText('Filled card', { exact: true }) });
+  await expect(card).toHaveCSS('padding', '0px');
+  await page.goto('/#/material/selection');
+  await page.getByRole('switch', { name: 'Component overrides', exact: true }).check();
+  const segment = page.getByRole('radiogroup', { name: 'Period', exact: true }).locator('.d-segment-surface').first();
+  await expect(segment).toHaveCSS('min-height', '40px');
+  await expect(segment).toHaveCSS('padding', '8px 12px');
+});

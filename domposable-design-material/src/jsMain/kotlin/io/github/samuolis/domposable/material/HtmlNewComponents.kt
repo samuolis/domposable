@@ -210,6 +210,7 @@ internal fun HtmlAppBar(
                     attr("type", "button")
                     attr("aria-label", item.label)
                     attr("data-appbar-action", "")
+                    classes("d-icon-button", "d-icon-button-standard")
                     if (index >=
                         visibleCount
                     ) {
@@ -222,11 +223,12 @@ internal fun HtmlAppBar(
                     if (!item.enabled || !formEnabled) disabled()
                     style { styleAppearance(appearance, item.enabled) }
                     onClick { if (item.enabled && formEnabled) item.onClick() }
-                }) { item.icon?.invoke() ?: Text(item.label) }
+                }) { item.icon?.invoke() ?: Text(item.label.take(1)) }
             }
             Button(attrs = {
                 attr("type", "button")
                 attr("data-appbar-overflow", "")
+                classes("d-icon-button", "d-icon-button-standard")
                 attr("aria-label", props.overflowLabel)
                 attr("aria-expanded", expanded.toString())
                 attr("aria-controls", id)

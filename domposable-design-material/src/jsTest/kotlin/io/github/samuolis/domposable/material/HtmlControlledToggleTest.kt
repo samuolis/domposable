@@ -32,7 +32,9 @@ class HtmlControlledToggleTest {
                     DomposableMaterialTheme {
                         DomposableCheckbox(false, { requested += it }, "Checkbox", showLabel = false)
                         DomposableSwitch(false, { requested += it }, "Switch", showLabel = false)
-                        DomposableCheckbox(false, { requested += it }, "Mixed", showLabel = false, indeterminate = true)
+                        DomposableCheckbox(false, {
+                            requested += it
+                        }, "Mixed", showLabel = false, indeterminate = true, description = "External description")
                         DomposableRadioButton(true, { radioRequests++ }, "First", groupName = "controlled")
                         DomposableRadioButton(false, { radioRequests++ }, "Second", groupName = "controlled")
                         DomposableSlider(0.5f, { sliderRequests += it }, "Slider")
@@ -42,6 +44,7 @@ class HtmlControlledToggleTest {
                 val inputs = root.querySelectorAll("input[type=checkbox]")
                 for (index in 0 until inputs.length) {
                     val input = inputs.item(index) as HTMLInputElement
+                    assertEquals("SPAN", input.parentElement?.tagName)
                     (input.parentElement as org.w3c.dom.HTMLElement).click()
                     settleControls()
                     assertFalse(input.checked)

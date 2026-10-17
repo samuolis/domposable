@@ -148,7 +148,10 @@ internal fun HtmlFloatingActionButton(
                 }
             }
             onClick { props.onClick() }
-        }) { content() }
+        }) {
+            content()
+            if (props.extended) Span { Text(props.label) }
+        }
     }
 }
 

@@ -47,3 +47,12 @@ CI captures both the top and bottom of each component family so lower controls, 
 The side-by-side frames intentionally scroll horizontally when their selected viewport exceeds the space on this page. This preserves the chosen **actual feature width**, rather than scaling pixels and pretending it is a phone layout.
 
 HTML renders semantic elements and native browser controls. Wasm renders Compose UI and offers different text, input and accessibility behavior. The isolated Material scenes remove application chrome so control geometry, palettes and states can be compared directly at equal viewports. Renderer comparison reports expose remaining differences; an independent golden image passing does not prove HTML/Compose parity. Text rasterization and platform input behavior still depend on the renderer. See the [compatibility table](compatibility.md) for tested behavior, browser-history differences and current limitations.
+
+
+## Reproducible component comparisons
+
+The Material routes pin the same regular and medium Roboto font files in both hosts, so font metrics do not depend on the browser or operating system. The library does not bundle a font or change your native Material font family: configure native typography in the host and use the matching CSS family through `DomposableMaterialTheme(typography = ...)` for HTML. The comparison host demonstrates both sides.
+
+CI captures all nine component families in eight themes at 390 px and 1280 px. It captures the beginning and end of long families, plus hover, press and keyboard focus for checkbox, switch, radio and slider. The resulting 464 HTML / pixel difference / Wasm panels are exported in the CI evidence artifact. These diagnostic panels complement regression baselines; producing an image does not establish visual parity.
+
+The demo font files come from [Roboto](https://github.com/googlefonts/roboto-2/tree/38062f4b4a0be4346d07a928408da21602545e9e), with the Apache 2.0 license included in the demo resources. They apply only to comparison routes.
