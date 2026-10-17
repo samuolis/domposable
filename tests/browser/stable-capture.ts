@@ -11,6 +11,18 @@ export async function stableCapture(page: Page, platform: string, name: string, 
     await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   }
   await page.evaluate(() => document.fonts.ready);
+  if (platform === 'wasm' && name === 'material-navigation' && beforeCapture) {
+    // This static scene must settle fallback glyphs before freezing its animation clock.
+    let previousFrame = '';
+    let stableSince = 0;
+    await expect.poll(async () => {
+      const frame = createHash('sha256').update(await page.screenshot({ animations: 'disabled', caret: 'hide', scale: 'css' })).digest('hex');
+      const now = Date.now();
+      if (frame !== previousFrame) stableSince = now;
+      previousFrame = frame;
+      return now - stableSince >= 1000;
+    }, { timeout: 20000, intervals: [250] }).toBe(true);
+  }
   await beforeCapture?.();
   let previous = '';
   let capture: Buffer;

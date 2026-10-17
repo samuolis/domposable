@@ -94,7 +94,17 @@ internal fun <T : HTMLElement> AttrsScope<T>.floatingControlStyle(
         property("border", "${width}px solid $borderColor")
         appearance.colors.container.color(props.enabled, props.isError, focused)?.let {
             property("background-color", it.css())
-        } ?: property("background-color", "var(--d-surface)")
+        }
+            ?: property(
+                "background-color",
+                if (appearance.variant ==
+                    DomposableTextFieldVariant.Filled
+                ) {
+                    "var(--d-surface-container-highest)"
+                } else {
+                    "var(--d-surface)"
+                },
+            )
         if (appearance.variant == DomposableTextFieldVariant.Filled) {
             property("border-width", "0 0 ${width}px")
         }

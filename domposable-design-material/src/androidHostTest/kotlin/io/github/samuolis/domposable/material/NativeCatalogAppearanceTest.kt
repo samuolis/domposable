@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
@@ -33,6 +34,7 @@ import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
+import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableShapes
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
@@ -65,24 +67,72 @@ class NativeCatalogAppearanceTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    fun unselectedCheckboxColorsStyleTheOutlineWithoutFillingTheBox() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                val colors =
+                    DomposableCheckboxAppearance(
+                        colors =
+                            DomposableSelectionColors(
+                                unselected = DomposableColor(0xFF006B5F),
+                                disabledUnselected = DomposableColor(0xFF79747E),
+                            ),
+                    ).nativeCheckboxColors()
+                SideEffect {
+                    assertEquals(Color.Transparent, colors.uncheckedBoxColor)
+                    assertEquals(Color.Transparent, colors.disabledUncheckedBoxColor)
+                    assertEquals(Color(0xFF006B5F), colors.uncheckedBorderColor)
+                    assertEquals(Color(0xFF79747E), colors.disabledUncheckedBorderColor)
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    @Test
+    fun disabledCheckboxUsesItsExplicitCheckmarkWithThePinnedMaterialRenderer() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                val appearance =
+                    DomposableCheckboxAppearance(
+                        checkmark = DomposableColor(0xFF006B5F),
+                        disabledCheckmark = DomposableColor(0xFF946749),
+                    )
+                val enabled = appearance.nativeCheckboxColors()
+                val disabled = appearance.nativeCheckboxColors(enabled = false)
+                SideEffect {
+                    assertEquals(Color(0xFF006B5F), enabled.checkedCheckmarkColor)
+                    assertEquals(Color(0xFF946749), disabled.checkedCheckmarkColor)
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    @Test
     fun segmentedControlsHonorTheirConfiguredMinimumHeight() {
         compose.setContent {
             DomposableMaterialTheme(
                 styles =
                     DomposableComponentStyles(
                         segmentedButtons = DomposableItemAppearance(minHeight = DomposableLength(72f)),
+                        tabs = DomposableItemAppearance(minHeight = DomposableLength(72f)),
                     ),
             ) {
-                DomposableSegmentedButtons(
-                    listOf("Day", "Week"),
-                    0,
-                    {},
-                    "Period",
-                    modifier = DomposableModifier.testId("period"),
-                )
+                Column {
+                    DomposableTabs(listOf("First", "Second"), 0, {}, modifier = DomposableModifier.testId("tall-tabs"))
+                    DomposableSegmentedButtons(
+                        listOf("Day", "Week"),
+                        0,
+                        {},
+                        "Period",
+                        modifier = DomposableModifier.testId("period"),
+                    )
+                }
             }
         }
         compose.onNodeWithTag("period").assertHeightIsAtLeast(72.dp)
+        compose.onNodeWithTag("tall-tabs").assertHeightIsAtLeast(72.dp)
     }
 
     @Test

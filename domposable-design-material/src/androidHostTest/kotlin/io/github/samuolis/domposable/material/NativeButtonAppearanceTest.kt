@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -25,10 +27,13 @@ import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableShape
+import io.github.samuolis.domposable.foundation.DomposableSwitchAppearance
+import io.github.samuolis.domposable.foundation.DomposableSwitchColors
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableSwitch
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.testId
 import org.junit.Rule
@@ -129,5 +134,49 @@ class NativeButtonAppearanceTest {
         }
         compose.onNodeWithTag("save").assertIsEnabled().performClick()
         compose.runOnIdle { assertEquals(2, clicks) }
+    }
+
+    @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
+    fun switchPressRetainsMaterialThumbGeometry() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                Column {
+                    Switch(
+                        false,
+                        {},
+                        Modifier.testTag("material-switch"),
+                        colors = SwitchDefaults.colors(uncheckedThumbColor = Color.Red),
+                    )
+                    DomposableSwitch(
+                        false,
+                        {},
+                        "Switch",
+                        showLabel = false,
+                        modifier = DomposableModifier.testId("shared-switch"),
+                        appearance =
+                            DomposableSwitchAppearance(
+                                colors = DomposableSwitchColors(uncheckedThumb = DomposableColor(0xFFFF0000)),
+                            ),
+                    )
+                }
+            }
+        }
+
+        fun pressedThumbWidth(tag: String): Int {
+            val control = compose.onNodeWithTag(tag)
+            control.performTouchInput { down(center) }
+            compose.waitForIdle()
+            val pixels = control.captureToImage().toPixelMap()
+            val width =
+                (0 until pixels.width).count { x ->
+                    val pixel = pixels[x, pixels.height / 2]
+                    pixel.red > 0.9f && pixel.green < 0.1f && pixel.blue < 0.1f
+                }
+            control.performTouchInput { up() }
+            return width
+        }
+        val expected = pressedThumbWidth("material-switch")
+        assertEquals(expected, pressedThumbWidth("shared-switch"))
     }
 }

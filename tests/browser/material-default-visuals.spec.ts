@@ -26,6 +26,22 @@ test('selection controls and chips use Material-sized visual surfaces', async ({
   await expect(toggle).toHaveCSS('appearance', 'none');
   await expect(toggle).toHaveCSS('width', '52px');
   await expect(toggle).toHaveCSS('height', '32px');
+  await expect(checkbox.locator('..')).toHaveCSS('min-height', '48px');
+  const defaultColors = await checkbox.evaluate(control => {
+    const theme = getComputedStyle(control.closest('.d-theme')!);
+    const resolve = (token: string) => {
+      const swatch = document.createElement('span');
+      swatch.style.color = theme.getPropertyValue(token).trim();
+      return swatch.style.color;
+    };
+    return {
+      outline: getComputedStyle(control).borderTopColor,
+      expectedOutline: resolve('--d-on-surface-variant'),
+      expectedTrack: resolve('--d-surface-container-highest'),
+    };
+  });
+  expect(defaultColors.outline).toBe(defaultColors.expectedOutline);
+  expect(await toggle.evaluate(control => getComputedStyle(control).backgroundColor)).toBe(defaultColors.expectedTrack);
 
   const filterChip = page.locator('.d-chip-filter').first();
   const chipSurface = (await filterChip.evaluate(element => element.classList.contains('d-item-hittarget')))
@@ -36,7 +52,7 @@ test('selection controls and chips use Material-sized visual surfaces', async ({
 });
 
 test('segmented controls apply theme geometry without shrinking the hit target', async ({ page }) => {
-  await page.goto('/#/material/selection');
+  await page.goto('/?comparison=overrides#/material/selection');
   await page.getByRole('switch', { name: 'Component overrides', exact: true }).check();
   const group = page.getByRole('radiogroup', { name: 'Period', exact: true });
   const segment = group.locator('label').first();
@@ -181,7 +197,8 @@ test('selection descriptions stay beside the control and trailing controls reach
   const parentBox = (await trailing.locator('../..').boundingBox())!;
   expect(rowBox.width).toBeGreaterThan(300);
   expect(Math.abs(rowBox.width - parentBox.width)).toBeLessThan(2);
-  expect(Math.abs(rowBox.x + rowBox.width - controlBox.x - controlBox.width)).toBeLessThan(2);
+  await expect(trailing).toHaveCSS('margin-inline-end', '2px');
+  expect(Math.abs(rowBox.x + rowBox.width - controlBox.x - controlBox.width - 2)).toBeLessThan(2);
 });
 
 test('explicit disabled selection colors are not faded or ignored', async ({ page }) => {
@@ -211,4 +228,264 @@ test('selection label and description styles configure color and spacing indepen
   await expect(label).toHaveCSS('color', 'rgb(148, 103, 73)');
   await expect(description).toHaveCSS('color', 'rgb(64, 45, 33)');
   await expect(description.locator('..')).toHaveCSS('gap', '4px');
+});
+
+for (const theme of ['light', 'dark', 'brand-light', 'brand-dark']) {
+  test(`selection geometry and disabled colors in ${theme}`, async ({ page, browserName }) => {
+    await page.goto(`/#/material/compare/${theme}/states`);
+    const checked = page.getByRole('checkbox', { name: 'Enabled selected checkbox', exact: true });
+    await expect(checked).toBeChecked();
+    await expect(checked).toHaveCSS('width', '20px');
+    await expect(checked).toHaveCSS('height', '20px');
+    expect(await checked.evaluate(element => getComputedStyle(element, '::after').maskImage)).toContain('M4');
+    const disabled = page.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true });
+    await expect(disabled).toBeDisabled();
+    await expect(disabled).toBeChecked();
+    const slider = page.getByRole('slider', { name: 'Slider 0.5', exact: true }).first();
+    await expect(slider).toHaveCSS('height', '48px');
+    if (browserName === 'chromium') {
+      // Chromium does not expose thumb paint geometry through getComputedStyle; the direct renderer report captures it.
+      await expect(slider).toHaveCSS('appearance', 'none');
+    }
+    await slider.focus();
+    await expect(slider).toBeFocused();
+    const disabledSlider = page.getByRole('slider', { name: 'Slider 0.5', exact: true }).last();
+    await expect(disabledSlider).toBeDisabled();
+    expect(await disabledSlider.evaluate(element => getComputedStyle(element).getPropertyValue('--d-slider-thumb-current')))
+      .toContain('38%');
+  });
+}
+
+
+test('app-owned control labels do not leave invisible layout gaps', async ({ page }) => {
+  await page.goto('/#/material/compare/light/states');
+  for (const [role, name] of [
+    ['checkbox', 'Enabled unselected checkbox'],
+    ['switch', 'Enabled unselected switch'],
+    ['radio', 'Enabled unselected radio'],
+  ] as const) {
+    const control = page.getByRole(role, { name, exact: true });
+    const visual = (await control.boundingBox())!;
+    const target = (await control.locator('..').boundingBox())!;
+    expect(target.height).toBe(48);
+    expect(target.width).toBeGreaterThanOrEqual(48);
+    expect(Math.abs(visual.x + visual.width / 2 - target.x - target.width / 2)).toBeLessThan(1);
+    expect(Math.abs(visual.y + visual.height / 2 - target.y - target.height / 2)).toBeLessThan(1);
+  }
+});
+
+
+test('stepped sliders paint markers and continuous sliders retain their end stop', async ({ page }) => {
+  await page.goto('/#/material/compare/light/states');
+  for (const name of ['Stepped slider', 'Slider 0.5']) {
+    const slider = page.getByRole('slider', { name, exact: true }).first();
+    const screenshot = await slider.screenshot({ scale: 'css' });
+    await test.info().attach(name, { body: screenshot, contentType: 'image/png' });
+    // Inspect actual paint: Chromium and WebKit do not expose native track pseudo styles.
+    const samples = await page.evaluate(async ({ image, stepped }) => {
+      const bitmap = new Image();
+      bitmap.src = `data:image/png;base64,${image}`;
+      await bitmap.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const context = canvas.getContext('2d')!;
+      context.drawImage(bitmap, 0, 0);
+      const fractions = stepped ? [0, 0.25, 0.75, 1] : [1];
+      return fractions.map(fraction => {
+        const x = Math.round(10 + (bitmap.width - 20) * fraction);
+        const y = Math.floor(bitmap.height / 2);
+        return {
+          marker: Array.from(context.getImageData(x, y, 1, 1).data).slice(0, 3),
+          track: Array.from(context.getImageData(x - (fraction === 0 ? -4 : 4), y, 1, 1).data).slice(0, 3),
+          active: fraction < 0.5,
+        };
+      });
+    }, { image: screenshot.toString('base64'), stepped: name === 'Stepped slider' });
+    for (const sample of samples) {
+      const primary = [87, 70, 178];
+      const container = [232, 222, 248];
+      for (const [actual, expected] of [
+        [sample.marker, sample.active ? container : primary],
+        [sample.track, sample.active ? primary : container],
+      ]) {
+        actual.forEach((channel, index) => expect(Math.abs(channel - expected[index])).toBeLessThanOrEqual(12));
+      }
+    }
+  }
+});
+
+for (const name of [
+  'Enabled unselected checkbox', 'Enabled selected checkbox',
+  'Enabled unselected switch', 'Enabled selected switch',
+  'Enabled unselected radio', 'Enabled selected radio',
+]) {
+  test(`selection feedback paints hover, press and keyboard focus for ${name}`, async ({ page }) => {
+    await page.goto('/#/material/compare/light/states');
+    const control = page.getByLabel(name, { exact: true });
+    const row = control.locator('..');
+    await control.hover();
+    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.08');
+    await page.mouse.down();
+    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.172');
+    if (name.endsWith(' switch')) {
+      await expect(control).toHaveCSS('background-size', '28px 28px');
+      await expect(control).toHaveCSS('background-position', name === 'Enabled selected switch' ? '100% 50%' : '0px 50%');
+    }
+    await page.mouse.up();
+    await page.mouse.move(0, 0);
+    await page.keyboard.press('Tab');
+    await control.focus();
+    await expect(control).toBeFocused();
+    expect(await control.evaluate(element => element.matches(':focus-visible'))).toBe(true);
+    expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
+    await expect(row).toHaveCSS('outline-width', '3px');
+    await expect(row).toHaveCSS('outline-style', 'solid');
+  });
+}
+
+
+test('Material defaults keep component surfaces compact and preserve explicit theme overrides', async ({ page }) => {
+  await page.goto('/?comparison=actions#/material/compare/light/actions');
+  const filled = page.getByRole('button', { name: 'Filled', exact: true });
+  await expect(filled).toHaveCSS('height', '40px');
+  await expect(filled.locator('..')).toHaveCSS('height', '48px');
+  const outlined = page.getByRole('button', { name: 'Outlined', exact: true });
+  const outline = await outlined.evaluate(element => ({
+    color: getComputedStyle(element).color,
+    token: (() => {
+      const color = document.createElement('span').style;
+      color.color = getComputedStyle(element.closest('.d-theme')!).getPropertyValue('--d-on-surface-variant').trim();
+      return color.color;
+    })(),
+  }));
+  expect(outline.color).toBe(outline.token);
+  const icon = page.getByRole('button', { name: 'Favorite FilledTonal', exact: true });
+  await expect(icon).toHaveCSS('width', '40px');
+  await expect(icon).toHaveCSS('height', '40px');
+  await expect(icon.locator('..')).toHaveCSS('height', '48px');
+  await expect(page.locator('.d-button-group')).toHaveCSS('height', '48px');
+  await expect(page.locator('.d-split-button')).toHaveCSS('height', '48px');
+  const extended = page.getByRole('button', { name: 'Compose', exact: true });
+  await expect(extended).toContainText('Compose');
+  await expect(extended).toHaveCSS('height', '56px');
+  const smallFab = page.locator('.d-fab-small').first();
+  await expect(smallFab).toHaveCSS('width', '40px');
+  await expect(smallFab).toHaveCSS('height', '40px');
+  await expect(smallFab.locator('..')).toHaveCSS('height', '48px');
+  await expect(page.locator('.d-fab-menu-toggle')).toHaveCSS('height', '56px');
+  await page.goto('/?comparison=selection#/material/compare/light/selection');
+  const chip = page.locator('.d-chip-assist').first();
+  await expect(chip).toHaveCSS('height', '48px');
+  await expect(chip.locator('.d-chip-surface')).toHaveCSS('height', '32px');
+  await expect(chip).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await page.goto('/?comparison=surfaces#/material/compare/light/surfaces');
+  const card = page.locator('.d-card').filter({ has: page.getByText('Filled card', { exact: true }) });
+  await expect(card).toHaveCSS('padding', '0px');
+  await page.goto('/?comparison=overrides#/material/selection');
+  await page.getByRole('switch', { name: 'Component overrides', exact: true }).check();
+  const segment = page.getByRole('radiogroup', { name: 'Period', exact: true }).locator('.d-segment-surface').first();
+  await expect(segment).toHaveCSS('min-height', '40px');
+  await expect(segment).toHaveCSS('padding', '8px 12px');
+});
+
+
+test('rails retain labels while closed drawers do not duplicate their content', async ({ page }) => {
+  await page.goto('/?comparison=navigation#/material/compare/light/navigation');
+  const rail = page.locator('.d-wide-navigation-rail');
+  const home = rail.getByRole('button', { name: 'Home', exact: true });
+  await expect(home.locator('.d-rail-label')).toBeVisible();
+  const saved = rail.getByRole('button', { name: 'Saved', exact: true });
+  const first = (await home.boundingBox())!;
+  const next = (await saved.boundingBox())!;
+  expect(next.y).toBeGreaterThanOrEqual(first.y + first.height);
+  await expect(page.locator('.d-navigation-drawer')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open navigation drawer', exact: true }).click();
+  const drawer = page.locator('.d-navigation-drawer');
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByRole('button', { name: 'Home', exact: true })).toHaveCount(1);
+});
+
+
+test('labelled and vertical sliders retain their available layout bounds', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1800 });
+  await page.goto('/#/material/compare/light/selection');
+  const horizontal = page.getByRole('slider', { name: 'Volume', exact: true });
+  expect((await horizontal.boundingBox())!.width).toBeGreaterThan(300);
+  const vertical = page.getByRole('slider', { name: 'Vertical volume', exact: true });
+  await expect(vertical).toHaveCSS('height', '180px');
+  const surface = vertical.locator('..');
+  await expect(surface).toHaveCSS('height', '180px');
+  await expect(surface).toHaveCSS('width', '48px');
+});
+
+test('feedback and surface defaults retain Material colors and geometry', async ({ page }) => {
+  await page.goto('/#/material/feedback');
+  const badge = page.locator('.d-badge').first();
+  const color = await badge.evaluate(element => {
+    const swatch = document.createElement('span');
+    swatch.style.color = getComputedStyle(element.closest('.d-theme')!).getPropertyValue('--d-error').trim();
+    return swatch.style.color;
+  });
+  await expect(badge).toHaveCSS('background-color', color);
+  const circular = page.locator('.d-progress-standard.d-progress-circular').first();
+  await expect(circular).toHaveCSS('width', '40px');
+  await expect(circular).toHaveCSS('height', '40px');
+  await expect(circular.locator('.d-standard-active')).toHaveAttribute('stroke-linecap', 'round');
+  await expect(page.locator('.d-progress-standard:not(.d-progress-circular)').first().locator('.d-progress-stop-indicator')).toHaveCount(1);
+  await expect(page.locator('.d-snackbar-message').first()).toHaveCSS('border-top-left-radius', '4px');
+  expect((await page.locator('.d-snackbar-message').first().boundingBox())!.height).toBe(48);
+
+  await page.goto('/#/material/surfaces');
+  await expect(page.locator('.d-list-item-headline').first()).toHaveCSS('font-weight', '400');
+  await expect(page.locator('.d-list-item-supporting').first()).toHaveCSS('line-height', '20px');
+  const surface = page.locator('.d-surface').filter({ hasText: 'Local surface override' }).last();
+  await expect(surface).toHaveCSS('border-top-left-radius', '0px');
+});
+
+test('app bar variants use Material heights and typography', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1800 });
+  await page.goto('/#/material/compare/light/navigation');
+  for (const [variant, height, fontSize] of [
+    ['small', '64px', '24px'], ['centeraligned', '64px', '24px'],
+    ['medium', '112px', '24px'], ['large', '152px', '28px'],
+    ['mediumflexible', '112px', '28px'], ['largeflexible', '120px', '36px'],
+    ['tworows', '112px', '28px'],
+  ]) {
+    const bar = page.locator(`.d-app-bar-${variant}`).first();
+    await expect(bar).toHaveCSS('min-height', height);
+    await expect(bar.locator('.d-app-bar-title')).toHaveCSS('font-size', fontSize);
+    await expect(bar.locator('.d-app-bar-title')).toHaveCSS('font-weight', '400');
+  }
+  const bottom = page.locator('.d-bottom-app-bar').first();
+  expect((await bottom.boundingBox())!.width).toBe(358);
+  const subtitleBar = page.locator('.d-app-bar').filter({ has: page.getByRole('heading', { name: 'Flexible heading with subtitle', exact: true }) });
+  await expect(subtitleBar).toHaveCSS('min-height', '136px');
+  await expect(subtitleBar.locator('.d-app-bar-subtitle')).toHaveCSS('font-size', '14px');
+  await expect(subtitleBar.getByRole('button', { name: 'Go back', exact: true })).toBeVisible();
+  await expect(subtitleBar.getByRole('button', { name: 'More actions', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Custom title typography', exact: true })).toHaveCSS('font-size', '31px');
+});
+
+
+test('input defaults and filled cards use their native Material roles', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1800 });
+  await page.goto('/#/material/compare/light/inputs');
+  expect((await page.locator('.d-field').first().boundingBox())!.width).toBe(280);
+  const search = page.getByRole('combobox', { name: 'Search products', exact: true });
+  await expect(search).toHaveAttribute('placeholder', 'Search products');
+  expect((await page.locator('.d-search-control').boundingBox())!.width).toBe(358);
+  await page.setViewportSize({ width: 1280, height: 1800 });
+  expect((await page.locator('.d-search-control').boundingBox())!.width).toBe(360);
+  await page.setViewportSize({ width: 390, height: 1800 });
+  await expect(page.locator('.d-search-control')).toHaveCSS('border-radius', '999px');
+  await expect(page.locator('.d-search-control')).toHaveCSS('background-color', 'rgb(236, 230, 240)');
+  const autocomplete = page.locator('.d-autocomplete');
+  expect((await autocomplete.boundingBox())!.width).toBe(358);
+  await expect(autocomplete.locator('label')).toHaveCSS('position', 'absolute');
+  await autocomplete.getByRole('combobox').fill('Bl');
+  await expect(autocomplete.locator('label')).toHaveCSS('font-size', '12px');
+  await expect(autocomplete.getByRole('option', { name: 'Blue', exact: true })).toBeVisible();
+  await page.goto('/?comparison=dark-surfaces#/material/compare/dark/surfaces');
+  await expect(page.locator('.d-card-filled').first()).toHaveCSS('background-color', 'rgb(54, 52, 59)');
 });

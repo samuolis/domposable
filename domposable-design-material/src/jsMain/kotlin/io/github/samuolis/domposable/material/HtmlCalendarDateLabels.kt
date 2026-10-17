@@ -30,3 +30,14 @@ internal fun dateLabel(millis: Long): String =
 internal fun epochToDate(millis: Long): String = Date(millis.toDouble()).toISOString().substring(0, ISO_DATE_LENGTH)
 
 internal fun dateToEpoch(value: String): Long = Date.parse("${value}T00:00:00Z").toLong()
+
+internal fun shortDateLabel(millis: Long): String =
+    Date(millis.toDouble()).toLocaleDateString(
+        options =
+            dateLocaleOptions {
+                month = "short"
+                day = "numeric"
+                year = "numeric"
+                timeZone = "UTC"
+            },
+    )

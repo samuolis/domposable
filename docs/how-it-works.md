@@ -1,5 +1,7 @@
 # How the API works
 
+**Web rendering:** Domposable uses Compose HTML to render a single-page application (SPA) in the browser. It does not provide server-side rendering (SSR). JavaScript must run to compose feature content. Hash/path URLs and static hosting entry pages do not change this rendering model.
+
 Write a feature once as a regular Compose function. Domposable's component calls describe its controls and layout. The provider installed above that feature decides how to render them on the current platform.
 
 ## 1. Write the feature in commonMain
@@ -137,3 +139,10 @@ A screen is an ordinary composable; it can receive your existing model or obtain
 For navigation, choose [direct Navigation 3, a manual registry, or generated entries](screens.md). With generated entries, `@DomposableScreen(Route::class)` connects a route to a function, and KSP creates the entry list. `viewModel = true` installs entry ownership before the original screen evaluates its injection default. KSP does not build a DI graph.
 
 Use the [modular app walkthrough](modular-demo.md) to see feature API/implementation boundaries, Metro injection and route ownership together. Start with [component examples](components.md) when your feature only needs shared UI.
+
+
+## Code sharing and responsive layouts
+
+The released **0.9.0 demo shares 90.9% of its application source**: 4,404 nonblank lines in `commonMain`, out of 4,845 production Kotlin/Swift lines. The count includes `demo`, the catalog/checkout `feature` modules, `androidApp`, and `iosApp/DomposableDemo` at commit `c5d6b69c12dad9edeb62030e88ecd2e165c5531e`. It excludes tests, generated code, dependencies, build scripts, assets and blank lines. This is a concrete demo measurement, not a guaranteed percentage for every application.
+
+Shared components, modifiers, sizing, wrapping and scrolling work on native and HTML targets. The [adaptive APIs](adaptive.md) measure the available feature width and provide breakpoints and pane recipes. Put the responsive choice in the shared composable once; both renderers use it. Applications still choose which content belongs side by side or behind navigation, and platform-only integrations or custom renderers affect the final shared-code ratio.

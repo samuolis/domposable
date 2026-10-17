@@ -10,11 +10,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTypographyRole
 import io.github.samuolis.domposable.ui.DomposableAppBarProps
 import io.github.samuolis.domposable.ui.DomposableAutocompleteProps
 import io.github.samuolis.domposable.ui.DomposableBottomAppBarProps
 import io.github.samuolis.domposable.ui.DomposableBottomSheetScaffoldProps
 import io.github.samuolis.domposable.ui.DomposableButtonGroupProps
+import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableCarouselProps
 import io.github.samuolis.domposable.ui.DomposableDatePickerMode
 import io.github.samuolis.domposable.ui.DomposableDatePickerProps
@@ -75,15 +78,17 @@ internal fun HtmlToggleButton(
     DomposableHtmlModifiers(modifier) {
         val appearance = props.appearance ?: LocalDomposableTokens.current.components.toggleButton
         val enabled = props.enabled && domposableFormEnabled()
-        Button(attrs = {
-            domposableAttributes(modifier)
-            attr("type", "button")
-            attr("aria-pressed", props.checked.toString())
-            if (!enabled) disabled()
-            classes("d-button", "d-button-toggle", "d-button-${props.style.name.lowercase()}")
-            style { styleAppearance(appearance, enabled) }
-            onClick { if (enabled) props.onCheckedChange(!props.checked) }
-        }) { content() }
+        MaterialButtonHitTarget(modifier, appearance.minHeight?.value) {
+            Button(attrs = {
+                domposableAttributes(modifier)
+                attr("type", "button")
+                attr("aria-pressed", props.checked.toString())
+                if (!enabled) disabled()
+                classes("d-button", "d-button-toggle", "d-button-${props.style.name.lowercase()}")
+                style { styleAppearance(appearance, enabled) }
+                onClick { if (enabled) props.onCheckedChange(!props.checked) }
+            }) { content() }
+        }
     }
 }
 
@@ -103,16 +108,14 @@ internal fun HtmlButtonGroup(
             style { property("gap", "${props.spacing.value}px") }
         }) {
             props.items.forEach { item ->
-                Button(attrs = {
-                    attr("type", "button")
-                    if (!item.enabled || !formEnabled) disabled()
-                    classes("d-button")
-                    style { styleAppearance(appearance, item.enabled) }
-                    onClick { if (item.enabled && formEnabled) item.onClick() }
-                }) {
-                    item.icon?.let { Span(attrs = { attr("aria-hidden", "true") }) { it() } }
-                    Text(item.label)
-                }
+                HtmlButton(
+                    DomposableButtonProps(item.onClick, item.enabled && formEnabled, appearance = appearance),
+                    DomposableModifier,
+                    content = {
+                        item.icon?.let { Span(attrs = { attr("aria-hidden", "true") }) { it() } }
+                        Text(item.label)
+                    },
+                )
             }
         }
     }
@@ -210,6 +213,7 @@ internal fun HtmlAppBar(
                     attr("type", "button")
                     attr("aria-label", item.label)
                     attr("data-appbar-action", "")
+                    classes("d-icon-button", "d-icon-button-standard")
                     if (index >=
                         visibleCount
                     ) {
@@ -222,11 +226,12 @@ internal fun HtmlAppBar(
                     if (!item.enabled || !formEnabled) disabled()
                     style { styleAppearance(appearance, item.enabled) }
                     onClick { if (item.enabled && formEnabled) item.onClick() }
-                }) { item.icon?.invoke() ?: Text(item.label) }
+                }) { item.icon?.invoke() ?: Text(item.label.take(1)) }
             }
             Button(attrs = {
                 attr("type", "button")
                 attr("data-appbar-overflow", "")
+                classes("d-icon-button", "d-icon-button-standard")
                 attr("aria-label", props.overflowLabel)
                 attr("aria-expanded", expanded.toString())
                 attr("aria-controls", id)
@@ -296,25 +301,33 @@ internal fun HtmlMultiChoiceSegmentedButtons(
         }) {
             props.labels.forEachIndexed { index, label ->
                 val selected = index in props.selectedIndices
-                Button(attrs = {
-                    attr("type", "button")
-                    attr("aria-pressed", selected.toString())
-                    if (!props.enabled || !formEnabled || !props.optionEnabled[index]) disabled()
-                    classes("d-multi-segment")
-                    style { itemAppearance(appearance, selected) }
-                    onClick {
-                        if (props.enabled && formEnabled && props.optionEnabled[index]) {
-                            props.onSelectionChange(
-                                if (selected) {
-                                    props.selectedIndices - index
-                                } else {
-                                    props.selectedIndices +
-                                        index
-                                },
-                            )
+                Span(attrs = { classes("d-multi-segment-hit-target") }) {
+                    Button(attrs = {
+                        attr("type", "button")
+                        attr("aria-pressed", selected.toString())
+                        if (!props.enabled || !formEnabled || !props.optionEnabled[index]) disabled()
+                        classes("d-multi-segment")
+                        style { itemAppearance(appearance, selected) }
+                        onClick {
+                            if (props.enabled && formEnabled && props.optionEnabled[index]) {
+                                props.onSelectionChange(
+                                    if (selected) {
+                                        props.selectedIndices - index
+                                    } else {
+                                        props.selectedIndices +
+                                            index
+                                    },
+                                )
+                            }
                         }
+                    }) {
+                        Span(attrs = {
+                            attr("aria-hidden", "true")
+                            classes(if (selected) "d-segment-checkmark" else "d-segment-icon-space")
+                        }) {}
+                        Span(attrs = { classes("d-segment-label") }) { Text(label) }
                     }
-                }) { Text(label) }
+                }
             }
         }
     }
@@ -430,6 +443,8 @@ internal fun HtmlFloatingActionButtonMenu(
                 attr("type", "button")
                 attr("aria-label", props.label)
                 attr("aria-expanded", props.expanded.toString())
+                classes("d-button", "d-fab", "d-fab-menu-toggle")
+                style { surfaceAppearance(appearance) }
                 if (!formEnabled) disabled()
                 onClick { if (formEnabled) props.onExpandedChange(!props.expanded) }
             }) { Text(if (props.expanded) "×" else "+") }
@@ -525,9 +540,40 @@ internal fun HtmlListItem(
         val content: @Composable () -> Unit = {
             props.leadingContent()
             Div(attrs = { classes("d-list-item-copy") }) {
-                props.overline?.let { Span(attrs = { classes("d-list-item-overline") }) { Text(it) } }
-                Span(attrs = { classes("d-list-item-headline") }) { Text(props.headline) }
-                props.supportingText?.let { Span(attrs = { classes("d-list-item-supporting") }) { Text(it) } }
+                props.overline?.let {
+                    Span(attrs = {
+                        classes("d-list-item-overline")
+                        style {
+                            applyCatalogTextAppearance(
+                                DomposableTextAppearance(role = DomposableTypographyRole.LabelSmall),
+                            )
+                        }
+                    }) { Text(it) }
+                }
+                Span(attrs = {
+                    classes("d-list-item-headline")
+                    style {
+                        val text =
+                            (if (props.selected) appearance.selectedTextAppearance else null)
+                                ?: appearance.textAppearance
+                        applyCatalogTextAppearance(
+                            text?.copy(role = text.role ?: DomposableTypographyRole.BodyLarge)
+                                ?: DomposableTextAppearance(role = DomposableTypographyRole.BodyLarge),
+                        )
+                    }
+                }) { Text(props.headline) }
+                props.supportingText?.let {
+                    Span(attrs = {
+                        classes("d-list-item-supporting")
+                        style {
+                            val text = appearance.textAppearance
+                            applyCatalogTextAppearance(
+                                text?.copy(role = text.role ?: DomposableTypographyRole.BodyMedium)
+                                    ?: DomposableTextAppearance(role = DomposableTypographyRole.BodyMedium),
+                            )
+                        }
+                    }) { Text(it) }
+                }
             }
             props.trailingContent()
         }
@@ -633,7 +679,7 @@ internal fun HtmlNavigationDrawerItem(
             style { itemAppearance(appearance, props.selected) }
             onClick { if (enabled) props.onClick() }
         }) {
-            props.icon()
+            Span(attrs = { attr("aria-hidden", "true") }) { props.icon() }
             Span { Text(props.label) }
             props.badge()
         }
@@ -687,7 +733,7 @@ internal fun HtmlWideNavigationRailItem(
     modifier: DomposableModifier,
 ) {
     DomposableHtmlModifiers(modifier) {
-        val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationDrawerItem
+        val appearance = props.appearance ?: LocalDomposableTokens.current.components.wideNavigationRailItem
         val enabled = props.enabled && domposableFormEnabled()
         val railItemClass =
             if (props.railExpanded) {
@@ -705,8 +751,11 @@ internal fun HtmlWideNavigationRailItem(
             style { itemAppearance(appearance, props.selected) }
             onClick { if (enabled) props.onClick() }
         }) {
-            props.icon()
-            if (props.railExpanded) Span { Text(props.label) }
+            Span(attrs = {
+                classes("d-rail-icon")
+                attr("aria-hidden", "true")
+            }) { props.icon() }
+            Span(attrs = { classes("d-rail-label") }) { Text(props.label) }
         }
     }
 }
@@ -730,65 +779,72 @@ internal fun HtmlBottomSheetScaffold(
             classes("d-bottom-sheet-scaffold")
         }) {
             Div(attrs = { classes("d-bottom-sheet-content") }) { content() }
-            Button(attrs = {
-                attr("type", "button")
-                attr("aria-expanded", props.expanded.toString())
-                classes("d-bottom-sheet-handle")
-                if (!formEnabled) disabled()
-                if (props.swipeEnabled && formEnabled) style { property("touch-action", "none") }
-                ref { element ->
-                    val pointerDown: (org.w3c.dom.events.Event) -> Unit = { event ->
-                        val dynamicEvent = event.asDynamic()
-                        val y = (dynamicEvent.clientY as? Number)?.toDouble()
-                        if (formEnabled && y != null) {
-                            dragStartY = y
-                            element.asDynamic().setPointerCapture(dynamicEvent.pointerId)
+            Div(attrs = {
+                attr("role", "region")
+                attr("aria-label", "Bottom sheet")
+                classes("d-bottom-sheet", "d-persistent-bottom-sheet")
+                style {
+                    surfaceAppearance(appearance)
+                    property("min-height", "${props.peekHeight.value}px")
+                    if (!props.expanded) property("height", "${props.peekHeight.value}px")
+                }
+            }) {
+                Button(attrs = {
+                    attr("type", "button")
+                    attr("aria-label", if (props.expanded) "Collapse" else "Expand")
+                    attr("aria-expanded", props.expanded.toString())
+                    classes("d-bottom-sheet-handle")
+                    if (!formEnabled) disabled()
+                    if (props.swipeEnabled && formEnabled) style { property("touch-action", "none") }
+                    ref { element ->
+                        val pointerDown: (org.w3c.dom.events.Event) -> Unit = { event ->
+                            val dynamicEvent = event.asDynamic()
+                            val y = (dynamicEvent.clientY as? Number)?.toDouble()
+                            if (formEnabled && y != null) {
+                                dragStartY = y
+                                element.asDynamic().setPointerCapture(dynamicEvent.pointerId)
+                            }
+                        }
+                        val pointerMove: (org.w3c.dom.events.Event) -> Unit = { event ->
+                            if (swipeEnabled && dragStartY != null) event.preventDefault()
+                        }
+                        val pointerEnd: (org.w3c.dom.events.Event) -> Unit = { event ->
+                            val y = (event.asDynamic().clientY as? Number)?.toDouble()
+                            val start = dragStartY
+                            if (y != null && start != null && kotlin.math.abs(y - start) >= 36) {
+                                val nextExpanded = if (y < start) true else false
+                                if (swipeEnabled && nextExpanded != expanded) onExpandedChange(nextExpanded)
+                                suppressNextClick = true
+                                window.setTimeout({ suppressNextClick = false }, 0)
+                            }
+                            dragStartY = null
+                        }
+                        val pointerCancel: (org.w3c.dom.events.Event) -> Unit = { dragStartY = null }
+                        element.addEventListener("pointerdown", pointerDown)
+                        element.addEventListener("pointermove", pointerMove)
+                        element.addEventListener("pointerup", pointerEnd)
+                        element.addEventListener("pointercancel", pointerCancel)
+                        onDispose {
+                            element.removeEventListener("pointerdown", pointerDown)
+                            element.removeEventListener("pointermove", pointerMove)
+                            element.removeEventListener("pointerup", pointerEnd)
+                            element.removeEventListener("pointercancel", pointerCancel)
                         }
                     }
-                    val pointerMove: (org.w3c.dom.events.Event) -> Unit = { event ->
-                        if (swipeEnabled && dragStartY != null) event.preventDefault()
-                    }
-                    val pointerEnd: (org.w3c.dom.events.Event) -> Unit = { event ->
-                        val y = (event.asDynamic().clientY as? Number)?.toDouble()
-                        val start = dragStartY
-                        if (y != null && start != null && kotlin.math.abs(y - start) >= 36) {
-                            val nextExpanded = if (y < start) true else false
-                            if (swipeEnabled && nextExpanded != expanded) onExpandedChange(nextExpanded)
-                            suppressNextClick = true
-                            window.setTimeout({ suppressNextClick = false }, 0)
+                    onClick {
+                        if (suppressNextClick) {
+                            suppressNextClick = false
+                        } else if (formEnabled) {
+                            props.onExpandedChange(!props.expanded)
                         }
-                        dragStartY = null
                     }
-                    val pointerCancel: (org.w3c.dom.events.Event) -> Unit = { dragStartY = null }
-                    element.addEventListener("pointerdown", pointerDown)
-                    element.addEventListener("pointermove", pointerMove)
-                    element.addEventListener("pointerup", pointerEnd)
-                    element.addEventListener("pointercancel", pointerCancel)
-                    onDispose {
-                        element.removeEventListener("pointerdown", pointerDown)
-                        element.removeEventListener("pointermove", pointerMove)
-                        element.removeEventListener("pointerup", pointerEnd)
-                        element.removeEventListener("pointercancel", pointerCancel)
-                    }
+                }) {
+                    Span(attrs = {
+                        classes("d-bottom-sheet-grip")
+                        attr("aria-hidden", "true")
+                    }) {}
                 }
-                onClick {
-                    if (suppressNextClick) {
-                        suppressNextClick = false
-                    } else if (formEnabled) {
-                        props.onExpandedChange(!props.expanded)
-                    }
-                }
-            }) { Text(if (props.expanded) "Collapse" else "Expand") }
-            if (props.expanded) {
-                Div(attrs = {
-                    attr("role", "region")
-                    attr("aria-label", "Bottom sheet")
-                    classes("d-bottom-sheet")
-                    style {
-                        surfaceAppearance(appearance)
-                        property("min-height", "${props.peekHeight.value}px")
-                    }
-                }) { props.sheetContent() }
+                props.sheetContent()
             }
         }
     }
@@ -825,7 +881,7 @@ internal fun HtmlSearchBar(
                     attr("aria-haspopup", "dialog")
                     attr("aria-expanded", props.expanded.toString())
                     attr("aria-controls", "$id-results")
-                    props.placeholder?.let { attr("placeholder", it) }
+                    attr("placeholder", props.placeholder ?: props.label)
                     value(props.query)
                     if (!enabled) disabled()
                     onFocus { if (enabled) props.onExpandedChange(true) }
@@ -840,17 +896,6 @@ internal fun HtmlSearchBar(
                         }
                     }
                 })
-                Button(attrs = {
-                    attr("type", "button")
-                    attr("aria-label", "Search")
-                    if (!enabled) disabled()
-                    onClick {
-                        if (enabled) {
-                            props.onSearch(props.query)
-                            props.onExpandedChange(false)
-                        }
-                    }
-                }) { Text("⌕") }
                 props.trailingIcon()
                 props.actions?.invoke()
             }
@@ -880,6 +925,9 @@ internal fun HtmlAutocomplete(
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-autocomplete")
+            style { textFieldAppearance(appearance) }
+            attr("data-filled", props.value.isNotEmpty().toString())
+            attr("data-variant", appearance.variant.name.lowercase())
         }) {
             Label(forId = id) { Text(props.label) }
             Div(attrs = {
@@ -948,6 +996,10 @@ internal fun HtmlAutocomplete(
                         }
                     }
                 })
+                Span(attrs = {
+                    classes("d-autocomplete-indicator")
+                    attr("aria-hidden", "true")
+                }) {}
             }
             if (props.expanded && matches.isNotEmpty()) {
                 Div(attrs = {
@@ -1002,13 +1054,16 @@ internal fun HtmlDatePicker(
             attr("aria-label", "Date picker")
             style { surfaceAppearance(appearance) }
         }) {
-            if (props.showModeToggle) {
-                Button(attrs = {
-                    attr("type", "button")
-                    if (!formEnabled) disabled()
-                    onClick {
-                        if (formEnabled) {
-                            modeChange.invoke(
+            HtmlDatePickerHeading(
+                title = "Select date",
+                selection = props.selectedDateMillis?.let(::shortDateLabel) ?: "Select date",
+                toggleLabel = if (mode == DomposableDatePickerMode.Calendar) "Enter date" else "Choose date",
+                mode = mode,
+                enabled = formEnabled,
+                onToggle =
+                    if (props.showModeToggle) {
+                        {
+                            modeChange(
                                 if (mode ==
                                     DomposableDatePickerMode.Calendar
                                 ) {
@@ -1018,11 +1073,10 @@ internal fun HtmlDatePicker(
                                 },
                             )
                         }
-                    }
-                }) {
-                    Text(if (mode == DomposableDatePickerMode.Calendar) "Enter date" else "Choose date")
-                }
-            }
+                    } else {
+                        null
+                    },
+            )
             if (mode == DomposableDatePickerMode.Input) {
                 val id = remember { "d-date-${nextCatalogId++}" }
                 Input(InputType.Date, attrs = {
@@ -1085,13 +1139,20 @@ internal fun HtmlDateRangePicker(
             attr("aria-label", "Date range")
             style { surfaceAppearance(appearance) }
         }) {
-            if (props.showModeToggle) {
-                Button(attrs = {
-                    attr("type", "button")
-                    if (!formEnabled) disabled()
-                    onClick {
-                        if (formEnabled) {
-                            modeChange.invoke(
+            HtmlDatePickerHeading(
+                title = "Select dates",
+                selection =
+                    listOf(props.startDateMillis, props.endDateMillis).joinToString("–") {
+                        it?.let(::shortDateLabel)
+                            ?: "Select date"
+                    },
+                toggleLabel = if (mode == DomposableDatePickerMode.Calendar) "Enter dates" else "Choose dates",
+                mode = mode,
+                enabled = formEnabled,
+                onToggle =
+                    if (props.showModeToggle) {
+                        {
+                            modeChange(
                                 if (mode ==
                                     DomposableDatePickerMode.Calendar
                                 ) {
@@ -1101,19 +1162,10 @@ internal fun HtmlDateRangePicker(
                                 },
                             )
                         }
-                    }
-                }) {
-                    Text(
-                        if (mode ==
-                            DomposableDatePickerMode.Calendar
-                        ) {
-                            "Enter dates"
-                        } else {
-                            "Choose dates"
-                        },
-                    )
-                }
-            }
+                    } else {
+                        null
+                    },
+            )
             if (mode == DomposableDatePickerMode.Input) {
                 Label(forId = startId) { Text("Start date") }
                 Input(InputType.Date, attrs = {
@@ -1166,10 +1218,6 @@ internal fun HtmlDateRangePicker(
                     }
                 })
             } else {
-                Div(attrs = { classes("d-date-range-fields") }) {
-                    Span { Text("Start date: ${props.startDateMillis?.let(::dateLabel) ?: "Choose a date"}") }
-                    Span { Text("End date: ${props.endDateMillis?.let(::dateLabel) ?: "Choose a date"}") }
-                }
                 HtmlCalendar(
                     month = visibleMonth,
                     selected = null,
@@ -1219,71 +1267,28 @@ internal fun HtmlTimePicker(
             style { surfaceAppearance(appearance) }
         }) {
             if (props.mode == DomposableTimePickerMode.Input) {
-                Label(forId = id) { Text("Time") }
-                Input(InputType.Time, attrs = {
-                    id(id)
-                    attr("aria-label", "Time")
-                    attr("step", "60")
-                    if (!formEnabled) disabled()
-                    value("${props.hour.toString().padStart(2, '0')}:${props.minute.toString().padStart(2, '0')}")
-                    onChange { event ->
-                        val pieces = event.value.split(":")
-                        if (pieces.size >= 2) {
-                            val hour = pieces[0].toIntOrNull()
-                            val minute = pieces[1].toIntOrNull()
-                            if (hour != null && minute != null && formEnabled) {
-                                if (hour in 0..23 && minute in 0..59) {
-                                    props.onTimeChange(hour, minute)
-                                }
-                            }
-                        }
-                    }
-                })
+                HtmlTimeInput(props, id, formEnabled)
             } else {
-                Span(attrs = {
-                    classes("d-time-value")
-                    attr("aria-live", "polite")
-                }) {
-                    Text(
-                        if (props.is24Hour) {
-                            "${props.hour.toString().padStart(
-                                2,
-                                '0',
-                            )}:${props.minute.toString().padStart(
-                                2,
-                                '0',
-                            )}"
-                        } else {
-                            "${((props.hour + 11) % 12) + 1}:${props.minute.toString().padStart(
-                                2,
-                                '0',
-                            )} ${if (props.hour < 12) "AM" else "PM"}"
-                        },
-                    )
-                }
+                HtmlTimeHeading(props, selectingHour, formEnabled, { selectingHour = it })
                 Div(attrs = { classes("d-time-dial") }) {
+                    val innerHours = selectingHour && props.is24Hour
                     Div(attrs = {
                         classes("d-time-dial-controls")
                         attr("role", "group")
                         attr("aria-label", "Select ${if (selectingHour) "hour" else "minute"}")
+                        val angle = if (selectingHour) (props.hour % 12) * 30 else props.minute * 6
+                        val inner = innerHours && (props.hour == 0 || props.hour > 12)
+                        style {
+                            property("--d-clock-angle", "${angle}deg")
+                            property("--d-clock-radius", if (inner) "69px" else "101px")
+                        }
                     }) {
                         val values = if (selectingHour) (if (props.is24Hour) 0..23 else 1..12) else (0..55 step 5)
-                        values.forEachIndexed { index, value ->
-                            val selected =
-                                if (selectingHour) {
-                                    (
-                                        if (props.is24Hour) {
-                                            value == props.hour
-                                        } else {
-                                            value ==
-                                                ((props.hour + 11) % 12) + 1
-                                        }
-                                    )
-                                } else {
-                                    value == props.minute
-                                }
-                            val angle = if (values.count() == 0) 0 else index * 360.0 / values.count()
-                            val radius = if (selectingHour && props.is24Hour && value >= 12) 68 else 108
+                        values.forEach { value ->
+                            val displayedHour = if (props.is24Hour) props.hour else ((props.hour + 11) % 12) + 1
+                            val selected = value == if (selectingHour) displayedHour else props.minute
+                            val angle = if (selectingHour) (value % 12) * 30 else value * 6
+                            val radius = if (innerHours && (value == 0 || value > 12)) 69 else 101
                             Button(attrs = {
                                 attr("type", "button")
                                 attr(
@@ -1344,22 +1349,18 @@ internal fun HtmlTimePicker(
                                         }
                                     }
                                 }
-                            }) { Text(value.toString().padStart(2, '0')) }
+                            }) {
+                                Text(
+                                    if (selectingHour &&
+                                        value in 1..12
+                                    ) {
+                                        value.toString()
+                                    } else {
+                                        value.toString().padStart(2, '0')
+                                    },
+                                )
+                            }
                         }
-                    }
-                    Button(attrs = {
-                        attr("type", "button")
-                        if (!formEnabled) disabled()
-                        attr("aria-label", if (selectingHour) "Select minutes" else "Select hours")
-                        onClick { if (formEnabled) selectingHour = !selectingHour }
-                    }) { Text(if (selectingHour) "Minutes" else "Hours") }
-                    if (!props.is24Hour) {
-                        Button(attrs = {
-                            attr("type", "button")
-                            if (!formEnabled) disabled()
-                            attr("aria-label", if (props.hour < 12) "Switch to PM" else "Switch to AM")
-                            onClick { if (formEnabled) props.onTimeChange((props.hour + 12) % 24, props.minute) }
-                        }) { Text(if (props.hour < 12) "AM" else "PM") }
                     }
                 }
             }
@@ -1562,6 +1563,7 @@ internal fun HtmlPullToRefresh(
         }) {
             Div(attrs = {
                 classes("d-pull-refresh-indicator")
+                if (!props.refreshing && distance == 0f) classes("d-visually-hidden")
                 attr("role", "status")
                 attr("aria-label", props.label)
                 if (props.refreshing) attr("aria-busy", "true")
@@ -1708,7 +1710,8 @@ private fun HtmlCalendar(
         mutableStateOf(selected ?: rangeStart ?: month)
     }
     val first = monthStart(month)
-    val offset = (utcWeekday(first) + 6) % 7
+    val weekStart = calendarFirstWeekday()
+    val offset = (utcWeekday(first) - weekStart + 7) % 7
     val dayCount = daysInMonth(month)
     val totalCells = ((offset + dayCount + 6) / 7) * 7
     val firstDay = first - offset * 86_400_000L
@@ -1771,11 +1774,12 @@ private fun HtmlCalendar(
             attr("role", "row")
             classes("d-calendar-week")
         }) {
-            listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").forEach { day ->
+            repeat(7) { column ->
+                val day = (weekStart + column) % 7
                 Span(attrs = {
                     attr("role", "columnheader")
-                    attr("aria-label", day)
-                }) { Text(day.take(3)) }
+                    attr("aria-label", calendarWeekdayLabel(day, narrow = false))
+                }) { Text(calendarWeekdayLabel(day, narrow = true)) }
             }
         }
         repeat(totalCells / 7) { row ->
@@ -1809,6 +1813,7 @@ private fun HtmlCalendar(
                                 attr("type", "button")
                                 attr("aria-label", dateLabel(day))
                                 if (day == selected || rangeSelected) attr("aria-pressed", "true")
+                                if (day == currentDayMillis()) attr("aria-current", "date")
                                 attr(
                                     "tabindex",
                                     if (day == focusedDay ||
@@ -1853,15 +1858,15 @@ private fun HtmlCalendar(
                                                 "Home" -> {
                                                     -(
                                                         (
-                                                            utcWeekday(day) +
-                                                                6
+                                                            utcWeekday(day) - weekStart +
+                                                                7
                                                         ) %
                                                             7
                                                     )
                                                 }
 
                                                 "End" -> {
-                                                    6 - ((utcWeekday(day) + 6) % 7)
+                                                    6 - ((utcWeekday(day) - weekStart + 7) % 7)
                                                 }
 
                                                 else -> {

@@ -2,11 +2,13 @@
 
 # One feature. Many screens.
 
-Build native apps and responsive DOM websites from the same Compose feature codebase. Write ordinary `@Composable` functions, supply your own models, and choose a design provider.
+**90%+ shared application code in the demo, with responsive layouts across native apps and semantic HTML.** Build from one Compose feature codebase. Write ordinary `@Composable` functions, supply your own models, and choose a design provider.
 
 Android and iOS render Compose UI. Kotlin/JS emits semantic HTML with browser links, form controls and layout. Desktop and Wasm use Compose UI as experimental targets.
 
 [Get started](getting-started.md) · [Try the component playground](https://samuolis.github.io/domposable/demo/) · [Open the storefront](https://samuolis.github.io/domposable/shop/) · [Compare HTML and Wasm](compare.md)
+
+The [0.9.0 demo measurement](how-it-works.md#code-sharing-and-responsive-layouts) includes shared features and platform hosts. Actual sharing depends on your app’s native integrations and custom renderers. Domposable’s HTML target is a client-rendered SPA; it does not support SSR.
 
 ## See a complete feature
 

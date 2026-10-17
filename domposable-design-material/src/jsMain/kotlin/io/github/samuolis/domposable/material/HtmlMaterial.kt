@@ -3,6 +3,7 @@ package io.github.samuolis.domposable.material
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -25,9 +26,7 @@ import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
-import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
-import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
@@ -243,28 +242,20 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             text = { props, modifier, _ ->
                 val tokens = LocalDomposableTokens.current
                 val appearance = props.appearance ?: LocalMaterialButtonTextAppearance.current ?: tokens.components.text
-                val baseFontSize =
-                    appearance?.fontSize ?: when (props.style) {
-                        DomposableTextStyle.Body -> tokens.typography.bodySize
-                        DomposableTextStyle.Title -> tokens.typography.titleSize
-                        DomposableTextStyle.Label -> tokens.typography.labelSize
+                val role =
+                    appearance?.role ?: when (props.style) {
+                        DomposableTextStyle.Body -> DomposableTypographyRole.BodyLarge
+                        DomposableTextStyle.Title -> DomposableTypographyRole.TitleLarge
+                        DomposableTextStyle.Label -> DomposableTypographyRole.LabelLarge
                     }
-                val effectiveLineHeight = appearance?.lineHeight ?: baseFontSize * tokens.typography.lineHeight
-                val textAlignment =
-                    when (appearance?.alignment) {
-                        DomposableTextAlignment.Start -> "start"
-                        DomposableTextAlignment.Center -> "center"
-                        DomposableTextAlignment.End -> "end"
-                        DomposableTextAlignment.Justify -> "justify"
-                        null -> null
+                val defaults = tokens.typography.materialTypeStyle(role)
+                val configuredRole =
+                    if (appearance?.role != null && appearance.emphasized) {
+                        tokens.typography.emphasizedRoles[role] ?: tokens.typography.roles[role]
+                    } else {
+                        tokens.typography.roles[role]
                     }
-                val textDecoration =
-                    when (appearance?.decoration) {
-                        DomposableTextDecoration.None -> "none"
-                        DomposableTextDecoration.Underline -> "underline"
-                        DomposableTextDecoration.LineThrough -> "line-through"
-                        null -> null
-                    }
+                val effectiveLineHeight = appearance?.lineHeight ?: configuredRole?.lineHeight ?: defaults.lineHeight!!
                 val liveRegion =
                     when (appearance?.liveRegion) {
                         DomposableLiveRegion.Polite -> "polite"
@@ -273,14 +264,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }
 
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
-                    appearance?.role?.let { style { applyCatalogTextAppearance(appearance) } }
+                    style { appearance?.let { applyCatalogTextAppearance(it) } }
                     (props.color ?: appearance?.color)?.let { style { property("color", it.css()) } }
-                    textAlignment?.let { alignment -> style { property("text-align", alignment) } }
-                    textDecoration?.let { decoration -> style { property("text-decoration", decoration) } }
-                    appearance?.letterSpacing?.let { style { property("letter-spacing", "${it}px") } }
-                    appearance?.fontSize?.let { size -> style { property("font-size", "${size}px") } }
-                    appearance?.lineHeight?.let { height -> style { property("line-height", "${height}px") } }
-                    appearance?.fontWeight?.let { weight -> style { property("font-weight", weight.css()) } }
                     appearance?.minLines?.takeIf { it > 1 }?.let { lines ->
                         style {
                             val inlineText = props.style != DomposableTextStyle.Title && props.headingLevel == null
@@ -324,6 +309,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         props.headingLevel != null
                     ) {
                         TagElement<HTMLElement>("h${props.headingLevel ?: 2}", applyAttrs = {
+                            style { applyCatalogTextAppearance(DomposableTextAppearance(role = role)) }
                             domposableAttributes(modifier)
                             classes("d-title")
                             props.color?.let { style { property("color", it.css()) } }
@@ -331,6 +317,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         }) { Text(props.text) }
                     } else {
                         Span(attrs = {
+                            style { applyCatalogTextAppearance(DomposableTextAppearance(role = role)) }
                             domposableAttributes(modifier)
                             classes(
                                 if (props.style ==
@@ -357,125 +344,119 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val tokens = LocalDomposableTokens.current
                 val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
-                    Button(attrs = {
-                        domposableAttributes(modifier)
-                        attr("type", "button")
-                        attr("aria-label", props.label)
-                        classes("d-icon-button")
-                        classes(
-                            "d-icon-button-${props.variant.name.lowercase().replace("filledtonal", "filled-tonal")}",
-                        )
-                        props.checked?.let { attr("aria-pressed", it.toString()) }
-                        if (!enabled) attr("disabled", "")
-                        style {
-                            val checked = props.checked == true
-                            val variantContainer =
-                                when (props.variant) {
-                                    DomposableIconButtonVariant.Standard -> {
-                                        if (checked) {
-                                            tokens.colors.secondaryContainer
-                                                ?: tokens.colors.surfaceVariant
-                                        } else {
+                    MaterialButtonHitTarget(modifier, appearance.minHeight?.value) {
+                        Button(attrs = {
+                            domposableAttributes(modifier)
+                            attr("type", "button")
+                            attr("aria-label", props.label)
+                            classes("d-icon-button")
+                            classes(
+                                "d-icon-button-${props.variant.name.lowercase().replace(
+                                    "filledtonal",
+                                    "filled-tonal",
+                                )}",
+                            )
+                            props.checked?.let { attr("aria-pressed", it.toString()) }
+                            if (!enabled) attr("disabled", "")
+                            style {
+                                val checked = props.checked == true
+                                val variantContainer =
+                                    when (props.variant) {
+                                        DomposableIconButtonVariant.Standard -> {
+                                            if (checked) {
+                                                tokens.colors.secondaryContainer
+                                                    ?: tokens.colors.surfaceVariant
+                                            } else {
+                                                null
+                                            }
+                                        }
+
+                                        DomposableIconButtonVariant.Filled -> {
+                                            if (props.checked == false) {
+                                                tokens.colors.surfaceContainerHighest
+                                                    ?: tokens.colors.surfaceVariant
+                                            } else {
+                                                tokens.colors.primary
+                                            }
+                                        }
+
+                                        DomposableIconButtonVariant.FilledTonal -> {
+                                            tokens.colors.secondaryContainer ?: tokens.colors.surfaceVariant
+                                        }
+
+                                        DomposableIconButtonVariant.Outlined -> {
                                             null
                                         }
                                     }
-
-                                    DomposableIconButtonVariant.Filled -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.surfaceContainerHighest
-                                                ?: tokens.colors.surfaceVariant
-                                        } else {
-                                            tokens.colors.primary
+                                val variantContent =
+                                    when (props.variant) {
+                                        DomposableIconButtonVariant.Standard -> {
+                                            if (checked) {
+                                                tokens.colors.onSecondaryContainer
+                                                    ?: tokens.colors.onSurface
+                                            } else {
+                                                tokens.colors.onSurface
+                                            }
                                         }
-                                    }
 
-                                    DomposableIconButtonVariant.FilledTonal -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.surfaceContainerHighest
-                                                ?: tokens.colors.surfaceVariant
-                                        } else {
-                                            tokens.colors.secondaryContainer
-                                                ?: tokens.colors.surfaceVariant
+                                        DomposableIconButtonVariant.Filled -> {
+                                            if (props.checked == false) {
+                                                tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
+                                            } else {
+                                                tokens.colors.onPrimary
+                                            }
                                         }
-                                    }
 
-                                    DomposableIconButtonVariant.Outlined -> {
-                                        null
-                                    }
-                                }
-                            val variantContent =
-                                when (props.variant) {
-                                    DomposableIconButtonVariant.Standard -> {
-                                        if (checked) {
-                                            tokens.colors.onSecondaryContainer
-                                                ?: tokens.colors.onSurface
-                                        } else {
+                                        DomposableIconButtonVariant.FilledTonal -> {
+                                            tokens.colors.onSecondaryContainer ?: tokens.colors.onSurface
+                                        }
+
+                                        DomposableIconButtonVariant.Outlined -> {
                                             tokens.colors.onSurface
                                         }
                                     }
-
-                                    DomposableIconButtonVariant.Filled -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
-                                        } else {
-                                            tokens.colors.onPrimary
-                                        }
-                                    }
-
-                                    DomposableIconButtonVariant.FilledTonal -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
-                                        } else {
-                                            tokens.colors.onSecondaryContainer
-                                                ?: tokens.colors.onSurface
-                                        }
-                                    }
-
-                                    DomposableIconButtonVariant.Outlined -> {
-                                        tokens.colors.onSurface
-                                    }
+                                appearance.container?.let { property("background", it.css()) }
+                                    ?: variantContainer?.let { property("background", it.css()) }
+                                appearance.content?.let { property("color", it.css()) }
+                                    ?: property("color", variantContent.css())
+                                appearance.border?.let { property("border-color", it.css()) }
+                                if (appearance.border == null &&
+                                    props.variant ==
+                                    DomposableIconButtonVariant.Outlined
+                                ) {
+                                    property("border-color", tokens.colors.outline.css())
                                 }
-                            appearance.container?.let { property("background", it.css()) }
-                                ?: variantContainer?.let { property("background", it.css()) }
-                            appearance.content?.let { property("color", it.css()) }
-                                ?: property("color", variantContent.css())
-                            appearance.border?.let { property("border-color", it.css()) }
-                            if (appearance.border == null &&
-                                props.variant ==
-                                DomposableIconButtonVariant.Outlined
-                            ) {
-                                property("border-color", tokens.colors.outline.css())
+                                if (props.variant ==
+                                    DomposableIconButtonVariant.Outlined &&
+                                    appearance.borderWidth == null
+                                ) {
+                                    property("border-width", "1px")
+                                }
+                                (if (enabled) appearance.container else appearance.disabledContainer)?.let {
+                                    property(
+                                        "background",
+                                        it.css(),
+                                    )
+                                }
+                                (if (enabled) appearance.content else appearance.disabledContent)?.let {
+                                    property(
+                                        "color",
+                                        it.css(),
+                                    )
+                                }
+                                (if (enabled) appearance.border else appearance.disabledBorder)?.let {
+                                    property("border", "${appearance.borderWidth?.value ?: 1f}px solid ${it.css()}")
+                                }
+                                appearance.borderWidth?.let { property("border-width", "${it.value}px") }
+                                appearance.shape?.let { materialShape(it) }
+                                appearance.minHeight?.let { property("min-height", "${it.value}px") }
+                                appearance.minWidth?.let { property("min-width", "${it.value}px") }
+                                appearance.contentPadding?.let { property("padding", it.cssPadding()) }
+                                appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                             }
-                            if (props.variant ==
-                                DomposableIconButtonVariant.Outlined &&
-                                appearance.borderWidth == null
-                            ) {
-                                property("border-width", "1px")
-                            }
-                            (if (enabled) appearance.container else appearance.disabledContainer)?.let {
-                                property(
-                                    "background",
-                                    it.css(),
-                                )
-                            }
-                            (if (enabled) appearance.content else appearance.disabledContent)?.let {
-                                property(
-                                    "color",
-                                    it.css(),
-                                )
-                            }
-                            (if (enabled) appearance.border else appearance.disabledBorder)?.let {
-                                property("border", "${appearance.borderWidth?.value ?: 1f}px solid ${it.css()}")
-                            }
-                            appearance.borderWidth?.let { property("border-width", "${it.value}px") }
-                            appearance.shape?.let { materialShape(it) }
-                            appearance.minHeight?.let { property("min-height", "${it.value}px") }
-                            appearance.minWidth?.let { property("min-width", "${it.value}px") }
-                            appearance.contentPadding?.let { property("padding", it.cssPadding()) }
-                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
-                        }
-                        onClick { if (enabled) props.onClick() }
-                    }) { content() }
+                            onClick { if (enabled) props.onClick() }
+                        }) { content() }
+                    }
                 }
             },
             textField = { props, modifier, _ -> HtmlTextField(props, modifier) },
@@ -539,11 +520,18 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val labelId = remember { "d-radio-label-${nextInputId++}" }
                 val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
-                    TagElement<HTMLElement>(if (props.showLabel) "label" else "span", applyAttrs = {
-                        classes("d-toggle")
-                        onClick { it.stopPropagation() }
-                        style { property("gap", "${appearance.labelSpacing.value}px") }
-                    }) {
+                    TagElement<HTMLElement>(
+                        if (props.showLabel) {
+                            "label"
+                        } else {
+                            "span"
+                        },
+                        applyAttrs = {
+                            classes("d-toggle")
+                            selectionContainerClick()
+                            style { property("gap", "${appearance.labelSpacing.value}px") }
+                        },
+                    ) {
                         @Composable fun control() {
                             Input(InputType.Radio, attrs = {
                                 domposableAttributes(modifier)
@@ -559,7 +547,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     )
                                     property(
                                         "--d-control-unselected",
-                                        appearance.colors.unselected.cssOr("var(--d-outline)"),
+                                        appearance.colors.unselected.cssOr(
+                                            "var(--d-on-surface-variant,var(--d-outline))",
+                                        ),
                                     )
                                     property(
                                         "--d-control-disabled-selected",
@@ -596,7 +586,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             Span(attrs = {
                                 classes("d-toggle-copy")
                                 style { property("gap", "${appearance.descriptionSpacing.value}px") }
-                                if (props.showLabel || props.description != null) classes("d-toggle-copy-visible")
+                                if (props.showLabel || props.description != null) {
+                                    classes("d-toggle-copy-visible")
+                                } else {
+                                    classes("d-visually-hidden")
+                                }
                             }) {
                                 Span(attrs = {
                                     id(labelId)
@@ -637,45 +631,63 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             100f,
                         )
                 DomposableHtmlModifiers(modifier) {
-                    Input(InputType.Range, attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-slider")
-                        if (props.orientation == DomposableOrientation.Vertical) {
-                            classes("d-slider-vertical")
-                            attr("aria-orientation", "vertical")
-                        } else {
-                            attr("aria-orientation", "horizontal")
-                        }
-                        value(props.value.toString())
-                        attr("aria-label", props.label)
-                        attr("min", props.range.start.toString())
-                        attr("max", props.range.endInclusive.toString())
-                        attr(
-                            "step",
-                            if (props.steps ==
-                                0
-                            ) {
-                                "any"
-                            } else {
-                                ((props.range.endInclusive - props.range.start) / (props.steps + 1)).toString()
-                            },
-                        )
-                        if (!enabled) disabled()
+                    Div(attrs = {
+                        classes("d-slider-surface")
+                        if (props.orientation == DomposableOrientation.Vertical) classes("d-slider-surface-vertical")
                         style {
                             sliderColors(colors, enabled)
                             property("--d-slider-progress", "$percent%")
+                            sliderMarks(
+                                props.steps,
+                                percent,
+                                vertical =
+                                    props.orientation == DomposableOrientation.Vertical,
+                                reversed =
+                                    props.orientation == DomposableOrientation.Vertical && !props.topToBottom,
+                            )
                             if (props.orientation == DomposableOrientation.Vertical) {
-                                property("writing-mode", "vertical-lr")
-                                property("direction", if (props.topToBottom) "ltr" else "rtl")
+                                property("--d-slider-direction", if (props.topToBottom) "bottom" else "top")
                             }
                         }
-                        onInput {
-                            it.target.value
-                                .toFloatOrNull()
-                                ?.takeIf { enabled }
-                                ?.let(props.onValueChange)
-                        }
-                    })
+                    }) {
+                        Input(InputType.Range, attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-slider")
+                            if (props.orientation == DomposableOrientation.Vertical) {
+                                classes("d-slider-vertical")
+                                attr("aria-orientation", "vertical")
+                            } else {
+                                attr("aria-orientation", "horizontal")
+                            }
+                            value(props.value.toString())
+                            attr("aria-label", props.label)
+                            attr("min", props.range.start.toString())
+                            attr("max", props.range.endInclusive.toString())
+                            attr(
+                                "step",
+                                if (props.steps ==
+                                    0
+                                ) {
+                                    "any"
+                                } else {
+                                    ((props.range.endInclusive - props.range.start) / (props.steps + 1)).toString()
+                                },
+                            )
+                            if (!enabled) disabled()
+                            style {
+                                if (props.orientation == DomposableOrientation.Vertical) {
+                                    property("writing-mode", "vertical-lr")
+                                    property("direction", if (props.topToBottom) "ltr" else "rtl")
+                                }
+                            }
+                            onInput {
+                                it.target.value
+                                    .toFloatOrNull()
+                                    ?.takeIf { enabled }
+                                    ?.let(props.onValueChange)
+                            }
+                        })
+                    }
                 }
             },
             card = { props, modifier, content ->
@@ -683,10 +695,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val appearance = props.appearance ?: tokens.components.card
                 val enabled = props.enabled && domposableFormEnabled()
                 val cardContentId = remember { "d-card-content-${nextInputId++}" }
+                val colors = tokens.colors.withMaterialColorDefaults()
                 val container =
                     when (props.variant) {
                         io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
-                            tokens.colors.surfaceVariant
+                            requireNotNull(colors.surfaceContainerHighest)
                         }
 
                         io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {
@@ -840,7 +853,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         classes("d-surface")
                         style {
                             surfaceAppearance(appearance)
-                            (appearance.container ?: props.color)?.let { property("background-color", it.css()) }
+                            (props.color ?: appearance.container)?.let { property("background-color", it.css()) }
                         }
                     }) { content() }
                 }
@@ -957,18 +970,18 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         attr("aria-label", props.label)
                         attr("aria-pressed", props.selected.toString())
                         classes("d-chip", "d-chip-${props.variant.name.lowercase()}")
-                        if (appearance.minimumInteractiveSize != null) classes("d-item-hittarget")
+                        if (props.elevated) classes("d-chip-elevated")
+                        if (appearance.minimumInteractiveSize?.value != 0f) classes("d-item-hittarget")
                         if (!enabled) disabled()
                         style {
                             itemAppearance(appearance, props.selected)
-                            if (props.elevated) property("box-shadow", "0 2px 6px rgb(0 0 0 / .22)")
                         }
                         onClick { if (enabled) props.onClick() }
                     }) {
                         Span(attrs = { classes("d-chip-surface") }) {
-                            props.leadingIcon?.let { Span(attrs = { classes("d-chip-icon") }) { it() } }
+                            Span(attrs = { classes("d-chip-icon") }) { props.leadingIcon?.invoke() }
                             Span(attrs = { classes("d-chip-label") }) { Text(props.label) }
-                            props.trailingIcon?.let { Span(attrs = { classes("d-chip-icon") }) { it() } }
+                            Span(attrs = { classes("d-chip-icon") }) { props.trailingIcon?.invoke() }
                         }
                     }
                 }
@@ -1002,7 +1015,10 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         domposableAttributes(modifier)
                         attr("role", if (props.isError) "alert" else "status")
                         classes("d-banner")
-                        style { surfaceAppearance(appearance) }
+                        style {
+                            if (props.isError) property("color", "var(--d-error)")
+                            surfaceAppearance(appearance)
+                        }
                     }) { Text(props.message) }
                 }
             },
@@ -1021,6 +1037,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         if (props.leadingIcons) classes("d-tabs-leading-icons")
                         style { itemAppearance(appearance) }
                         if (props.scrollable) {
+                            classes("d-tabs-scrollable")
                             style {
                                 property("overflow-x", "auto")
                                 property("white-space", "nowrap")
@@ -1096,6 +1113,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         domposableAttributes(modifier)
                         attr("aria-label", props.label)
                         classes("d-navigation")
+                        if (props.orientation == DomposableOrientation.Vertical) classes("d-navigation-rail")
                         if (props.short) classes("d-navigation-short")
                         if (props.webLayout == DomposableWebNavigationLayout.Links) classes("d-navigation-links")
                         style { itemAppearance(appearance) }
@@ -1599,6 +1617,17 @@ private var nextInputId = 0
 
 internal fun nextMaterialInputId(): String = "d-input-${nextInputId++}"
 
+private fun AttrsScope<HTMLElement>.selectionContainerClick() {
+    onClick { event ->
+        event.stopPropagation()
+        val host = event.currentTarget as? HTMLElement
+        if (host?.tagName != "LABEL" && event.target != host?.querySelector("input")) {
+            event.preventDefault()
+            (host?.querySelector("input") as? HTMLElement)?.click()
+        }
+    }
+}
+
 @Composable
 private fun HtmlToggle(
     checkedValue: Boolean,
@@ -1621,6 +1650,8 @@ private fun HtmlToggle(
     switchColors: DomposableSwitchColors? = null,
 ) {
     val effectiveEnabled = enabled && domposableFormEnabled()
+    val inputRef = remember { arrayOfNulls<HTMLElement>(1) }
+    SideEffect { inputRef[0]?.asDynamic()?.indeterminate = indeterminate }
     val descriptionId = remember { "d-toggle-description-${nextInputId++}" }
     val labelId = remember { "d-toggle-label-${nextInputId++}" }
     val customColors =
@@ -1633,7 +1664,7 @@ private fun HtmlToggle(
     DomposableHtmlModifiers(modifier) {
         TagElement<HTMLElement>(if (showLabel) "label" else "span", applyAttrs = {
             classes("d-toggle")
-            onClick { it.stopPropagation() }
+            selectionContainerClick()
             style { property("gap", "${labelSpacing.value}px") }
         }) {
             @Composable fun control() {
@@ -1641,8 +1672,9 @@ private fun HtmlToggle(
                     domposableAttributes(modifier)
                     checked(checkedValue)
                     ref { input ->
+                        inputRef[0] = input
                         input.asDynamic().indeterminate = indeterminate
-                        onDispose {}
+                        onDispose { inputRef[0] = null }
                     }
                     if (switch) attr("role", "switch")
                     if (!effectiveEnabled) disabled()
@@ -1657,7 +1689,10 @@ private fun HtmlToggle(
                                 property("--d-switch-checked-border", it.checkedBorder.cssOr("transparent"))
                                 property("--d-switch-checked-icon", it.checkedIcon.cssOr("var(--d-on-primary)"))
                                 property("--d-switch-unchecked-thumb", it.uncheckedThumb.cssOr("var(--d-outline)"))
-                                property("--d-switch-unchecked-track", it.uncheckedTrack.cssOr("var(--d-surface)"))
+                                property(
+                                    "--d-switch-unchecked-track",
+                                    it.uncheckedTrack.cssOr("var(--d-surface-container-highest,var(--d-variant))"),
+                                )
                                 property("--d-switch-unchecked-border", it.uncheckedBorder.cssOr("var(--d-outline)"))
                                 property("--d-switch-unchecked-icon", it.uncheckedIcon.cssOr("var(--d-on-surface)"))
                                 property(
@@ -1709,7 +1744,10 @@ private fun HtmlToggle(
                             }
                         } else {
                             property("--d-control-selected", colors.selected.cssOr("var(--d-primary)"))
-                            property("--d-control-unselected", colors.unselected.cssOr("var(--d-outline)"))
+                            property(
+                                "--d-control-unselected",
+                                colors.unselected.cssOr("var(--d-on-surface-variant,var(--d-outline))"),
+                            )
                             property(
                                 "--d-control-disabled-selected",
                                 colors.disabledSelected.cssOr("color-mix(in srgb,var(--d-on-surface) 38%,transparent)"),
@@ -1721,7 +1759,7 @@ private fun HtmlToggle(
                                 ),
                             )
                             property("--d-control-checkmark", checkmark.cssOr("var(--d-on-primary)"))
-                            property("--d-control-disabled-checkmark", disabledCheckmark.cssOr("var(--d-surface)"))
+                            property("--d-control-disabled-checkmark", disabledCheckmark.cssOr("var(--d-on-primary)"))
                             property(
                                 "accent-color",
                                 (if (effectiveEnabled) colors.selected else colors.disabledSelected).cssOr(
@@ -1730,7 +1768,11 @@ private fun HtmlToggle(
                             )
                         }
                     }
-                    onChange { if (effectiveEnabled) onChange(indeterminate || it.value) }
+                    onChange {
+                        // Restore before the callback so synchronous recomposition can commit a new mixed state.
+                        it.target.asDynamic().indeterminate = indeterminate
+                        if (effectiveEnabled) onChange(indeterminate || it.value)
+                    }
                 })
             }
 
@@ -1738,17 +1780,33 @@ private fun HtmlToggle(
                 Span(attrs = {
                     classes("d-toggle-copy")
                     style { property("gap", "${descriptionSpacing.value}px") }
-                    if (showLabel || description != null) classes("d-toggle-copy-visible")
+                    if (showLabel || description != null) {
+                        classes("d-toggle-copy-visible")
+                    } else {
+                        classes("d-visually-hidden")
+                    }
                 }) {
                     Span(attrs = {
                         id(labelId)
                         if (!showLabel) classes("d-visually-hidden")
-                        style { labelAppearance?.let { applyCatalogTextAppearance(it) } }
+                        style {
+                            applyCatalogTextAppearance(
+                                labelAppearance?.copy(role = labelAppearance.role ?: DomposableTypographyRole.BodyLarge)
+                                    ?: DomposableTextAppearance(role = DomposableTypographyRole.BodyLarge),
+                            )
+                        }
                     }) { Text(label) }
                     description?.let {
                         Span(attrs = {
                             id(descriptionId)
-                            style { descriptionAppearance?.let { applyCatalogTextAppearance(it) } }
+                            classes("d-toggle-description")
+                            style {
+                                property("color", "var(--d-on-surface-variant)")
+                                applyCatalogTextAppearance(
+                                    descriptionAppearance
+                                        ?: DomposableTextAppearance(role = DomposableTypographyRole.BodySmall),
+                                )
+                            }
                         }) { Text(it) }
                     }
                 }
@@ -1874,7 +1932,7 @@ private fun HtmlTheme(
 internal fun InstallDomposableMaterialStyles() {
     DisposableEffect(Unit) {
         val style = document.createElement("style")
-        style.textContent = MATERIAL_CSS
+        style.textContent = MATERIAL_CSS + MATERIAL_DEFAULTS_CSS
         document.head!!.appendChild(style)
         onDispose { style.remove() }
     }
@@ -1889,7 +1947,7 @@ private const val MATERIAL_CSS = """
 .d-theme button{cursor:pointer}.d-theme button:disabled{cursor:default;opacity:.5}
 .d-theme :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
-.d-theme h1,.d-theme h2,.d-theme h3{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
+.d-theme h1,.d-theme h2,.d-theme h3,.d-theme h4,.d-theme h5,.d-theme h6{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:9999px;min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
 .d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;align-items:center;justify-content:center}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
 @media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}
@@ -1902,18 +1960,19 @@ private const val MATERIAL_CSS = """
 .d-field input[type=search]{appearance:none;-webkit-appearance:none}
 .d-field input[type=search]::-webkit-search-decoration,.d-field input[type=search]::-webkit-search-cancel-button,.d-field input[type=search]::-webkit-search-results-button,.d-field input[type=search]::-webkit-search-results-decoration{display:none}
 .d-field-control{display:flex;align-items:center;gap:8px;min-height:56px}.d-field-control input,.d-field-control textarea{flex:1;min-width:0;height:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent}
-.d-error{color:var(--d-error)}.d-toggle{display:flex;gap:10px;align-items:center;min-height:44px}.d-toggle input{width:20px;height:20px}
-.d-avatar{position:relative;display:inline-grid;place-items:center;overflow:hidden;flex:none;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{display:inline-grid;place-items:center;box-sizing:border-box;min-width:16px;width:max-content;height:16px;padding:0 4px;border-radius:999px;background:var(--d-primary);color:var(--d-on-primary);font-size:11px;line-height:16px;font-weight:500;font-variant-numeric:tabular-nums}.d-badge-dot{width:6px;min-width:6px;height:6px;padding:0}
-.d-divider{margin:0;padding:0;flex:none;align-self:stretch;border:0;border-top:1px solid var(--d-outline);width:100%}.d-banner{padding:12px;border-radius:var(--d-radius);background:var(--d-variant)}
+.d-error{color:var(--d-error)}.d-toggle{position:relative;display:flex;gap:10px;align-items:center;min-height:48px;min-width:48px}.d-toggle:not(:has(.d-toggle-copy-visible)){justify-content:center}.d-toggle input{width:20px;height:20px}
+.d-toggle::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--d-on-surface);opacity:0}.d-toggle:has(input:enabled):hover::before{opacity:.08}.d-toggle:has(input:enabled:focus-visible)::before,.d-toggle:has(input:enabled):active::before{opacity:.1}
+.d-surface{background:var(--d-surface);color:var(--d-on-surface)}.d-avatar{position:relative;display:inline-grid;place-items:center;overflow:hidden;flex:none;width:40px;height:40px;border-radius:50%;background:var(--d-variant)}.d-badge{display:inline-grid;place-items:center;box-sizing:border-box;min-width:16px;width:max-content;height:16px;padding:0 4px;border-radius:999px;background:var(--d-error);color:var(--d-on-error);font-size:11px;line-height:16px;font-weight:500;font-variant-numeric:tabular-nums}.d-badge-dot{width:6px;min-width:6px;height:6px;padding:0}
+.d-divider{margin:0;padding:0;flex:none;align-self:stretch;border:0;border-top:1px solid var(--d-outline-variant);width:100%}.d-banner{border-radius:var(--d-radius);background:transparent}
 .d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button,.d-navigation a{text-decoration:none;display:inline-flex;align-items:center;padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
 .d-tabs [aria-selected=true],.d-navigation [aria-current=page]{color:var(--d-primary);border-bottom:3px solid var(--d-primary)}
 .d-dialog{border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface);max-width:min(600px,90vw)}
 .d-dialog::backdrop{background:#0006}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw)}
 .d-scaffold{display:flex;flex-direction:column;height:100dvh}.d-scaffold-constrained{height:100%;min-height:0;min-width:0;overflow:hidden}.d-scaffold-middle{display:flex;flex:1;min-height:0}.d-scaffold-constrained>.d-scaffold-middle{min-height:0;overflow:hidden}.d-scaffold-body{flex:1;min-width:0;min-height:0;position:relative;overflow:auto}.d-scaffold-constrained>.d-scaffold-middle>.d-scaffold-body{height:100%;min-height:0}.d-floating{position:absolute;bottom:16px;right:16px}.d-snackbar{position:absolute;bottom:16px;left:16px}
 .d-app-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;background:var(--d-surface)}.d-app-bar h2{font-size:var(--d-title);flex:1}.d-app-bar-actions{display:flex;gap:8px}.d-fab{min-width:56px;min-height:56px;border-radius:16px;box-shadow:0 3px 8px #0003}
-.d-snackbar-message{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 16px;border-radius:var(--d-radius);background:var(--d-on-surface);color:var(--d-surface)}.d-snackbar-message button{border:0;background:transparent;color:inherit;min-height:44px;padding:8px}
+.d-snackbar-message{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:48px;padding:0 8px 0 16px;border-radius:4px;background:var(--d-inverse-surface);color:var(--d-inverse-on-surface)}.d-snackbar-message>span{flex:1;padding-block:14px;font-size:14px;line-height:20px;letter-spacing:.25px}.d-snackbar-message button{border:0;background:transparent;color:var(--d-inverse-primary);min-height:48px;padding:0 12px;font-size:14px;line-height:20px;font-weight:500;letter-spacing:.1px}
 .d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer;display:flex;align-items:center;min-width:var(--d-item-min-interactive,0px);min-height:var(--d-item-min-interactive,0px)}.d-segment input{position:absolute;opacity:0;width:1px;height:1px}.d-segment-surface{display:flex;align-items:center;gap:var(--d-item-gap,0px);min-height:var(--d-item-min-height,44px);padding:var(--d-item-padding,10px 16px);border:1px solid var(--d-outline)}.d-segment:first-child .d-segment-surface{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child .d-segment-surface{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+.d-segment-surface{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+.d-segment-surface{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+.d-segment-surface{opacity:.5;cursor:default}
-.d-range{display:flex;flex-direction:column;gap:12px}.d-tooltip-anchor{display:inline-block;position:relative}.d-tooltip{position:absolute;z-index:5;bottom:100%;left:0;min-width:160px;max-width:280px;border-radius:4px;padding:8px 12px;background:var(--d-on-surface);color:var(--d-surface);font-size:var(--d-label)}
+.d-range{position:relative;width:100%;height:48px;min-width:144px}.d-tooltip-anchor{display:inline-block;position:relative}.d-tooltip{position:absolute;z-index:5;bottom:100%;left:0;min-width:160px;max-width:280px;border-radius:4px;padding:8px 12px;background:var(--d-on-surface);color:var(--d-surface);font-size:var(--d-label)}
 @media(prefers-reduced-motion:reduce){.d-theme *{transition:none!important;animation:none!important}}
 .d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-navigation button,.d-navigation a{font:inherit;accent-color:var(--d-primary);box-sizing:border-box}
 .d-button:focus-visible,.d-chip:focus-visible,.d-icon-button:focus-visible,.d-field :focus-visible,.d-navigation :focus-visible,.d-tabs :focus-visible,.d-toggle :focus-visible,.d-segment :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
@@ -1921,25 +1980,38 @@ private const val MATERIAL_CSS = """
 @media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}.d-button-spinner{animation:none!important}}
 @media(forced-colors:active){.d-button:not(:disabled):focus-visible{outline:2px solid Highlight;outline-offset:3px;box-shadow:none}}
 .d-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-outline));border-radius:2px;background:transparent;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
-.d-toggle input[type=checkbox]:not([role=switch]):checked{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary));background-image:linear-gradient(135deg,transparent 43%,var(--d-control-checkmark,var(--d-on-primary)) 44% 56%,transparent 57%),linear-gradient(45deg,transparent 38%,var(--d-control-checkmark,var(--d-on-primary)) 39% 52%,transparent 53%);background-size:9px 9px;background-position:1px 0,3px 4px;background-repeat:no-repeat}
-.d-toggle input[type=checkbox]:not([role=switch]):indeterminate{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary));background-image:linear-gradient(var(--d-control-checkmark,var(--d-on-primary)),var(--d-control-checkmark,var(--d-on-primary)));background-size:10px 2px;background-position:center;background-repeat:no-repeat}
+.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-on-surface-variant,var(--d-outline)));border-radius:2px;background:transparent;background-clip:padding-box;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
+.d-toggle input[type=checkbox]:not([role=switch]){position:relative}.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{margin:2px}
+.d-toggle input[type=checkbox]:not([role=switch]):checked{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary))}
+.d-toggle input[type=checkbox]:not([role=switch]):checked::after,.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{content:"";position:absolute;inset:-2px;pointer-events:none;background:var(--d-control-checkmark,var(--d-on-primary));mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10 8 14 16 6' fill='none' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") center/20px 20px no-repeat}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate{border-color:var(--d-control-selected,var(--d-primary));background-color:var(--d-control-selected,var(--d-primary))}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate::after{mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10H16' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") center/20px 20px no-repeat}
 .d-toggle input[type=radio]{border-radius:50%;background-color:transparent}.d-toggle input[type=radio]:checked{border-color:var(--d-control-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-selected,var(--d-primary)) 0 42%,transparent 46%)}
 .d-toggle input[type=checkbox]:not([role=switch]):disabled,.d-toggle input[type=radio]:disabled{border-color:var(--d-control-disabled-unselected,color-mix(in srgb,var(--d-on-surface) 38%,transparent));opacity:1}
-.d-toggle input[type=checkbox]:not([role=switch]):checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background-color:var(--d-control-disabled-selected,var(--d-primary));background-image:linear-gradient(135deg,transparent 43%,var(--d-control-disabled-checkmark,var(--d-on-surface)) 44% 56%,transparent 57%),linear-gradient(45deg,transparent 38%,var(--d-control-disabled-checkmark,var(--d-on-surface)) 39% 52%,transparent 53%)}
+.d-toggle input[type=checkbox]:not([role=switch]):checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background-color:var(--d-control-disabled-selected,var(--d-primary))}
+.d-toggle input[type=checkbox]:not([role=switch]):disabled::after{background:var(--d-control-disabled-checkmark,var(--d-surface))}
 .d-toggle input[type=radio]:checked:disabled{border-color:var(--d-control-disabled-selected,var(--d-primary));background:radial-gradient(circle,var(--d-control-disabled-selected,var(--d-primary)) 0 42%,transparent 46%)}
-.d-toggle input[role=switch]{appearance:none;flex:0 0 52px;width:52px;height:32px;margin:0;border:2px solid var(--d-switch-unchecked-border,var(--d-outline));border-radius:999px;background-color:var(--d-switch-unchecked-track,var(--d-surface));background-image:radial-gradient(circle closest-side,var(--d-switch-unchecked-thumb,var(--d-outline)) 0 98%,transparent 100%);background-size:16px 16px;background-position:6px center;background-repeat:no-repeat;transition:background-color 150ms ease,border-color 150ms ease,background-position 150ms ease,background-size 150ms ease}
+.d-toggle input[role=switch]{appearance:none;flex:0 0 52px;width:52px;height:32px;margin:0;border:2px solid var(--d-switch-unchecked-border,var(--d-outline));border-radius:999px;background-color:var(--d-switch-unchecked-track,var(--d-surface-container-highest,var(--d-variant)));background-image:radial-gradient(circle closest-side,var(--d-switch-unchecked-thumb,var(--d-outline)) 0 98%,transparent 100%);background-size:16px 16px;background-position:6px center;background-repeat:no-repeat;transition:background-color 150ms ease,border-color 150ms ease,background-position 150ms ease,background-size 150ms ease}
 .d-toggle input[role=switch]:checked{border-color:var(--d-switch-checked-border,transparent);background-color:var(--d-switch-checked-track,var(--d-primary));background-image:radial-gradient(circle closest-side,var(--d-switch-checked-thumb,var(--d-on-primary)) 0 98%,transparent 100%);background-size:24px 24px;background-position:calc(100% - 2px) center}
 .d-toggle input[role=switch]:disabled{opacity:1;border-color:var(--d-switch-disabled-unchecked-border);background-color:var(--d-switch-disabled-unchecked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-unchecked-thumb) 0 98%,transparent 100%)}
 .d-toggle input[role=switch]:checked:disabled{border-color:var(--d-switch-disabled-checked-border);background-color:var(--d-switch-disabled-checked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-checked-thumb) 0 98%,transparent 100%)}
-.d-toggle input[type=checkbox]:not([role=switch]):indeterminate:disabled{border-color:var(--d-control-disabled-selected);background-color:var(--d-control-disabled-selected);background-image:linear-gradient(var(--d-control-disabled-checkmark),var(--d-control-disabled-checkmark))}
-.d-slider{appearance:none;width:100%;height:20px;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
-.d-slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(to right,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) 100%)}
-.d-slider::-moz-range-track{height:4px;border-radius:4px;background:var(--d-slider-inactive-current,var(--d-outline))}
-.d-slider::-moz-range-progress{height:4px;border-radius:4px;background:var(--d-slider-active-current,var(--d-primary))}
-.d-slider-vertical{height:160px;width:20px;touch-action:pan-x}.d-slider-vertical::-webkit-slider-runnable-track{height:100%;width:4px;background:linear-gradient(to bottom,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) var(--d-slider-progress,50%),var(--d-slider-inactive-current,var(--d-outline)) 100%)}.d-slider-vertical::-moz-range-track{height:100%;width:4px}.d-slider-vertical::-moz-range-progress{height:var(--d-slider-progress,50%);width:4px}.d-slider-vertical::-webkit-slider-thumb{appearance:none;width:20px;height:20px;margin-top:-8px;border:0;border-radius:50%;background:var(--d-slider-thumb-current,var(--d-primary))}
-.d-slider::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:var(--d-slider-thumb-current,var(--d-primary))}
-.d-slider:disabled{--d-slider-thumb-current:var(--d-slider-disabled-thumb,var(--d-slider-thumb-current));--d-slider-active-current:var(--d-slider-disabled-active,var(--d-slider-active-current));--d-slider-inactive-current:var(--d-slider-disabled-inactive,var(--d-slider-inactive-current))}
+.d-toggle input[type=checkbox]:not([role=switch]):indeterminate:disabled{border-color:var(--d-control-disabled-selected);background-color:var(--d-control-disabled-selected)}
+.d-slider{appearance:none;width:100%;height:48px;margin:0;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
+.d-slider-surface{--d-slider-track-paint:var(--d-slider-marks,linear-gradient(transparent,transparent)),linear-gradient(to var(--d-slider-direction),var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) 100%)}
+.d-slider-surface{position:relative;width:100%;height:48px;--d-slider-direction:right}.d-slider-surface::before{content:"";position:absolute;inset:16px 2px;border-radius:8px;background:var(--d-slider-track-paint);pointer-events:none}.d-slider-surface-vertical{width:48px;height:160px}.d-slider-surface-vertical::before{inset:2px 16px}.d-slider-surface>.d-slider{display:block;position:absolute;inset:0}
+.d-slider::-webkit-slider-runnable-track{height:16px;border-radius:8px;background:transparent}
+.d-slider::-moz-range-track{height:16px;border-radius:8px;background:transparent}.d-slider::-moz-range-progress{background:transparent}
+.d-slider-vertical{height:160px;width:48px;touch-action:pan-x}.d-slider-vertical::-webkit-slider-runnable-track{height:100%;width:16px}.d-slider-vertical::-moz-range-track{height:100%;width:16px}
+.d-slider::-webkit-slider-thumb{appearance:none;width:4px;height:44px;margin-top:-14px;border:0;border-radius:999px;background:var(--d-slider-thumb-current,var(--d-primary))}
+.d-slider::-moz-range-thumb{width:4px;height:44px;border:0;border-radius:999px;background:var(--d-slider-thumb-current,var(--d-primary))}
+.d-slider:active::-webkit-slider-thumb{width:2px}.d-slider:active::-moz-range-thumb{width:2px}
+.d-range::before{content:"";position:absolute;inset:16px 2px;border-radius:8px;background:var(--d-slider-marks,linear-gradient(transparent,transparent)),linear-gradient(to right,var(--d-slider-inactive-current) 0,var(--d-slider-inactive-current) calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) + 8px),var(--d-slider-active-current) calc(var(--d-range-start) + 8px),var(--d-slider-active-current) calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) + 8px),var(--d-slider-inactive-current) calc(var(--d-range-end) + 8px))}
+.d-range::before{mask-image:linear-gradient(to right,black 0,black calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) + 8px),black calc(var(--d-range-start) + 8px),black calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) + 8px),black calc(var(--d-range-end) + 8px))}
+.d-range .d-slider{position:absolute;inset:0;width:100%}.d-range-start{clip-path:inset(0 calc(100% - var(--d-range-midpoint)) 0 0)}.d-range-end{clip-path:inset(0 0 0 var(--d-range-midpoint))}
+.d-range .d-slider::-webkit-slider-runnable-track{background:transparent;mask-image:none}.d-range .d-slider::-moz-range-track,.d-range .d-slider::-moz-range-progress{background:transparent;mask-image:none}
+
+.d-slider-vertical::-webkit-slider-thumb{width:44px;height:4px;margin-top:0;margin-left:-14px}.d-slider-vertical::-moz-range-thumb{width:44px;height:4px}
+
 .d-chip{background:var(--d-item-container,var(--d-variant));color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,transparent);border-width:var(--d-item-border-width,1px);border-radius:var(--d-item-radius,var(--d-radius))}
 .d-chip[aria-pressed=true]{background:var(--d-item-selected-container,var(--d-variant));color:var(--d-item-selected-content,var(--d-primary));border-color:var(--d-item-selected-border,var(--d-primary))}
 .d-chip:disabled{background:var(--d-item-disabled-container,var(--d-variant));color:var(--d-item-disabled-content,var(--d-on-surface));border-color:var(--d-item-disabled-border,var(--d-outline))}
@@ -1949,7 +2021,7 @@ private const val MATERIAL_CSS = """
 .d-segment:first-child .d-segment-surface{border-top-left-radius:var(--d-item-radius,var(--d-radius));border-bottom-left-radius:var(--d-item-radius,var(--d-radius))}.d-segment:last-child .d-segment-surface{border-top-right-radius:var(--d-item-radius,var(--d-radius));border-bottom-right-radius:var(--d-item-radius,var(--d-radius))}
 .d-segment input:checked+.d-segment-surface{border-width:var(--d-item-selected-border-width,var(--d-item-border-width,1px));background:var(--d-item-selected-container,var(--d-variant));color:var(--d-item-selected-content,var(--d-primary));border-color:var(--d-item-selected-border,var(--d-outline))}
 .d-segment input:disabled+.d-segment-surface{background:var(--d-item-disabled-container,var(--d-item-container,transparent));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-outline))}
-.d-progress{display:block;appearance:none;accent-color:var(--d-progress-color,var(--d-primary));height:var(--d-progress-stroke,4px);border:0;border-radius:999px;overflow:hidden;background:var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))}.d-progress::-webkit-progress-bar{border-radius:999px;background:var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))}.d-progress::-webkit-progress-value{border-radius:999px;background:var(--d-progress-color,var(--d-primary))}.d-progress::-moz-progress-bar{border-radius:999px;background:var(--d-progress-color,var(--d-primary))}.d-progress-circular{width:48px;height:48px;vertical-align:middle}@keyframes d-progress-spin{to{transform:rotate(360deg)}}@keyframes d-wave-travel{to{stroke-dashoffset:-100}}@keyframes d-wave-circular-travel{to{stroke-dashoffset:-100;transform:rotate(270deg)}}@keyframes d-loading-rotate{to{transform:rotate(360deg)}}@keyframes d-loading-shape-one{0%,100%{opacity:1;transform:rotate(0deg) scale(.78)}33%{opacity:0;transform:rotate(120deg) scale(1)}66%{opacity:0;transform:rotate(240deg) scale(.9)}}@keyframes d-loading-shape-two{0%,33%,100%{opacity:0;transform:rotate(-30deg) scale(.9)}38%,61%{opacity:1;transform:rotate(90deg) scale(1)}68%{opacity:0;transform:rotate(150deg) scale(.8)}}@keyframes d-loading-shape-three{0%,60%,100%{opacity:0;transform:rotate(20deg) scale(.8)}66%,92%{opacity:1;transform:rotate(140deg) scale(1)}96%{opacity:0;transform:rotate(180deg) scale(.9)}}
+.d-progress{display:block;appearance:none;accent-color:var(--d-progress-color,var(--d-primary));height:var(--d-progress-stroke,4px);border:0;border-radius:999px;overflow:hidden;background:var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))}.d-progress::-webkit-progress-bar{border-radius:999px;background:var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))}.d-progress::-webkit-progress-value{border-radius:999px;background:var(--d-progress-color,var(--d-primary))}.d-progress::-moz-progress-bar{border-radius:999px;background:var(--d-progress-color,var(--d-primary))}.d-standard-active{stroke:var(--d-progress-color,var(--d-primary))}.d-standard-track{stroke:var(--d-progress-track,var(--d-secondary-container))}.d-progress-circular{width:40px;height:40px;vertical-align:middle}@keyframes d-progress-spin{to{transform:rotate(360deg)}}@keyframes d-wave-travel{to{stroke-dashoffset:-100}}@keyframes d-wave-circular-travel{to{stroke-dashoffset:-100;transform:rotate(270deg)}}@keyframes d-loading-rotate{to{transform:rotate(360deg)}}@keyframes d-loading-shape-one{0%,100%{opacity:1;transform:rotate(0deg) scale(.78)}33%{opacity:0;transform:rotate(120deg) scale(1)}66%{opacity:0;transform:rotate(240deg) scale(.9)}}@keyframes d-loading-shape-two{0%,33%,100%{opacity:0;transform:rotate(-30deg) scale(.9)}38%,61%{opacity:1;transform:rotate(90deg) scale(1)}68%{opacity:0;transform:rotate(150deg) scale(.8)}}@keyframes d-loading-shape-three{0%,60%,100%{opacity:0;transform:rotate(20deg) scale(.8)}66%,92%{opacity:1;transform:rotate(140deg) scale(1)}96%{opacity:0;transform:rotate(180deg) scale(.9)}}
 .d-theme .d-card{border-radius:var(--d-shape-medium,var(--d-radius))}.d-theme .d-field input,.d-theme .d-field textarea,.d-theme .d-field select,.d-search-control,.d-autocomplete-control{border-radius:var(--d-shape-extra-small,var(--d-radius))}
 .d-theme .d-chip,.d-theme .d-segment-surface,.d-navigation-drawer-item,.d-list-item{border-radius:var(--d-item-radius,var(--d-shape-small,var(--d-radius)))}
 .d-theme-expressive .d-button,.d-theme-expressive .d-chip,.d-theme-expressive .d-loading-indicator,.d-theme-expressive .d-floating-toolbar{transition-timing-function:cubic-bezier(.2,.8,.2,1)}
@@ -1965,10 +2037,10 @@ private const val MATERIAL_CSS = """
 .d-app-bar-center-aligned .d-app-bar-title{position:absolute;left:50%;transform:translateX(-50%);text-align:center}.d-app-bar-medium,.d-app-bar-large,.d-app-bar-mediumflexible,.d-app-bar-largeflexible{align-items:flex-end;padding-bottom:24px}.d-app-bar-large .d-app-bar-title,.d-app-bar-largeflexible .d-app-bar-title{font-size:var(--d-title)}
 .d-fab-small{min-width:40px;min-height:40px;border-radius:var(--d-shape-medium,16px)}.d-fab-medium{min-width:80px;min-height:80px;border-radius:var(--d-shape-large,28px)}.d-fab-large{min-width:96px;min-height:96px;border-radius:var(--d-shape-extra-large,32px)}
 .d-button-group{display:flex;flex-wrap:wrap;align-items:center}.d-button-toggle[aria-pressed=true]{background:var(--d-secondary-container);color:var(--d-on-secondary-container)}.d-split-button>.d-button:first-child{border-start-end-radius:0;border-end-end-radius:0}.d-split-button>.d-button:last-child{border-start-start-radius:0;border-end-start-radius:0;border-inline-start:1px solid color-mix(in srgb,currentColor 20%,transparent)}
-.d-loading-indicator{position:relative;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:var(--d-progress-color,var(--d-primary))}.d-loading-indicator svg{display:block;overflow:visible}.d-loading-contained{background:var(--d-loading-container,var(--d-progress-track,var(--d-secondary-container)));padding:8px}.d-loading-container-shape{fill:var(--d-loading-container,var(--d-progress-track,var(--d-secondary-container)))}.d-loading-morph-shape{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-contained{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-outline{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-shape{transform-box:fill-box;transform-origin:center;animation:d-loading-rotate 3.2s linear infinite}.d-loading-morph-0{animation:d-loading-shape-one 3.2s ease-in-out infinite}.d-loading-morph-1{animation:d-loading-shape-two 3.2s ease-in-out infinite}.d-loading-morph-2{animation:d-loading-shape-three 3.2s ease-in-out infinite}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}
+.d-loading-indicator{position:relative;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:var(--d-progress-color,var(--d-primary))}.d-loading-indicator svg{display:block;overflow:visible}.d-loading-contained{background:var(--d-loading-container,var(--d-progress-track,var(--d-primary-container)));padding:8px}.d-loading-container-shape{fill:var(--d-loading-container,var(--d-progress-track,var(--d-primary-container)))}.d-loading-morph-shape{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-contained{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-outline{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-shape{transform-box:fill-box;transform-origin:center;animation:d-loading-rotate 3.2s linear infinite}.d-loading-morph-0{animation:d-loading-shape-one 3.2s ease-in-out infinite}.d-loading-morph-1{animation:d-loading-shape-two 3.2s ease-in-out infinite}.d-loading-morph-2{animation:d-loading-shape-three 3.2s ease-in-out infinite}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}
 .d-floating-toolbar{position:relative;z-index:auto;display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}.d-floating-toolbar[data-expanded=false]{gap:0}.d-fab-menu{position:relative;z-index:auto;display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:max-content;max-width:100%}.d-fab-menu-items{display:flex;flex-direction:column;gap:8px;max-width:100%;padding:12px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}
 .d-drag-handle{display:grid;place-items:center;min-width:48px;min-height:24px;touch-action:none;cursor:grab}.d-drag-handle:active{cursor:grabbing}.d-drag-handle-grip{display:block;width:32px;height:4px;border-radius:999px;background:currentColor;opacity:.45}
-.d-list-item{display:flex;width:100%;align-items:center;gap:var(--d-item-gap,16px);min-height:var(--d-item-min-height,56px);padding:var(--d-item-padding,12px 16px);border:0;text-align:start;background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface))}.d-list-item-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}.d-list-item-headline{font-weight:500}.d-list-item-supporting,.d-list-item-overline{font-size:var(--d-label);color:var(--d-on-surface-variant)}.d-list-item[aria-current=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-list-item:disabled{background:var(--d-item-disabled-container,transparent);color:var(--d-item-disabled-content,var(--d-on-surface));opacity:.5}.d-list-item-first{border-end-start-radius:0;border-end-end-radius:0}.d-list-item-middle{border-radius:0}.d-list-item-last{border-start-start-radius:0;border-start-end-radius:0}
+.d-list-item{display:flex;width:100%;align-items:center;gap:var(--d-item-gap,16px);min-height:var(--d-item-min-height,56px);padding:var(--d-item-padding,12px 16px);border:0;text-align:start;background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface))}.d-list-item-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:var(--d-item-gap,0px)}.d-list-item-headline{font-weight:400}.d-list-item-supporting{font-size:14px;line-height:20px;letter-spacing:.25px;color:var(--d-on-surface-variant)}.d-list-item-overline{font-size:11px;line-height:16px;letter-spacing:.5px;font-weight:500;color:var(--d-on-surface-variant)}.d-list-item:has(.d-list-item-supporting),.d-list-item:has(.d-list-item-overline){min-height:var(--d-item-min-height,72px)}.d-list-item:has(.d-list-item-supporting):has(.d-list-item-overline){min-height:var(--d-item-min-height,88px)}.d-list-item[aria-current=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-list-item:disabled{background:var(--d-item-disabled-container,transparent);color:var(--d-item-disabled-content,var(--d-on-surface));opacity:.5}.d-list-item-first{border-end-start-radius:0;border-end-end-radius:0}.d-list-item-middle{border-radius:0}.d-list-item-last{border-start-start-radius:0;border-start-end-radius:0}
 .d-bottom-app-bar{display:flex;align-items:center;gap:12px;min-height:80px;padding:12px 16px;border-radius:var(--d-shape-large,var(--d-radius)) var(--d-shape-large,var(--d-radius)) 0 0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}.d-navigation-drawer{position:absolute;inset-block:0;inset-inline-start:0;width:min(360px,90vw);padding:16px;overflow:auto;border-radius:0 var(--d-shape-large,var(--d-radius)) var(--d-shape-large,var(--d-radius));box-shadow:0 8px 24px rgb(0 0 0 / .24)}.d-drawer-scrim{position:fixed;inset:0;z-index:30;background:rgb(0 0 0 / .32)}.d-navigation-drawer-item{display:flex;width:100%;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border:0;background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));text-align:start}.d-navigation-drawer-item[aria-current=page]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-wide-navigation-rail{display:flex;flex:0 0 88px;flex-direction:column;align-items:center;gap:12px;overflow:hidden}.d-wide-navigation-rail-expanded{flex-basis:280px;align-items:stretch;padding:16px}
 .d-bottom-sheet-scaffold{display:flex;min-height:100%;flex-direction:column}.d-bottom-sheet-content{flex:1}.d-bottom-sheet{position:sticky;bottom:0;max-height:80vh;overflow:auto;border-radius:var(--d-shape-large,var(--d-radius)) var(--d-shape-large,var(--d-radius)) 0 0;padding:16px}.d-bottom-sheet-handle{align-self:center;min-height:44px}
 .d-search-bar,.d-autocomplete{position:relative;display:flex;flex-direction:column;gap:6px}.d-search-control,.d-autocomplete-control{display:flex;align-items:center;gap:8px;min-height:var(--d-input-min-height,56px);padding:var(--d-input-padding,0 16px);border:var(--d-input-outline-width,1px) solid var(--d-input-outline,var(--d-outline));background:var(--d-input-container,var(--d-surface));color:var(--d-input-text,var(--d-on-surface))}.d-search-control:focus-within,.d-autocomplete-control:focus-within{border-width:var(--d-input-outline-focused-width,2px);border-color:var(--d-input-outline-focused,var(--d-primary));background:var(--d-input-container-focused,var(--d-surface))}.d-search-control input,.d-autocomplete-control input{flex:1;min-width:0;min-height:inherit;border:0;outline:0;padding:0;background:transparent;color:inherit;caret-color:var(--d-input-cursor,var(--d-primary))}.d-search-control input::placeholder,.d-autocomplete-control input::placeholder{font-size:var(--d-input-placeholder-size,inherit)}.d-search-results,.d-autocomplete-options{position:absolute;z-index:15;top:100%;inset-inline:0;display:flex;flex-direction:column;max-height:50vh;overflow:auto;padding:8px;border-radius:0 0 var(--d-shape-medium,var(--d-radius)) var(--d-shape-medium,var(--d-radius));background:var(--d-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}.d-search-results:empty{display:none}.d-autocomplete-options button{text-align:start;min-height:44px;border:0;background:transparent;color:var(--d-on-surface)}.d-autocomplete-options button[aria-selected=true]{background:var(--d-secondary-container);color:var(--d-on-secondary-container)}
@@ -2005,7 +2077,7 @@ private const val MATERIAL_CSS = """
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
 .d-snackbar-host>.d-snackbar-message{max-width:min(720px,100%);min-height:48px;box-shadow:0 3px 8px rgb(0 0 0 / .24);pointer-events:auto}
 .d-scroll-field-viewport::before,.d-scroll-field-viewport::after{content:"";display:block;height:62px;scroll-snap-align:none;pointer-events:none}
-.d-theme .d-toggle{min-height:24px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}.d-toggle:has(>.d-toggle-copy-visible:first-child){width:100%}
+.d-theme .d-toggle{min-height:48px;gap:10px;align-items:center}.d-toggle-copy{display:flex;flex-direction:column;min-width:0}.d-toggle:has(>input:last-child)>.d-toggle-copy-visible{flex:1}.d-toggle:has(>.d-toggle-copy-visible:first-child){width:100%}
 .d-theme .d-chip.d-item-hittarget .d-chip-surface{border-radius:var(--d-item-radius,var(--d-shape-small,8px))}
 .d-theme .d-progress-wavy-linear{width:100%}
 .d-theme .d-navigation:not(.d-navigation-links):not([style*="column"]){display:flex;width:100%;min-height:80px;align-items:stretch;justify-content:space-around;gap:0;background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface)}

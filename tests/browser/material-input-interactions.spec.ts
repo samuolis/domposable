@@ -36,12 +36,16 @@ test('time picker modes preserve and update controlled hour and minute values', 
   await expect(page.getByTestId('material-selected-time')).toContainText('11:45');
   const switchMode = page.getByRole('button', { name: 'Switch time entry', exact: true });
   await switchMode.click();
-  const typedTime = picker.locator('input[type="time"]');
-  await expect(typedTime).toHaveValue('11:45');
-  await typedTime.fill('12:15');
+  const typedHour = picker.getByRole('textbox', { name: 'Hour', exact: true });
+  const typedMinute = picker.getByRole('textbox', { name: 'Minute', exact: true });
+  await expect(typedHour).toHaveValue('11');
+  await expect(typedMinute).toHaveValue('45');
+  await typedHour.fill('12');
+  await expect(page.getByTestId('material-selected-time')).toContainText('12:45');
+  await typedMinute.fill('15');
   await expect(page.getByTestId('material-selected-time')).toContainText('12:15');
   await switchMode.click();
-  await expect(picker.locator('input[type="time"]')).toHaveCount(0);
+  await expect(picker.getByRole('textbox')).toHaveCount(0);
   await expect(page.getByTestId('material-selected-time')).toContainText('12:15');
   await picker.getByRole('button', { name: 'Select hours', exact: true }).click();
   const hour = picker.getByRole('button', { name: 'Hour 12', exact: true });
@@ -166,4 +170,49 @@ test('controls embed in app-owned labels and mixed selection commits true', asyn
     await expect(control.locator('xpath=ancestor::label')).toHaveCount(1);
     if (role === 'checkbox') await expect(control).toHaveJSProperty('indeterminate', false);
   }
+});
+
+
+test('time editing keeps partial text and rejects out-of-range values', async ({ page }) => {
+  await openInputs(page);
+  await page.getByRole('button', { name: 'Switch time entry', exact: true }).click();
+  const picker = page.getByRole('group', { name: 'Time picker' });
+  const hour = picker.getByRole('textbox', { name: 'Hour', exact: true });
+  const minute = picker.getByRole('textbox', { name: 'Minute', exact: true });
+  await hour.fill('');
+  await hour.pressSequentially('23');
+  await expect(hour).toHaveValue('23');
+  await expect(page.getByTestId('material-selected-time')).toContainText('23:30');
+  await minute.fill('59');
+  await expect(page.getByTestId('material-selected-time')).toContainText('23:59');
+  await hour.fill('99');
+  await expect(hour).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.getByTestId('material-selected-time')).toContainText('23:59');
+  await minute.focus();
+  await expect(hour).toHaveValue('23');
+});
+
+test('24-hour clock places midnight and noon on distinct concentric rings', async ({ page }) => {
+  await openInputs(page);
+  const picker = page.getByRole('group', { name: 'Time picker' });
+  const midnight = (await picker.getByRole('button', { name: 'Hour 00', exact: true }).boundingBox())!;
+  const noon = (await picker.getByRole('button', { name: 'Hour 12', exact: true }).boundingBox())!;
+  const one = (await picker.getByRole('button', { name: 'Hour 01', exact: true }).boundingBox())!;
+  const thirteen = (await picker.getByRole('button', { name: 'Hour 13', exact: true }).boundingBox())!;
+  expect(Math.abs(midnight.x - noon.x)).toBeLessThan(1);
+  expect(midnight.y - noon.y).toBeGreaterThan(30);
+  expect(one.x).toBeGreaterThan(thirteen.x);
+  expect(one.y).toBeLessThan(thirteen.y);
+});
+
+test('calendar uses locale week order and circular Material day targets', async ({ page }) => {
+  await openInputs(page);
+  const picker = page.getByRole('group', { name: 'Date picker' });
+  await expect(picker.locator('.d-date-picker-title')).toHaveText('Select date');
+  const firstHeader = picker.getByRole('columnheader').first();
+  await expect(firstHeader).toHaveAttribute('aria-label', 'Sunday');
+  const selected = picker.locator('.d-calendar-day[aria-pressed="true"]');
+  await expect(selected).toHaveCSS('width', '40px');
+  await expect(selected).toHaveCSS('height', '40px');
+  await expect(selected).toHaveCSS('border-radius', '50%');
 });

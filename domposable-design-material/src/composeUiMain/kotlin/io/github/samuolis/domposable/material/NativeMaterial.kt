@@ -72,7 +72,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Typography
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
@@ -225,23 +224,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             theme = { props, _, content ->
                 val colors = props.tokens.colors
                 val type = props.tokens.typography
-                val colorScheme =
-                    colors.nativeColorScheme(
-                        lightColorScheme(
-                            primary = Color(colors.primary.argb),
-                            onPrimary = Color(colors.onPrimary.argb),
-                            surface = Color(colors.surface.argb),
-                            onSurface = Color(colors.onSurface.argb),
-                            surfaceVariant = Color(colors.surfaceVariant.argb),
-                            outline = Color(colors.outline.argb),
-                            error = Color(colors.error.argb),
-                            background = Color(colors.surface.argb),
-                            surfaceContainer = Color(colors.surfaceVariant.argb),
-                            surfaceContainerHighest = Color(colors.surfaceVariant.argb),
-                            secondaryContainer = Color(colors.surfaceVariant.argb),
-                            onSecondaryContainer = Color(colors.onSurface.argb),
-                        ),
-                    )
+                val colorScheme = colors.nativeMaterialColorScheme()
                 val typography = type.nativeTypography(MaterialTheme.typography)
                 val shapes = props.tokens.shapes.nativeShapes(MaterialTheme.shapes)
                 if (props.tokens.designLanguage ==
@@ -446,7 +429,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             radioButton = { props, modifier, _ -> NativeRadioButton(props, modifier) },
             slider = { props, modifier, _ ->
                 val appearance = props.colors ?: LocalDomposableTokens.current.components.slider
-                val sliderModifier = modifier.toComposeModifier().semantics { contentDescription = props.label }
+                val sliderModifier =
+                    modifier.toComposeModifier().materialKeyboardFocusRing().semantics {
+                        contentDescription =
+                            props.label
+                    }
                 if (props.orientation == DomposableOrientation.Vertical) {
                     val state =
                         remember(

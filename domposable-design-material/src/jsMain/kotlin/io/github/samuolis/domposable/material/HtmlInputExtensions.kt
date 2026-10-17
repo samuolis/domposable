@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
@@ -89,8 +90,11 @@ internal fun HtmlScrollField(
             props.onSelectedIndexChange(index)
         }
     }
-    var reportedIndex by remember(props.selectedIndex) { mutableStateOf(props.selectedIndex) }
+    val currentProps by rememberUpdatedState(props)
+    val currentEnabled by rememberUpdatedState(enabled)
+    var reportedIndex by remember { mutableStateOf(props.selectedIndex) }
     LaunchedEffect(props.selectedIndex) {
+        reportedIndex = props.selectedIndex
         scrollWheelItemIntoView(fieldId, props.selectedIndex)
     }
     DomposableHtmlModifiers(modifier) {
@@ -134,9 +138,9 @@ internal fun HtmlScrollField(
                 attr("aria-hidden", "true")
                 ref { viewport ->
                     val onScroll: (org.w3c.dom.events.Event) -> Unit = {
-                        if (enabled && viewport.children.length > 0) {
+                        if (currentEnabled && viewport.children.length > 0 && !isProgrammaticWheelScroll(viewport)) {
                             val center = viewport.getBoundingClientRect().top + viewport.clientHeight / 2.0
-                            var nearest = props.selectedIndex
+                            var nearest = currentProps.selectedIndex
                             var distance = Double.POSITIVE_INFINITY
                             for (index in 0 until viewport.children.length) {
                                 val child = viewport.children.item(index) as? HTMLElement ?: continue
@@ -149,7 +153,7 @@ internal fun HtmlScrollField(
                             }
                             if (nearest != reportedIndex) {
                                 reportedIndex = nearest
-                                props.onSelectedIndexChange(nearest)
+                                currentProps.onSelectedIndexChange(nearest)
                             }
                         }
                     }

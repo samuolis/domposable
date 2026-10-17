@@ -23,7 +23,16 @@ internal fun DomposableTextAppearance?.nativeTextStyle(base: TextStyle): TextSty
         this?.role?.let { role ->
             if (this.emphasized) tokens.emphasizedRoles[role] ?: tokens.roles[role] else tokens.roles[role]
         }
-    val roleBase = this?.role?.let { MaterialTheme.typography.nativeRoleStyle(it) } ?: base
+    val roleBase =
+        this?.role?.let {
+            if (this.emphasized) {
+                MaterialTheme.typography.nativeEmphasizedRoleStyle(
+                    it,
+                )
+            } else {
+                MaterialTheme.typography.nativeRoleStyle(it)
+            }
+        } ?: base
     return this.nativeTextStyleDirect(roleStyle?.nativeTextStyleDirect(roleBase) ?: roleBase)
 }
 
@@ -38,7 +47,7 @@ internal fun DomposableTextAppearance?.nativeTextStyleDirect(base: TextStyle): T
         textDecoration = this?.decoration?.nativeAppearanceTextDecoration() ?: base.textDecoration,
     )
 
-private fun androidx.compose.material3.Typography.nativeRoleStyle(role: DomposableTypographyRole): TextStyle =
+internal fun androidx.compose.material3.Typography.nativeRoleStyle(role: DomposableTypographyRole): TextStyle =
     when (role) {
         DomposableTypographyRole.DisplayLarge -> displayLarge
         DomposableTypographyRole.DisplayMedium -> displayMedium
@@ -57,12 +66,44 @@ private fun androidx.compose.material3.Typography.nativeRoleStyle(role: Domposab
         DomposableTypographyRole.LabelSmall -> labelSmall
     }
 
+internal fun androidx.compose.material3.Typography.nativeEmphasizedRoleStyle(
+    role: DomposableTypographyRole,
+): TextStyle =
+    when (role) {
+        DomposableTypographyRole.DisplayLarge -> displayLargeEmphasized
+        DomposableTypographyRole.DisplayMedium -> displayMediumEmphasized
+        DomposableTypographyRole.DisplaySmall -> displaySmallEmphasized
+        DomposableTypographyRole.HeadlineLarge -> headlineLargeEmphasized
+        DomposableTypographyRole.HeadlineMedium -> headlineMediumEmphasized
+        DomposableTypographyRole.HeadlineSmall -> headlineSmallEmphasized
+        DomposableTypographyRole.TitleLarge -> titleLargeEmphasized
+        DomposableTypographyRole.TitleMedium -> titleMediumEmphasized
+        DomposableTypographyRole.TitleSmall -> titleSmallEmphasized
+        DomposableTypographyRole.BodyLarge -> bodyLargeEmphasized
+        DomposableTypographyRole.BodyMedium -> bodyMediumEmphasized
+        DomposableTypographyRole.BodySmall -> bodySmallEmphasized
+        DomposableTypographyRole.LabelLarge -> labelLargeEmphasized
+        DomposableTypographyRole.LabelMedium -> labelMediumEmphasized
+        DomposableTypographyRole.LabelSmall -> labelSmallEmphasized
+    }
+
 internal fun DomposableTypography.nativeTypography(defaults: Typography = Typography()): Typography {
     val base =
         defaults.copy(
             bodyLarge = defaults.bodyLarge.copy(fontSize = bodySize.sp, lineHeight = (bodySize * lineHeight).sp),
             titleLarge = defaults.titleLarge.copy(fontSize = titleSize.sp),
             labelLarge = defaults.labelLarge.copy(fontSize = labelSize.sp),
+            bodyLargeEmphasized =
+                defaults.bodyLargeEmphasized.copy(
+                    fontSize = bodySize.sp,
+                    lineHeight =
+                        (
+                            bodySize *
+                                lineHeight
+                        ).sp,
+                ),
+            titleLargeEmphasized = defaults.titleLargeEmphasized.copy(fontSize = titleSize.sp),
+            labelLargeEmphasized = defaults.labelLargeEmphasized.copy(fontSize = labelSize.sp),
         )
     return withConfiguredEmphasizedRoles(withConfiguredRoles(base))
 }
@@ -88,52 +129,39 @@ private fun DomposableTypography.withConfiguredRoles(base: Typography): Typograp
 
 private fun DomposableTypography.withConfiguredEmphasizedRoles(base: Typography): Typography =
     base.copy(
-        displayLargeEmphasized =
-            emphasizedRoles[DomposableTypographyRole.DisplayLarge]
-                .nativeTextStyleDirect(base.displayLargeEmphasized),
-        displayMediumEmphasized =
-            emphasizedRoles[DomposableTypographyRole.DisplayMedium]
-                .nativeTextStyleDirect(base.displayMediumEmphasized),
-        displaySmallEmphasized =
-            emphasizedRoles[DomposableTypographyRole.DisplaySmall]
-                .nativeTextStyleDirect(base.displaySmallEmphasized),
-        headlineLargeEmphasized =
-            emphasizedRoles[DomposableTypographyRole.HeadlineLarge]
-                .nativeTextStyleDirect(base.headlineLargeEmphasized),
+        displayLargeEmphasized = emphasizedStyle(DomposableTypographyRole.DisplayLarge, base.displayLargeEmphasized),
+        displayMediumEmphasized = emphasizedStyle(DomposableTypographyRole.DisplayMedium, base.displayMediumEmphasized),
+        displaySmallEmphasized = emphasizedStyle(DomposableTypographyRole.DisplaySmall, base.displaySmallEmphasized),
+        headlineLargeEmphasized = emphasizedStyle(DomposableTypographyRole.HeadlineLarge, base.headlineLargeEmphasized),
         headlineMediumEmphasized =
-            emphasizedRoles[DomposableTypographyRole.HeadlineMedium]
-                .nativeTextStyleDirect(base.headlineMediumEmphasized),
+            emphasizedStyle(
+                DomposableTypographyRole.HeadlineMedium,
+                base.headlineMediumEmphasized,
+            ),
         headlineSmallEmphasized =
-            emphasizedRoles[DomposableTypographyRole.HeadlineSmall]
-                .nativeTextStyleDirect(base.headlineSmallEmphasized),
-        titleLargeEmphasized =
-            emphasizedRoles[DomposableTypographyRole.TitleLarge]
-                .nativeTextStyleDirect(base.titleLargeEmphasized),
-        titleMediumEmphasized =
-            emphasizedRoles[DomposableTypographyRole.TitleMedium]
-                .nativeTextStyleDirect(base.titleMediumEmphasized),
-        titleSmallEmphasized =
-            emphasizedRoles[DomposableTypographyRole.TitleSmall]
-                .nativeTextStyleDirect(base.titleSmallEmphasized),
-        bodyLargeEmphasized =
-            emphasizedRoles[DomposableTypographyRole.BodyLarge]
-                .nativeTextStyleDirect(base.bodyLargeEmphasized),
-        bodyMediumEmphasized =
-            emphasizedRoles[DomposableTypographyRole.BodyMedium]
-                .nativeTextStyleDirect(base.bodyMediumEmphasized),
-        bodySmallEmphasized =
-            emphasizedRoles[DomposableTypographyRole.BodySmall]
-                .nativeTextStyleDirect(base.bodySmallEmphasized),
-        labelLargeEmphasized =
-            emphasizedRoles[DomposableTypographyRole.LabelLarge]
-                .nativeTextStyleDirect(base.labelLargeEmphasized),
-        labelMediumEmphasized =
-            emphasizedRoles[DomposableTypographyRole.LabelMedium]
-                .nativeTextStyleDirect(base.labelMediumEmphasized),
-        labelSmallEmphasized =
-            emphasizedRoles[DomposableTypographyRole.LabelSmall]
-                .nativeTextStyleDirect(base.labelSmallEmphasized),
+            emphasizedStyle(
+                DomposableTypographyRole.HeadlineSmall,
+                base.headlineSmallEmphasized,
+            ),
+        titleLargeEmphasized = emphasizedStyle(DomposableTypographyRole.TitleLarge, base.titleLargeEmphasized),
+        titleMediumEmphasized = emphasizedStyle(DomposableTypographyRole.TitleMedium, base.titleMediumEmphasized),
+        titleSmallEmphasized = emphasizedStyle(DomposableTypographyRole.TitleSmall, base.titleSmallEmphasized),
+        bodyLargeEmphasized = emphasizedStyle(DomposableTypographyRole.BodyLarge, base.bodyLargeEmphasized),
+        bodyMediumEmphasized = emphasizedStyle(DomposableTypographyRole.BodyMedium, base.bodyMediumEmphasized),
+        bodySmallEmphasized = emphasizedStyle(DomposableTypographyRole.BodySmall, base.bodySmallEmphasized),
+        labelLargeEmphasized = emphasizedStyle(DomposableTypographyRole.LabelLarge, base.labelLargeEmphasized),
+        labelMediumEmphasized = emphasizedStyle(DomposableTypographyRole.LabelMedium, base.labelMediumEmphasized),
+        labelSmallEmphasized = emphasizedStyle(DomposableTypographyRole.LabelSmall, base.labelSmallEmphasized),
     )
+
+private fun DomposableTypography.emphasizedStyle(
+    role: DomposableTypographyRole,
+    base: TextStyle,
+): TextStyle {
+    // The older Material constructor aliases emphasized styles to regular styles.
+    val weight = materialTypeStyle(role, emphasized = true).fontWeight?.native() ?: base.fontWeight
+    return emphasizedRoles[role].nativeTextStyleDirect(base.copy(fontWeight = weight))
+}
 
 internal fun DomposableTextAlignment.nativeAppearanceTextAlign(): TextAlign =
     when (this) {

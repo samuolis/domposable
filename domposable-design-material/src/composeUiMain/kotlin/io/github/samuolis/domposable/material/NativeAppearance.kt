@@ -135,14 +135,13 @@ internal fun DomposableSliderColors.nativeSliderColors() =
     )
 
 @Composable
-internal fun DomposableCheckboxAppearance.nativeCheckboxColors() =
+internal fun DomposableCheckboxAppearance.nativeCheckboxColors(enabled: Boolean = true) =
     CheckboxDefaults.colors(
-        checkedCheckmarkColor = checkmark?.nativeColor() ?: Color.Unspecified,
+        checkedCheckmarkColor =
+            (if (enabled) checkmark else disabledCheckmark ?: checkmark)?.nativeColor() ?: Color.Unspecified,
         disabledCheckmarkColor = disabledCheckmark?.nativeColor() ?: Color.Unspecified,
         checkedBoxColor = colors.selected?.nativeColor() ?: Color.Unspecified,
-        uncheckedBoxColor = colors.unselected?.nativeColor() ?: Color.Unspecified,
         disabledCheckedBoxColor = colors.disabledSelected?.nativeColor() ?: Color.Unspecified,
-        disabledUncheckedBoxColor = colors.disabledUnselected?.nativeColor() ?: Color.Unspecified,
         disabledIndeterminateBoxColor = colors.disabledSelected?.nativeColor() ?: Color.Unspecified,
         checkedBorderColor = colors.selected?.nativeColor() ?: Color.Unspecified,
         uncheckedBorderColor = colors.unselected?.nativeColor() ?: Color.Unspecified,

@@ -308,6 +308,8 @@ install this binding. Native renderers use the portable modifier adapter.
 
 Theme settings are scoped to the composables beneath the theme, rather than mutable global branding. `DomposableMaterialTheme()` supplies Material defaults. Override only the brand values and component styles you need; nested themes inherit their current values.
 
+Unspecified semantic color roles use the same Material baseline in HTML and native rendering. Changing `primary` does not generate a complete palette: provide container, content and surface roles for a full branded or dark scheme. A host using `ProvideDomposableMaterialComponents` should bridge its complete native color scheme into the shared colors, as in the adapter example below.
+
 ```kotlin
 val brandStyles = DomposableComponentStyles(
     button = DomposableButtonAppearance(

@@ -2,7 +2,9 @@
 
 # Domposable
 
-**Native apps and responsive DOM websites from the same Compose feature codebase.**
+**Share your Compose code across native apps and semantic HTML, with responsive layouts on every platform.**
+
+The 0.9.0 demo shares **90.9% of its application source** across targets. Built-in sizing, wrapping and adaptive pane APIs let the same feature respond to phone, tablet and desktop space. [What the sharing measurement includes](docs/how-it-works.md#code-sharing-and-responsive-layouts).
 
 [![CI](https://github.com/samuolis/domposable/actions/workflows/ci.yml/badge.svg)](https://github.com/samuolis/domposable/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/samuolis/domposable)](https://github.com/samuolis/domposable/releases/latest)
@@ -11,6 +13,9 @@
 [Documentation](https://samuolis.github.io/domposable/) · [Shopping demo](https://samuolis.github.io/domposable/shop/) · [Playground](https://samuolis.github.io/domposable/demo/) · [API reference](https://samuolis.github.io/domposable/api/)
 
 Domposable is a Kotlin Multiplatform UI library with optional integration helpers, built on Compose. Feature teams write regular composables with shared components, modifiers and adaptive layouts. An installed design system provider renders those calls as Compose UI on native targets or semantic HTML on Kotlin/JS. The primary web target is HTML; it does not require Wasm.
+
+> [!IMPORTANT]
+> **The HTML target is a client-rendered single-page application (SPA), built on Compose HTML. Domposable does not provide server-side rendering (SSR).** Route URLs and static hosting entry pages do not render feature content on the server. Hosts such as Kobweb may offer their own static pre-rendering; that is a separate integration, not Domposable SSR.
 
 ## Contents
 

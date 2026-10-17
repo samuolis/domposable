@@ -27,6 +27,23 @@ test('range endpoints stay ordered and keyboard interaction updates the feature'
   await page.goto('/#/components');
   const minimum = page.getByRole('slider', { name: 'Minimum price', exact: true });
   const maximum = page.getByRole('slider', { name: 'Maximum price', exact: true });
+  const startBox = (await minimum.boundingBox())!;
+  const endBox = (await maximum.boundingBox())!;
+  expect(startBox.y).toBe(endBox.y);
+  expect(startBox.height).toBe(48);
+  // Both halves of the shared track remain pointer targets for their endpoint.
+  await minimum.click({ position: { x: startBox.width * 0.1, y: startBox.height / 2 } });
+  await expect(minimum).toHaveValue('10');
+  await expect(page.getByText('Price range: 10–80', { exact: true })).toBeVisible();
+  await maximum.click({ position: { x: endBox.width * 0.9, y: endBox.height / 2 } });
+  await expect(maximum).toHaveValue('90');
+  await expect(page.getByText('Price range: 10–90', { exact: true })).toBeVisible();
+  await minimum.press('ArrowRight');
+  await expect(minimum).toHaveValue('20');
+  await expect(page.getByText('Price range: 20–90', { exact: true })).toBeVisible();
+  await maximum.press('ArrowLeft');
+  await expect(maximum).toHaveValue('80');
+  await expect(page.getByText('Price range: 20–80', { exact: true })).toBeVisible();
   await minimum.focus();
   await minimum.press('ArrowRight');
   await expect(page.getByText('Price range: 30–80', { exact: true })).toBeVisible();

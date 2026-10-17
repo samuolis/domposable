@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -66,6 +67,8 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.ui.DomposableAppBarProps
@@ -518,6 +521,7 @@ internal fun NativeNavigationDrawer(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
+    if (props.variant == DomposableDrawerVariant.Modal && !props.expanded) return
     NativeWindow { featureRegistry ->
         val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationDrawer
         val state = rememberDrawerState(if (props.expanded) DrawerValue.Open else DrawerValue.Closed)
@@ -531,13 +535,18 @@ internal fun NativeNavigationDrawer(
         }
         when (props.variant) {
             DomposableDrawerVariant.Modal -> {
-                ModalNavigationDrawer(
-                    drawerContent,
-                    modifier.toComposeModifier(),
-                    state,
-                    props.gesturesEnabled,
-                    content = featureContent,
-                )
+                Dialog(
+                    onDismissRequest = props.onDismiss,
+                    properties = DialogProperties(usePlatformDefaultWidth = false),
+                ) {
+                    ModalNavigationDrawer(
+                        drawerContent,
+                        modifier.toComposeModifier().fillMaxSize(),
+                        state,
+                        props.gesturesEnabled,
+                        content = {},
+                    )
+                }
             }
 
             DomposableDrawerVariant.Dismissible -> {
@@ -549,7 +558,7 @@ internal fun NativeNavigationDrawer(
                         featureContent,
                         dismissible = true,
                     )
-                }, modifier.toComposeModifier(), state, props.gesturesEnabled, featureContent)
+                }, modifier.toComposeModifier(), state, props.gesturesEnabled, {})
             }
 
             DomposableDrawerVariant.Permanent -> {
@@ -561,7 +570,7 @@ internal fun NativeNavigationDrawer(
                         featureContent,
                         permanent = true,
                     )
-                }, modifier.toComposeModifier(), featureContent)
+                }, modifier.toComposeModifier(), {})
             }
         }
     }
@@ -708,6 +717,13 @@ internal fun NativeWideNavigationRailItem(
     modifier: DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.wideNavigationRailItem
+    val enabled = props.enabled && domposableFormEnabled()
+    val interaction =
+        remember {
+            androidx.compose.foundation.interaction
+                .MutableInteractionSource()
+        }
+    val resolved = appearance.resolveInteractionColors(interaction, props.selected, enabled)
     WideNavigationRailItem(
         selected = props.selected,
         onClick = props.onClick,
@@ -715,11 +731,36 @@ internal fun NativeWideNavigationRailItem(
         label = {
             Text(
                 props.label,
-                style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
+                style =
+                    (
+                        if (props.selected) {
+                            appearance.selectedTextAppearance ?: appearance.textAppearance
+                        } else {
+                            appearance.textAppearance
+                        }
+                    ).nativeTextStyle(MaterialTheme.typography.labelLarge),
             )
         },
         railExpanded = props.railExpanded,
-        modifier = modifier.toComposeModifier(),
-        enabled = props.enabled && domposableFormEnabled(),
+        modifier =
+            modifier
+                .toComposeModifier()
+                .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier),
+        enabled = enabled,
+        interactionSource = interaction,
+        indicatorPadding =
+            appearance.contentPadding?.nativePadding()
+                ?: androidx.compose.material3.WideNavigationRailItemDefaults
+                    .indicatorPadding(props.railExpanded),
+        colors =
+            androidx.compose.material3.WideNavigationRailItemDefaults.colors(
+                selectedIconColor = resolved.selectedContent,
+                selectedTextColor = resolved.selectedContent,
+                selectedIndicatorColor = resolved.selectedContainer,
+                unselectedIconColor = resolved.content,
+                unselectedTextColor = resolved.content,
+                disabledIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                disabledTextColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            ),
     )
 }

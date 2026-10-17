@@ -15,6 +15,7 @@ data class DomposableSurfaceAppearance(
     val textAppearance: DomposableTextAppearance? = null,
 )
 
+/** Selected control colors and unselected outlines; unchecked checkbox interiors remain transparent. */
 @Immutable
 data class DomposableSelectionColors(
     val selected: DomposableColor? = null,

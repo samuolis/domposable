@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -90,55 +91,99 @@ internal fun NativeTopAppBar(
         )
     val baseModifier =
         modifier.toComposeModifier().then(
-            Modifier.nativeModifier(appearance, MaterialTheme.shapes.small),
+            Modifier.nativeModifier(appearance, androidx.compose.ui.graphics.RectangleShape),
         )
     val title: @Composable () -> Unit = {
-        Text(props.title, style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.titleLarge))
+        Text(
+            props.title,
+            modifier = Modifier.semantics { heading() },
+            style = appearance.textAppearance.nativeTextStyle(androidx.compose.material3.LocalTextStyle.current),
+        )
     }
+    val subtitleText = props.subtitle
+    val legacyTitle: @Composable () -> Unit = {
+        if (subtitleText == null) {
+            title()
+        } else {
+            androidx.compose.foundation.layout.Column {
+                title()
+                Text(
+                    subtitleText,
+                    color =
+                        appearance.content?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
+    val subtitle: (@Composable () -> Unit)? = subtitleText?.let { text -> { Text(text) } }
     when (props.variant) {
         DomposableTopAppBarVariant.Small -> {
-            TopAppBar(title, baseModifier, props.navigationIcon, { props.actions() }, colors = colors)
+            TopAppBar(
+                title = legacyTitle,
+                modifier = baseModifier,
+                navigationIcon = props.navigationIcon,
+                actions = { props.actions() },
+                colors = colors,
+            )
         }
 
         DomposableTopAppBarVariant.CenterAligned -> {
-            CenterAlignedTopAppBar(title, baseModifier, props.navigationIcon, { props.actions() }, colors = colors)
+            CenterAlignedTopAppBar(
+                title = legacyTitle,
+                modifier = baseModifier,
+                navigationIcon = props.navigationIcon,
+                actions = { props.actions() },
+                colors = colors,
+            )
         }
 
         DomposableTopAppBarVariant.Medium -> {
-            MediumTopAppBar(title, baseModifier, props.navigationIcon, { props.actions() }, colors = colors)
+            MediumTopAppBar(
+                title = legacyTitle,
+                modifier = baseModifier,
+                navigationIcon = props.navigationIcon,
+                actions = { props.actions() },
+                colors = colors,
+            )
         }
 
         DomposableTopAppBarVariant.Large -> {
-            LargeTopAppBar(title, baseModifier, props.navigationIcon, { props.actions() }, colors = colors)
+            LargeTopAppBar(
+                title = legacyTitle,
+                modifier = baseModifier,
+                navigationIcon = props.navigationIcon,
+                actions = { props.actions() },
+                colors = colors,
+            )
         }
 
         DomposableTopAppBarVariant.MediumFlexible -> {
-            MediumFlexibleTopAppBar(title, baseModifier, props.navigationIcon, { props.actions() }, colors = colors)
+            MediumFlexibleTopAppBar(
+                title = title,
+                modifier = baseModifier,
+                subtitle = subtitle,
+                navigationIcon = props.navigationIcon,
+                actions = { props.actions() },
+                colors = colors,
+            )
         }
 
         DomposableTopAppBarVariant.LargeFlexible -> {
-            LargeFlexibleTopAppBar(title, baseModifier, props.navigationIcon, { props.actions() }, colors = colors)
+            LargeFlexibleTopAppBar(
+                title = title,
+                modifier = baseModifier,
+                subtitle = subtitle,
+                navigationIcon = props.navigationIcon,
+                actions = { props.actions() },
+                colors = colors,
+            )
         }
 
         DomposableTopAppBarVariant.TwoRows -> {
             TwoRowsTopAppBar(
-                title = { expanded ->
-                    Text(
-                        props.title,
-                        style =
-                            appearance.textAppearance.nativeTextStyle(
-                                if (expanded) {
-                                    MaterialTheme.typography.titleLarge
-                                } else {
-                                    MaterialTheme.typography.titleMedium
-                                },
-                            ),
-                    )
-                },
-                subtitle =
-                    props.subtitle?.let { subtitle ->
-                        { _ -> Text(subtitle, style = MaterialTheme.typography.bodyMedium) }
-                    },
+                title = { title() },
+                subtitle = subtitleText?.let { text -> { _ -> Text(text) } },
                 modifier = baseModifier,
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
@@ -355,6 +400,7 @@ internal fun NativeRangeSlider(
     props: DomposableRangeSliderProps,
     modifier: DomposableModifier,
 ) {
+    val colors = (props.colors ?: LocalDomposableTokens.current.components.rangeSlider).nativeSliderColors()
     val startInteraction = remember { MutableInteractionSource() }
     val endInteraction = remember { MutableInteractionSource() }
     RangeSlider(
@@ -362,7 +408,7 @@ internal fun NativeRangeSlider(
         onValueChange = props.onValueChange,
         valueRange = props.range,
         steps = props.steps,
-        modifier = modifier.toComposeModifier(),
+        modifier = modifier.toComposeModifier().materialKeyboardFocusRing(),
         enabled = props.enabled && domposableFormEnabled(),
         startInteractionSource = startInteraction,
         endInteractionSource = endInteraction,
@@ -373,6 +419,7 @@ internal fun NativeRangeSlider(
                     contentDescription = props.startLabel
                 },
                 enabled = props.enabled && domposableFormEnabled(),
+                colors = colors,
             )
         },
         endThumb = {
@@ -382,9 +429,10 @@ internal fun NativeRangeSlider(
                     contentDescription = props.endLabel
                 },
                 enabled = props.enabled && domposableFormEnabled(),
+                colors = colors,
             )
         },
-        colors = (props.colors ?: LocalDomposableTokens.current.components.rangeSlider).nativeSliderColors(),
+        colors = colors,
     )
 }
 

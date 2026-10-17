@@ -46,7 +46,9 @@ class HtmlProgressAppearanceTest {
             val withStop = theme.children.item(2) as HTMLElement
 
             assertEquals(3, theme.childElementCount)
-            assertEquals("PROGRESS", default.tagName)
+            assertEquals("DIV", default.tagName)
+            assertEquals("50", default.getAttribute("aria-valuenow"))
+            assertEquals("true", default.querySelector(".d-progress-stop-indicator")?.getAttribute("aria-hidden"))
             assertEquals("DIV", withoutStop.tagName)
             assertEquals("DIV", withStop.tagName)
             assertEquals("progressbar", withoutStop.getAttribute("role"))

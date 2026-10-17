@@ -15,6 +15,7 @@ import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
 import io.github.samuolis.domposable.foundation.DomposableProgressVariant
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableTabsVariant
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableAvatar
@@ -34,6 +35,7 @@ import io.github.samuolis.domposable.ui.DomposableDisclosure
 import io.github.samuolis.domposable.ui.DomposableDivider
 import io.github.samuolis.domposable.ui.DomposableDragHandle
 import io.github.samuolis.domposable.ui.DomposableFlowRow
+import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableLazyItem
 import io.github.samuolis.domposable.ui.DomposableListItem
 import io.github.samuolis.domposable.ui.DomposableListItemPosition
@@ -168,6 +170,24 @@ internal fun MaterialNavigation() {
     DomposableTopAppBarVariant.entries.forEach { variant ->
         DomposableTopAppBar("${variant.name} app bar", variant = variant)
     }
+    DomposableTopAppBar(
+        "Flexible heading with subtitle",
+        subtitle = "Navigation and actions keep their own slots",
+        variant = DomposableTopAppBarVariant.MediumFlexible,
+        navigationIcon = { DomposableIconButton({ selected = 0 }, "Go back") { DomposableText("‹") } },
+        actions = { DomposableIconButton({ selected = 2 }, "More actions") { DomposableText("⋮") } },
+    )
+    DomposableTopAppBar(
+        "Large flexible heading",
+        subtitle = "Supporting text",
+        variant = DomposableTopAppBarVariant.LargeFlexible,
+    )
+    DomposableTopAppBar(
+        "Custom title typography",
+        subtitle = "Per-call styles keep the shared API",
+        variant = DomposableTopAppBarVariant.TwoRows,
+        appearance = DomposableSurfaceAppearance(textAppearance = DomposableTextAppearance(fontSize = 31f)),
+    )
     DomposableBottomAppBar(
         variant = DomposableBottomAppBarVariant.Flexible,
     ) { DomposableText("Flexible bottom actions") }

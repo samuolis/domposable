@@ -157,6 +157,7 @@ fun DomposableHtmlModifiers(
         Div(attrs = {
             attr("data-domposable-layout-item", "true")
             style {
+                childLayoutSizing(visual)
                 property("box-sizing", "border-box")
                 layout.forEach { element ->
                     when (element) {

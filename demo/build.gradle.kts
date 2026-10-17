@@ -69,6 +69,7 @@ kotlin {
                 dependencies {
                     api(libs.compose.ui)
                     api(libs.compose.foundation)
+                    implementation(libs.material3)
                     implementation(libs.navigation3.ui)
                 }
             }
