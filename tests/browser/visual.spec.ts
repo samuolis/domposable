@@ -33,6 +33,7 @@ for (const [name, width, height, route] of [
     await page.setViewportSize({ width, height });
     await page.goto(`/#/${route}`);
     await expect(page.locator('main h1, main h2').first()).toBeVisible();
+    if (route === 'composition') await expect(page.getByTestId('shared-card-loaded')).toBeVisible();
     await stableCapture(page, 'dom', name);
   });
 }
@@ -90,7 +91,9 @@ test('DOM visual shop-cart-phone', async ({ page }) => {
   await page.getByRole('link', { name: 'Bag (1)', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your bag' })).toBeVisible();
   await expect(page.locator('main img').first()).toHaveAttribute('data-testid', /-loaded$/);
-  await stableCapture(page, 'dom', 'shop-cart-phone');
+  await stableCapture(page, 'dom', 'shop-cart-phone', async () => {
+    await expect(page.getByRole('heading', { name: 'Your bag' })).toBeVisible();
+  });
 });
 for (const [name, width, height] of [['shop-phone',390,844],['shop-wide',1440,900]] as const) {
   test(`Wasm visual ${name}`, async ({ page }) => {

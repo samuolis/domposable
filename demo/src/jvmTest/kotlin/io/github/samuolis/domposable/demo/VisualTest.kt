@@ -30,7 +30,15 @@ class VisualTest {
 
     @Test fun extensions() = capture("extensions", DemoRoute.Extensions)
 
-    @Test fun composition() = capture("composition", DemoRoute.Composition)
+    @Test
+    fun composition() {
+        compose.setContent { DemoApp(initialRoute = DemoRoute.Composition) }
+        compose.waitUntil(30000) {
+            compose.onAllNodesWithTag("shared-card-loaded").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitForIdle()
+        save("composition")
+    }
 
     @Test fun extendedComponents() = capture("extended-components", DemoRoute.ExtendedCatalog)
 

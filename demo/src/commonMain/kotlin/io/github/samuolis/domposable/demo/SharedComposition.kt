@@ -3,6 +3,7 @@ package io.github.samuolis.domposable.demo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.adaptive.DomposablePaneLayout
@@ -87,6 +88,7 @@ fun SharedCompositionScreen() {
 
 @Composable
 private fun SharedWorkshopCard() {
+    var imageLoaded by remember { mutableStateOf(false) }
     var mediaActions by rememberSaveable { mutableStateOf(0) }
     var saved by rememberSaveable { mutableStateOf(false) }
     val scrim =
@@ -98,13 +100,16 @@ private fun SharedWorkshopCard() {
                     DomposableGradientStop(DomposableColor(0xDD000000), 1f),
                 ),
         )
-    DomposableCard(DomposableModifier.fillMaxWidth()) {
+    DomposableCard(
+        DomposableModifier.fillMaxWidth().testId(if (imageLoaded) "shared-card-loaded" else "shared-card-loading"),
+    ) {
         DomposableBox(DomposableModifier.fillMaxWidth().height(240.dp).testId("shared-card-hero")) {
             DomposableImage(
                 DEMO_ARTWORK,
                 null,
                 DomposableModifier.fillMaxSize().testId("shared-card-image"),
                 scale = DomposableImageScale.Crop,
+                onLoaded = { imageLoaded = true },
             )
             DomposableButton(
                 "Media action",
