@@ -169,7 +169,8 @@ fun DomposableHtmlModifiers(
                             property("min-height", "0")
                             property("flex-grow", element.weight.toString())
                             property("flex-shrink", if (element.fill) "1" else "0")
-                            property("flex-basis", if (element.fill) "0px" else "auto")
+                            // Percent basis keeps intrinsic content when the document axis is unbounded.
+                            property("flex-basis", if (element.fill) "0%" else "auto")
                         }
 
                         is DomposableModifierOperation.AxisAlignment -> {

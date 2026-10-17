@@ -39,6 +39,31 @@ import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
     @Test
+    fun weightedBoxKeepsItsContentHeightInAnUnboundedColumn() =
+        withHost(content = {
+            Div(attrs = {
+                style {
+                    property("display", "flex")
+                    property("flex-direction", "column")
+                }
+            }) {
+                Div(attrs = { style { property("height", "40px") } }) { Text("Toolbar") }
+                DomposableBox(DomposableModifier.weight(1f).fillMaxWidth().then(HostScope)) {
+                    Div(attrs = {
+                        attr("data-testid", "document-body")
+                        style { property("height", "80px") }
+                    }) { Text("Body") }
+                }
+            }
+        }) { root ->
+            val item = root.querySelector("[data-domposable-layout-item]") as HTMLElement
+            assertTrue(
+                abs(item.getBoundingClientRect().height - 80.0) < 1,
+                "Unbounded weight must preserve the 80px content height:\n${layoutTrace(item)}",
+            )
+        }
+
+    @Test
     fun weightedNestedBoxKeepsTheHostsAvailableHeight() =
         withHost(content = {
             Div(attrs = {
