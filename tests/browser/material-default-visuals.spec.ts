@@ -332,6 +332,8 @@ for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 
     await expect(control).toBeFocused();
     expect(await control.evaluate(element => element.matches(':focus-visible'))).toBe(true);
     expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
+    await expect(row).toHaveCSS('outline-width', '3px');
+    await expect(row).toHaveCSS('outline-style', 'solid');
   });
 }
 

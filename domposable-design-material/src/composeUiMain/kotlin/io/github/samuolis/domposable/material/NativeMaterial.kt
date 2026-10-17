@@ -446,7 +446,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             radioButton = { props, modifier, _ -> NativeRadioButton(props, modifier) },
             slider = { props, modifier, _ ->
                 val appearance = props.colors ?: LocalDomposableTokens.current.components.slider
-                val sliderModifier = modifier.toComposeModifier().semantics { contentDescription = props.label }
+                val sliderModifier =
+                    modifier.toComposeModifier().materialKeyboardFocusRing().semantics {
+                        contentDescription =
+                            props.label
+                    }
                 if (props.orientation == DomposableOrientation.Vertical) {
                     val state =
                         remember(

@@ -1,5 +1,7 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.font.FontFamily
 import io.github.samuolis.domposable.foundation.DomposableTypography
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,6 +28,14 @@ class MaterialTypographyParityTest {
                     assertEquals(expected.lineHeight.value, html.lineHeight!!, 0.0001f, "$role line height")
                     assertEquals(expected.letterSpacing.value, html.letterSpacing!!, 0.0001f, "$role letter spacing")
                     assertEquals(expected.fontWeight, html.fontWeight!!.native(), "$role weight")
+                    if (emphasized) {
+                        val material = Typography(fontFamily = FontFamily.Default).nativeEmphasizedRoleStyle(role)
+                        assertEquals(
+                            material.fontWeight,
+                            html.fontWeight!!.native(),
+                            "$role Material emphasized weight",
+                        )
+                    }
                 }
             }
         }

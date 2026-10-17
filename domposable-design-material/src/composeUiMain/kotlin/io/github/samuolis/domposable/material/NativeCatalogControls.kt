@@ -529,7 +529,10 @@ private fun ChoiceRow(
             }
         }
     }
-    Row(modifier.minimumInteractiveComponentSize(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier.materialKeyboardFocusRing().minimumInteractiveComponentSize(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         if (placement == DomposableControlPlacement.Leading) {
             control()
             if (showLabel || description != null) Spacer(Modifier.width(spacing))

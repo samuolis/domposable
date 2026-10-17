@@ -53,4 +53,9 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-wide-navigation-rail-item-compact[aria-current=page]{background:transparent}
 .d-rail-icon{display:grid;place-items:center;width:56px;height:32px;border-radius:999px}
 .d-wide-navigation-rail-item-compact[aria-current=page] .d-rail-icon{background:var(--d-item-selected-container,var(--d-secondary-container))}
+.d-theme .d-toggle input:focus-visible,.d-theme .d-slider:focus-visible{outline:none}
+.d-toggle:has(input:enabled:focus-visible),.d-slider-surface:has(input:focus-visible),.d-range:has(input:focus-visible){outline:3px solid var(--d-primary);outline-offset:3px}
+.d-slider:focus-visible::-webkit-slider-thumb{width:2px}.d-slider:focus-visible::-moz-range-thumb{width:2px}
+.d-slider-vertical:focus-visible::-webkit-slider-thumb{width:44px;height:2px}.d-slider-vertical:focus-visible::-moz-range-thumb{width:44px;height:2px}
+@media(forced-colors:active){.d-toggle:has(input:enabled:focus-visible),.d-slider-surface:has(input:focus-visible),.d-range:has(input:focus-visible){outline:2px solid Highlight}}
 """

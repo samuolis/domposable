@@ -363,7 +363,7 @@ internal fun NativeRangeSlider(
         onValueChange = props.onValueChange,
         valueRange = props.range,
         steps = props.steps,
-        modifier = modifier.toComposeModifier(),
+        modifier = modifier.toComposeModifier().materialKeyboardFocusRing(),
         enabled = props.enabled && domposableFormEnabled(),
         startInteractionSource = startInteraction,
         endInteractionSource = endInteraction,
