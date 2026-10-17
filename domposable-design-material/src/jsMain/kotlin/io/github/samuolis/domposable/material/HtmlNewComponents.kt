@@ -635,7 +635,7 @@ internal fun HtmlNavigationDrawerItem(
             style { itemAppearance(appearance, props.selected) }
             onClick { if (enabled) props.onClick() }
         }) {
-            props.icon()
+            Span(attrs = { attr("aria-hidden", "true") }) { props.icon() }
             Span { Text(props.label) }
             props.badge()
         }

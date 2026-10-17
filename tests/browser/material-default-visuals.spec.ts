@@ -52,7 +52,7 @@ test('selection controls and chips use Material-sized visual surfaces', async ({
 });
 
 test('segmented controls apply theme geometry without shrinking the hit target', async ({ page }) => {
-  await page.goto('/#/material/selection');
+  await page.goto('/?comparison=overrides#/material/selection');
   await page.getByRole('switch', { name: 'Component overrides', exact: true }).check();
   const group = page.getByRole('radiogroup', { name: 'Period', exact: true });
   const segment = group.locator('label').first();
@@ -326,9 +326,8 @@ for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 
     expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
     await page.mouse.up();
     await page.mouse.move(0, 0);
-    await control.focus();
     await page.keyboard.press('Tab');
-    await page.keyboard.press('Shift+Tab');
+    await control.focus();
     await expect(control).toBeFocused();
     expect(await control.evaluate(element => element.matches(':focus-visible'))).toBe(true);
     expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.1');
@@ -339,7 +338,7 @@ for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 
 
 
 test('Material defaults keep component surfaces compact and preserve explicit theme overrides', async ({ page }) => {
-  await page.goto('/#/material/compare/light/actions');
+  await page.goto('/?comparison=actions#/material/compare/light/actions');
   const filled = page.getByRole('button', { name: 'Filled', exact: true });
   await expect(filled).toHaveCSS('height', '40px');
   const outlined = page.getByRole('button', { name: 'Outlined', exact: true });
@@ -354,14 +353,14 @@ test('Material defaults keep component surfaces compact and preserve explicit th
   expect(outline.color).toBe(outline.token);
   const extended = page.getByRole('button', { name: 'Compose', exact: true });
   await expect(extended).toContainText('Compose');
-  await page.goto('/#/material/compare/light/selection');
+  await page.goto('/?comparison=selection#/material/compare/light/selection');
   const chip = page.locator('.d-chip-assist').first();
   await expect(chip).toHaveCSS('height', '32px');
   await expect(chip).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-  await page.goto('/#/material/compare/light/surfaces');
+  await page.goto('/?comparison=surfaces#/material/compare/light/surfaces');
   const card = page.locator('.d-card').filter({ has: page.getByText('Filled card', { exact: true }) });
   await expect(card).toHaveCSS('padding', '0px');
-  await page.goto('/#/material/selection');
+  await page.goto('/?comparison=overrides#/material/selection');
   await page.getByRole('switch', { name: 'Component overrides', exact: true }).check();
   const segment = page.getByRole('radiogroup', { name: 'Period', exact: true }).locator('.d-segment-surface').first();
   await expect(segment).toHaveCSS('min-height', '40px');
@@ -370,7 +369,7 @@ test('Material defaults keep component surfaces compact and preserve explicit th
 
 
 test('rails retain labels while closed drawers do not duplicate their content', async ({ page }) => {
-  await page.goto('/#/material/compare/light/navigation');
+  await page.goto('/?comparison=navigation#/material/compare/light/navigation');
   const rail = page.locator('.d-wide-navigation-rail');
   const home = rail.getByRole('button', { name: 'Home', exact: true });
   await expect(home.locator('.d-rail-label')).toBeVisible();
@@ -383,4 +382,17 @@ test('rails retain labels while closed drawers do not duplicate their content', 
   const drawer = page.locator('.d-navigation-drawer');
   await expect(drawer).toBeVisible();
   await expect(drawer.getByRole('button', { name: 'Home', exact: true })).toHaveCount(1);
+});
+
+
+test('labelled and vertical sliders retain their available layout bounds', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1800 });
+  await page.goto('/#/material/compare/light/selection');
+  const horizontal = page.getByRole('slider', { name: 'Volume', exact: true });
+  expect((await horizontal.boundingBox())!.width).toBeGreaterThan(300);
+  const vertical = page.getByRole('slider', { name: 'Vertical volume', exact: true });
+  await expect(vertical).toHaveCSS('height', '180px');
+  const surface = vertical.locator('..');
+  await expect(surface).toHaveCSS('height', '180px');
+  await expect(surface).toHaveCSS('width', '48px');
 });

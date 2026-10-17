@@ -1,5 +1,8 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableRadioButton
 import io.github.samuolis.domposable.ui.DomposableSlider
@@ -19,6 +22,34 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class HtmlControlledToggleTest {
+    @Test
+    fun acceptingMixedSelectionClearsTheCustomDomProperty() =
+        CoroutineScope(Dispatchers.Unconfined).promise {
+            val root = document.createElement("div")
+            document.body!!.appendChild(root)
+            var checked by mutableStateOf(false)
+            var mixed by mutableStateOf(true)
+            val composition =
+                renderComposable(root) {
+                    DomposableMaterialTheme {
+                        DomposableCheckbox(checked, {
+                            checked = it
+                            mixed = false
+                        }, "Mixed", indeterminate = mixed)
+                    }
+                }
+            try {
+                val input = root.querySelector("input") as HTMLInputElement
+                input.click()
+                settleControls()
+                assertTrue(input.checked)
+                assertFalse(input.asDynamic().indeterminate as Boolean)
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+            }
+        }
+
     @Test
     fun declinedChangesPreserveTheDeclaredSelectionStates() =
         CoroutineScope(Dispatchers.Unconfined).promise {

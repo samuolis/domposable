@@ -11,6 +11,8 @@ const controls = [
   { key: 'slider', role: 'slider', name: 'Slider 0.5', tabs: 9 },
 ] as const;
 
+test.describe.configure({ mode: 'parallel' });
+
 test.skip(({ browserName }) => browserName !== 'chromium', 'Cross-renderer pixels use pinned Chromium; control behavior retains three-engine coverage.');
 
 for (const theme of themes) {

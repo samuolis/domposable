@@ -41,6 +41,7 @@ test('time picker modes preserve and update controlled hour and minute values', 
   await expect(typedHour).toHaveValue('11');
   await expect(typedMinute).toHaveValue('45');
   await typedHour.fill('12');
+  await expect(page.getByTestId('material-selected-time')).toContainText('12:45');
   await typedMinute.fill('15');
   await expect(page.getByTestId('material-selected-time')).toContainText('12:15');
   await switchMode.click();
@@ -181,6 +182,7 @@ test('time editing keeps partial text and rejects out-of-range values', async ({
   await hour.fill('');
   await hour.pressSequentially('23');
   await expect(hour).toHaveValue('23');
+  await expect(page.getByTestId('material-selected-time')).toContainText('23:30');
   await minute.fill('59');
   await expect(page.getByTestId('material-selected-time')).toContainText('23:59');
   await hour.fill('99');

@@ -3,6 +3,7 @@ package io.github.samuolis.domposable.material
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -1651,6 +1652,8 @@ private fun HtmlToggle(
     switchColors: DomposableSwitchColors? = null,
 ) {
     val effectiveEnabled = enabled && domposableFormEnabled()
+    val inputRef = remember { arrayOfNulls<HTMLElement>(1) }
+    SideEffect { inputRef[0]?.asDynamic()?.indeterminate = indeterminate }
     val descriptionId = remember { "d-toggle-description-${nextInputId++}" }
     val labelId = remember { "d-toggle-label-${nextInputId++}" }
     val customColors =
@@ -1671,8 +1674,9 @@ private fun HtmlToggle(
                     domposableAttributes(modifier)
                     checked(checkedValue)
                     ref { input ->
+                        inputRef[0] = input
                         input.asDynamic().indeterminate = indeterminate
-                        onDispose {}
+                        onDispose { inputRef[0] = null }
                     }
                     if (switch) attr("role", "switch")
                     if (!effectiveEnabled) disabled()
@@ -1767,9 +1771,9 @@ private fun HtmlToggle(
                         }
                     }
                     onChange {
-                        if (effectiveEnabled) onChange(indeterminate || it.value)
-                        // Compose HTML restores checked state; indeterminate is our custom DOM property.
+                        // Restore before the callback so synchronous recomposition can commit a new mixed state.
                         it.target.asDynamic().indeterminate = indeterminate
+                        if (effectiveEnabled) onChange(indeterminate || it.value)
                     }
                 })
             }
