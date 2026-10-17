@@ -347,6 +347,7 @@ internal fun HtmlRangeSlider(
                 property("--d-range-start", "$startPercent%")
                 property("--d-range-end", "$endPercent%")
                 property("--d-range-midpoint", "$midpoint%")
+                sliderMarks(props.steps, endPercent, startPercent)
             }
         }) {
             listOf(true, false).forEach { start ->

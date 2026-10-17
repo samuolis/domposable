@@ -159,6 +159,20 @@ internal fun StyleScope.sliderColors(
                 "color-mix(in srgb,var(--d-on-surface) 12%,transparent)"
             },
     )
+    property(
+        "--d-slider-active-tick-current",
+        (if (enabled) colors.activeTick else colors.disabledActiveTick)?.css()
+            ?: if (enabled) {
+                "var(--d-secondary-container,var(--d-variant))"
+            } else {
+                "color-mix(in srgb,var(--d-on-surface) 12%,transparent)"
+            },
+    )
+    property(
+        "--d-slider-inactive-tick-current",
+        (if (enabled) colors.inactiveTick else colors.disabledInactiveTick)?.css()
+            ?: if (enabled) "var(--d-primary)" else "color-mix(in srgb,var(--d-on-surface) 38%,transparent)",
+    )
 }
 
 internal fun DomposableColor?.cssOr(fallback: String): String = this?.css() ?: fallback

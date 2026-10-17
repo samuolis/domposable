@@ -50,6 +50,11 @@ for (const theme of themes) {
               await page.mouse.up();
               await page.mouse.move(0, 0);
               if (renderer === 'wasm') {
+                // Start keyboard traversal without focus retained from the pointer capture.
+                await page.reload();
+                await expect(page.locator('body')).toHaveAttribute('data-domposable-ready', 'true', { timeout: 60000 });
+                await page.waitForLoadState('networkidle');
+                await page.evaluate(() => document.fonts.ready);
                 await page.locator('canvas').first().focus();
                 await page.keyboard.press('Tab');
               } else {

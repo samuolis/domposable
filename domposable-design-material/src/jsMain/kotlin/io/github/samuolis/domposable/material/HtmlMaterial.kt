@@ -585,7 +585,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             Span(attrs = {
                                 classes("d-toggle-copy")
                                 style { property("gap", "${appearance.descriptionSpacing.value}px") }
-                                if (props.showLabel || props.description != null) classes("d-toggle-copy-visible")
+                                if (props.showLabel || props.description != null) {
+                                    classes("d-toggle-copy-visible")
+                                } else {
+                                    classes("d-visually-hidden")
+                                }
                             }) {
                                 Span(attrs = {
                                     id(labelId)
@@ -653,7 +657,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         style {
                             sliderColors(colors, enabled)
                             property("--d-slider-progress", "$percent%")
+                            sliderMarks(
+                                props.steps,
+                                percent,
+                                vertical = props.orientation == DomposableOrientation.Vertical,
+                                reversed = props.orientation == DomposableOrientation.Vertical && !props.topToBottom,
+                            )
                             if (props.orientation == DomposableOrientation.Vertical) {
+                                property("--d-slider-direction", if (props.topToBottom) "bottom" else "top")
                                 property("writing-mode", "vertical-lr")
                                 property("direction", if (props.topToBottom) "ltr" else "rtl")
                             }
@@ -1738,7 +1749,11 @@ private fun HtmlToggle(
                 Span(attrs = {
                     classes("d-toggle-copy")
                     style { property("gap", "${descriptionSpacing.value}px") }
-                    if (showLabel || description != null) classes("d-toggle-copy-visible")
+                    if (showLabel || description != null) {
+                        classes("d-toggle-copy-visible")
+                    } else {
+                        classes("d-visually-hidden")
+                    }
                 }) {
                     Span(attrs = {
                         id(labelId)
@@ -1938,15 +1953,17 @@ private const val MATERIAL_CSS = """
 .d-toggle input[role=switch]:checked:disabled{border-color:var(--d-switch-disabled-checked-border);background-color:var(--d-switch-disabled-checked-track);background-image:radial-gradient(circle closest-side,var(--d-switch-disabled-checked-thumb) 0 98%,transparent 100%)}
 .d-toggle input[type=checkbox]:not([role=switch]):indeterminate:disabled{border-color:var(--d-control-disabled-selected);background-color:var(--d-control-disabled-selected)}
 .d-slider{appearance:none;width:100%;height:48px;margin:0;background:transparent;accent-color:var(--d-slider-active-current,var(--d-primary));touch-action:pan-y}
-.d-slider::-webkit-slider-runnable-track{height:16px;border-radius:8px;background:linear-gradient(to right,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-outline)) 100%)}
-.d-slider::-moz-range-track{height:16px;border-radius:8px;background:var(--d-slider-inactive-current,var(--d-outline))}
-.d-slider::-moz-range-progress{height:16px;border-radius:8px;background:var(--d-slider-active-current,var(--d-primary))}
-.d-slider-vertical{height:160px;width:48px;touch-action:pan-x}.d-slider-vertical::-webkit-slider-runnable-track{height:100%;width:16px;background:linear-gradient(to bottom,var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-outline)) 100%)}.d-slider-vertical::-moz-range-track{height:100%;width:16px}.d-slider-vertical::-moz-range-progress{height:var(--d-slider-progress,50%);width:16px}.d-slider::-webkit-slider-thumb{appearance:none;width:4px;height:44px;margin-top:-14px;border:0;border-radius:999px;background:var(--d-slider-thumb-current,var(--d-primary))}
+.d-slider{--d-slider-direction:right;--d-slider-track-paint:var(--d-slider-marks,linear-gradient(transparent,transparent)),linear-gradient(to var(--d-slider-direction),var(--d-slider-active-current,var(--d-primary)) 0,var(--d-slider-active-current,var(--d-primary)) calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) - 8px),transparent calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) calc(var(--d-slider-progress,50%) + 8px),var(--d-slider-inactive-current,var(--d-variant)) 100%)}
+.d-slider::-webkit-slider-runnable-track{height:16px;border-radius:8px;background:var(--d-slider-track-paint)}
+.d-slider::-moz-range-track{height:16px;border-radius:8px;background:var(--d-slider-track-paint)}.d-slider::-moz-range-progress{background:transparent}
+.d-slider-vertical{height:160px;width:48px;touch-action:pan-x}.d-slider-vertical::-webkit-slider-runnable-track{height:100%;width:16px}.d-slider-vertical::-moz-range-track{height:100%;width:16px}
+.d-slider::-webkit-slider-thumb{appearance:none;width:4px;height:44px;margin-top:-14px;border:0;border-radius:999px;background:var(--d-slider-thumb-current,var(--d-primary))}
 .d-slider::-moz-range-thumb{width:4px;height:44px;border:0;border-radius:999px;background:var(--d-slider-thumb-current,var(--d-primary))}
 .d-slider:active::-webkit-slider-thumb{width:2px}.d-slider:active::-moz-range-thumb{width:2px}
-.d-range::before{content:"";position:absolute;inset:16px 2px;border-radius:8px;background:linear-gradient(to right,var(--d-slider-inactive-current) 0,var(--d-slider-inactive-current) calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) + 8px),var(--d-slider-active-current) calc(var(--d-range-start) + 8px),var(--d-slider-active-current) calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) + 8px),var(--d-slider-inactive-current) calc(var(--d-range-end) + 8px))}
+.d-range::before{content:"";position:absolute;inset:16px 2px;border-radius:8px;background:var(--d-slider-marks,linear-gradient(transparent,transparent)),linear-gradient(to right,var(--d-slider-inactive-current) 0,var(--d-slider-inactive-current) calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) + 8px),var(--d-slider-active-current) calc(var(--d-range-start) + 8px),var(--d-slider-active-current) calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) + 8px),var(--d-slider-inactive-current) calc(var(--d-range-end) + 8px))}
+.d-range::before{mask-image:linear-gradient(to right,black 0,black calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) - 8px),transparent calc(var(--d-range-start) + 8px),black calc(var(--d-range-start) + 8px),black calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) - 8px),transparent calc(var(--d-range-end) + 8px),black calc(var(--d-range-end) + 8px))}
 .d-range .d-slider{position:absolute;inset:0;width:100%}.d-range-start{clip-path:inset(0 calc(100% - var(--d-range-midpoint)) 0 0)}.d-range-end{clip-path:inset(0 0 0 var(--d-range-midpoint))}
-.d-range .d-slider::-webkit-slider-runnable-track{background:transparent}.d-range .d-slider::-moz-range-track,.d-range .d-slider::-moz-range-progress{background:transparent}
+.d-range .d-slider::-webkit-slider-runnable-track{background:transparent;mask-image:none}.d-range .d-slider::-moz-range-track,.d-range .d-slider::-moz-range-progress{background:transparent;mask-image:none}
 
 .d-slider-vertical::-webkit-slider-thumb{width:44px;height:4px;margin-top:0;margin-left:-14px}.d-slider-vertical::-moz-range-thumb{width:44px;height:4px}
 

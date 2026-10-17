@@ -255,3 +255,36 @@ for (const theme of ['light', 'dark', 'brand-light', 'brand-dark']) {
       .toContain('38%');
   });
 }
+
+
+test('app-owned control labels do not leave invisible layout gaps', async ({ page }) => {
+  await page.goto('/#/material/compare/light/states');
+  for (const [role, name] of [
+    ['checkbox', 'Enabled unselected checkbox'],
+    ['switch', 'Enabled unselected switch'],
+    ['radio', 'Enabled unselected radio'],
+  ] as const) {
+    const control = page.getByRole(role, { name, exact: true });
+    const visual = (await control.boundingBox())!;
+    const target = (await control.locator('..').boundingBox())!;
+    expect(target.height).toBe(48);
+    expect(target.width).toBeGreaterThanOrEqual(48);
+    expect(Math.abs(visual.x + visual.width / 2 - target.x - target.width / 2)).toBeLessThan(1);
+    expect(Math.abs(visual.y + visual.height / 2 - target.y - target.height / 2)).toBeLessThan(1);
+  }
+});
+
+
+test('stepped sliders paint markers and continuous sliders retain their end stop', async ({ page, browserName }) => {
+  await page.goto('/#/material/compare/light/states');
+  const pseudo = browserName === 'firefox' ? '::-moz-range-track' : '::-webkit-slider-runnable-track';
+  const tracks = await page.locator('input[type=range]:enabled').evaluateAll((controls, pseudo) => controls.map(control => ({
+    step: control.getAttribute('step'),
+    image: getComputedStyle(control, pseudo).backgroundImage,
+  })), pseudo);
+  const stepped = tracks.find(track => track.step === '0.25')!;
+  expect(stepped.image.match(/radial-gradient/g)).toHaveLength(4);
+  expect(stepped.image).toContain('linear-gradient');
+  const continuous = tracks.find(track => track.step === 'any')!;
+  expect(continuous.image.match(/radial-gradient/g)).toHaveLength(1);
+});
