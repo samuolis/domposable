@@ -695,10 +695,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val appearance = props.appearance ?: tokens.components.card
                 val enabled = props.enabled && domposableFormEnabled()
                 val cardContentId = remember { "d-card-content-${nextInputId++}" }
+                val colors = tokens.colors.withMaterialColorDefaults()
                 val container =
                     when (props.variant) {
                         io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
-                            tokens.colors.surfaceVariant
+                            requireNotNull(colors.surfaceContainerHighest)
                         }
 
                         io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {

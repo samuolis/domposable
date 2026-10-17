@@ -458,3 +458,22 @@ test('app bar variants use Material heights and typography', async ({ page }) =>
   await expect(subtitleBar.getByRole('button', { name: 'More actions', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Custom title typography', exact: true })).toHaveCSS('font-size', '31px');
 });
+
+
+test('input defaults and filled cards use their native Material roles', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1800 });
+  await page.goto('/#/material/compare/light/inputs');
+  expect((await page.locator('.d-field').first().boundingBox())!.width).toBe(280);
+  const search = page.getByRole('combobox', { name: 'Search products', exact: true });
+  await expect(search).toHaveAttribute('placeholder', 'Search products');
+  await expect(page.locator('.d-search-control')).toHaveCSS('border-radius', '999px');
+  await expect(page.locator('.d-search-control')).toHaveCSS('background-color', 'rgb(236, 230, 240)');
+  const autocomplete = page.locator('.d-autocomplete');
+  expect((await autocomplete.boundingBox())!.width).toBe(358);
+  await expect(autocomplete.locator('label')).toHaveCSS('position', 'absolute');
+  await autocomplete.getByRole('combobox').fill('Bl');
+  await expect(autocomplete.locator('label')).toHaveCSS('font-size', '12px');
+  await expect(autocomplete.getByRole('option', { name: 'Blue', exact: true })).toBeVisible();
+  await page.goto('/?comparison=dark-surfaces#/material/compare/dark/surfaces');
+  await expect(page.locator('.d-card-filled').first()).toHaveCSS('background-color', 'rgb(54, 52, 59)');
+});

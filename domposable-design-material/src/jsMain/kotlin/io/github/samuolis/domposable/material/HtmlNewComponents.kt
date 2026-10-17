@@ -881,7 +881,7 @@ internal fun HtmlSearchBar(
                     attr("aria-haspopup", "dialog")
                     attr("aria-expanded", props.expanded.toString())
                     attr("aria-controls", "$id-results")
-                    props.placeholder?.let { attr("placeholder", it) }
+                    attr("placeholder", props.placeholder ?: props.label)
                     value(props.query)
                     if (!enabled) disabled()
                     onFocus { if (enabled) props.onExpandedChange(true) }
@@ -896,17 +896,6 @@ internal fun HtmlSearchBar(
                         }
                     }
                 })
-                Button(attrs = {
-                    attr("type", "button")
-                    attr("aria-label", "Search")
-                    if (!enabled) disabled()
-                    onClick {
-                        if (enabled) {
-                            props.onSearch(props.query)
-                            props.onExpandedChange(false)
-                        }
-                    }
-                }) { Text("⌕") }
                 props.trailingIcon()
                 props.actions?.invoke()
             }
@@ -936,6 +925,9 @@ internal fun HtmlAutocomplete(
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-autocomplete")
+            style { textFieldAppearance(appearance) }
+            attr("data-filled", props.value.isNotEmpty().toString())
+            attr("data-variant", appearance.variant.name.lowercase())
         }) {
             Label(forId = id) { Text(props.label) }
             Div(attrs = {
@@ -1004,6 +996,10 @@ internal fun HtmlAutocomplete(
                         }
                     }
                 })
+                Span(attrs = {
+                    classes("d-autocomplete-indicator")
+                    attr("aria-hidden", "true")
+                }) {}
             }
             if (props.expanded && matches.isNotEmpty()) {
                 Div(attrs = {

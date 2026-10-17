@@ -142,4 +142,22 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-app-bar{width:100%}.d-app-bar-copy{display:flex;flex-direction:column;gap:0;min-width:0;transform:translateY(calc(-1 * var(--d-app-bar-baseline-gap,0px)))}
 .d-app-bar-expanded{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:64px minmax(calc(var(--d-app-bar-height) - 64px),max-content);padding:0 8px 0 16px;gap:0}
 .d-app-bar-expanded>.d-app-bar-heading{position:static;grid-row:2;grid-column:1;justify-content:flex-end;align-self:stretch;min-width:0;gap:0}
+
+.d-field{min-width:min(280px,100%);max-width:100%}
+.d-field>.d-helper,.d-field>.d-error{padding-inline:16px;font-size:var(--d-type-body-small-size);line-height:var(--d-type-body-small-line-height);letter-spacing:var(--d-type-body-small-letter-spacing);color:var(--d-on-surface-variant)}
+.d-field>.d-error{color:var(--d-error)}
+.d-search-bar,.d-autocomplete{width:100%;min-width:0}
+.d-search-control{border-width:var(--d-input-outline-width,0px);border-radius:999px;background:var(--d-input-container,var(--d-surface-container-high))}
+.d-search-control:focus-within{border-width:var(--d-input-outline-focused-width,0px);background:var(--d-input-container-focused,var(--d-input-container,var(--d-surface-container-high)))}
+.d-search-control input{font:inherit;line-height:24px;letter-spacing:.5px}
+.d-autocomplete{padding-top:8px;gap:0}
+.d-autocomplete>label{position:absolute;z-index:1;inset-inline-start:16px;top:24px;font-size:var(--d-input-label-size,16px);line-height:24px;color:var(--d-on-surface-variant);pointer-events:none}
+.d-autocomplete:focus-within>label,.d-autocomplete[data-filled=true]>label{top:0;padding-inline:4px;margin-inline-start:-4px;font-size:12px;line-height:16px;background:var(--d-input-container,var(--d-surface))}
+.d-autocomplete:focus-within>label{color:var(--d-input-outline-focused,var(--d-primary))}
+.d-autocomplete-control{gap:12px}
+.d-autocomplete-control input{font:inherit;line-height:24px;letter-spacing:.5px}
+.d-autocomplete-indicator{flex:none;width:0;height:0;border-inline:4px solid transparent;border-top:5px solid currentColor;margin-inline:4px}
+.d-autocomplete[data-variant=filled] .d-autocomplete-control{border-width:0 0 var(--d-input-outline-width,1px);border-radius:4px 4px 0 0;background:var(--d-input-container,var(--d-surface-container-highest))}
+.d-autocomplete[data-variant=filled]:focus-within>label,.d-autocomplete[data-variant=filled][data-filled=true]>label{top:12px;background:transparent}
+.d-autocomplete[data-variant=filled]:focus-within input,.d-autocomplete[data-variant=filled][data-filled=true] input{padding-top:16px}
 """
