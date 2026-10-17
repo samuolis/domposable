@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -66,6 +67,8 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.ui.DomposableAppBarProps
@@ -518,6 +521,7 @@ internal fun NativeNavigationDrawer(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
+    if (props.variant == DomposableDrawerVariant.Modal && !props.expanded) return
     NativeWindow { featureRegistry ->
         val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationDrawer
         val state = rememberDrawerState(if (props.expanded) DrawerValue.Open else DrawerValue.Closed)
@@ -531,13 +535,18 @@ internal fun NativeNavigationDrawer(
         }
         when (props.variant) {
             DomposableDrawerVariant.Modal -> {
-                ModalNavigationDrawer(
-                    drawerContent,
-                    modifier.toComposeModifier(),
-                    state,
-                    props.gesturesEnabled,
-                    content = featureContent,
-                )
+                Dialog(
+                    onDismissRequest = props.onDismiss,
+                    properties = DialogProperties(usePlatformDefaultWidth = false),
+                ) {
+                    ModalNavigationDrawer(
+                        drawerContent,
+                        modifier.toComposeModifier().fillMaxSize(),
+                        state,
+                        props.gesturesEnabled,
+                        content = {},
+                    )
+                }
             }
 
             DomposableDrawerVariant.Dismissible -> {
@@ -549,7 +558,7 @@ internal fun NativeNavigationDrawer(
                         featureContent,
                         dismissible = true,
                     )
-                }, modifier.toComposeModifier(), state, props.gesturesEnabled, featureContent)
+                }, modifier.toComposeModifier(), state, props.gesturesEnabled, {})
             }
 
             DomposableDrawerVariant.Permanent -> {
@@ -561,7 +570,7 @@ internal fun NativeNavigationDrawer(
                         featureContent,
                         permanent = true,
                     )
-                }, modifier.toComposeModifier(), featureContent)
+                }, modifier.toComposeModifier(), {})
             }
         }
     }

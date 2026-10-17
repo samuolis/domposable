@@ -365,3 +365,20 @@ test('Material defaults keep component surfaces compact and preserve explicit th
   await expect(segment).toHaveCSS('min-height', '40px');
   await expect(segment).toHaveCSS('padding', '8px 12px');
 });
+
+
+test('rails retain labels while closed drawers do not duplicate their content', async ({ page }) => {
+  await page.goto('/#/material/compare/light/navigation');
+  const rail = page.locator('.d-wide-navigation-rail');
+  const home = rail.getByRole('button', { name: 'Home', exact: true });
+  await expect(home.locator('.d-rail-label')).toBeVisible();
+  const saved = rail.getByRole('button', { name: 'Saved', exact: true });
+  const first = (await home.boundingBox())!;
+  const next = (await saved.boundingBox())!;
+  expect(next.y).toBeGreaterThanOrEqual(first.y + first.height);
+  await expect(page.locator('.d-navigation-drawer')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open navigation drawer', exact: true }).click();
+  const drawer = page.locator('.d-navigation-drawer');
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByRole('button', { name: 'Home', exact: true })).toHaveCount(1);
+});

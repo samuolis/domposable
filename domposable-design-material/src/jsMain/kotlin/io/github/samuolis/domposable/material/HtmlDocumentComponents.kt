@@ -97,13 +97,18 @@ internal fun HtmlDomposableDisclosure(
             domposableAttributes(modifier)
             classes("d-disclosure")
             style {
+                property("width", "100%")
                 property(
                     "border",
                     "${appearance.borderWidth.value}px solid " +
-                        (appearance.border?.css() ?: tokens.colors.outline.css()),
+                        (appearance.border?.css() ?: "transparent"),
                 )
                 appearance.shape?.let { materialShape(it) } ?: property("border-radius", "${tokens.radius.value}px")
-                property("background-color", appearance.container?.css() ?: tokens.colors.surface.css())
+                property(
+                    "background-color",
+                    appearance.container?.css() ?: tokens.colors.surfaceContainerHighest?.css()
+                        ?: tokens.colors.surfaceVariant.css(),
+                )
                 property("color", appearance.content?.css() ?: tokens.colors.onSurface.css())
                 property("padding", "${tokens.spacing.medium.value}px")
                 appearance.tonalElevation?.let { surfaceAppearance(appearance) }
@@ -117,7 +122,7 @@ internal fun HtmlDomposableDisclosure(
                 style {
                     property("display", "flex")
                     property("width", "100%")
-                    property("min-height", "44px")
+                    property("min-height", "20px")
                     property("align-items", "center")
                     property("justify-content", "space-between")
                     property("gap", "${tokens.spacing.small.value}px")
@@ -128,7 +133,12 @@ internal fun HtmlDomposableDisclosure(
                     property("font", "inherit")
                     property("text-align", "start")
                     property("cursor", "pointer")
-                    appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                    applyCatalogTextAppearance(
+                        appearance.textAppearance
+                            ?: io.github.samuolis.domposable.foundation.DomposableTextAppearance(
+                                role = io.github.samuolis.domposable.foundation.DomposableTypographyRole.TitleSmall,
+                            ),
+                    )
                 }
                 onClick { props.onToggle() }
             }) {

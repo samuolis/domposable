@@ -43,4 +43,14 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-tabs .d-tab[aria-selected=true]::after{content:"";position:absolute;inset-inline:0;bottom:0;height:var(--d-tabs-indicator-height,3px);background:var(--d-item-selected-border,var(--d-primary))}
 .d-tabs-primary .d-tab[aria-selected=true]::after{width:40px;inset-inline:calc(50% - 20px);border-radius:3px 3px 0 0}
 .d-tabs-secondary .d-tab[aria-selected=true]::after{height:2px}
+.d-theme .d-navigation-rail{width:96px;gap:0;padding-block:12px;background:var(--d-surface);align-items:stretch}
+.d-theme .d-navigation-rail>button,.d-theme .d-navigation-rail>a{display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:80px;padding:8px 0;font-size:12px;line-height:16px;border:0;border-radius:0;background:transparent}
+.d-theme .d-navigation-rail>[aria-current=page]{border:0;background:transparent;color:var(--d-item-selected-content,var(--d-on-secondary-container))}
+.d-navigation-rail>button>span[aria-hidden=true],.d-navigation-rail>a>span[aria-hidden=true]{display:grid;place-items:center;width:56px;height:32px;border-radius:999px}
+.d-navigation-rail>[aria-current=page]>span[aria-hidden=true]{background:var(--d-item-selected-container,var(--d-secondary-container))}
+.d-wide-navigation-rail:not(.d-wide-navigation-rail-expanded){width:96px;flex-basis:96px;align-items:stretch;gap:0;padding-block:12px}
+.d-wide-navigation-rail-item-compact{flex-direction:column;gap:4px;min-height:80px;padding:8px 0;font-size:12px;line-height:16px;border-radius:0;background:transparent}
+.d-wide-navigation-rail-item-compact[aria-current=page]{background:transparent}
+.d-rail-icon{display:grid;place-items:center;width:56px;height:32px;border-radius:999px}
+.d-wide-navigation-rail-item-compact[aria-current=page] .d-rail-icon{background:var(--d-item-selected-container,var(--d-secondary-container))}
 """

@@ -689,7 +689,7 @@ internal fun HtmlWideNavigationRailItem(
     modifier: DomposableModifier,
 ) {
     DomposableHtmlModifiers(modifier) {
-        val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationDrawerItem
+        val appearance = props.appearance ?: LocalDomposableTokens.current.components.wideNavigationRailItem
         val enabled = props.enabled && domposableFormEnabled()
         val railItemClass =
             if (props.railExpanded) {
@@ -707,8 +707,11 @@ internal fun HtmlWideNavigationRailItem(
             style { itemAppearance(appearance, props.selected) }
             onClick { if (enabled) props.onClick() }
         }) {
-            props.icon()
-            if (props.railExpanded) Span { Text(props.label) }
+            Span(attrs = {
+                classes("d-rail-icon")
+                attr("aria-hidden", "true")
+            }) { props.icon() }
+            Span(attrs = { classes("d-rail-label") }) { Text(props.label) }
         }
     }
 }

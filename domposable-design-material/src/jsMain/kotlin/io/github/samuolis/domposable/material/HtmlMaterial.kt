@@ -526,9 +526,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val enabled = props.enabled && domposableFormEnabled()
                 DomposableHtmlModifiers(modifier) {
                     TagElement<HTMLElement>(
-                        if (props.showLabel ||
-                            props.description != null
-                        ) {
+                        if (props.showLabel) {
                             "label"
                         } else {
                             "span"
@@ -1116,6 +1114,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         domposableAttributes(modifier)
                         attr("aria-label", props.label)
                         classes("d-navigation")
+                        if (props.orientation == DomposableOrientation.Vertical) classes("d-navigation-rail")
                         if (props.short) classes("d-navigation-short")
                         if (props.webLayout == DomposableWebNavigationLayout.Links) classes("d-navigation-links")
                         style { itemAppearance(appearance) }
