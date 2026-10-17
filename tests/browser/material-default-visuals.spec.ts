@@ -315,7 +315,11 @@ test('stepped sliders paint markers and continuous sliders retain their end stop
   }
 });
 
-for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 'Enabled unselected radio']) {
+for (const name of [
+  'Enabled unselected checkbox', 'Enabled selected checkbox',
+  'Enabled unselected switch', 'Enabled selected switch',
+  'Enabled unselected radio', 'Enabled selected radio',
+]) {
   test(`selection feedback paints hover, press and keyboard focus for ${name}`, async ({ page }) => {
     await page.goto('/#/material/compare/light/states');
     const control = page.getByLabel(name, { exact: true });
@@ -324,9 +328,9 @@ for (const name of ['Enabled unselected checkbox', 'Enabled unselected switch', 
     expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.08');
     await page.mouse.down();
     expect(await row.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('0.172');
-    if (name === 'Enabled unselected switch') {
+    if (name.endsWith(' switch')) {
       await expect(control).toHaveCSS('background-size', '28px 28px');
-      await expect(control).toHaveCSS('background-position', '0px 50%');
+      await expect(control).toHaveCSS('background-position', name === 'Enabled selected switch' ? '100% 50%' : '0px 50%');
     }
     await page.mouse.up();
     await page.mouse.move(0, 0);
