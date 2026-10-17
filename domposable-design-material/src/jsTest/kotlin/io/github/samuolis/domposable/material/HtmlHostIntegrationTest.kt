@@ -11,6 +11,8 @@ import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableIconButtonProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableModifierElement
+import io.github.samuolis.domposable.ui.DomposableSelect
+import io.github.samuolis.domposable.ui.DomposableSelectOption
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
@@ -164,6 +166,24 @@ class HtmlHostIntegrationTest {
             assertEquals(40, button.offsetWidth)
             assertEquals(40, button.offsetHeight)
             assertEquals("relative", window.getComputedStyle(button).position)
+        }
+
+    @Test
+    fun embeddedSelectInheritsTheHostTypography() =
+        withHost(content = {
+            Div(attrs = {
+                style {
+                    property("font-family", "monospace")
+                    property("font-size", "20px")
+                }
+            }) {
+                DomposableSelect("one", {}, "Choice", listOf(DomposableSelectOption("one", "Option")))
+            }
+        }) { root ->
+            val select = root.querySelector("select") as HTMLElement
+            val style = window.getComputedStyle(select)
+            assertEquals("monospace", style.fontFamily)
+            assertEquals("20px", style.fontSize)
         }
 
     @Test

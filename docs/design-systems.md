@@ -260,7 +260,8 @@ component/token locals without adding a layout element. Apply `domposableTokenVa
 to the existing HTML host's attrs so descendant controls receive scoped `--d-*` variables.
 The helper sets custom properties only; the host keeps its classes, typography and layout.
 Material control defaults also apply in this mode: buttons inherit the host font family while
-using the configured control type scale, dimensions and focus styling. No `.d-theme` class is needed.
+using the configured control type scale, dimensions and focus styling. Select controls inherit the
+host typography too, instead of the browser's default form font. No `.d-theme` class is needed.
 Use `DomposableMaterialTheme` for a standalone application that wants the default full theme.
 
 Matrix schemas are portable library models. A matrix may use a generic application icon value;
