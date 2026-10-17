@@ -11,6 +11,7 @@ import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableRadioButton
+import io.github.samuolis.domposable.ui.DomposableRangeSlider
 import io.github.samuolis.domposable.ui.DomposableRow
 import io.github.samuolis.domposable.ui.DomposableSlider
 import io.github.samuolis.domposable.ui.DomposableSurface
@@ -181,6 +182,16 @@ private fun MaterialControlStates() {
                 {},
                 "Stepped slider",
                 steps = 3,
+                enabled = enabled,
+                modifier = DomposableModifier.width(240.dp),
+            )
+        }
+        ComparisonRow(if (enabled) "Range" else "Disabled range") {
+            DomposableRangeSlider(
+                0.2f..0.8f,
+                {},
+                "Range start",
+                "Range end",
                 enabled = enabled,
                 modifier = DomposableModifier.width(240.dp),
             )

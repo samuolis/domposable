@@ -355,6 +355,7 @@ internal fun NativeRangeSlider(
     props: DomposableRangeSliderProps,
     modifier: DomposableModifier,
 ) {
+    val colors = (props.colors ?: LocalDomposableTokens.current.components.rangeSlider).nativeSliderColors()
     val startInteraction = remember { MutableInteractionSource() }
     val endInteraction = remember { MutableInteractionSource() }
     RangeSlider(
@@ -373,6 +374,7 @@ internal fun NativeRangeSlider(
                     contentDescription = props.startLabel
                 },
                 enabled = props.enabled && domposableFormEnabled(),
+                colors = colors,
             )
         },
         endThumb = {
@@ -382,9 +384,10 @@ internal fun NativeRangeSlider(
                     contentDescription = props.endLabel
                 },
                 enabled = props.enabled && domposableFormEnabled(),
+                colors = colors,
             )
         },
-        colors = (props.colors ?: LocalDomposableTokens.current.components.rangeSlider).nativeSliderColors(),
+        colors = colors,
     )
 }
 

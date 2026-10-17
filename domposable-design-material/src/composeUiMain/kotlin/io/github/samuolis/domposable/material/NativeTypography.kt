@@ -38,7 +38,7 @@ internal fun DomposableTextAppearance?.nativeTextStyleDirect(base: TextStyle): T
         textDecoration = this?.decoration?.nativeAppearanceTextDecoration() ?: base.textDecoration,
     )
 
-private fun androidx.compose.material3.Typography.nativeRoleStyle(role: DomposableTypographyRole): TextStyle =
+internal fun androidx.compose.material3.Typography.nativeRoleStyle(role: DomposableTypographyRole): TextStyle =
     when (role) {
         DomposableTypographyRole.DisplayLarge -> displayLarge
         DomposableTypographyRole.DisplayMedium -> displayMedium
