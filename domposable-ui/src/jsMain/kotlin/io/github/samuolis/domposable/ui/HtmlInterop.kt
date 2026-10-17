@@ -153,6 +153,7 @@ fun DomposableHtmlModifiers(
                 it is HtmlAttributes
         }
     val pointerPassthrough = visual.contains(DomposableModifierOperation.PointerPassthrough)
+    val stackingOrder = layout.sumOf { if (it is DomposableModifierOperation.ZIndex) it.value.toDouble() else 0.0 }
     if (layout.isEmpty()) {
         HtmlModifierBox(visual, 0, renderer, decoration, false, pointerPassthrough, content)
     } else {
@@ -179,6 +180,11 @@ fun DomposableHtmlModifiers(
 
                         is DomposableModifierOperation.BoxAlignment -> {
                             property("place-self", "${element.vertical.css()} ${element.horizontal.css()}")
+                        }
+
+                        is DomposableModifierOperation.ZIndex -> {
+                            property("position", "relative")
+                            property("z-index", stackingOrder.toString())
                         }
 
                         else -> {
@@ -398,10 +404,6 @@ private fun HtmlModifierBox(
                     property("aspect-ratio", operation.ratio.toString())
                 }
 
-                is DomposableModifierOperation.ZIndex -> {
-                    property("z-index", operation.value.toString())
-                }
-
                 is DomposableModifierOperation.Offset -> {
                     // Compose's horizontal offset follows layout direction. Logical insets
                     // preserve that behavior in RTL without changing the layout slot.
@@ -480,6 +482,7 @@ private fun HtmlModifierBox(
                 is DomposableModifierOperation.Weight,
                 is DomposableModifierOperation.AxisAlignment,
                 is DomposableModifierOperation.BoxAlignment,
+                is DomposableModifierOperation.ZIndex,
                 -> {
                     error("Child layout operation should have been applied to the item wrapper")
                 }
@@ -572,7 +575,8 @@ internal fun DomposableBorderEdge.cssProperty(): String =
 private fun isChildLayoutOperation(element: DomposableModifierElement): Boolean =
     element is DomposableModifierOperation.Weight ||
         element is DomposableModifierOperation.AxisAlignment ||
-        element is DomposableModifierOperation.BoxAlignment
+        element is DomposableModifierOperation.BoxAlignment ||
+        element is DomposableModifierOperation.ZIndex
 
 private fun DomposableAlignment.css(): String =
     when (this) {

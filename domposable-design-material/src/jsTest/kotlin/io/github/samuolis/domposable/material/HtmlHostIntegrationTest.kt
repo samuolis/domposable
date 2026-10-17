@@ -2,11 +2,13 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCard
+import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableIconButtonProps
 import io.github.samuolis.domposable.ui.DomposableModifier
@@ -17,6 +19,7 @@ import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
 import io.github.samuolis.domposable.ui.LocalDomposableHtmlModifierRenderer
+import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
@@ -38,6 +41,69 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
+    @Test
+    fun stackingOrderIncludesBackgroundBeforeTheZIndexModifier() =
+        withHost(content = {
+            DomposableBox(DomposableModifier.width(240.dp).height(120.dp)) {
+                DomposableBox(DomposableModifier.fillMaxSize().zIndex(0f).testId("media-layer")) {
+                    Div(attrs = {
+                        style {
+                            property("position", "absolute")
+                            property("inset", "0")
+                            property("z-index", "999")
+                            property("background", "red")
+                        }
+                    }) {}
+                }
+                DomposableBox(
+                    DomposableModifier
+                        .fillMaxSize()
+                        .background(DomposableColor(0xFF112233))
+                        .then(NonInteractiveContent)
+                        .zIndex(2f)
+                        .zIndex(-1f)
+                        .testId("overlay-layer"),
+                ) {}
+            }
+        }) { root ->
+            val media = root.querySelector("[data-testid=media-layer]") as HTMLElement
+            val overlay = root.querySelector("[data-testid=overlay-layer]") as HTMLElement
+            val bounds = overlay.getBoundingClientRect()
+            val hit = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2)
+            assertTrue(hit?.contains(overlay) == true, "The overlay background must remain above media descendants")
+            assertTrue(hit?.contains(media) == false, "The host itself must not be the hit target")
+        }
+
+    @Test
+    fun cardLabelsStayClickableWithoutActivatingTheCard() {
+        for (action in listOf("none", "container", "stretched")) {
+            var checked = false
+            var cardClicks = 0
+            val onClick: (() -> Unit)? = if (action == "none") null else ({ cardClicks++ })
+            withHost(content = {
+                DomposableCard(
+                    onClick = onClick,
+                    actionLabel = if (action == "stretched") "Open" else null,
+                ) {
+                    DomposableCheckbox(false, { checked = it }, "Keep selection")
+                }
+            }) { root ->
+                val input = root.querySelector("input[type=checkbox]") as HTMLElement
+                val label = input.closest("label") as HTMLElement
+                val bounds = label.getBoundingClientRect()
+                val hit =
+                    document.elementFromPoint(
+                        bounds.left + bounds.width / 2,
+                        bounds.top + bounds.height / 2,
+                    ) as? HTMLElement
+                assertEquals(label, hit?.closest("label"), "$action card must not cover its label")
+                requireNotNull(hit).click()
+                assertTrue(checked, "$action label must toggle its input")
+                assertEquals(0, cardClicks, "$action label must not also activate the card")
+            }
+        }
+    }
+
     @Test
     fun weightedBoxKeepsItsContentHeightInAnUnboundedColumn() =
         withHost(content = {
@@ -228,6 +294,8 @@ class HtmlHostIntegrationTest {
 
 private data object HostScope : DomposableModifierElement
 
+private data object NonInteractiveContent : DomposableModifierElement
+
 private fun layoutTrace(element: HTMLElement): String =
     generateSequence(element) { it.parentElement as? HTMLElement }.take(10).joinToString("\n") {
         val style = window.getComputedStyle(it)
@@ -252,7 +320,11 @@ private fun withHost(
             }) {
                 CompositionLocalProvider(
                     LocalDomposableHtmlModifierRenderer provides { element ->
-                        if (element == HostScope) ({ classes("host-scope") }) else null
+                        when (element) {
+                            HostScope -> ({ classes("host-scope") })
+                            NonInteractiveContent -> ({ style { property("pointer-events", "none") } })
+                            else -> null
+                        }
                     },
                 ) {
                     ProvideDomposableMaterialComponents(tokens, content)
