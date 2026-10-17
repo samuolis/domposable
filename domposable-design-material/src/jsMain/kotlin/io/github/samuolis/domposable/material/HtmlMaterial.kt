@@ -25,9 +25,7 @@ import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
-import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
-import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
@@ -243,28 +241,20 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             text = { props, modifier, _ ->
                 val tokens = LocalDomposableTokens.current
                 val appearance = props.appearance ?: LocalMaterialButtonTextAppearance.current ?: tokens.components.text
-                val baseFontSize =
-                    appearance?.fontSize ?: when (props.style) {
-                        DomposableTextStyle.Body -> tokens.typography.bodySize
-                        DomposableTextStyle.Title -> tokens.typography.titleSize
-                        DomposableTextStyle.Label -> tokens.typography.labelSize
+                val role =
+                    appearance?.role ?: when (props.style) {
+                        DomposableTextStyle.Body -> DomposableTypographyRole.BodyLarge
+                        DomposableTextStyle.Title -> DomposableTypographyRole.TitleLarge
+                        DomposableTextStyle.Label -> DomposableTypographyRole.LabelLarge
                     }
-                val effectiveLineHeight = appearance?.lineHeight ?: baseFontSize * tokens.typography.lineHeight
-                val textAlignment =
-                    when (appearance?.alignment) {
-                        DomposableTextAlignment.Start -> "start"
-                        DomposableTextAlignment.Center -> "center"
-                        DomposableTextAlignment.End -> "end"
-                        DomposableTextAlignment.Justify -> "justify"
-                        null -> null
+                val defaults = tokens.typography.materialTypeStyle(role)
+                val configuredRole =
+                    if (appearance?.role != null && appearance.emphasized) {
+                        tokens.typography.emphasizedRoles[role] ?: tokens.typography.roles[role]
+                    } else {
+                        tokens.typography.roles[role]
                     }
-                val textDecoration =
-                    when (appearance?.decoration) {
-                        DomposableTextDecoration.None -> "none"
-                        DomposableTextDecoration.Underline -> "underline"
-                        DomposableTextDecoration.LineThrough -> "line-through"
-                        null -> null
-                    }
+                val effectiveLineHeight = appearance?.lineHeight ?: configuredRole?.lineHeight ?: defaults.lineHeight!!
                 val liveRegion =
                     when (appearance?.liveRegion) {
                         DomposableLiveRegion.Polite -> "polite"
@@ -273,14 +263,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }
 
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
-                    appearance?.role?.let { style { applyCatalogTextAppearance(appearance) } }
+                    style {
+                        applyCatalogTextAppearance(DomposableTextAppearance(role = role))
+                        appearance?.let { applyCatalogTextAppearance(it) }
+                    }
                     (props.color ?: appearance?.color)?.let { style { property("color", it.css()) } }
-                    textAlignment?.let { alignment -> style { property("text-align", alignment) } }
-                    textDecoration?.let { decoration -> style { property("text-decoration", decoration) } }
-                    appearance?.letterSpacing?.let { style { property("letter-spacing", "${it}px") } }
-                    appearance?.fontSize?.let { size -> style { property("font-size", "${size}px") } }
-                    appearance?.lineHeight?.let { height -> style { property("line-height", "${height}px") } }
-                    appearance?.fontWeight?.let { weight -> style { property("font-weight", weight.css()) } }
                     appearance?.minLines?.takeIf { it > 1 }?.let { lines ->
                         style {
                             val inlineText = props.style != DomposableTextStyle.Title && props.headingLevel == null
@@ -1889,7 +1876,7 @@ private const val MATERIAL_CSS = """
 .d-theme button{cursor:pointer}.d-theme button:disabled{cursor:default;opacity:.5}
 .d-theme :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
-.d-theme h1,.d-theme h2,.d-theme h3{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
+.d-theme h1,.d-theme h2,.d-theme h3,.d-theme h4,.d-theme h5,.d-theme h6{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:9999px;min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
 .d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;align-items:center;justify-content:center}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
 @media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}

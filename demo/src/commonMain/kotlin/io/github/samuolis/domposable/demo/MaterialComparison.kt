@@ -13,9 +13,9 @@ import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableRadioButton
 import io.github.samuolis.domposable.ui.DomposableRow
 import io.github.samuolis.domposable.ui.DomposableSlider
+import io.github.samuolis.domposable.ui.DomposableSurface
 import io.github.samuolis.domposable.ui.DomposableSwitch
 import io.github.samuolis.domposable.ui.DomposableText
-import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
@@ -68,26 +68,27 @@ internal fun MaterialComparisonScreen(path: String) {
                 DomposableDesignLanguage.Standard
             },
     ) {
-        DomposableColumn(
-            DomposableModifier
-                .fillMaxSize()
-                .background(colors.surface)
-                .verticalScroll()
-                .padding(16.dp)
-                .testId("material-comparison"),
-            gap = 16.dp,
-        ) {
-            DomposableText("$family · $theme", style = DomposableTextStyle.Title, headingLevel = 1)
-            when (family) {
-                "states" -> MaterialControlStates()
-                "actions" -> MaterialActions()
-                "selection" -> MaterialSelection()
-                "inputs" -> MaterialInputs()
-                "surfaces" -> MaterialSurfaces()
-                "navigation" -> MaterialNavigation()
-                "feedback" -> MaterialFeedback()
-                "gestures" -> MaterialGestures()
-                "scaffold" -> MaterialScaffold()
+        DomposableSurface(DomposableModifier.fillMaxSize(), color = colors.surface) {
+            DomposableColumn(
+                DomposableModifier
+                    .fillMaxSize()
+                    .verticalScroll()
+                    .padding(16.dp)
+                    .testId("material-comparison"),
+                gap = 16.dp,
+            ) {
+                DomposableText("$family · $theme", style = DomposableTextStyle.Title, headingLevel = 1)
+                when (family) {
+                    "states" -> MaterialControlStates()
+                    "actions" -> MaterialActions()
+                    "selection" -> MaterialSelection()
+                    "inputs" -> MaterialInputs()
+                    "surfaces" -> MaterialSurfaces()
+                    "navigation" -> MaterialNavigation()
+                    "feedback" -> MaterialFeedback()
+                    "gestures" -> MaterialGestures()
+                    "scaffold" -> MaterialScaffold()
+                }
             }
         }
     }
