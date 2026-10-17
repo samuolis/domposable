@@ -10,6 +10,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableOrientation
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTypographyRole
 import io.github.samuolis.domposable.ui.DomposableAppBarProps
 import io.github.samuolis.domposable.ui.DomposableAutocompleteProps
 import io.github.samuolis.domposable.ui.DomposableBottomAppBarProps
@@ -298,25 +300,33 @@ internal fun HtmlMultiChoiceSegmentedButtons(
         }) {
             props.labels.forEachIndexed { index, label ->
                 val selected = index in props.selectedIndices
-                Button(attrs = {
-                    attr("type", "button")
-                    attr("aria-pressed", selected.toString())
-                    if (!props.enabled || !formEnabled || !props.optionEnabled[index]) disabled()
-                    classes("d-multi-segment")
-                    style { itemAppearance(appearance, selected) }
-                    onClick {
-                        if (props.enabled && formEnabled && props.optionEnabled[index]) {
-                            props.onSelectionChange(
-                                if (selected) {
-                                    props.selectedIndices - index
-                                } else {
-                                    props.selectedIndices +
-                                        index
-                                },
-                            )
+                Span(attrs = { classes("d-multi-segment-hit-target") }) {
+                    Button(attrs = {
+                        attr("type", "button")
+                        attr("aria-pressed", selected.toString())
+                        if (!props.enabled || !formEnabled || !props.optionEnabled[index]) disabled()
+                        classes("d-multi-segment")
+                        style { itemAppearance(appearance, selected) }
+                        onClick {
+                            if (props.enabled && formEnabled && props.optionEnabled[index]) {
+                                props.onSelectionChange(
+                                    if (selected) {
+                                        props.selectedIndices - index
+                                    } else {
+                                        props.selectedIndices +
+                                            index
+                                    },
+                                )
+                            }
                         }
+                    }) {
+                        Span(attrs = {
+                            attr("aria-hidden", "true")
+                            classes(if (selected) "d-segment-checkmark" else "d-segment-icon-space")
+                        }) {}
+                        Span(attrs = { classes("d-segment-label") }) { Text(label) }
                     }
-                }) { Text(label) }
+                }
             }
         }
     }
@@ -432,6 +442,8 @@ internal fun HtmlFloatingActionButtonMenu(
                 attr("type", "button")
                 attr("aria-label", props.label)
                 attr("aria-expanded", props.expanded.toString())
+                classes("d-button", "d-fab", "d-fab-menu-toggle")
+                style { surfaceAppearance(appearance) }
                 if (!formEnabled) disabled()
                 onClick { if (formEnabled) props.onExpandedChange(!props.expanded) }
             }) { Text(if (props.expanded) "×" else "+") }
@@ -527,9 +539,40 @@ internal fun HtmlListItem(
         val content: @Composable () -> Unit = {
             props.leadingContent()
             Div(attrs = { classes("d-list-item-copy") }) {
-                props.overline?.let { Span(attrs = { classes("d-list-item-overline") }) { Text(it) } }
-                Span(attrs = { classes("d-list-item-headline") }) { Text(props.headline) }
-                props.supportingText?.let { Span(attrs = { classes("d-list-item-supporting") }) { Text(it) } }
+                props.overline?.let {
+                    Span(attrs = {
+                        classes("d-list-item-overline")
+                        style {
+                            applyCatalogTextAppearance(
+                                DomposableTextAppearance(role = DomposableTypographyRole.LabelSmall),
+                            )
+                        }
+                    }) { Text(it) }
+                }
+                Span(attrs = {
+                    classes("d-list-item-headline")
+                    style {
+                        val text =
+                            (if (props.selected) appearance.selectedTextAppearance else null)
+                                ?: appearance.textAppearance
+                        applyCatalogTextAppearance(
+                            text?.copy(role = text.role ?: DomposableTypographyRole.BodyLarge)
+                                ?: DomposableTextAppearance(role = DomposableTypographyRole.BodyLarge),
+                        )
+                    }
+                }) { Text(props.headline) }
+                props.supportingText?.let {
+                    Span(attrs = {
+                        classes("d-list-item-supporting")
+                        style {
+                            val text = appearance.textAppearance
+                            applyCatalogTextAppearance(
+                                text?.copy(role = text.role ?: DomposableTypographyRole.BodyMedium)
+                                    ?: DomposableTextAppearance(role = DomposableTypographyRole.BodyMedium),
+                            )
+                        }
+                    }) { Text(it) }
+                }
             }
             props.trailingContent()
         }
@@ -735,65 +778,72 @@ internal fun HtmlBottomSheetScaffold(
             classes("d-bottom-sheet-scaffold")
         }) {
             Div(attrs = { classes("d-bottom-sheet-content") }) { content() }
-            Button(attrs = {
-                attr("type", "button")
-                attr("aria-expanded", props.expanded.toString())
-                classes("d-bottom-sheet-handle")
-                if (!formEnabled) disabled()
-                if (props.swipeEnabled && formEnabled) style { property("touch-action", "none") }
-                ref { element ->
-                    val pointerDown: (org.w3c.dom.events.Event) -> Unit = { event ->
-                        val dynamicEvent = event.asDynamic()
-                        val y = (dynamicEvent.clientY as? Number)?.toDouble()
-                        if (formEnabled && y != null) {
-                            dragStartY = y
-                            element.asDynamic().setPointerCapture(dynamicEvent.pointerId)
+            Div(attrs = {
+                attr("role", "region")
+                attr("aria-label", "Bottom sheet")
+                classes("d-bottom-sheet", "d-persistent-bottom-sheet")
+                style {
+                    surfaceAppearance(appearance)
+                    property("min-height", "${props.peekHeight.value}px")
+                    if (!props.expanded) property("height", "${props.peekHeight.value}px")
+                }
+            }) {
+                Button(attrs = {
+                    attr("type", "button")
+                    attr("aria-label", if (props.expanded) "Collapse" else "Expand")
+                    attr("aria-expanded", props.expanded.toString())
+                    classes("d-bottom-sheet-handle")
+                    if (!formEnabled) disabled()
+                    if (props.swipeEnabled && formEnabled) style { property("touch-action", "none") }
+                    ref { element ->
+                        val pointerDown: (org.w3c.dom.events.Event) -> Unit = { event ->
+                            val dynamicEvent = event.asDynamic()
+                            val y = (dynamicEvent.clientY as? Number)?.toDouble()
+                            if (formEnabled && y != null) {
+                                dragStartY = y
+                                element.asDynamic().setPointerCapture(dynamicEvent.pointerId)
+                            }
+                        }
+                        val pointerMove: (org.w3c.dom.events.Event) -> Unit = { event ->
+                            if (swipeEnabled && dragStartY != null) event.preventDefault()
+                        }
+                        val pointerEnd: (org.w3c.dom.events.Event) -> Unit = { event ->
+                            val y = (event.asDynamic().clientY as? Number)?.toDouble()
+                            val start = dragStartY
+                            if (y != null && start != null && kotlin.math.abs(y - start) >= 36) {
+                                val nextExpanded = if (y < start) true else false
+                                if (swipeEnabled && nextExpanded != expanded) onExpandedChange(nextExpanded)
+                                suppressNextClick = true
+                                window.setTimeout({ suppressNextClick = false }, 0)
+                            }
+                            dragStartY = null
+                        }
+                        val pointerCancel: (org.w3c.dom.events.Event) -> Unit = { dragStartY = null }
+                        element.addEventListener("pointerdown", pointerDown)
+                        element.addEventListener("pointermove", pointerMove)
+                        element.addEventListener("pointerup", pointerEnd)
+                        element.addEventListener("pointercancel", pointerCancel)
+                        onDispose {
+                            element.removeEventListener("pointerdown", pointerDown)
+                            element.removeEventListener("pointermove", pointerMove)
+                            element.removeEventListener("pointerup", pointerEnd)
+                            element.removeEventListener("pointercancel", pointerCancel)
                         }
                     }
-                    val pointerMove: (org.w3c.dom.events.Event) -> Unit = { event ->
-                        if (swipeEnabled && dragStartY != null) event.preventDefault()
-                    }
-                    val pointerEnd: (org.w3c.dom.events.Event) -> Unit = { event ->
-                        val y = (event.asDynamic().clientY as? Number)?.toDouble()
-                        val start = dragStartY
-                        if (y != null && start != null && kotlin.math.abs(y - start) >= 36) {
-                            val nextExpanded = if (y < start) true else false
-                            if (swipeEnabled && nextExpanded != expanded) onExpandedChange(nextExpanded)
-                            suppressNextClick = true
-                            window.setTimeout({ suppressNextClick = false }, 0)
+                    onClick {
+                        if (suppressNextClick) {
+                            suppressNextClick = false
+                        } else if (formEnabled) {
+                            props.onExpandedChange(!props.expanded)
                         }
-                        dragStartY = null
                     }
-                    val pointerCancel: (org.w3c.dom.events.Event) -> Unit = { dragStartY = null }
-                    element.addEventListener("pointerdown", pointerDown)
-                    element.addEventListener("pointermove", pointerMove)
-                    element.addEventListener("pointerup", pointerEnd)
-                    element.addEventListener("pointercancel", pointerCancel)
-                    onDispose {
-                        element.removeEventListener("pointerdown", pointerDown)
-                        element.removeEventListener("pointermove", pointerMove)
-                        element.removeEventListener("pointerup", pointerEnd)
-                        element.removeEventListener("pointercancel", pointerCancel)
-                    }
+                }) {
+                    Span(attrs = {
+                        classes("d-bottom-sheet-grip")
+                        attr("aria-hidden", "true")
+                    }) {}
                 }
-                onClick {
-                    if (suppressNextClick) {
-                        suppressNextClick = false
-                    } else if (formEnabled) {
-                        props.onExpandedChange(!props.expanded)
-                    }
-                }
-            }) { Text(if (props.expanded) "Collapse" else "Expand") }
-            if (props.expanded) {
-                Div(attrs = {
-                    attr("role", "region")
-                    attr("aria-label", "Bottom sheet")
-                    classes("d-bottom-sheet")
-                    style {
-                        surfaceAppearance(appearance)
-                        property("min-height", "${props.peekHeight.value}px")
-                    }
-                }) { props.sheetContent() }
+                props.sheetContent()
             }
         }
     }
@@ -1516,6 +1566,7 @@ internal fun HtmlPullToRefresh(
         }) {
             Div(attrs = {
                 classes("d-pull-refresh-indicator")
+                if (!props.refreshing && distance == 0f) classes("d-visually-hidden")
                 attr("role", "status")
                 attr("aria-label", props.label)
                 if (props.refreshing) attr("aria-busy", "true")

@@ -39,10 +39,9 @@ for (const theme of themes) {
               // Top and bottom captures must cover the whole family, including time/wheel inputs.
               expect(await page.getByTestId('material-comparison').evaluate(element => element.scrollHeight)).toBeLessThanOrEqual(3600);
             }
-            await page.clock.install();
+
             await capture(page, `${directory}/${renderer}.png`, golden && `${golden}-rest.png`);
             if (family !== 'states') {
-              await page.clock.resume();
               // Scroll over outer padding so nested calendars and wheels do not consume the event.
               await page.mouse.move(8, 900);
               await page.mouse.wheel(0, 10000);
@@ -50,7 +49,6 @@ for (const theme of themes) {
             } else {
               for (const target of controls) {
                 if (target.key !== 'checkbox') {
-                  await page.clock.resume();
                   await page.reload();
                   await ready(page, renderer, route, family, theme);
                 }
@@ -68,13 +66,13 @@ for (const theme of themes) {
                 expect(bounds?.width).toBeGreaterThan(0);
                 const suffix = target.key === 'checkbox' ? '' : `-${target.key}`;
                 const targetGolden = target.key === 'checkbox' ? golden : undefined;
-                await page.clock.resume();
+
                 await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
                 await capture(page, `${directory}/${renderer}${suffix}-hover.png`, targetGolden && `${targetGolden}-hover.png`);
-                await page.clock.resume();
+
                 await page.mouse.down();
                 await capture(page, `${directory}/${renderer}${suffix}-pressed.png`, targetGolden && `${targetGolden}-pressed.png`);
-                await page.clock.resume();
+
                 await page.mouse.up();
                 await page.mouse.move(0, 0);
                 if (renderer === 'wasm') {
@@ -117,8 +115,7 @@ async function ready(page: Page, renderer: string, route: string, family: string
 }
 
 async function capture(page: Page, path: string, golden?: string) {
-  const now = await page.evaluate(() => Date.now());
-  await page.clock.pauseAt(new Date(now + 1000));
+  // The fixture disables indefinite animation; settle real frames without replacing the Wasm clock.
   let previous: Buffer | undefined;
   await expect.poll(async () => {
     const image = await page.screenshot({ animations: 'disabled', caret: 'hide', scale: 'css' });

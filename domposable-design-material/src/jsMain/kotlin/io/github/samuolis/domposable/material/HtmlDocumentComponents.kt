@@ -100,7 +100,7 @@ internal fun HtmlDomposableDisclosure(
                 property("width", "100%")
                 property(
                     "border",
-                    "${appearance.borderWidth.value}px solid " +
+                    "${if (appearance.border == null) 0f else appearance.borderWidth.value}px solid " +
                         (appearance.border?.css() ?: "transparent"),
                 )
                 appearance.shape?.let { materialShape(it) } ?: property("border-radius", "${tokens.radius.value}px")
@@ -122,7 +122,7 @@ internal fun HtmlDomposableDisclosure(
                 style {
                     property("display", "flex")
                     property("width", "100%")
-                    property("min-height", "20px")
+                    property("min-height", "24px")
                     property("align-items", "center")
                     property("justify-content", "space-between")
                     property("gap", "${tokens.spacing.small.value}px")

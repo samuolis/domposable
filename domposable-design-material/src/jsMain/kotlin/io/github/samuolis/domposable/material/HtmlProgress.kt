@@ -28,6 +28,7 @@ import kotlin.math.min
 private const val SVG_NAMESPACE = "http://www.w3.org/2000/svg"
 private const val PROGRESS_SCALE = 100
 private const val DEFAULT_INDICATOR_SIZE = 48f
+private const val STANDARD_INDICATOR_SIZE = 40f
 private const val DEFAULT_WAVE_SPEED = 120f
 private const val HALF_ROTATION_DEGREES = 180f
 
@@ -50,52 +51,114 @@ private fun HtmlStandardProgress(
     modifier: DomposableModifier,
     appearance: DomposableProgressAppearance,
 ) {
-    val width =
-        modifierDimension(modifier, width = true)
-            ?: appearance.indicatorSize?.value
-            ?: DEFAULT_INDICATOR_SIZE
-    val height =
-        modifierDimension(modifier, width = false)
-            ?: appearance.indicatorSize?.value
-            ?: DEFAULT_INDICATOR_SIZE
-    val status = props.semantics == DomposableProgressSemantics.Status
-    val strokeWidth = appearance.strokeWidth?.value ?: 4f
-    if (!props.circular && props.value != null && appearance.showStopIndicator != null) {
+    if (!props.circular && props.value != null) {
         HtmlExplicitLinearProgress(props, modifier, appearance)
         return
     }
-    DomposableHtmlModifiers(modifier) {
-        TagElement<HTMLElement>(if (status) "div" else "progress", applyAttrs = {
-            domposableAttributes(modifier)
-            progressSemantics(props, status)
-            if (!status) {
+    if (!props.circular) {
+        DomposableHtmlModifiers(modifier) {
+            TagElement<HTMLElement>("progress", applyAttrs = {
+                domposableAttributes(modifier)
+                progressSemantics(props, props.semantics == DomposableProgressSemantics.Status)
+                classes("d-progress", "d-progress-standard")
                 attr("max", "1")
-                props.value?.let { attr("value", it.toString()) }
-            }
+                style {
+                    property("width", "100%")
+                    appearance.strokeWidth?.let { property("height", "${it.value}px") }
+                    appearance.color?.let { property("--d-progress-color", it.css()) }
+                    appearance.track?.let { property("--d-progress-track", it.css()) }
+                }
+            }) {}
+        }
+        return
+    }
+    val width = modifierDimension(modifier, width = true) ?: appearance.indicatorSize?.value ?: STANDARD_INDICATOR_SIZE
+    val height =
+        modifierDimension(modifier, width = false) ?: appearance.indicatorSize?.value ?: STANDARD_INDICATOR_SIZE
+    val stroke = appearance.strokeWidth?.value ?: 4f
+    val svgElement = remember { mutableStateOf<Element?>(null) }
+    DomposableHtmlModifiers(modifier) {
+        Div(attrs = {
+            domposableAttributes(modifier)
+            progressSemantics(props, props.semantics == DomposableProgressSemantics.Status)
             classes("d-progress", "d-progress-standard")
             if (props.circular) classes("d-progress-circular")
             style {
-                appearance.color?.let { property("accent-color", it.css()) }
                 appearance.color?.let { property("--d-progress-color", it.css()) }
                 appearance.track?.let { property("--d-progress-track", it.css()) }
-                property("--d-progress-stroke", "${strokeWidth}px")
+                property("--d-progress-stroke", "${stroke}px")
+                property("width", if (props.circular) "${width}px" else "100%")
+                property("height", if (props.circular) "${height}px" else "${stroke}px")
                 if (props.circular) {
-                    property("width", "${width}px")
-                    property("height", "${height}px")
-                    property("appearance", "none")
-                    property("border", "0")
-                    property("border-radius", "50%")
-                    property("background", progressRing(props.value))
-                    val mask = progressMask(strokeWidth)
-                    property("-webkit-mask", mask)
-                    property("mask", mask)
+                    property("background", "transparent")
+                    property("overflow", "visible")
                     if (props.value == null) property("animation", "d-progress-spin 1s linear infinite")
-                } else {
-                    property("width", "100%")
-                    property("height", "${strokeWidth}px")
+                }
+            }
+            ref { host ->
+                val svg = document.createElementNS(SVG_NAMESPACE, "svg")
+                svg.setAttribute("viewBox", "0 0 $width $height")
+                svg.setAttribute("width", "100%")
+                svg.setAttribute("height", "100%")
+                svg.setAttribute("aria-hidden", "true")
+                svg.setAttribute("focusable", "false")
+                host.appendChild(svg)
+                svgElement.value = svg
+                onDispose {
+                    host.removeChild(svg)
+                    svgElement.value = null
                 }
             }
         }) {}
+    }
+    SideEffect {
+        svgElement.value?.let { svg ->
+            while (svg.firstChild != null) svg.removeChild(svg.firstChild!!)
+            if (props.circular) {
+                val radius = (min(width, height) - stroke) / 2f
+                val circumference = 2f * PI.toFloat() * radius
+                val fraction = props.value?.coerceIn(0f, 1f) ?: 0.25f
+                val active = fraction * circumference
+                val gap = min(active, stroke + 4f)
+                appendProgressCircle(
+                    svg,
+                    width,
+                    height,
+                    radius,
+                    stroke,
+                    "d-standard-track",
+                    (circumference - active - gap * 2f).coerceAtLeast(0f),
+                    -(active + gap),
+                )
+                appendProgressCircle(svg, width, height, radius, stroke, "d-standard-active", active, 0f)
+            }
+        }
+    }
+}
+
+private fun appendProgressCircle(
+    svg: Element,
+    width: Float,
+    height: Float,
+    radius: Float,
+    stroke: Float,
+    cssClass: String,
+    length: Float,
+    offset: Float,
+) {
+    document.createElementNS(SVG_NAMESPACE, "circle").also { circle ->
+        circle.setAttribute("cx", "${width / 2f}")
+        circle.setAttribute("cy", "${height / 2f}")
+        circle.setAttribute("r", "$radius")
+        circle.setAttribute("class", cssClass)
+        circle.setAttribute("fill", "none")
+        circle.setAttribute("stroke-width", "$stroke")
+        circle.setAttribute("stroke-linecap", "round")
+        circle.setAttribute("stroke-dasharray", "$length ${2f * PI.toFloat() * radius}")
+        circle.setAttribute("stroke-dashoffset", "$offset")
+        circle.setAttribute("transform", "rotate(-90 ${width / 2f} ${height / 2f})")
+        if (length == 0f) circle.setAttribute("visibility", "hidden")
+        svg.appendChild(circle)
     }
 }
 
@@ -120,14 +183,26 @@ private fun HtmlExplicitLinearProgress(
                 property("--d-progress-stroke", "${strokeWidth}px")
                 property("overflow", "hidden")
                 property("border-radius", "999px")
-                property(
-                    "background-color",
-                    "var(--d-progress-track,var(--d-surface-container-highest,var(--d-variant)))",
-                )
+                property("background", "transparent")
                 appearance.color?.let { property("--d-progress-color", it.css()) }
                 appearance.track?.let { property("--d-progress-track", it.css()) }
             }
         }) {
+            Div(attrs = {
+                classes("d-progress-linear-track")
+                attr("aria-hidden", "true")
+                style {
+                    property("position", "absolute")
+                    property("inset-block", "0")
+                    property(
+                        "inset-inline-start",
+                        "min(100%, calc(${progress * 100f}% + min(${progress * 100f}%, ${strokeWidth + 4f}px)))",
+                    )
+                    property("inset-inline-end", "0")
+                    property("border-radius", "inherit")
+                    property("background", "var(--d-progress-track,var(--d-secondary-container))")
+                }
+            }) {}
             Div(attrs = {
                 attr("aria-hidden", "true")
                 style {
@@ -139,7 +214,7 @@ private fun HtmlExplicitLinearProgress(
                     property("background-color", "var(--d-progress-color,var(--d-primary))")
                 }
             }) {}
-            if (appearance.showStopIndicator == true) {
+            if (appearance.showStopIndicator != false) {
                 Div(attrs = {
                     classes("d-progress-stop-indicator")
                     attr("aria-hidden", "true")
@@ -173,7 +248,7 @@ private fun HtmlWavyProgress(
     val height =
         modifierDimension(modifier, width = false)
             ?: appearance.indicatorSize?.value
-            ?: if (props.circular) DEFAULT_INDICATOR_SIZE else 12f
+            ?: if (props.circular) DEFAULT_INDICATOR_SIZE else 10f
     val fillsWidth =
         !props.circular &&
             modifier.elements.any {
@@ -221,10 +296,51 @@ private fun HtmlWavyProgress(
         svgElement.value?.let { svg ->
             while (svg.firstChild != null) svg.removeChild(svg.firstChild!!)
             val circular = props.circular
-            val trackPath = if (circular) circularWavePath() else linearWavePath()
-            appendSvgPath(svg, if (circular) trackPath else "M0,6 L100,6", "d-wave-track", PROGRESS_SCALE.toString())
-            val activePath = appendSvgPath(svg, trackPath, "d-wave-active", PROGRESS_SCALE.toString())
             val fraction = props.value?.coerceIn(0f, 1f)
+            val actualWidth =
+                svg.parentElement
+                    ?.getBoundingClientRect()
+                    ?.width
+                    ?.takeIf { it > 0 } ?: width.toDouble()
+            if (!circular) svg.setAttribute("viewBox", "0 0 $actualWidth $height")
+            val trackPath =
+                if (circular) {
+                    circularWavePath()
+                } else {
+                    linearWavePath(
+                        actualWidth,
+                        height.toDouble(),
+                        fraction,
+                    )
+                }
+            val track =
+                appendSvgPath(
+                    svg,
+                    if (circular) {
+                        "M92.5,50 A42.5,42.5 0 1,1 7.5,50 A42.5,42.5 0 1,1 92.5,50"
+                    } else {
+                        "M0,${height / 2f} L$actualWidth,${height / 2f}"
+                    },
+                    "d-wave-track",
+                    PROGRESS_SCALE.toString(),
+                )
+            val activePath = appendSvgPath(svg, trackPath, "d-wave-active", PROGRESS_SCALE.toString())
+            if (fraction != null) {
+                if (circular) {
+                    val gap = 6f
+                    track.setAttribute(
+                        "stroke-dasharray",
+                        "${((1f - fraction) * PROGRESS_SCALE - gap * 2f).coerceAtLeast(0f)} $PROGRESS_SCALE",
+                    )
+                    track.setAttribute("stroke-dashoffset", "${-(fraction * PROGRESS_SCALE + gap)}")
+                    track.setAttribute("transform", "rotate(-90 50 50)")
+                } else {
+                    track.setAttribute(
+                        "style",
+                        "clip-path:inset(-50% 0 -50% calc(${fraction * PROGRESS_SCALE}% + 8px))",
+                    )
+                }
+            }
             if (fraction == null) {
                 activePath.setAttribute("class", "d-wave-active d-wave-indeterminate")
             } else if (circular) {

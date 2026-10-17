@@ -341,6 +341,7 @@ test('Material defaults keep component surfaces compact and preserve explicit th
   await page.goto('/?comparison=actions#/material/compare/light/actions');
   const filled = page.getByRole('button', { name: 'Filled', exact: true });
   await expect(filled).toHaveCSS('height', '40px');
+  await expect(filled.locator('..')).toHaveCSS('height', '48px');
   const outlined = page.getByRole('button', { name: 'Outlined', exact: true });
   const outline = await outlined.evaluate(element => ({
     color: getComputedStyle(element).color,
@@ -355,7 +356,8 @@ test('Material defaults keep component surfaces compact and preserve explicit th
   await expect(extended).toContainText('Compose');
   await page.goto('/?comparison=selection#/material/compare/light/selection');
   const chip = page.locator('.d-chip-assist').first();
-  await expect(chip).toHaveCSS('height', '32px');
+  await expect(chip).toHaveCSS('height', '48px');
+  await expect(chip.locator('.d-chip-surface')).toHaveCSS('height', '32px');
   await expect(chip).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await page.goto('/?comparison=surfaces#/material/compare/light/surfaces');
   const card = page.locator('.d-card').filter({ has: page.getByText('Filled card', { exact: true }) });
@@ -395,4 +397,28 @@ test('labelled and vertical sliders retain their available layout bounds', async
   const surface = vertical.locator('..');
   await expect(surface).toHaveCSS('height', '180px');
   await expect(surface).toHaveCSS('width', '48px');
+});
+
+test('feedback and surface defaults retain Material colors and geometry', async ({ page }) => {
+  await page.goto('/#/material/feedback');
+  const badge = page.locator('.d-badge').first();
+  const color = await badge.evaluate(element => {
+    const swatch = document.createElement('span');
+    swatch.style.color = getComputedStyle(element.closest('.d-theme')!).getPropertyValue('--d-error').trim();
+    return swatch.style.color;
+  });
+  await expect(badge).toHaveCSS('background-color', color);
+  const circular = page.locator('.d-progress-standard.d-progress-circular').first();
+  await expect(circular).toHaveCSS('width', '40px');
+  await expect(circular).toHaveCSS('height', '40px');
+  await expect(circular.locator('.d-standard-active')).toHaveAttribute('stroke-linecap', 'round');
+  await expect(page.locator('.d-progress-standard:not(.d-progress-circular)').first().locator('.d-progress-stop-indicator')).toHaveCount(1);
+  await expect(page.locator('.d-snackbar-message').first()).toHaveCSS('border-top-left-radius', '4px');
+  expect((await page.locator('.d-snackbar-message').first().boundingBox())!.height).toBe(48);
+
+  await page.goto('/#/material/surfaces');
+  await expect(page.locator('.d-list-item-headline').first()).toHaveCSS('font-weight', '400');
+  await expect(page.locator('.d-list-item-supporting').first()).toHaveCSS('line-height', '20px');
+  const surface = page.locator('.d-surface').filter({ hasText: 'Local surface override' }).last();
+  await expect(surface).toHaveCSS('border-top-left-radius', '0px');
 });

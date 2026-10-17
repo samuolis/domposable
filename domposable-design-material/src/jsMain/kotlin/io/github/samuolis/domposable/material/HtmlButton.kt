@@ -9,6 +9,7 @@ import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableModifierOperation
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableAttributes
 import io.github.samuolis.domposable.ui.domposableFormEnabled
@@ -29,7 +30,8 @@ internal fun HtmlButton(
     val customAppearance = appearance != DomposableButtonAppearance()
     val formEnabled = !respectFormEnabled || domposableFormEnabled()
     val useEnabledColors = (props.enabled && formEnabled) || props.loading
-    DomposableHtmlModifiers(modifier) {
+
+    @Composable fun button() {
         Button(attrs = {
             domposableAttributes(modifier)
             attr("type", "button")
@@ -172,7 +174,31 @@ internal fun HtmlButton(
             }
         }
     }
+    val heightConstrained =
+        modifier.elements.any {
+            when (it) {
+                is DomposableModifierOperation.Height,
+                is DomposableModifierOperation.MinHeight,
+                is DomposableModifierOperation.MaxHeight,
+                DomposableModifierOperation.FillHeight,
+                -> true
+
+                else -> false
+            }
+        }
+    val reserveHitTarget =
+        !heightConstrained && (appearance.minHeight?.value ?: BUTTON_VISUAL_HEIGHT) < BUTTON_TARGET_HEIGHT
+    DomposableHtmlModifiers(modifier) {
+        if (reserveHitTarget) {
+            Span(attrs = { classes("d-button-hit-target") }) { button() }
+        } else {
+            button()
+        }
+    }
 }
+
+private const val BUTTON_VISUAL_HEIGHT = 40f
+private const val BUTTON_TARGET_HEIGHT = 48f
 
 internal fun StyleScope.materialShape(shape: DomposableShape) {
     when (shape) {

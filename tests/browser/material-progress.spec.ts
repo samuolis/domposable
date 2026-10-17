@@ -5,10 +5,10 @@ test('Material progress and loading indicators render controlled state, expressi
 
   const circular = page.getByRole('progressbar', { name: 'Download Standard', exact: true });
   await expect(circular).toHaveAttribute('aria-valuenow', '60');
-  await expect(circular).toHaveCSS('width', '48px');
-  await expect(circular).toHaveCSS('height', '48px');
-  await expect(circular).toHaveCSS('background-image', /conic-gradient/);
-  await expect(circular).toHaveCSS('mask-image', /radial-gradient/);
+  await expect(circular).toHaveCSS('width', '40px');
+  await expect(circular).toHaveCSS('height', '40px');
+  await expect(circular.locator('.d-standard-active')).toHaveAttribute('stroke-linecap', 'round');
+  await expect(circular.locator('.d-standard-track')).toHaveAttribute('stroke-dashoffset', /^-/);
 
   const wavyCircle = page.getByRole('progressbar', { name: 'Download Wavy', exact: true });
   await expect(wavyCircle).toHaveAttribute('aria-valuenow', '60');

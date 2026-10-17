@@ -717,7 +717,7 @@ internal fun NativeSurface(
         modifier = modifier.toComposeModifier(),
         color = color,
         contentColor = appearance.content?.nativeColor() ?: androidx.compose.material3.contentColorFor(color),
-        shape = appearance.nativeShape(MaterialTheme.shapes.medium),
+        shape = appearance.nativeShape(androidx.compose.ui.graphics.RectangleShape),
         tonalElevation = appearance.tonalElevation?.value?.dp ?: 0.dp,
         shadowElevation = appearance.shadowElevation?.value?.dp ?: 0.dp,
         border = appearance.border?.let { BorderStroke(appearance.borderWidth.value.dp, it.nativeColor()) },
@@ -1148,6 +1148,7 @@ internal fun NativeProgress(
                 ProgressIndicatorDefaults.linearTrackColor
             }
     val strokeWidth = appearance.strokeWidth?.value?.dp ?: 4.dp
+    val strokePixels = with(androidx.compose.ui.platform.LocalDensity.current) { strokeWidth.toPx() }
     if (props.variant == io.github.samuolis.domposable.foundation.DomposableProgressVariant.Wavy) {
         val wavyModifier = appearance.indicatorSize?.let { native.size(it.value.dp) } ?: native
         val value = props.value
@@ -1166,7 +1167,7 @@ internal fun NativeProgress(
                     modifier = wavyModifier,
                     color = color,
                     trackColor = track,
-                    stroke = Stroke(strokeWidth.value, cap = StrokeCap.Round),
+                    stroke = Stroke(strokePixels, cap = StrokeCap.Round),
                     waveSpeed = waveSpeed,
                 )
             } else {
@@ -1179,7 +1180,7 @@ internal fun NativeProgress(
                     trackColor = track,
                     stroke =
                         Stroke(
-                            strokeWidth.value,
+                            strokePixels,
                             cap = StrokeCap.Round,
                         ),
                     waveSpeed = waveSpeed,
@@ -1193,7 +1194,7 @@ internal fun NativeProgress(
                     modifier = wavyModifier,
                     color = color,
                     trackColor = track,
-                    stroke = Stroke(strokeWidth.value, cap = StrokeCap.Round),
+                    stroke = Stroke(strokePixels, cap = StrokeCap.Round),
                     waveSpeed = waveSpeed,
                 )
             } else {
@@ -1206,7 +1207,7 @@ internal fun NativeProgress(
                     trackColor = track,
                     stroke =
                         Stroke(
-                            strokeWidth.value,
+                            strokePixels,
                             cap = StrokeCap.Round,
                         ),
                     waveSpeed = waveSpeed,
@@ -1535,70 +1536,76 @@ internal fun NativeSegmentedButtons(
     ) {
         SingleChoiceSegmentedButtonRow(modifier.toComposeModifier().semantics { contentDescription = props.label }) {
             props.labels.forEachIndexed { index, label ->
-                val selected = index == props.selectedIndex
-                val enabled = props.enabled && props.optionEnabled[index] && domposableFormEnabled()
-                val interaction = remember { MutableInteractionSource() }
-                val resolved = appearance.resolveInteractionColors(interaction, selected, enabled)
-                val borderColor = if (selected) resolved.selectedBorder else resolved.border
-                val borderWidth =
-                    if (selected) {
-                        appearance.selectedBorderWidth?.value?.dp
-                            ?: appearance.borderWidth.value.dp
-                    } else {
-                        appearance.borderWidth.value.dp
-                    }
-                val labelAppearance =
-                    if (selected) {
-                        appearance.selectedTextAppearance ?: appearance.textAppearance
-                    } else {
-                        appearance.textAppearance
-                    }
-                SegmentedButton(
-                    selected = selected,
-                    onClick = { if (props.allowReselect || !selected) props.onSelect(index) },
-                    enabled = enabled,
-                    modifier =
-                        (if (props.equalWidth) Modifier.weight(1f) else Modifier)
-                            .then(props.optionTestTags[index]?.let { Modifier.testTag(it) } ?: Modifier)
-                            .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier),
-                    shape =
-                        appearance.shape?.nativeShape() ?: SegmentedButtonDefaults.itemShape(index, props.labels.size),
-                    interactionSource = interaction,
-                    contentPadding =
-                        appearance.contentPadding?.nativePadding() ?: SegmentedButtonDefaults.ContentPadding,
-                    colors =
-                        SegmentedButtonDefaults.colors(
-                            activeContainerColor = resolved.selectedContainer,
-                            activeContentColor = resolved.selectedContent,
-                            activeBorderColor = resolved.selectedBorder,
-                            inactiveContainerColor = resolved.container,
-                            inactiveContentColor = resolved.content,
-                            inactiveBorderColor = resolved.border,
-                            disabledActiveContainerColor = c.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                            disabledActiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
-                            disabledActiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
-                            disabledInactiveContainerColor = c.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                            disabledInactiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
-                            disabledInactiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
-                        ),
-                    border =
-                        if (borderColor ==
-                            Color.Unspecified
-                        ) {
-                            BorderStroke(borderWidth, MaterialTheme.colorScheme.outline)
+                val renderButton: @Composable () -> Unit = {
+                    val selected = index == props.selectedIndex
+                    val enabled = props.enabled && props.optionEnabled[index] && domposableFormEnabled()
+                    val interaction = remember { MutableInteractionSource() }
+                    val resolved = appearance.resolveInteractionColors(interaction, selected, enabled)
+                    val borderColor = if (selected) resolved.selectedBorder else resolved.border
+                    val borderWidth =
+                        if (selected) {
+                            appearance.selectedBorderWidth?.value?.dp
+                                ?: appearance.borderWidth.value.dp
                         } else {
-                            BorderStroke(borderWidth, borderColor)
-                        },
-                    icon = {
-                        if (props.showSelectedIcon) {
-                            if (selected) {
-                                props.selectedIcon?.invoke() ?: SegmentedButtonDefaults.Icon(true)
-                            } else {
-                                SegmentedButtonDefaults.Icon(false)
-                            }
+                            appearance.borderWidth.value.dp
                         }
-                    },
-                ) { Text(label, style = labelAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge)) }
+                    val labelAppearance =
+                        if (selected) {
+                            appearance.selectedTextAppearance ?: appearance.textAppearance
+                        } else {
+                            appearance.textAppearance
+                        }
+                    SegmentedButton(
+                        selected = selected,
+                        onClick = { if (props.allowReselect || !selected) props.onSelect(index) },
+                        enabled = enabled,
+                        modifier =
+                            (if (props.equalWidth) Modifier.weight(1f) else Modifier)
+                                .then(props.optionTestTags[index]?.let { Modifier.testTag(it) } ?: Modifier)
+                                .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier),
+                        shape =
+                            appearance.shape?.nativeShape()
+                                ?: SegmentedButtonDefaults.itemShape(index, props.labels.size),
+                        interactionSource = interaction,
+                        contentPadding =
+                            appearance.contentPadding?.nativePadding() ?: SegmentedButtonDefaults.ContentPadding,
+                        colors =
+                            SegmentedButtonDefaults.colors(
+                                activeContainerColor = resolved.selectedContainer,
+                                activeContentColor = resolved.selectedContent,
+                                activeBorderColor = resolved.selectedBorder,
+                                inactiveContainerColor = resolved.container,
+                                inactiveContentColor = resolved.content,
+                                inactiveBorderColor = resolved.border,
+                                disabledActiveContainerColor = c.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledActiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledActiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
+                                disabledInactiveContainerColor =
+                                    c.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledInactiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledInactiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
+                            ),
+                        border =
+                            if (borderColor ==
+                                Color.Unspecified
+                            ) {
+                                BorderStroke(borderWidth, MaterialTheme.colorScheme.outline)
+                            } else {
+                                BorderStroke(borderWidth, borderColor)
+                            },
+                        icon = {
+                            if (props.showSelectedIcon) {
+                                if (selected) {
+                                    props.selectedIcon?.invoke() ?: SegmentedButtonDefaults.Icon(true)
+                                } else {
+                                    SegmentedButtonDefaults.Icon(false)
+                                }
+                            }
+                        },
+                    ) { Text(label, style = labelAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge)) }
+                }
+                // Material's segment installs weight itself; a Box makes unequal-width items intrinsic.
+                if (props.equalWidth) renderButton() else Box { renderButton() }
             }
         }
     }

@@ -3,6 +3,7 @@ package io.github.samuolis.domposable.material
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.toPixelMap
@@ -11,10 +12,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
+import io.github.samuolis.domposable.foundation.DomposableProgressVariant
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableProgress
 import io.github.samuolis.domposable.ui.asDomposableModifier
@@ -83,6 +86,45 @@ class NativeProgressAppearanceTest {
 
         assertFalse(withoutStop.hasRedPixelInLastQuarter())
         assertTrue(withStop.hasRedPixelInLastQuarter())
+    }
+
+    @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
+    fun wavyStrokeScalesWithDisplayDensity() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                Column {
+                    listOf(1f, 2f).forEach { density ->
+                        CompositionLocalProvider(LocalDensity provides Density(density)) {
+                            DomposableProgress(
+                                modifier = DomposableModifier.testId("wavy-$density"),
+                                value = 0.6f,
+                                variant = DomposableProgressVariant.Wavy,
+                                appearance =
+                                    DomposableProgressAppearance(
+                                        color = DomposableColor(0xFFFF0000),
+                                        track = DomposableColor(0xFFFFFFFF),
+                                        strokeWidth = DomposableLength(4f),
+                                        waveSpeed = DomposableLength(0f),
+                                    ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        fun redPixels(tag: String): Int {
+            val pixels = compose.onNodeWithTag(tag).captureToImage().toPixelMap()
+            return (0 until pixels.width).sumOf { x ->
+                (0 until pixels.height).count { y ->
+                    val pixel = pixels[x, y]
+                    pixel.red > 0.8f && pixel.green < 0.2f && pixel.blue < 0.2f
+                }
+            }
+        }
+        val ratio = redPixels("wavy-2.0").toFloat() / redPixels("wavy-1.0")
+        assertTrue(ratio in 3.5f..4.5f, "Doubling density should quadruple painted area: $ratio")
     }
 
     private fun progressAppearance(showStopIndicator: Boolean) =

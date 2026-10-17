@@ -19,8 +19,9 @@ private data class CssTokenColors(
 )
 
 private fun StyleScope.applyTokenVariables(tokens: DomposableTokens) {
-    applyCoreColorTokens(tokens.colors)
-    applyFixedColorTokens(tokens.colors)
+    val colors = tokens.colors.withMaterialColorDefaults()
+    applyCoreColorTokens(colors)
+    applyFixedColorTokens(colors)
     applyTypographyTokens(tokens)
     applyMetricTokens(tokens)
     applyShapeTokens(tokens)

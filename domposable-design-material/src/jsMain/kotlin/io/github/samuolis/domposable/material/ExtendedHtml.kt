@@ -263,6 +263,7 @@ internal fun HtmlSegmentedButtons(
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-segments")
+            if (props.equalWidth) classes("d-segments-equal")
             attr("role", "radiogroup")
             attr("aria-label", props.label)
             style { itemAppearance(appearance) }
@@ -313,15 +314,19 @@ internal fun HtmlSegmentedButtons(
                             }
                         }
                     }) {
-                        if (props.showSelectedIcon && index == props.selectedIndex) {
+                        val showIcon = props.showSelectedIcon && index == props.selectedIndex
+                        if (showIcon) {
                             Span(attrs = {
                                 attr("aria-hidden", "true")
                                 classes("d-segment-checkmark")
-                            }) {
-                                props.selectedIcon?.invoke() ?: Text("✓")
-                            }
+                            }) { props.selectedIcon?.invoke() }
+                        } else {
+                            Span(attrs = {
+                                attr("aria-hidden", "true")
+                                classes("d-segment-icon-space")
+                            }) {}
                         }
-                        Text(label)
+                        Span(attrs = { classes("d-segment-label") }) { Text(label) }
                     }
                 }
             }

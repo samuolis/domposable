@@ -15,6 +15,7 @@ import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableSurface
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.testId
@@ -31,6 +32,21 @@ import kotlin.test.assertEquals
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeCardBorderTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    @SdkSuppress(minSdkVersion = 26)
+    fun changingSurfaceColorPreservesItsDefaultRectangularShape() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableSurface(
+                    modifier = DomposableModifier.size(40.dp).testId("surface"),
+                    appearance = DomposableSurfaceAppearance(container = DomposableColor(0xFFFF0000)),
+                ) {}
+            }
+        }
+        val pixels = compose.onNodeWithTag("surface").captureToImage().toPixelMap()
+        assertEquals(0xFFFF0000.toInt(), pixels[0, 0].toArgb())
+    }
 
     @Test
     @SdkSuppress(minSdkVersion = 26)
