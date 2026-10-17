@@ -3,6 +3,7 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,6 +52,7 @@ import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -432,6 +434,7 @@ internal fun NativeSwitch(
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.switch
     val formEnabled = props.enabled && domposableFormEnabled()
+    val interaction = remember { MutableInteractionSource() }
     ChoiceRow(
         label = props.label,
         description = props.description,
@@ -446,6 +449,8 @@ internal fun NativeSwitch(
                 .toComposeModifier()
                 .toggleable(
                     props.checked,
+                    interactionSource = interaction,
+                    indication = LocalIndication.current,
                     enabled = formEnabled,
                     role = Role.Switch,
                     onValueChange = props.onCheckedChange,
@@ -453,12 +458,16 @@ internal fun NativeSwitch(
                     if (!props.showLabel && props.label.isNotBlank()) contentDescription = props.label
                 },
         control = {
-            Switch(
-                checked = props.checked,
-                onCheckedChange = null,
-                enabled = formEnabled,
-                colors = appearance.colors.nativeSwitchColors(),
-            )
+            // The labelled row owns feedback; the thumb only consumes its press geometry.
+            CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                Switch(
+                    checked = props.checked,
+                    onCheckedChange = null,
+                    enabled = formEnabled,
+                    colors = appearance.colors.nativeSwitchColors(),
+                    interactionSource = interaction,
+                )
+            }
         },
     )
 }
