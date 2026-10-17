@@ -6,6 +6,8 @@ ksp = "2.3.12"
 dokka = "2.2.0"
 mavenPublish = "0.37.0"
 material3 = "1.12.0-alpha03"
+graphicsShapes = "1.1.0"
+collection = "1.5.0"
 navigation3 = "1.1.2"
 navigation3Runtime = "1.1.7"
 lifecycle = "2.11.0"
@@ -29,6 +31,8 @@ kobweb = "0.25.1"
 koin = "4.2.2"
 
 [libraries]
+androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
+graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphicsShapes" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }

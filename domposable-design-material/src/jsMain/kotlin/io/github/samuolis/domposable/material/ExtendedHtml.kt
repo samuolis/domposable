@@ -111,46 +111,57 @@ internal fun HtmlFloatingActionButton(
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.floatingActionButton
     DomposableHtmlModifiers(modifier) {
-        Button(attrs = {
-            domposableAttributes(modifier)
-            attr("type", "button")
-            attr("aria-label", props.label)
-            classes("d-button", "d-fab", "d-fab-${props.size.name.lowercase()}")
-            style {
-                surfaceAppearance(appearance)
-                appearance.container?.let { property("background-color", it.css()) }
-                appearance.content?.let { property("color", it.css()) }
-                if (props.extended) property("padding-inline", "20px")
-                if (props.extended) property("gap", "12px")
-                if (props.extended) {
-                    property("width", "auto")
-                } else {
-                    property(
-                        "width",
-                        when (props.size) {
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Small -> "40px"
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Medium -> "80px"
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Large -> "96px"
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Standard -> "56px"
-                        },
-                    )
-                }
-                if (!props.extended) {
-                    property(
-                        "height",
-                        when (props.size) {
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Small -> "40px"
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Medium -> "80px"
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Large -> "96px"
-                            io.github.samuolis.domposable.foundation.DomposableFabSize.Standard -> "56px"
-                        },
-                    )
-                }
+        val minimumHeight =
+            if (!props.extended &&
+                props.size == io.github.samuolis.domposable.foundation.DomposableFabSize.Small
+            ) {
+                40f
+            } else {
+                56f
             }
-            onClick { props.onClick() }
-        }) {
-            content()
-            if (props.extended) Span { Text(props.label) }
+        MaterialButtonHitTarget(modifier, minimumHeight) {
+            Button(attrs = {
+                domposableAttributes(modifier)
+                attr("type", "button")
+                attr("aria-label", props.label)
+                classes("d-button", "d-fab", "d-fab-${props.size.name.lowercase()}")
+                style {
+                    surfaceAppearance(appearance)
+                    appearance.container?.let { property("background-color", it.css()) }
+                    appearance.content?.let { property("color", it.css()) }
+                    if (props.extended) property("padding-inline", "20px")
+                    if (props.extended) property("height", "56px")
+                    if (props.extended) property("gap", "12px")
+                    if (props.extended) {
+                        property("width", "auto")
+                    } else {
+                        property(
+                            "width",
+                            when (props.size) {
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Small -> "40px"
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Medium -> "80px"
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Large -> "96px"
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Standard -> "56px"
+                            },
+                        )
+                    }
+                    if (!props.extended) {
+                        property(
+                            "height",
+                            when (props.size) {
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Small -> "40px"
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Medium -> "80px"
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Large -> "96px"
+                                io.github.samuolis.domposable.foundation.DomposableFabSize.Standard -> "56px"
+                            },
+                        )
+                    }
+                }
+                onClick { props.onClick() }
+            }) {
+                content()
+                if (props.extended) Span { Text(props.label) }
+            }
         }
     }
 }

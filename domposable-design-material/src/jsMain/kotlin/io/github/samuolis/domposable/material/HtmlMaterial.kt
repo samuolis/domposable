@@ -377,13 +377,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
 
                                     DomposableIconButtonVariant.FilledTonal -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.surfaceContainerHighest
-                                                ?: tokens.colors.surfaceVariant
-                                        } else {
-                                            tokens.colors.secondaryContainer
-                                                ?: tokens.colors.surfaceVariant
-                                        }
+                                        tokens.colors.secondaryContainer ?: tokens.colors.surfaceVariant
                                     }
 
                                     DomposableIconButtonVariant.Outlined -> {
@@ -410,12 +404,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
 
                                     DomposableIconButtonVariant.FilledTonal -> {
-                                        if (props.checked == false) {
-                                            tokens.colors.onSurfaceVariant ?: tokens.colors.onSurface
-                                        } else {
-                                            tokens.colors.onSecondaryContainer
-                                                ?: tokens.colors.onSurface
-                                        }
+                                        tokens.colors.onSecondaryContainer ?: tokens.colors.onSurface
                                     }
 
                                     DomposableIconButtonVariant.Outlined -> {
@@ -1794,12 +1783,19 @@ private fun HtmlToggle(
                     Span(attrs = {
                         id(labelId)
                         if (!showLabel) classes("d-visually-hidden")
-                        style { labelAppearance?.let { applyCatalogTextAppearance(it) } }
+                        style {
+                            applyCatalogTextAppearance(
+                                labelAppearance?.copy(role = labelAppearance.role ?: DomposableTypographyRole.BodyLarge)
+                                    ?: DomposableTextAppearance(role = DomposableTypographyRole.BodyLarge),
+                            )
+                        }
                     }) { Text(label) }
                     description?.let {
                         Span(attrs = {
                             id(descriptionId)
+                            classes("d-toggle-description")
                             style {
+                                property("color", "var(--d-on-surface-variant)")
                                 applyCatalogTextAppearance(
                                     descriptionAppearance
                                         ?: DomposableTextAppearance(role = DomposableTypographyRole.BodySmall),
@@ -2035,7 +2031,7 @@ private const val MATERIAL_CSS = """
 .d-app-bar-center-aligned .d-app-bar-title{position:absolute;left:50%;transform:translateX(-50%);text-align:center}.d-app-bar-medium,.d-app-bar-large,.d-app-bar-mediumflexible,.d-app-bar-largeflexible{align-items:flex-end;padding-bottom:24px}.d-app-bar-large .d-app-bar-title,.d-app-bar-largeflexible .d-app-bar-title{font-size:var(--d-title)}
 .d-fab-small{min-width:40px;min-height:40px;border-radius:var(--d-shape-medium,16px)}.d-fab-medium{min-width:80px;min-height:80px;border-radius:var(--d-shape-large,28px)}.d-fab-large{min-width:96px;min-height:96px;border-radius:var(--d-shape-extra-large,32px)}
 .d-button-group{display:flex;flex-wrap:wrap;align-items:center}.d-button-toggle[aria-pressed=true]{background:var(--d-secondary-container);color:var(--d-on-secondary-container)}.d-split-button>.d-button:first-child{border-start-end-radius:0;border-end-end-radius:0}.d-split-button>.d-button:last-child{border-start-start-radius:0;border-end-start-radius:0;border-inline-start:1px solid color-mix(in srgb,currentColor 20%,transparent)}
-.d-loading-indicator{position:relative;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:var(--d-progress-color,var(--d-primary))}.d-loading-indicator svg{display:block;overflow:visible}.d-loading-contained{background:var(--d-loading-container,var(--d-progress-track,var(--d-secondary-container)));padding:8px}.d-loading-container-shape{fill:var(--d-loading-container,var(--d-progress-track,var(--d-secondary-container)))}.d-loading-morph-shape{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-contained{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-outline{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-shape{transform-box:fill-box;transform-origin:center;animation:d-loading-rotate 3.2s linear infinite}.d-loading-morph-0{animation:d-loading-shape-one 3.2s ease-in-out infinite}.d-loading-morph-1{animation:d-loading-shape-two 3.2s ease-in-out infinite}.d-loading-morph-2{animation:d-loading-shape-three 3.2s ease-in-out infinite}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}
+.d-loading-indicator{position:relative;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:var(--d-progress-color,var(--d-primary))}.d-loading-indicator svg{display:block;overflow:visible}.d-loading-contained{background:var(--d-loading-container,var(--d-progress-track,var(--d-primary-container)));padding:8px}.d-loading-container-shape{fill:var(--d-loading-container,var(--d-progress-track,var(--d-primary-container)))}.d-loading-morph-shape{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-contained{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-outline{fill:var(--d-progress-color,var(--d-primary));stroke:none}.d-loading-morph-shape{transform-box:fill-box;transform-origin:center;animation:d-loading-rotate 3.2s linear infinite}.d-loading-morph-0{animation:d-loading-shape-one 3.2s ease-in-out infinite}.d-loading-morph-1{animation:d-loading-shape-two 3.2s ease-in-out infinite}.d-loading-morph-2{animation:d-loading-shape-three 3.2s ease-in-out infinite}.d-loading-determinate{fill:var(--d-progress-color,var(--d-primary));stroke:none}
 .d-floating-toolbar{position:relative;z-index:auto;display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}.d-floating-toolbar[data-expanded=false]{gap:0}.d-fab-menu{position:relative;z-index:auto;display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:max-content;max-width:100%}.d-fab-menu-items{display:flex;flex-direction:column;gap:8px;max-width:100%;padding:12px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);box-shadow:0 4px 12px rgb(0 0 0 / .2)}
 .d-drag-handle{display:grid;place-items:center;min-width:48px;min-height:24px;touch-action:none;cursor:grab}.d-drag-handle:active{cursor:grabbing}.d-drag-handle-grip{display:block;width:32px;height:4px;border-radius:999px;background:currentColor;opacity:.45}
 .d-list-item{display:flex;width:100%;align-items:center;gap:var(--d-item-gap,16px);min-height:var(--d-item-min-height,56px);padding:var(--d-item-padding,12px 16px);border:0;text-align:start;background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface))}.d-list-item-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:var(--d-item-gap,0px)}.d-list-item-headline{font-weight:400}.d-list-item-supporting{font-size:14px;line-height:20px;letter-spacing:.25px;color:var(--d-on-surface-variant)}.d-list-item-overline{font-size:11px;line-height:16px;letter-spacing:.5px;font-weight:500;color:var(--d-on-surface-variant)}.d-list-item:has(.d-list-item-supporting),.d-list-item:has(.d-list-item-overline){min-height:var(--d-item-min-height,72px)}.d-list-item:has(.d-list-item-supporting):has(.d-list-item-overline){min-height:var(--d-item-min-height,88px)}.d-list-item[aria-current=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-list-item:disabled{background:var(--d-item-disabled-container,transparent);color:var(--d-item-disabled-content,var(--d-on-surface));opacity:.5}.d-list-item-first{border-end-start-radius:0;border-end-end-radius:0}.d-list-item-middle{border-radius:0}.d-list-item-last{border-start-start-radius:0;border-start-end-radius:0}

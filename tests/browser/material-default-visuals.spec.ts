@@ -354,6 +354,12 @@ test('Material defaults keep component surfaces compact and preserve explicit th
   expect(outline.color).toBe(outline.token);
   const extended = page.getByRole('button', { name: 'Compose', exact: true });
   await expect(extended).toContainText('Compose');
+  await expect(extended).toHaveCSS('height', '56px');
+  const smallFab = page.locator('.d-fab-small').first();
+  await expect(smallFab).toHaveCSS('width', '40px');
+  await expect(smallFab).toHaveCSS('height', '40px');
+  await expect(smallFab.locator('..')).toHaveCSS('height', '48px');
+  await expect(page.locator('.d-fab-menu-toggle')).toHaveCSS('height', '56px');
   await page.goto('/?comparison=selection#/material/compare/light/selection');
   const chip = page.locator('.d-chip-assist').first();
   await expect(chip).toHaveCSS('height', '48px');

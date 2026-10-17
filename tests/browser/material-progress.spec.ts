@@ -46,7 +46,7 @@ test('Material progress and loading indicators render controlled state, expressi
     await expect(determinateShape).toHaveCSS('fill', /rgb\(/);
     await expect(determinateShape).toHaveCSS('stroke', 'none');
     const polygon = await determinateShape.getAttribute('d');
-    expect(polygon).toContain('Q');
+    expect(polygon).toContain('C');
     expect(polygon).toContain('Z');
   }
   await expect(uncontained).toHaveClass(/d-loading-uncontained/);

@@ -174,26 +174,26 @@ internal fun HtmlButton(
             }
         }
     }
+    DomposableHtmlModifiers(modifier) {
+        MaterialButtonHitTarget(modifier, appearance.minHeight?.value) { button() }
+    }
+}
+
+@Composable
+internal fun MaterialButtonHitTarget(
+    modifier: DomposableModifier,
+    minimumHeight: Float? = null,
+    content: @Composable () -> Unit,
+) {
     val heightConstrained =
         modifier.elements.any {
-            when (it) {
-                is DomposableModifierOperation.Height,
-                is DomposableModifierOperation.MinHeight,
-                is DomposableModifierOperation.MaxHeight,
-                DomposableModifierOperation.FillHeight,
-                -> true
-
-                else -> false
-            }
+            it is DomposableModifierOperation.Height || it is DomposableModifierOperation.MinHeight ||
+                it is DomposableModifierOperation.MaxHeight || it == DomposableModifierOperation.FillHeight
         }
-    val reserveHitTarget =
-        !heightConstrained && (appearance.minHeight?.value ?: BUTTON_VISUAL_HEIGHT) < BUTTON_TARGET_HEIGHT
-    DomposableHtmlModifiers(modifier) {
-        if (reserveHitTarget) {
-            Span(attrs = { classes("d-button-hit-target") }) { button() }
-        } else {
-            button()
-        }
+    if (!heightConstrained && (minimumHeight ?: BUTTON_VISUAL_HEIGHT) < BUTTON_TARGET_HEIGHT) {
+        Span(attrs = { classes("d-button-hit-target") }) { content() }
+    } else {
+        content()
     }
 }
 

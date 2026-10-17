@@ -919,7 +919,12 @@ internal fun NativeLoadingIndicator(
     modifier: DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.loadingIndicator
-    val color = appearance.color?.nativeColor() ?: LoadingIndicatorDefaults.indicatorColor
+    val color =
+        appearance.color?.nativeColor() ?: if (props.contained) {
+            LoadingIndicatorDefaults.containedIndicatorColor
+        } else {
+            LoadingIndicatorDefaults.indicatorColor
+        }
     val containerColor =
         props.containerColor?.nativeColor() ?: appearance.track?.nativeColor()
             ?: LoadingIndicatorDefaults.containedContainerColor

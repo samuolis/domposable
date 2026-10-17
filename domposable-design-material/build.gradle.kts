@@ -35,6 +35,8 @@ kotlin {
                 dependencies {
                     api(libs.compose.runtime)
                     api(project(":domposable-ui"))
+                    implementation(libs.graphics.shapes)
+                    implementation(libs.androidx.collection)
                 }
             }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }

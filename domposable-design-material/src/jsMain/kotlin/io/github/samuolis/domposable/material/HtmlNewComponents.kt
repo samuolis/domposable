@@ -77,15 +77,17 @@ internal fun HtmlToggleButton(
     DomposableHtmlModifiers(modifier) {
         val appearance = props.appearance ?: LocalDomposableTokens.current.components.toggleButton
         val enabled = props.enabled && domposableFormEnabled()
-        Button(attrs = {
-            domposableAttributes(modifier)
-            attr("type", "button")
-            attr("aria-pressed", props.checked.toString())
-            if (!enabled) disabled()
-            classes("d-button", "d-button-toggle", "d-button-${props.style.name.lowercase()}")
-            style { styleAppearance(appearance, enabled) }
-            onClick { if (enabled) props.onCheckedChange(!props.checked) }
-        }) { content() }
+        MaterialButtonHitTarget(modifier, appearance.minHeight?.value) {
+            Button(attrs = {
+                domposableAttributes(modifier)
+                attr("type", "button")
+                attr("aria-pressed", props.checked.toString())
+                if (!enabled) disabled()
+                classes("d-button", "d-button-toggle", "d-button-${props.style.name.lowercase()}")
+                style { styleAppearance(appearance, enabled) }
+                onClick { if (enabled) props.onCheckedChange(!props.checked) }
+            }) { content() }
+        }
     }
 }
 

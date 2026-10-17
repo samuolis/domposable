@@ -42,36 +42,3 @@ internal fun linearWavePath(
             append(y)
         }
     }
-
-private const val DETERMINATE_VERTEX_COUNT = 20
-private const val DETERMINATE_OUTER_RADIUS = 42.0
-private const val DETERMINATE_PETAL_DEPTH = 14.0
-
-internal fun determinateLoadingPath(progress: Float): String {
-    val points =
-        (0 until DETERMINATE_VERTEX_COUNT).map { index ->
-            val angle = 2.0 * PI * index / DETERMINATE_VERTEX_COUNT - PI / 2.0
-            val radius =
-                if (index % 2 == 0) {
-                    DETERMINATE_OUTER_RADIUS
-                } else {
-                    DETERMINATE_OUTER_RADIUS - DETERMINATE_PETAL_DEPTH * progress
-                }
-            (50.0 + radius * cos(angle)) to (50.0 + radius * sin(angle))
-        }
-    val firstMidpoint = midpoint(points.last(), points.first())
-    return buildString {
-        append("M${firstMidpoint.first},${firstMidpoint.second}")
-        points.forEachIndexed { index, point ->
-            val next = points[(index + 1) % points.size]
-            val middle = midpoint(point, next)
-            append(" Q${point.first},${point.second} ${middle.first},${middle.second}")
-        }
-        append(" Z")
-    }
-}
-
-private fun midpoint(
-    first: Pair<Double, Double>,
-    second: Pair<Double, Double>,
-): Pair<Double, Double> = ((first.first + second.first) / 2.0) to ((first.second + second.second) / 2.0)

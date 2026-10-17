@@ -165,6 +165,8 @@ DomposableChip(
 
 `DomposableItemAppearance` separates the visual `minHeight` from `minimumInteractiveSize`, so a compact chip can retain a larger touch target. Its selected, disabled, focused, hovered and pressed colors belong to the actual control. Field colors distinguish unfocused, focused, error and disabled decoration; inner field padding and outline widths use the field appearance, while its outer modifier controls layout.
 
+The Material adapter uses the same stable AndroidX Graphics Shapes 1.1 morph engine as native Material for determinate loading indicators. Its portable circle-to-soft-burst geometry is checked against the installed Material implementation. This does not raise the stable Compose 1.12.2 baseline.
+
 ## Linear progress appearance
 
 Set the stroke height and endpoint marker explicitly when adapting an existing design system:

@@ -92,7 +92,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-slider-surface{height:auto;min-height:48px}.d-slider-surface-vertical{min-height:160px}.d-slider-surface>.d-slider{height:100%}
 .d-component-label:has(>.d-component-label-content>.d-slider-surface:not(.d-slider-surface-vertical)){width:100%}
 .d-scroll-field-viewport{box-sizing:border-box}
-.d-button-hit-target{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px}
+.d-button-hit-target{height:max-content;display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px}
 .d-button-hit-target>.d-button{flex:1}.d-button-hit-target>.d-button::after{content:"";position:absolute;inset-inline:0;top:50%;height:100%;min-height:48px;transform:translateY(-50%)}
 .d-theme .d-time-number>input[aria-invalid=true]{background:var(--d-error-container);color:var(--d-on-error-container)}
 .d-segments{flex-wrap:nowrap;max-width:100%}.d-segments-equal{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;width:max-content}
@@ -117,4 +117,10 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-bottom-sheet-grip{display:block;width:32px;height:4px;border-radius:999px;background:currentColor}
 .d-snackbar-message{width:100%}
 .d-avatar{color:var(--d-on-surface-variant);font-size:var(--d-type-label-large-size);line-height:var(--d-type-label-large-line-height);font-weight:var(--d-type-label-large-weight);letter-spacing:var(--d-type-label-large-letter-spacing)}
+.d-theme .d-fab{min-width:0;min-height:0}.d-button-hit-target>.d-fab{flex:none}.d-fab-menu-toggle{width:56px;height:56px}
+.d-button-toggle{padding:10px 16px}.d-button-toggle.d-button-elevated:not([aria-pressed=true]){color:var(--d-primary)}
+.d-floating-toolbar{padding:8px;border-radius:999px;box-shadow:none;gap:0}
+.d-carousel-track{height:100%;align-items:center}.d-carousel-item{display:flex;align-items:center;height:100%}.d-carousel-item>.d-card{flex:none}
+.d-carousel-controls{position:absolute;inset-inline:0;bottom:8px;opacity:0;transition:opacity 120ms ease}.d-carousel:hover>.d-carousel-controls,.d-carousel:focus-within>.d-carousel-controls{opacity:1}
+.d-loading-contained{padding:0}.d-loading-contained .d-loading-determinate,.d-loading-contained .d-loading-morph-contained{fill:var(--d-progress-color,var(--d-on-primary-container))}
 """

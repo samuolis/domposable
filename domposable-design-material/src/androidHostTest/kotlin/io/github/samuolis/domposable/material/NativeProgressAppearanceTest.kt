@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.PixelMap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -18,6 +19,7 @@ import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
 import io.github.samuolis.domposable.foundation.DomposableProgressVariant
+import io.github.samuolis.domposable.ui.DomposableLoadingIndicator
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableProgress
 import io.github.samuolis.domposable.ui.asDomposableModifier
@@ -125,6 +127,31 @@ class NativeProgressAppearanceTest {
         }
         val ratio = redPixels("wavy-2.0").toFloat() / redPixels("wavy-1.0")
         assertTrue(ratio in 3.5f..4.5f, "Doubling density should quadruple painted area: $ratio")
+    }
+
+    @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
+    fun containedLoadingUsesTheMaterialContainerForeground() {
+        val expected = mutableMapOf<Boolean, Int>()
+        compose.setContent {
+            DomposableMaterialTheme {
+                Column {
+                    listOf(false, true).forEach { contained ->
+                        val colors = androidx.compose.material3.MaterialTheme.colorScheme
+                        expected[contained] = (if (contained) colors.onPrimaryContainer else colors.primary).toArgb()
+                        DomposableLoadingIndicator(
+                            progress = 0.6f,
+                            contained = contained,
+                            modifier = DomposableModifier.testId("loading-$contained"),
+                        )
+                    }
+                }
+            }
+        }
+        listOf(false, true).forEach { contained ->
+            val pixels = compose.onNodeWithTag("loading-$contained").captureToImage().toPixelMap()
+            assertEquals(expected[contained], pixels[pixels.width / 2, pixels.height / 2].toArgb())
+        }
     }
 
     private fun progressAppearance(showStopIndicator: Boolean) =
