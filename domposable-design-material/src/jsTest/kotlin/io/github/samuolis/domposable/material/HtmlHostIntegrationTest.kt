@@ -134,6 +134,7 @@ class HtmlHostIntegrationTest {
             }
         }) { root ->
             val menu = root.querySelector("[role=menu]") as HTMLElement
+            assertEquals(menu.querySelector("[role=menuitem]"), document.activeElement, "Menu focus must be immediate")
             val background = window.getComputedStyle(menu).backgroundColor
             assertTrue(background != "transparent" && background != "rgba(0, 0, 0, 0)", "Menus need a surface")
             val bounds = menu.getBoundingClientRect()

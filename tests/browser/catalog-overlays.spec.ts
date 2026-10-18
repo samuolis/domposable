@@ -38,6 +38,8 @@ test('catalog menu has an opaque surface above the app header and restores focus
   await expect(menu).toHaveCount(0);
   await expect(trigger).toBeFocused();
   await trigger.click();
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('menuitem').first()).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toHaveCount(0);
   await expect(trigger).toBeFocused();

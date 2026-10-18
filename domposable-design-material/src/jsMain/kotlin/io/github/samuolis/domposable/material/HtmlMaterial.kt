@@ -1157,6 +1157,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         classes("d-menu-backdrop")
                         attr("popover", "manual")
                         attr("aria-label", "Menu")
+                        attr("tabindex", "-1")
                         style {
                             property("position", "fixed")
                             property("inset", "0")
@@ -1201,10 +1202,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         ref { element ->
                             // The browser top layer keeps menus above application stacking contexts.
                             element.asDynamic().showPopover()
-                            window.setTimeout(
-                                { (element.querySelector("[role^=menuitem]:not(:disabled)") as? HTMLElement)?.focus() },
-                                0,
-                            )
+                            val focusTarget =
+                                element.querySelector("[role^=menuitem]:not(:disabled)") as? HTMLElement ?: element
+                            focusTarget.focus()
                             onDispose {
                                 if (element.matches(":popover-open")) element.asDynamic().hidePopover()
                                 previousFocus?.takeIf { it.isConnected }?.focus()

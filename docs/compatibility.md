@@ -41,6 +41,12 @@ These are the versions verified together. Applications adopting older/newer Comp
 
 ## Rendering differences
 
+HTML menus use the browser Popover API to appear above application stacking
+contexts, so the Material provider requires a browser that implements that API.
+CI exercises the Chromium, Firefox and WebKit versions bundled with the pinned
+Playwright release. HTML menus currently use a viewport-positioned popup;
+trigger-anchored placement is not yet shared with native Material menus.
+
 HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm uses Compose UI rendering and its accessibility layer. The Material comparison checks geometry, palettes, typography and control states from the same declarations. Text rasterization, browser-native text selection and platform input behavior can vary. HTML collections are keyed DOM lists; columns, rows, grids and tables offer optional [bounded scroll windows](performance.md). Unwindowed collections render all items. Compose UI collections are lazy. Date/time text-field purposes remain text fields; the dedicated date, range and time picker APIs use Material pickers on Compose UI and HTML controls on Kotlin/JS. Application-specific rich-text editors, hinge/fold integrations, drag/reorder and column virtualization remain host-owned.
 
 Domposable supports Android API 24 and newer. The library modules, demo and published-consumer fixtures use the same minimum; applications upgrading must also set `minSdk = 24` or higher.
