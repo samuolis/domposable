@@ -3,6 +3,7 @@ package io.github.samuolis.domposable.material
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTokens
@@ -51,6 +52,41 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
+    @Test
+    fun chipTextLimitsApplyToItsLabelWithoutClippingTheTouchTarget() {
+        for (selected in listOf(false, true)) {
+            withHost(content = {
+                DomposableChip(
+                    "A long chip label that must wrap across many lines before it is truncated",
+                    {},
+                    modifier = DomposableModifier.width(120.dp),
+                    selected = selected,
+                    appearance =
+                        DomposableItemAppearance(
+                            textAppearance =
+                                DomposableTextAppearance(
+                                    maxLines = 1,
+                                    lineHeight = 20f,
+                                    overflow = DomposableTextOverflow.Ellipsis,
+                                ),
+                            selectedTextAppearance =
+                                DomposableTextAppearance(
+                                    maxLines = 2,
+                                    lineHeight = 20f,
+                                    overflow = DomposableTextOverflow.Ellipsis,
+                                ),
+                        ),
+                )
+            }) { root ->
+                val chip = root.querySelector(".d-chip") as HTMLElement
+                val label = chip.querySelector(".d-chip-label") as HTMLElement
+                assertEquals(if (selected) 40.0 else 20.0, label.getBoundingClientRect().height)
+                assertTrue(label.scrollHeight > label.clientHeight, "Extra label lines must be truncated")
+                assertTrue(chip.getBoundingClientRect().height >= 48.0, "Text limits must not shrink the touch target")
+            }
+        }
+    }
+
     @Test
     fun selectableTextOverridesItsHostSelectionPolicy() {
         for (selectable in listOf(false, true)) {

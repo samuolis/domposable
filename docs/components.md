@@ -69,6 +69,27 @@ DomposableTooltip("Saves this item to your favorites") {
 DomposableLink("Help", "https://example.com/help")
 ```
 
+Chip labels support the same text limits on native and HTML. Give the chip a
+bounded width when you want long labels to truncate:
+
+```kotlin
+DomposableChip(
+    "A long category name",
+    onClick = onSelectCategory,
+    modifier = DomposableModifier.width(160.dp),
+    appearance = DomposableItemAppearance(
+        textAppearance = DomposableTextAppearance(
+            maxLines = 1,
+            overflow = DomposableTextOverflow.Ellipsis,
+        ),
+    ),
+)
+```
+
+Text limits apply to the label, preserving the control's touch target. Use
+`selectedTextAppearance` for a different selected label style; item content
+colors also configure its icons.
+
 Tooltips provide supplemental descriptions. The control still needs its own accessible label. HTML shows help on hover or keyboard focus and supports Escape; native delegates hover/long-press behavior to Material. Link emits a browser anchor or opens the native URI handler. Navigation items with `href` preserve browser new-tab behavior while ordinary clicks call `onSelect`.
 
 Use `description = null` for a decorative Icon inside a labelled control. IconButton and FloatingActionButton take the control's accessible `label`; the decorative glyph does not become part of that name.

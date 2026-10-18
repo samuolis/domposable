@@ -3,7 +3,10 @@ package io.github.samuolis.domposable.material
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import org.jetbrains.compose.web.css.StyleScope
 
-internal fun StyleScope.applyCatalogTextAppearance(appearance: DomposableTextAppearance) {
+internal fun StyleScope.applyCatalogTextAppearance(
+    appearance: DomposableTextAppearance,
+    includeLineLimits: Boolean = true,
+) {
     applyRoleTextAppearance(appearance)
     appearance.color?.let { property("color", it.css()) }
     appearance.fontSize?.let { property("font-size", "${it}px") }
@@ -13,7 +16,7 @@ internal fun StyleScope.applyCatalogTextAppearance(appearance: DomposableTextApp
     applyTextDecoration(appearance)
     appearance.letterSpacing?.let { property("letter-spacing", "${it}px") }
     appearance.selectable?.let { property("user-select", if (it) "text" else "none") }
-    applyMaxLines(appearance)
+    if (includeLineLimits) applyMaxLines(appearance)
 }
 
 private fun StyleScope.applyRoleTextAppearance(appearance: DomposableTextAppearance) {

@@ -939,6 +939,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.chip
                 val enabled = props.enabled && domposableFormEnabled()
+                val labelAppearance =
+                    if (props.selected) {
+                        appearance.selectedTextAppearance ?: appearance.textAppearance
+                    } else {
+                        appearance.textAppearance
+                    }
                 DomposableHtmlModifiers(modifier) {
                     Button(attrs = {
                         domposableAttributes(modifier)
@@ -950,14 +956,22 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         if (appearance.minimumInteractiveSize?.value != 0f) classes("d-item-hittarget")
                         if (!enabled) disabled()
                         style {
-                            itemAppearance(appearance, props.selected)
+                            itemAppearance(appearance, props.selected, includeTextLineLimits = false)
                             if (appearance.minimumInteractiveSize?.value != 0f) property("border-width", "0")
                         }
                         onClick { if (enabled) props.onClick() }
                     }) {
                         Span(attrs = { classes("d-chip-surface") }) {
                             Span(attrs = { classes("d-chip-icon") }) { props.leadingIcon?.invoke() }
-                            Span(attrs = { classes("d-chip-label") }) { Text(props.label) }
+                            Span(attrs = {
+                                classes("d-chip-label")
+                                style {
+                                    labelAppearance?.let {
+                                        applyCatalogTextAppearance(it)
+                                        if (it.minLines > 1) property("min-height", "${it.minLines}lh")
+                                    }
+                                }
+                            }) { Text(props.label) }
                             Span(attrs = { classes("d-chip-icon") }) { props.trailingIcon?.invoke() }
                         }
                     }

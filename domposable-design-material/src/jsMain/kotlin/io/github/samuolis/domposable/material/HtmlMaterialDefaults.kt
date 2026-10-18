@@ -21,7 +21,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-chip.d-item-hittarget .d-chip-surface{padding:var(--d-item-padding,3px 7px);background:var(--d-item-container,transparent);border-color:var(--d-item-border,var(--d-outline-variant));color:var(--d-item-content,var(--d-on-surface-variant))}
 .d-chip-elevated.d-item-hittarget:not([aria-pressed=true]) .d-chip-surface{background:var(--d-item-container,var(--d-surface-container-low));border-color:var(--d-item-border,transparent)}
 .d-card{padding:0}
-.d-chip-label{gap:8px}
+.d-chip-label{gap:8px;min-width:0}.d-chip-icon{flex:none}
 :root .d-segment-surface{border-radius:0;min-height:var(--d-item-min-height,40px);padding:var(--d-item-padding,9px 11px)}
 :root .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,999px));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,999px))}
 :root .d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,999px));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,999px))}
@@ -107,7 +107,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-multi-segment-hit-target:first-child>.d-multi-segment{border-start-start-radius:var(--d-item-radius,999px);border-end-start-radius:var(--d-item-radius,999px)}
 .d-multi-segment-hit-target:last-child>.d-multi-segment{border-start-end-radius:var(--d-item-radius,999px);border-end-end-radius:var(--d-item-radius,999px)}
 .d-multi-segment::after{content:"";position:absolute;inset-inline:0;top:50%;height:100%;min-height:var(--d-item-min-interactive,48px);transform:translateY(-50%)}
-.d-chip,.d-chip.d-item-hittarget .d-chip-surface{gap:var(--d-item-gap,4px)}.d-chip-surface{box-sizing:border-box}
+.d-chip,.d-chip.d-item-hittarget .d-chip-surface{gap:var(--d-item-gap,4px)}.d-chip-surface{box-sizing:border-box;min-width:0;max-width:100%}
 .d-chip-elevated:not(.d-item-hittarget){box-shadow:0 1px 3px rgb(0 0 0 / .24)}.d-chip-elevated.d-item-hittarget .d-chip-surface{box-shadow:0 1px 3px rgb(0 0 0 / .24)}
 :root .d-navigation:not(.d-navigation-links)>button>span[aria-hidden=true]:first-child,:root .d-navigation:not(.d-navigation-links)>a>span[aria-hidden=true]:first-child{width:max-content;min-width:44px;padding-inline:16px;font-size:16px;line-height:24px}
 :root .d-navigation:not(.d-navigation-links)>button,:root .d-navigation:not(.d-navigation-links)>a{font-weight:500;letter-spacing:.5px}
