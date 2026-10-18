@@ -16,6 +16,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
+import androidx.test.filters.SdkSuppress
 import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
@@ -40,6 +41,7 @@ class NativeElevatedChipBorderTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    @SdkSuppress(minSdkVersion = 26)
     fun elevatedFilterAssistAndSuggestionMatchMaterialDefaultBorderPixels() {
         compose.setContent {
             DomposableMaterialTheme {
@@ -59,6 +61,7 @@ class NativeElevatedChipBorderTest {
     }
 
     @Test
+    @SdkSuppress(minSdkVersion = 26)
     fun elevatedFilterKeepsAnExplicitAppearanceBorder() {
         compose.setContent {
             DomposableMaterialTheme {
