@@ -282,9 +282,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
-      - run: ./gradlew :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 --console=plain
       - run: python scripts/ci/generate_xcode_project.py
-      - run: python scripts/ci/ios_test.py
+      - run: python scripts/ci/ios_test.py --build-framework
       - name: iOS visual regression
         if: always()
         env:
