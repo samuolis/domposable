@@ -193,8 +193,8 @@ data class DomposableTableAppearance(
     val compactLabelMinWidth: DomposableLength = 96.dp,
     /**
      * Optional space between table rows, including the header row. When null, each renderer keeps its current
-     * size-preset spacing. In Compact mode this is the space between visible table rows, including a rendered
-     * header, and between card rows.
+     * size-preset spacing. In Compact card mode it also sets the gap between field rows inside each card. When
+     * null, each renderer keeps its current spacing between compact fields.
      */
     val rowSpacing: DomposableLength? = null,
     /**

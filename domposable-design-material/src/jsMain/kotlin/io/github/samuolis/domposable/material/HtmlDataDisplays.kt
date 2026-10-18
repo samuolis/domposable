@@ -391,7 +391,12 @@ internal fun HtmlDataTable(
                     property("table-layout", "fixed")
                     property("width", "100%")
                     if (hasExplicitSpacing) {
-                        property("--d-data-column-count", props.columns.size.coerceAtLeast(1).toString())
+                        property(
+                            "--d-data-column-count",
+                            props.columns.size
+                                .coerceAtLeast(1)
+                                .toString(),
+                        )
                         appearance.rowSpacing?.let { property("--d-data-row-spacing", "${it.value}px") }
                         appearance.columnSpacing?.let { property("--d-data-column-spacing", "${it.value}px") }
                     }
@@ -399,7 +404,12 @@ internal fun HtmlDataTable(
                     if (props.allowHorizontalOverflow) {
                         val minimumTableWidth =
                             appearance.columnSpacing?.let { spacing ->
-                                "${(props.columns.size * 160 + spacing.value * (props.columns.size - 1).coerceAtLeast(0))
+                                "${(
+                                    props.columns.size * 160 + spacing.value *
+                                        (props.columns.size - 1).coerceAtLeast(
+                                            0,
+                                        )
+                                )
                                     .coerceAtLeast(1f)}px"
                             } ?: "${(props.columns.size * 160).coerceAtLeast(1)}px"
                         property("min-width", minimumTableWidth)
@@ -430,11 +440,18 @@ internal fun HtmlDataTable(
                                             appearance.cellPadding?.cssPadding() ?: props.sizePreset.htmlCellPadding(),
                                         )
                                         if (!hasExplicitSpacing) {
-                                            appearance.headerContainer?.let { property("background-color", it.css()) }
+                                            appearance.headerContainer?.let {
+                                                property("background-color", it.css())
+                                            }
                                         }
                                         appearance.headerContent?.let { property("color", it.css()) }
                                         if (!hasExplicitSpacing) {
-                                            appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                            appearance.border?.let {
+                                                property(
+                                                    "border-bottom",
+                                                    "1px solid ${it.css()}",
+                                                )
+                                            }
                                         }
                                         appearance.headerTextAppearance?.let { applyCatalogTextAppearance(it) }
                                     }

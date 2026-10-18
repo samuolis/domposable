@@ -399,7 +399,11 @@ internal fun NativeDataTable(
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
     val scroll = rememberScrollState()
     BoxWithConstraints(modifier.toComposeModifier().fillMaxWidth()) {
-        val naturalWidth = (props.columns.size.coerceAtLeast(1) * 160).dp
+        val columnCount = props.columns.size.coerceAtLeast(1)
+        val naturalWidth =
+            appearance.columnSpacing?.let { spacing ->
+                (columnCount * 160 + spacing.value * (props.columns.size - 1).coerceAtLeast(0)).dp
+            } ?: (columnCount * 160).dp
         val tableWidth = if (props.allowHorizontalOverflow) maxOf(maxWidth, naturalWidth) else maxWidth
         val rowModifier =
             if (props.allowHorizontalOverflow) {
@@ -649,7 +653,10 @@ internal fun NativeDataTable(
                                         ) { rowAction(row.key) }
                                     },
                                 ),
-                            verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    appearance.rowSpacing?.value?.dp ?: props.sizePreset.nativeGap(),
+                                ),
                         ) {
                             CompositionLocalProvider(
                                 LocalTextStyle provides
@@ -672,7 +679,11 @@ internal fun NativeDataTable(
                                         }
                                     }
                                     if (compactSurface != null) {
-                                        Column(Modifier.padding(16.dp)) { compactCells() }
+                                        Column(
+                                            Modifier.padding(16.dp),
+                                            verticalArrangement =
+                                                Arrangement.spacedBy(appearance.rowSpacing?.value?.dp ?: 0.dp),
+                                        ) { compactCells() }
                                     } else {
                                         compactCells()
                                     }
@@ -680,7 +691,7 @@ internal fun NativeDataTable(
                                     Row(
                                         Modifier.fillMaxWidth(),
                                         horizontalArrangement =
-                            Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
+                                            Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         props.columns.forEach { column ->

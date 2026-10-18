@@ -333,8 +333,8 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 `DomposableTableAppearance.rowSpacing` and `columnSpacing` optionally set the gaps between table rows and columns.
 They default to `null`, preserving each renderer's existing size-preset layout. In Compact mode, `rowSpacing` sets
-the gap between visible row tracks (including a rendered header) and cards, while `columnSpacing` sets the
-label-to-value gap inside each card.
+the gap between visible row tracks (including a rendered header), card rows and fields within each card, while
+`columnSpacing` sets the label-to-value gap inside each card.
 
 ```kotlin
 val tableAppearance = DomposableTableAppearance(

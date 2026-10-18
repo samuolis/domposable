@@ -1,8 +1,9 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableColor
-import io.github.samuolis.domposable.foundation.DomposableInteractionAppearance
 import io.github.samuolis.domposable.foundation.DomposableInsets
+import io.github.samuolis.domposable.foundation.DomposableInteractionAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
@@ -14,6 +15,8 @@ import io.github.samuolis.domposable.ui.DomposableDataTableSize
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.testId
 import kotlinx.browser.document
+import kotlinx.browser.window
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
@@ -25,42 +28,14 @@ import kotlin.test.assertTrue
 class HtmlDataTableAppearanceTest {
     @Test
     fun compactRowsUseSurfaceAndInteractionAppearanceAndKeepKeyboardActivation() {
-        val root = document.createElement("div")
+        val root = document.createElement("div") as HTMLElement
+        root.style.width = "300px"
         document.body!!.appendChild(root)
         var activated = ""
         val composition =
             renderComposable(root) {
                 DomposableMaterialTheme {
-                    DomposableDataTable(
-                        columns = listOf(DomposableDataTableColumn("name", "Name")),
-                        rows = listOf(DomposableDataTableRow("one", accessibleLabel = "First row", selected = true)),
-                        modifier = DomposableModifier.testId("table"),
-                        sizePreset = DomposableDataTableSize.Compact,
-                        rowHeaderColumnKey = "name",
-                        onRowActivate = { activated = it },
-                        appearance =
-                            DomposableTableAppearance(
-                                selectedContainer = DomposableColor(0xFF102030),
-                                selectedBorder = DomposableColor(0xFF405060),
-                                selectedBorderWidth = DomposableLength(2f),
-                                compactRowAppearance =
-                                    DomposableSurfaceAppearance(
-                                        container = DomposableColor(0xFF112233),
-                                        border = DomposableColor(0xFF445566),
-                                        borderWidth = DomposableLength(1f),
-                                        shape = DomposableShape.Rounded(DomposableLength(12f)),
-                                    ),
-                                rowInteraction =
-                                    DomposableInteractionAppearance(
-                                        focusRingColor = DomposableColor(0xFF778899),
-                                        focusRingWidth = DomposableLength(4f),
-                                    ),
-                            ),
-                        cellContent = { _, _ ->
-                            org.jetbrains.compose.web.dom
-                                .Text("Example")
-                        },
-                    )
+                    CompactInteractionTable { activated = it }
                 }
             }
         try {
@@ -69,6 +44,7 @@ class HtmlDataTableAppearanceTest {
             val container = root.querySelector(".d-data-table-container") as HTMLElement
             assertTrue(table.classList.contains("d-data-table"))
             assertFalse(container.classList.contains("d-data-table-spaced"))
+            assertTrue(container.classList.contains("d-data-table-compact-active"))
             assertEquals("TR", row.tagName)
             assertEquals(null, row.getAttribute("role"))
             assertEquals("0", row.getAttribute("tabindex"))
@@ -76,9 +52,9 @@ class HtmlDataTableAppearanceTest {
             assertEquals("First row", row.getAttribute("aria-label"))
             assertEquals("row", row.querySelector("th")?.getAttribute("scope"))
             assertEquals("96px", row.style.getPropertyValue("--d-data-compact-label-width"))
-            assertEquals("8px", kotlinx.browser.window.getComputedStyle(row).marginTop)
+            assertCompactRowStyle(row)
             val labelValueCell = row.querySelector("th[scope=row]") as HTMLElement
-            assertEquals("8px", kotlinx.browser.window.getComputedStyle(labelValueCell).columnGap)
+            assertEquals("8px", window.getComputedStyle(labelValueCell).columnGap)
             assertEquals("rgba(17,34,51,1)", row.style.getPropertyValue("--d-data-compact-container"))
             assertEquals("rgba(68,85,102,1)", row.style.getPropertyValue("--d-data-compact-border"))
             assertEquals("rgba(119,136,153,1)", row.style.getPropertyValue("--d-data-focus-ring-color"))
@@ -120,7 +96,9 @@ class HtmlDataTableAppearanceTest {
                                 rowSpacing = DomposableLength(6f),
                                 columnSpacing = DomposableLength(8f),
                             ),
-                    ) { _, _ -> org.jetbrains.compose.web.dom.Text("Cell") }
+                    ) { _, _ ->
+                        Text("Cell")
+                    }
                 }
             }
         try {
@@ -132,44 +110,17 @@ class HtmlDataTableAppearanceTest {
             val headerLastCell = root.querySelector("thead th:last-child") as HTMLElement
             val headerNextCell = root.querySelector("thead th:nth-child(2)") as HTMLElement
 
-            val tableBounds = table.getBoundingClientRect()
-            val firstCellBounds = headerFirstCell.getBoundingClientRect()
-            val lastCellBounds = headerLastCell.getBoundingClientRect()
-            assertEquals(tableBounds.left, firstCellBounds.left, 0.5)
-            assertEquals(tableBounds.right, lastCellBounds.right, 0.5)
-            assertEquals(8.0, headerNextCell.getBoundingClientRect().left - firstCellBounds.right, 0.5)
-            assertEquals(
-                6.0,
-                firstDataRow.getBoundingClientRect().top - headerRow.getBoundingClientRect().bottom,
-                0.5,
+            assertExplicitTableGeometry(
+                table,
+                headerRow,
+                firstDataRow,
+                secondDataRow,
+                headerFirstCell,
+                headerLastCell,
+                headerNextCell,
             )
-            assertEquals(
-                6.0,
-                secondDataRow.getBoundingClientRect().top - firstDataRow.getBoundingClientRect().bottom,
-                0.5,
-            )
-            assertEquals(
-                "rgb(1, 2, 3)",
-                kotlinx.browser.window.getComputedStyle(headerRow).backgroundColor,
-            )
-            assertEquals(
-                "rgb(18, 52, 86)",
-                kotlinx.browser.window.getComputedStyle(firstDataRow).backgroundColor,
-            )
-            assertEquals(
-                "rgb(170, 187, 204)",
-                kotlinx.browser.window.getComputedStyle(firstDataRow).borderBottomColor,
-            )
-
-            assertEquals("table", table.getAttribute("role"))
-            assertEquals("rowgroup", root.querySelector("thead")?.getAttribute("role"))
-            assertEquals("row", headerRow.getAttribute("role"))
-            assertEquals("1", headerRow.getAttribute("aria-rowindex"))
-            assertEquals("columnheader", headerFirstCell.getAttribute("role"))
-            assertEquals("rowgroup", root.querySelector("tbody")?.getAttribute("role"))
-            assertEquals("row", firstDataRow.getAttribute("role"))
-            assertEquals("rowheader", firstDataRow.querySelector("th[scope=row]")?.getAttribute("role"))
-            assertEquals("cell", firstDataRow.querySelector("td")?.getAttribute("role"))
+            assertExplicitTableAppearance(headerRow, firstDataRow)
+            assertExplicitTableSemantics(root, table, headerRow, firstDataRow, headerFirstCell)
         } finally {
             composition.dispose()
             root.parentNode?.removeChild(root)
@@ -186,7 +137,9 @@ class HtmlDataTableAppearanceTest {
                     DomposableDataTable(
                         columns = listOf(DomposableDataTableColumn("name", "Name")),
                         rows = listOf(DomposableDataTableRow("one")),
-                    ) { _, _ -> org.jetbrains.compose.web.dom.Text("Cell") }
+                    ) { _, _ ->
+                        Text("Cell")
+                    }
                 }
             }
         try {
@@ -194,8 +147,14 @@ class HtmlDataTableAppearanceTest {
             val table = root.querySelector("table") as HTMLElement
             val row = root.querySelector("tbody tr") as HTMLElement
             assertFalse(container.classList.contains("d-data-table-spaced"))
-            assertEquals("table", kotlinx.browser.window.getComputedStyle(table).display)
-            assertEquals("collapse", kotlinx.browser.window.getComputedStyle(table).borderCollapse)
+            assertEquals(
+                "table",
+                window.getComputedStyle(table).display,
+            )
+            assertEquals(
+                "collapse",
+                window.getComputedStyle(table).borderCollapse,
+            )
             assertEquals(null, row.getAttribute("role"))
         } finally {
             composition.dispose()
@@ -212,7 +171,11 @@ class HtmlDataTableAppearanceTest {
             renderComposable(root) {
                 DomposableMaterialTheme {
                     DomposableDataTable(
-                        columns = listOf(DomposableDataTableColumn("name", "Name")),
+                        columns =
+                            listOf(
+                                DomposableDataTableColumn("name", "Name"),
+                                DomposableDataTableColumn("score", "Score"),
+                            ),
                         rows = listOf(DomposableDataTableRow("one"), DomposableDataTableRow("two")),
                         sizePreset = DomposableDataTableSize.Compact,
                         rowHeaderColumnKey = "name",
@@ -221,7 +184,9 @@ class HtmlDataTableAppearanceTest {
                                 rowSpacing = DomposableLength(12f),
                                 columnSpacing = DomposableLength(4f),
                             ),
-                    ) { row, _ -> org.jetbrains.compose.web.dom.Text(row.key) }
+                    ) { row, _ ->
+                        Text(row.key)
+                    }
                 }
             }
         try {
@@ -231,18 +196,118 @@ class HtmlDataTableAppearanceTest {
             val firstRow = rows.item(0) as HTMLElement
             val secondRow = rows.item(1) as HTMLElement
             val labelValueCell = firstRow.querySelector("th[scope=row]") as HTMLElement
+            val nextFieldCell = firstRow.querySelector("td") as HTMLElement
             assertTrue(container.classList.contains("d-data-table-compact-active"))
             assertEquals(
                 0.0,
                 firstRow.getBoundingClientRect().top - table.getBoundingClientRect().top,
                 0.5,
             )
-            assertEquals("0px", kotlinx.browser.window.getComputedStyle(firstRow).marginTop)
+            assertEquals("0px", window.getComputedStyle(firstRow).marginTop)
             assertEquals(12.0, secondRow.getBoundingClientRect().top - firstRow.getBoundingClientRect().bottom, 0.5)
-            assertEquals("4px", kotlinx.browser.window.getComputedStyle(labelValueCell).columnGap)
+            assertEquals(
+                12.0,
+                nextFieldCell.getBoundingClientRect().top - labelValueCell.getBoundingClientRect().bottom,
+                0.5,
+            )
+            assertEquals("4px", window.getComputedStyle(labelValueCell).columnGap)
         } finally {
             composition.dispose()
             root.parentNode?.removeChild(root)
         }
     }
+}
+
+@Composable
+private fun CompactInteractionTable(onRowActivate: (String) -> Unit) {
+    DomposableDataTable(
+        columns = listOf(DomposableDataTableColumn("name", "Name")),
+        rows = listOf(DomposableDataTableRow("one", accessibleLabel = "First row", selected = true)),
+        modifier = DomposableModifier.testId("table"),
+        sizePreset = DomposableDataTableSize.Compact,
+        rowHeaderColumnKey = "name",
+        onRowActivate = onRowActivate,
+        appearance =
+            DomposableTableAppearance(
+                selectedContainer = DomposableColor(0xFF102030),
+                selectedBorder = DomposableColor(0xFF405060),
+                selectedBorderWidth = DomposableLength(2f),
+                compactRowAppearance =
+                    DomposableSurfaceAppearance(
+                        container = DomposableColor(0xFF112233),
+                        border = DomposableColor(0xFF445566),
+                        borderWidth = DomposableLength(1f),
+                        shape = DomposableShape.Rounded(DomposableLength(12f)),
+                    ),
+                rowInteraction =
+                    DomposableInteractionAppearance(
+                        focusRingColor = DomposableColor(0xFF778899),
+                        focusRingWidth = DomposableLength(4f),
+                    ),
+            ),
+        cellContent = { _, _ -> Text("Example") },
+    )
+}
+
+private fun assertCompactRowStyle(row: HTMLElement) {
+    assertEquals("8px", window.getComputedStyle(row).marginTop)
+}
+
+private fun assertExplicitTableGeometry(
+    table: HTMLElement,
+    headerRow: HTMLElement,
+    firstDataRow: HTMLElement,
+    secondDataRow: HTMLElement,
+    headerFirstCell: HTMLElement,
+    headerLastCell: HTMLElement,
+    headerNextCell: HTMLElement,
+) {
+    val tableBounds = table.getBoundingClientRect()
+    val firstCellBounds = headerFirstCell.getBoundingClientRect()
+    val lastCellBounds = headerLastCell.getBoundingClientRect()
+    assertEquals(328.0, tableBounds.width, 0.5)
+    assertEquals(tableBounds.left, firstCellBounds.left, 0.5)
+    assertEquals(tableBounds.right, lastCellBounds.right, 0.5)
+    assertEquals(
+        8.0,
+        headerNextCell.getBoundingClientRect().left - firstCellBounds.right,
+        0.5,
+    )
+    assertEquals(
+        6.0,
+        firstDataRow.getBoundingClientRect().top - headerRow.getBoundingClientRect().bottom,
+        0.5,
+    )
+    assertEquals(
+        6.0,
+        secondDataRow.getBoundingClientRect().top - firstDataRow.getBoundingClientRect().bottom,
+        0.5,
+    )
+}
+
+private fun assertExplicitTableAppearance(
+    headerRow: HTMLElement,
+    firstDataRow: HTMLElement,
+) {
+    assertEquals("rgb(1, 2, 3)", window.getComputedStyle(headerRow).backgroundColor)
+    assertEquals("rgb(18, 52, 86)", window.getComputedStyle(firstDataRow).backgroundColor)
+    assertEquals("rgb(170, 187, 204)", window.getComputedStyle(firstDataRow).borderBottomColor)
+}
+
+private fun assertExplicitTableSemantics(
+    root: HTMLElement,
+    table: HTMLElement,
+    headerRow: HTMLElement,
+    firstDataRow: HTMLElement,
+    headerFirstCell: HTMLElement,
+) {
+    assertEquals("table", table.getAttribute("role"))
+    assertEquals("rowgroup", root.querySelector("thead")?.getAttribute("role"))
+    assertEquals("row", headerRow.getAttribute("role"))
+    assertEquals("1", headerRow.getAttribute("aria-rowindex"))
+    assertEquals("columnheader", headerFirstCell.getAttribute("role"))
+    assertEquals("rowgroup", root.querySelector("tbody")?.getAttribute("role"))
+    assertEquals("row", firstDataRow.getAttribute("role"))
+    assertEquals("rowheader", firstDataRow.querySelector("th[scope=row]")?.getAttribute("role"))
+    assertEquals("cell", firstDataRow.querySelector("td")?.getAttribute("role"))
 }

@@ -57,7 +57,7 @@ The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowP
 
 ## Data-table track spacing
 
-`DomposableTableAppearance` adds optional `rowSpacing` and `columnSpacing` values for shared data-table renderers. Null values keep the existing size-preset layout. Set them to tune gaps between rows and columns; Compact mode applies them between cards and between each card's label and value. `cellPadding` continues to control content insets.
+`DomposableTableAppearance` adds optional `rowSpacing` and `columnSpacing` values for shared data-table renderers. Null values keep the existing size-preset layout. Set them to tune gaps between rows and columns; Compact mode also applies `rowSpacing` between fields within each card, while `columnSpacing` controls each card's label-to-value gap. `cellPadding` continues to control content insets.
 
 ```kotlin
 val appearance = DomposableTableAppearance(
