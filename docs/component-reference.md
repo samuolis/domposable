@@ -331,28 +331,6 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 | `appearance` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-table-appearance/index.html">DomposableTableAppearance</a>?</code> | `null` |
 | `cellContent` | <code>@Composable (row: <a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-data-table-row/index.html">DomposableDataTableRow</a>, column: <a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-data-table-column/index.html">DomposableDataTableColumn</a>) -&gt; Unit</code> | **Required** |
 
-`DomposableTableAppearance.rowSpacing` and `columnSpacing` optionally set the gaps between table rows and columns.
-They default to `null`, preserving each renderer's existing size-preset layout. In Compact mode, `rowSpacing` sets
-the gap between visible row tracks (including a rendered header), card rows and fields within each card, while
-`columnSpacing` sets the label-to-value gap inside each card.
-
-```kotlin
-val tableAppearance = DomposableTableAppearance(
-    rowSpacing = 0.dp,
-    columnSpacing = 8.dp,
-    cellPadding = DomposableInsets(top = 4.dp, bottom = 4.dp),
-)
-
-DomposableDataTable(
-    columns = listOf(DomposableDataTableColumn("name", "Name")),
-    rows = listOf(DomposableDataTableRow("Ada Lovelace")),
-    rowHeaderColumnKey = "name",
-    appearance = tableAppearance,
-) { row, _ ->
-    DomposableText(row.key)
-}
-```
-
 ## DomposableDatePicker
 
 Input. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-date-picker.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-date-picker-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/InputComponents.kt#L130)
