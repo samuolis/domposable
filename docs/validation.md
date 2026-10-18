@@ -11,6 +11,22 @@ The required **CI passed** check combines workflow hygiene, Kotlin quality/cover
 - Kotlin ABI validation checks 22 baselines across all eight published modules: Android/JVM signatures, JS/Wasm/iOS Klibs and the JVM KSP processor. macOS CI compiles all targets with inference disabled, fails on missing/incomplete inventories, and retains compiled dumps plus PR-base/release diffs for 30 days. Two published consumers also compile every runtime artifact's six target variants. Optional Metro/Koin graphs compile on every target; Kobweb exports and browser routes run separately.
 - Strict MkDocs/Dokka and both production browser distributions build before website packaging. Version/release/Central recovery tests protect publishing behavior.
 
+## Parallel CI
+
+CI builds the development browser preview once in a dedicated job, without waiting for Android tests, Dokka, integration exports or production packaging. Eight Ubuntu runners split the complete browser suite: six test-level Chromium shards handle the heavier HTML/Wasm comparison matrix, while Firefox and WebKit each run in their own job. Each runner uses two workers. Sharding is weighted by browser because most visual fixtures run only in Chromium; equal shards across all browsers concentrate those expensive tests in a single job. A failed shard does not cancel the others, so diagnostic captures remain available. Their blob reports are merged into one HTML report, and all captures are collected before the complete screenshot inventory is compared.
+
+The iOS simulator boots while its simulator framework compiles; the device-target demo compiles in the published-consumer job, reusing that job's device libraries. One process owns both and cleans up the simulator and any unfinished Gradle child on failure. The iOS simulator/UI job also runs alongside publication and six-target consumer compilation on separate standard macOS runners. Kotlin quality and ABI checks also remain independent. This removes sequential waiting without reducing test coverage, browser engines or visual thresholds. Wall time still depends on runner availability, cold builds and retries; the first hosted run establishes the new timing. The normal PR budget is at most 20 minutes, targeting 10–15 minutes; queue delays and cold-cache runs are measured separately. No tests are skipped to meet that target.
+
+The final **CI passed** gate requires every build, shard, evidence comparison, native, consumer and ABI job to succeed. The iOS UI job also preserves `~/.konan` in GitHub Actions cache, because Gradle User Home caching does not include Kotlin/Native compiled dependency libraries. Its cache key includes the runner architecture and compiler/dependency configuration; the first build populates it, and later builds can reuse it. Cache storage stays within the repository's configured GitHub limit. Same-repository PRs save branch-scoped Gradle and native caches for subsequent updates; fork PRs remain read-only, and their entries cannot replace main caches. Intermediate preview artifacts expire after one day; review evidence remains available for 30 days. `android-html-evidence` and `native-evidence` keep the same paths used by the inline review publisher. The unsigned Maven bundle is retained separately in `published-consumer-evidence`.
+
+Reproduce an individual browser shard after building the preview:
+
+```bash
+npx playwright test --project=chromium --shard=1/6 --workers=2 --reporter=list,blob
+# Collect blob-report/*.zip from all eight runners before merging:
+npx playwright merge-reports --reporter=html blob-report
+```
+
 ## Where images live
 
 Reviewed golden PNGs live in `screenshots/<platform>/` in **Git**, with an explicit inventory in `screenshots/manifest.json`. They remain available across branches and releases without an expiring artifact or third-party service. PR checks do not overwrite them.
