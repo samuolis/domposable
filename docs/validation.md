@@ -13,7 +13,7 @@ The required **CI passed** check combines workflow hygiene, Kotlin quality/cover
 
 ## Parallel CI
 
-CI builds the development browser preview once in a dedicated job, without waiting for Android tests, Dokka, integration exports or production packaging. Eight Ubuntu runners then split the complete Chromium, Firefox and WebKit suite with Playwright's test-level sharding; each runner uses two workers. A failed shard does not cancel the others, so diagnostic captures remain available. Their blob reports are merged into one HTML report, and all captures are collected before the complete screenshot inventory is compared.
+CI builds the development browser preview once in a dedicated job, without waiting for Android tests, Dokka, integration exports or production packaging. Eight Ubuntu runners split the complete browser suite: six test-level Chromium shards handle the heavier HTML/Wasm comparison matrix, while Firefox and WebKit each run in their own job. Each runner uses two workers. Sharding is weighted by browser because most visual fixtures run only in Chromium; equal shards across all browsers concentrate those expensive tests in a single job. A failed shard does not cancel the others, so diagnostic captures remain available. Their blob reports are merged into one HTML report, and all captures are collected before the complete screenshot inventory is compared.
 
 The iOS simulator/UI job runs alongside publication and six-target consumer compilation on separate standard macOS runners. Kotlin quality and ABI checks also remain independent. This removes sequential waiting without reducing test coverage, browser engines or visual thresholds. Wall time still depends on runner availability, cold builds and retries; the first hosted run establishes the new timing. The normal PR budget is at most 20 minutes, targeting 10–15 minutes; queue delays and cold-cache runs are measured separately. No tests are skipped to meet that target.
 
@@ -22,7 +22,7 @@ The final **CI passed** gate requires every build, shard, evidence comparison, n
 Reproduce an individual browser shard after building the preview:
 
 ```bash
-npx playwright test --shard=1/8 --workers=2 --reporter=list,blob
+npx playwright test --project=chromium --shard=1/6 --workers=2 --reporter=list,blob
 # Collect blob-report/*.zip from all eight runners before merging:
 npx playwright merge-reports --reporter=html blob-report
 ```

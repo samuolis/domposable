@@ -122,14 +122,22 @@ jobs:
           retention-days: 1
           if-no-files-found: error
   browser:
-    name: Browser tests (${{ matrix.shard }}/8)
+    name: Browser tests (${{ matrix.browser }} ${{ matrix.shard }}/${{ matrix.total }})
     needs: preview
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+        include:
+          - {browser: chromium, shard: 1, total: 6}
+          - {browser: chromium, shard: 2, total: 6}
+          - {browser: chromium, shard: 3, total: 6}
+          - {browser: chromium, shard: 4, total: 6}
+          - {browser: chromium, shard: 5, total: 6}
+          - {browser: chromium, shard: 6, total: 6}
+          - {browser: firefox, shard: 1, total: 1}
+          - {browser: webkit, shard: 1, total: 1}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
@@ -143,14 +151,16 @@ jobs:
           name: browser-preview
           path: build/browser-preview
       - run: npx playwright install --with-deps chromium firefox webkit
-      - name: Run every browser test across eight shards
+      - name: Run the assigned browser shard
         env:
+          BROWSER: ${{ matrix.browser }}
           SHARD: ${{ matrix.shard }}
-        run: npx playwright test --shard="$SHARD/8" --workers=2 --reporter=list,github,blob
+          SHARDS: ${{ matrix.total }}
+        run: npx playwright test --project="$BROWSER" --shard="$SHARD/$SHARDS" --workers=2 --reporter=list,github,blob
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
-          name: browser-shard-${{ matrix.shard }}
+          name: browser-shard-${{ matrix.browser }}-${{ matrix.shard }}
           path: |
             blob-report/
             test-results/
