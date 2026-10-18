@@ -402,7 +402,11 @@ internal fun NativeDataTable(
         val naturalWidth = (props.columns.size.coerceAtLeast(1) * 160).dp
         val tableWidth = if (props.allowHorizontalOverflow) maxOf(maxWidth, naturalWidth) else maxWidth
         val rowModifier =
-            if (props.allowHorizontalOverflow) Modifier.fillMaxWidth().horizontalScroll(scroll) else Modifier.fillMaxWidth()
+            if (props.allowHorizontalOverflow) {
+                Modifier.fillMaxWidth().horizontalScroll(scroll)
+            } else {
+                Modifier.fillMaxWidth()
+            }
         Row(rowModifier) {
             Column(
                 Modifier.width(tableWidth).semantics {

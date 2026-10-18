@@ -126,7 +126,8 @@ class NativeDataDisplaysTest {
             }
         }
 
-        compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
+        compose
+            .onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
             .assertCountEquals(0)
         compose.onNodeWithText("Row 19").performScrollTo().assertIsDisplayed()
     }
@@ -144,7 +145,8 @@ class NativeDataDisplaysTest {
             }
         }
 
-        compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
+        compose
+            .onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
             .assertCountEquals(1)
     }
 
