@@ -191,6 +191,17 @@ data class DomposableTableAppearance(
     val compactBreakpoint: DomposableLength = 520.dp,
     /** Minimum width reserved for each compact row's column label. */
     val compactLabelMinWidth: DomposableLength = 96.dp,
+    /**
+     * Optional space between table rows, including the header row. When null, each renderer keeps its current
+     * size-preset spacing. In Compact mode this is the space between visible table rows, including a rendered
+     * header, and between card rows.
+     */
+    val rowSpacing: DomposableLength? = null,
+    /**
+     * Optional space between table columns. When null, each renderer keeps its current spacing. In Compact mode
+     * this is the space between a row card's label and value.
+     */
+    val columnSpacing: DomposableLength? = null,
 )
 
 @Immutable

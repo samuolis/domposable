@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableInteractionAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableShape
@@ -190,6 +191,52 @@ class NativeDataDisplaysTest {
             )
         selectedRow.assertIsDisplayed().assertHasClickAction().performTouchInput { click(center) }
         compose.runOnIdle { assertEquals(listOf("one"), activatedRows.value) }
+    }
+
+    @Test
+    fun dataTableAppearanceSpacingOverridesPresetGapsWithoutOuterSpacing() {
+        val zeroPadding = DomposableInsets(DomposableLength(0f))
+        val appearance = mutableStateOf(DomposableTableAppearance(cellPadding = zeroPadding))
+        compose.setContent {
+            DomposableTheme(components = rememberDomposableMaterialComponents()) {
+                DomposableDataTable(
+                    columns = listOf(
+                        DomposableDataTableColumn("first", "First"),
+                        DomposableDataTableColumn("second", "Second"),
+                    ),
+                    rows = listOf(DomposableDataTableRow("one"), DomposableDataTableRow("two")),
+                    modifier = DomposableModifier.width(DomposableLength(200f)),
+                    appearance = appearance.value,
+                ) { row, column ->
+                    Text(
+                        row.key,
+                        Modifier.testTag("${row.key}-${column.key}"),
+                    )
+                }
+            }
+        }
+
+        fun bounds(tag: String) = compose.onNodeWithTag(tag).getUnclippedBoundsInRoot()
+
+        val defaultFirstColumn = bounds("one-first")
+        val defaultSecondColumn = bounds("one-second")
+        val defaultNextRow = bounds("two-first")
+        assertEquals(100f, (defaultSecondColumn.left - defaultFirstColumn.left).value, 1f)
+        assertEquals(8f, (defaultNextRow.top - defaultFirstColumn.bottom).value, 1f)
+
+        compose.runOnIdle {
+            appearance.value =
+                DomposableTableAppearance(
+                    cellPadding = zeroPadding,
+                    rowSpacing = DomposableLength(0f),
+                    columnSpacing = DomposableLength(8f),
+                )
+        }
+        val spacedFirstColumn = bounds("one-first")
+        val spacedSecondColumn = bounds("one-second")
+        val spacedNextRow = bounds("two-first")
+        assertEquals(104f, (spacedSecondColumn.left - spacedFirstColumn.left).value, 1f)
+        assertEquals(0f, (spacedNextRow.top - spacedFirstColumn.bottom).value, 1f)
     }
 
     @Test

@@ -412,7 +412,8 @@ internal fun NativeDataTable(
                 Modifier.width(tableWidth).semantics {
                     collectionInfo = CollectionInfo(props.rows.size + 1, props.columns.size)
                 },
-                verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
+                verticalArrangement =
+                    Arrangement.spacedBy(appearance.rowSpacing?.value?.dp ?: props.sizePreset.nativeGap()),
             ) {
                 Row(
                     Modifier
@@ -423,6 +424,8 @@ internal fun NativeDataTable(
                             collectionItemInfo = CollectionItemInfo(0, 1, 0, props.columns.size)
                         },
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement =
+                        Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
                 ) {
                     props.columns.forEach { column ->
                         key(column.key) {
@@ -674,7 +677,12 @@ internal fun NativeDataTable(
                                         compactCells()
                                     }
                                 } else {
-                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement =
+                            Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
                                         props.columns.forEach { column ->
                                             NativeDataTableCell(
                                                 props,
@@ -732,7 +740,12 @@ private fun NativeDataTableCell(
                 contentDescription = column.accessibleLabel
             }
     if (compact) {
-        Row(cellModifier, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            cellModifier,
+            horizontalArrangement =
+                Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 column.label,
                 Modifier.weight(1f).widthIn(min = appearance.compactLabelMinWidth.value.dp),
