@@ -839,6 +839,7 @@ internal fun NativeChip(
     val disabledContent = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified
     val disabledContainer = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified
     val minInteractive = appearance.minimumInteractiveSize?.value?.dp ?: 48.dp
+    val horizontalArrangement = appearance.chipHorizontalArrangement(props.variant)
     val chipModifier =
         modifier
             .toComposeModifier()
@@ -927,7 +928,7 @@ internal fun NativeChip(
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: FilterChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 } else {
@@ -961,7 +962,7 @@ internal fun NativeChip(
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: FilterChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 }
@@ -993,7 +994,7 @@ internal fun NativeChip(
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: AssistChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 } else {
@@ -1021,7 +1022,7 @@ internal fun NativeChip(
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: AssistChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 }
@@ -1050,7 +1051,7 @@ internal fun NativeChip(
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: SuggestionChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 } else {
@@ -1075,7 +1076,7 @@ internal fun NativeChip(
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: SuggestionChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 }
@@ -1117,9 +1118,48 @@ internal fun NativeChip(
                                 hasLeadingIcon = leading != null,
                                 hasTrailingIcon = trailing != null,
                             ),
-                    horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                    horizontalArrangement = horizontalArrangement,
                     interactionSource = interaction,
                 )
+            }
+        }
+    }
+}
+
+private fun DomposableItemAppearance.chipHorizontalArrangement(
+    variant: DomposableChipVariant,
+): Arrangement.Horizontal {
+    val spacing = contentSpacing?.value?.dp
+    return when (variant) {
+        DomposableChipVariant.Assist -> {
+            if (spacing == null) {
+                AssistChipDefaults.horizontalArrangement()
+            } else {
+                AssistChipDefaults.horizontalArrangement(spacing)
+            }
+        }
+
+        DomposableChipVariant.Filter -> {
+            if (spacing == null) {
+                FilterChipDefaults.horizontalArrangement()
+            } else {
+                FilterChipDefaults.horizontalArrangement(spacing)
+            }
+        }
+
+        DomposableChipVariant.Suggestion -> {
+            if (spacing == null) {
+                SuggestionChipDefaults.horizontalArrangement()
+            } else {
+                SuggestionChipDefaults.horizontalArrangement(spacing)
+            }
+        }
+
+        DomposableChipVariant.Input -> {
+            if (spacing == null) {
+                InputChipDefaults.horizontalArrangement()
+            } else {
+                InputChipDefaults.horizontalArrangement(spacing)
             }
         }
     }

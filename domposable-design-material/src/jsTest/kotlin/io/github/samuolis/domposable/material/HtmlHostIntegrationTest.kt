@@ -53,6 +53,41 @@ import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
     @Test
+    fun chipIconSpacingUsesMaterialDefaultsAndHonorsOverrides() {
+        for (touchSize in listOf(0, 48)) {
+            for (spacing in listOf(null, 12)) {
+                withHost(content = {
+                    DomposableChip(
+                        "Label",
+                        {},
+                        appearance =
+                            DomposableItemAppearance(
+                                minimumInteractiveSize = touchSize.dp,
+                                contentSpacing = spacing?.dp,
+                            ),
+                        leadingIcon = { DomposableText("L") },
+                        trailingIcon = { DomposableText("R") },
+                    )
+                }) { root ->
+                    val surface = root.querySelector(".d-chip-surface") as HTMLElement
+                    val label = surface.querySelector(".d-chip-label") as HTMLElement
+                    val leading = surface.firstElementChild as HTMLElement
+                    val trailing = surface.lastElementChild as HTMLElement
+                    val expected = (spacing ?: 8).toDouble()
+                    val labelBounds = label.getBoundingClientRect()
+                    assertEquals("inline-flex", window.getComputedStyle(surface).display)
+                    assertTrue(
+                        abs(labelBounds.left - leading.getBoundingClientRect().right - expected) < 0.1,
+                    )
+                    assertTrue(
+                        abs(trailing.getBoundingClientRect().left - labelBounds.right - expected) < 0.1,
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
     fun chipTextLimitsApplyToItsLabelWithoutClippingTheTouchTarget() {
         for (selected in listOf(false, true)) {
             withHost(content = {
