@@ -1336,6 +1336,7 @@ public final class io/github/samuolis/domposable/foundation/DomposableTextOverfl
 
 public final class io/github/samuolis/domposable/foundation/DomposableTextStyle : java/lang/Enum {
 	public static final field Body Lio/github/samuolis/domposable/foundation/DomposableTextStyle;
+	public static final field Inherit Lio/github/samuolis/domposable/foundation/DomposableTextStyle;
 	public static final field Label Lio/github/samuolis/domposable/foundation/DomposableTextStyle;
 	public static final field Title Lio/github/samuolis/domposable/foundation/DomposableTextStyle;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;

@@ -24,6 +24,48 @@ test('catalog menu has an opaque surface above the app header and restores focus
   await trigger.click();
   const menu = page.getByRole('menu');
   await expect(menu).toBeVisible();
+  const richItem = menu.getByRole('menuitem', { name: /Example action/ });
+  await expect(richItem).toContainText('★ Example action');
+  const placement = await menu.evaluate(element => {
+    const menuBounds = element.getBoundingClientRect();
+    const anchorBounds = document.querySelector('.d-menu-anchor button')!.getBoundingClientRect();
+    return {
+      left: menuBounds.left,
+      top: menuBounds.top,
+      right: menuBounds.right,
+      bottom: menuBounds.bottom,
+      anchorLeft: anchorBounds.left,
+      anchorRight: anchorBounds.right,
+      anchorTop: anchorBounds.top,
+      anchorBottom: anchorBounds.bottom,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  expect(placement.left).toBeGreaterThanOrEqual(8);
+  expect(placement.top).toBeGreaterThanOrEqual(8);
+  expect(placement.right).toBeLessThanOrEqual(placement.viewportWidth - 8);
+  expect(placement.bottom).toBeLessThanOrEqual(placement.viewportHeight - 8);
+  expect(placement.left).toBeLessThan(placement.anchorRight);
+  expect(placement.right).toBeGreaterThan(placement.anchorLeft);
+  expect(placement.bottom <= placement.anchorTop || placement.top >= placement.anchorBottom).toBe(true);
+  const reposition = await menu.evaluate(element => {
+    const before = element.getBoundingClientRect().top;
+    const anchor = document.querySelector('.d-menu-anchor') as HTMLElement;
+    anchor.style.transform = 'translateY(24px)';
+    window.dispatchEvent(new Event('scroll'));
+    const after = element.getBoundingClientRect().top;
+    anchor.style.transform = '';
+    window.dispatchEvent(new Event('scroll'));
+    return after - before;
+  });
+  expect(reposition).toBeGreaterThan(12);
+  await page.setViewportSize({ width: 320, height: 480 });
+  await expect.poll(() => menu.evaluate(element => {
+    const bounds = element.getBoundingClientRect();
+    return bounds.left >= 8 && bounds.top >= 8 && bounds.right <= innerWidth - 8 && bounds.bottom <= innerHeight - 8;
+  })).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
   const surface = await menu.evaluate(element => {
     const bounds = element.getBoundingClientRect();
     return {
@@ -40,16 +82,32 @@ test('catalog menu has an opaque surface above the app header and restores focus
   await trigger.click();
   await expect(menu).toBeVisible();
   await expect(menu.getByRole('menuitem').first()).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(menu.getByRole('menuitem').last()).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(menu.getByRole('menuitem').first()).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toHaveCount(0);
   await expect(trigger).toBeFocused();
+});
+
+test('action chips remain actions while filter chips expose their controlled selection', async ({ page }) => {
+  await page.goto('/#/material/compare/light/selection');
+  for (const variant of ['assist', 'suggestion']) {
+    const chip = page.locator(`.d-chip-${variant}`).first();
+    await expect(chip).toBeVisible();
+    await expect(chip).not.toHaveAttribute('aria-pressed', /.+/);
+    await chip.click();
+    await expect(chip).not.toHaveAttribute('aria-pressed', /.+/);
+  }
+  await expect(page.locator('.d-chip-filter').first()).toHaveAttribute('aria-pressed', /^(true|false)$/);
 });
 
 for (const theme of ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-light', 'overrides-dark', 'expressive-light', 'expressive-dark']) {
   test(`chip interaction paint stays inside its visual surface in ${theme}`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/#/material/compare/${theme}/selection`);
-    const chip = page.locator('.d-chip').first();
+    const chip = page.locator('.d-chip-filter').first();
     await expect(chip).toBeVisible();
     for (const selected of ['false', 'true']) {
       if (await chip.getAttribute('aria-pressed') !== selected) await chip.click();
@@ -84,7 +142,7 @@ for (const theme of ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-li
 test('forced colors retain chip selection and a visible keyboard focus ring without painting its touch target', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   await page.goto('/#/material/compare/light/selection');
-  const chip = page.locator('.d-chip').first();
+  const chip = page.locator('.d-chip-filter').first();
   await expect(chip).toBeVisible();
   if (await chip.getAttribute('aria-pressed') !== 'true') await chip.click();
   await page.keyboard.press('Tab');

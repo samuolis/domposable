@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import io.github.samuolis.domposable.foundation.DomposableFontWeight
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.ui.DomposableDisclosureProps
@@ -181,6 +182,7 @@ internal fun HtmlDomposableRichHtml(
             DomposableTextStyle.Body -> tokens.typography.bodySize
             DomposableTextStyle.Title -> tokens.typography.titleSize
             DomposableTextStyle.Label -> tokens.typography.labelSize
+            DomposableTextStyle.Inherit -> null
         }
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
@@ -188,9 +190,11 @@ internal fun HtmlDomposableRichHtml(
             classes("d-rich-html", "d-text", "d-text-${props.style.name.lowercase()}")
             attr("data-selectable", effectiveSelectable.toString())
             style {
-                property("font-family", tokens.typography.fontFamily)
-                property("font-size", "${fontSize}px")
-                property("line-height", tokens.typography.lineHeight.toString())
+                if (props.style != DomposableTextStyle.Inherit) {
+                    property("font-family", tokens.typography.fontFamily)
+                    fontSize?.let { property("font-size", "${it}px") }
+                    property("line-height", tokens.typography.lineHeight.toString())
+                }
                 property("user-select", if (effectiveSelectable) "text" else "none")
                 props.color?.let { property("color", it.css()) }
                 applyCatalogTextAppearance(appearance)
@@ -287,8 +291,15 @@ internal fun HtmlDomposableLink(
             DomposableTextStyle.Body -> tokens.typography.bodySize
             DomposableTextStyle.Title -> tokens.typography.titleSize
             DomposableTextStyle.Label -> tokens.typography.labelSize
+            DomposableTextStyle.Inherit -> null
         }
-    val lineHeight = appearance?.lineHeight ?: fontSize * tokens.typography.lineHeight
+    val lineHeight =
+        appearance?.lineHeight
+            ?: if (props.textStyle == DomposableTextStyle.Inherit) {
+                null
+            } else {
+                fontSize?.times(tokens.typography.lineHeight)
+            }
     DomposableHtmlModifiers(modifier) {
         A(href = props.href, attrs = {
             domposableAttributes(modifier)
@@ -308,9 +319,11 @@ internal fun HtmlDomposableLink(
                 }
             }
             style {
-                property("font-family", tokens.typography.fontFamily)
-                property("font-size", "${fontSize}px")
-                property("line-height", "${lineHeight}px")
+                if (props.textStyle != DomposableTextStyle.Inherit) {
+                    property("font-family", tokens.typography.fontFamily)
+                }
+                fontSize?.let { property("font-size", "${it}px") }
+                lineHeight?.let { property("line-height", "${it}px") }
                 appearance?.fontWeight?.let { property("font-weight", it.cssValue()) }
                 when (appearance?.alignment) {
                     DomposableTextAlignment.Start -> property("text-align", "start")

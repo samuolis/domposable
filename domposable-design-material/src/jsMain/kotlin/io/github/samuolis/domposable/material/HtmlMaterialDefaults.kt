@@ -16,12 +16,13 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-button-toggle.d-button-filled[aria-pressed=true]{background:var(--d-primary);color:var(--d-on-primary)}
 .d-button-toggle.d-button-outlined[aria-pressed=true]{background:var(--d-inverse-surface);color:var(--d-inverse-on-surface)}
 .d-chip:not(.d-item-hittarget){padding:var(--d-item-padding,3px 7px);background:var(--d-item-container,transparent);border-color:var(--d-item-border,var(--d-outline-variant));color:var(--d-item-content,var(--d-on-surface-variant))}
-.d-chip:not(.d-item-hittarget)[aria-pressed=true],.d-chip.d-item-hittarget[aria-pressed=true] .d-chip-surface{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container));border-color:var(--d-item-selected-border,transparent)}
-.d-chip-elevated:not(.d-item-hittarget):not([aria-pressed=true]){background:var(--d-item-container,var(--d-surface-container-low));border-color:var(--d-item-border,transparent)}
+.d-chip:not(.d-item-hittarget)[data-selected=true],.d-chip.d-item-hittarget[data-selected=true] .d-chip-surface{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container));border-color:var(--d-item-selected-border,transparent)}
+.d-chip-elevated:not(.d-item-hittarget):not([data-selected=true]){background:var(--d-item-container,var(--d-surface-container-low));border-color:var(--d-item-border,transparent)}
 .d-chip.d-item-hittarget .d-chip-surface{padding:var(--d-item-padding,3px 7px);background:var(--d-item-container,transparent);border-color:var(--d-item-border,var(--d-outline-variant));color:var(--d-item-content,var(--d-on-surface-variant))}
-.d-chip-elevated.d-item-hittarget:not([aria-pressed=true]) .d-chip-surface{background:var(--d-item-container,var(--d-surface-container-low));border-color:var(--d-item-border,transparent)}
+.d-chip-elevated.d-item-hittarget:not([data-selected=true]) .d-chip-surface{background:var(--d-item-container,var(--d-surface-container-low));border-color:var(--d-item-border,transparent)}
 .d-card{padding:0}
 .d-chip-label{gap:8px;min-width:0}.d-chip-icon{flex:none}
+.d-chip[data-input-padding]:not(.d-item-hittarget),.d-chip[data-input-padding].d-item-hittarget .d-chip-surface{padding-inline:var(--d-chip-padding-start) var(--d-chip-padding-end)}
 :root .d-segment-surface{border-radius:0;min-height:var(--d-item-min-height,40px);padding:var(--d-item-padding,9px 11px)}
 :root .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,999px));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,999px))}
 :root .d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,999px));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,999px))}

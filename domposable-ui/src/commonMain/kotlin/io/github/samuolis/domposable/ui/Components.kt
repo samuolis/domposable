@@ -26,6 +26,7 @@ import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
+import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
 import io.github.samuolis.domposable.foundation.DomposableProgressVariant
@@ -84,6 +85,7 @@ data class DomposableMenuItem(
     val trailingContent: (@Composable () -> Unit)? = null,
     val supportingText: (@Composable () -> Unit)? = null,
     val appearance: DomposableItemAppearance? = null,
+    val textContent: (@Composable () -> Unit)? = null,
 ) {
     init {
         require(checked == null || selected == null) { "A menu item is checkable or selectable" }
@@ -95,10 +97,14 @@ data class DomposableThemeProps(
     val tokens: DomposableTokens,
 )
 
+/** Main-axis placement for children in a row, column, or wrapping row. */
+enum class DomposableArrangement { Start, Center, End, SpaceBetween, SpaceAround, SpaceEvenly }
+
 @DomposableComponent("Column")
 data class DomposableColumnProps(
     val gap: DomposableLength = 0.dp,
     val alignment: DomposableAlignment = DomposableAlignment.Start,
+    val arrangement: DomposableArrangement = DomposableArrangement.Start,
 )
 
 @DomposableComponent("Row")
@@ -106,11 +112,15 @@ data class DomposableRowProps(
     val gap: DomposableLength = 0.dp,
     val alignment: DomposableAlignment = DomposableAlignment.Start,
     val stretch: Boolean = false,
+    val arrangement: DomposableArrangement = DomposableArrangement.Start,
 )
 
 @DomposableComponent("FlowRow")
 data class DomposableFlowRowProps(
     val gap: DomposableLength = 8.dp,
+    val arrangement: DomposableArrangement = DomposableArrangement.Start,
+    val alignment: DomposableAlignment = DomposableAlignment.Start,
+    val rowGap: DomposableLength = gap,
 )
 
 /** A browser anchor on HTML; opens a URI with the platform handler on Compose UI. */
@@ -420,6 +430,9 @@ data class DomposableMenuProps(
     val onDismiss: () -> Unit,
     val items: List<DomposableMenuItem>,
     val appearance: DomposableSurfaceAppearance? = null,
+    val anchor: (@Composable () -> Unit)? = null,
+    val contentSpacing: DomposableLength = 0.dp,
+    val anchorOffset: DomposableOffset = DomposableOffset(),
 )
 
 @DomposableComponent("Dialog")
@@ -532,6 +545,14 @@ fun DomposableTheme(
     content: @Composable () -> Unit,
 ) = DomposableColumn(DomposableColumnProps(gap, alignment), modifier, content)
 
+@Composable fun DomposableColumn(
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
+    arrangement: DomposableArrangement,
+    content: @Composable () -> Unit,
+) = DomposableColumn(DomposableColumnProps(gap, alignment, arrangement), modifier, content)
+
 @Composable fun DomposableRow(
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 0.dp,
@@ -543,15 +564,41 @@ fun DomposableTheme(
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 0.dp,
     alignment: DomposableAlignment = DomposableAlignment.Start,
+    arrangement: DomposableArrangement,
+    content: @Composable () -> Unit,
+) = DomposableRow(DomposableRowProps(gap, alignment, arrangement = arrangement), modifier, content)
+
+@Composable fun DomposableRow(
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
     stretch: Boolean,
     content: @Composable () -> Unit,
 ) = DomposableRow(DomposableRowProps(gap, alignment, stretch), modifier, content)
+
+@Composable fun DomposableRow(
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 0.dp,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
+    stretch: Boolean,
+    arrangement: DomposableArrangement,
+    content: @Composable () -> Unit,
+) = DomposableRow(DomposableRowProps(gap, alignment, stretch, arrangement), modifier, content)
 
 @Composable fun DomposableFlowRow(
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 8.dp,
     content: @Composable () -> Unit,
 ) = DomposableFlowRow(DomposableFlowRowProps(gap), modifier, content)
+
+@Composable fun DomposableFlowRow(
+    modifier: DomposableModifier = DomposableModifier,
+    gap: DomposableLength = 8.dp,
+    arrangement: DomposableArrangement,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
+    rowGap: DomposableLength = gap,
+    content: @Composable () -> Unit,
+) = DomposableFlowRow(DomposableFlowRowProps(gap, arrangement, alignment, rowGap), modifier, content)
 
 @Composable fun DomposableLink(
     label: String,

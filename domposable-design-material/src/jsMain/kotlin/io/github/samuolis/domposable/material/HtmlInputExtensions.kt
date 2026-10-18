@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableLabelProps
 import io.github.samuolis.domposable.ui.DomposableMenuGroupProps
@@ -27,7 +26,6 @@ import org.jetbrains.compose.web.dom.TagElement
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLElement
 
-internal val LocalHtmlMenuDismiss = staticCompositionLocalOf<(() -> Unit)?> { null }
 private var nextExtensionId = 0
 
 @Composable
@@ -192,7 +190,6 @@ internal fun HtmlDropdownMenuItem(
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.dropdownMenuItem
     val enabled = props.enabled && domposableFormEnabled()
-    val dismiss = LocalHtmlMenuDismiss.current
     val role =
         when {
             props.checked != null -> "menuitemcheckbox"
@@ -212,7 +209,6 @@ internal fun HtmlDropdownMenuItem(
             onClick {
                 if (enabled) {
                     props.onClick()
-                    dismiss?.invoke()
                 }
             }
         }) {
@@ -225,7 +221,7 @@ internal fun HtmlDropdownMenuItem(
                 }) { it() }
             }
             Div(attrs = { classes("d-dropdown-menu-labels") }) {
-                Span { Text(props.label) }
+                Span { props.textContent?.invoke() ?: Text(props.label) }
                 props.supportingText?.let { Span(attrs = { classes("d-dropdown-menu-supporting") }) { it() } }
             }
             props.trailingContent?.let { Div(attrs = { classes("d-dropdown-menu-trailing") }) { it() } }

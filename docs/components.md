@@ -57,6 +57,32 @@ Select values must be unique and include the current value. Use an explicit plac
 
 Both previews run `ExtendedComponentCatalog()` from `commonMain`. The provider changes the controls' structure; the selected delivery, address, price range and callbacks come from the same feature. The [HTML/Wasm comparison](compare.md) lets you change the actual viewport width.
 
+## Layout arrangements
+
+Rows and columns keep their current start placement by default. Set `arrangement` to place children along the main axis. `gap` is used by `Start`, `Center` and `End`; the `SpaceBetween`, `SpaceAround` and `SpaceEvenly` arrangements distribute the available space between children:
+
+```kotlin
+DomposableRow(
+    modifier = DomposableModifier.fillMaxWidth(),
+    gap = 12.dp,
+    arrangement = DomposableArrangement.SpaceBetween,
+) {
+    DomposableText("Order 1042")
+    DomposableText("€38.00")
+}
+
+DomposableColumn(
+    modifier = DomposableModifier.height(240.dp),
+    gap = 8.dp,
+    arrangement = DomposableArrangement.End,
+) {
+    DomposableText("Optional details")
+    DomposableText("Placed at 14:30")
+}
+```
+
+`DomposableFlowRow` also accepts a main-axis arrangement, `alignment` for items within each line, and `rowGap` between lines. Its `rowGap` defaults to `gap`. Items align to the top by default on both renderers; HTML no longer stretches shorter items to the line height. Use these shared values instead of adding provider-specific layout CSS to feature code.
+
 ## Actions and help
 
 ```kotlin
@@ -89,6 +115,12 @@ DomposableChip(
 Text limits apply to the label, preserving the control's touch target. Use
 `selectedTextAppearance` for a different selected label style; item content
 colors also configure its icons.
+
+Filter and Input chips expose selection to accessibility services. Assist and
+Suggestion chips are actions, including when used to open a popup; they do not
+become toggle buttons because their appearance changes. Input chip padding
+adapts to its leading and trailing icon slots. An explicit `contentPadding`
+overrides those defaults.
 
 Tooltips provide supplemental descriptions. The control still needs its own accessible label. HTML shows help on hover or keyboard focus and supports Escape; native delegates hover/long-press behavior to Material. Link emits a browser anchor or opens the native URI handler. Navigation items with `href` preserve browser new-tab behavior while ordinary clicks call `onSelect`.
 

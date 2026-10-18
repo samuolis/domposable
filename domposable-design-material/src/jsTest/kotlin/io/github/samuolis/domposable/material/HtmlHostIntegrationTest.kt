@@ -2,8 +2,10 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTokens
@@ -15,10 +17,12 @@ import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableChip
 import io.github.samuolis.domposable.ui.DomposableDialog
+import io.github.samuolis.domposable.ui.DomposableDropdownMenuItem
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableIconButtonProps
 import io.github.samuolis.domposable.ui.DomposableMenu
 import io.github.samuolis.domposable.ui.DomposableMenuItem
+import io.github.samuolis.domposable.ui.DomposableMenuProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableModifierElement
 import io.github.samuolis.domposable.ui.DomposableSelect
@@ -32,6 +36,9 @@ import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.htmlAttributes
+import io.github.samuolis.domposable.ui.htmlMenuAnchor
+import io.github.samuolis.domposable.ui.minWidth
+import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.pointerPassthrough
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.weight
@@ -41,6 +48,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
@@ -52,6 +60,59 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
+    @Test
+    fun actionChipsKeepPopupSemanticsWithoutBecomingToggleButtons() {
+        for (variant in DomposableChipVariant.entries) {
+            withHost(content = {
+                DomposableChip(
+                    "Open options",
+                    {},
+                    modifier =
+                        DomposableModifier.htmlAttributes {
+                            attr("aria-haspopup", "dialog")
+                            attr("aria-expanded", "true")
+                        },
+                    variant = variant,
+                    selected = true,
+                )
+            }) { root ->
+                val chip = root.querySelector(".d-chip") as HTMLElement
+                val selectable = variant == DomposableChipVariant.Filter || variant == DomposableChipVariant.Input
+                assertEquals(if (selectable) "true" else null, chip.getAttribute("aria-pressed"))
+                assertEquals("true", chip.getAttribute("data-selected"))
+                assertEquals("dialog", chip.getAttribute("aria-haspopup"))
+                assertEquals("true", chip.getAttribute("aria-expanded"))
+            }
+        }
+    }
+
+    @Test
+    fun inputChipPaddingTracksItsIconSlotsLikeMaterial() {
+        for (touchSize in listOf(0, 48)) {
+            for (leading in listOf(false, true)) {
+                for (trailing in listOf(false, true)) {
+                    withHost(content = {
+                        DomposableChip(
+                            "Label",
+                            {},
+                            variant = DomposableChipVariant.Input,
+                            appearance = DomposableItemAppearance(minimumInteractiveSize = touchSize.dp),
+                            leadingIcon = if (leading) ({ DomposableText("L") }) else null,
+                            trailingIcon = if (trailing) ({ DomposableText("R") }) else null,
+                        )
+                    }) { root ->
+                        val chip = root.querySelector(".d-chip") as HTMLElement
+                        val surface = chip.querySelector(".d-chip-surface") as HTMLElement
+                        val style = window.getComputedStyle(if (touchSize == 0) chip else surface)
+                        // The CSS border occupies one pixel of Material's internal 4/8 dp padding.
+                        assertEquals(if (leading) "7px" else "3px", style.paddingLeft)
+                        assertEquals(if (trailing) "7px" else "3px", style.paddingRight)
+                    }
+                }
+            }
+        }
+    }
+
     @Test
     fun chipIconSpacingUsesMaterialDefaultsAndHonorsOverrides() {
         for (touchSize in listOf(0, 48)) {
@@ -187,31 +248,6 @@ class HtmlHostIntegrationTest {
             }
         }
     }
-
-    @Test
-    fun menuSurfaceIsOpaqueAndAboveHostStackingContexts() =
-        withHost(content = {
-            Div(attrs = {
-                style {
-                    property("position", "fixed")
-                    property("inset", "0 0 auto")
-                    property("height", "160px")
-                    property("z-index", "9999")
-                    property("background", "red")
-                }
-            }) { Text("Application header") }
-            DomposableBox(DomposableModifier.zIndex(0f)) {
-                DomposableMenu(true, {}, listOf(DomposableMenuItem("Action", {})))
-            }
-        }) { root ->
-            val menu = root.querySelector("[role=menu]") as HTMLElement
-            assertEquals(menu.querySelector("[role=menuitem]"), document.activeElement, "Menu focus must be immediate")
-            val background = window.getComputedStyle(menu).backgroundColor
-            assertTrue(background != "transparent" && background != "rgba(0, 0, 0, 0)", "Menus need a surface")
-            val bounds = menu.getBoundingClientRect()
-            val hit = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2)
-            assertTrue(menu.contains(hit), "Host headers must not paint above a menu")
-        }
 
     @Test
     fun chipTouchTargetDoesNotPaintASecondSelectedSurface() {
@@ -492,7 +528,7 @@ private fun layoutTrace(element: HTMLElement): String =
             )}; align=${style.alignItems}; ${it.getAttribute("style")}"
     }
 
-private fun withHost(
+internal fun withHost(
     content: @Composable () -> Unit,
     verify: (HTMLElement) -> Unit,
 ) {

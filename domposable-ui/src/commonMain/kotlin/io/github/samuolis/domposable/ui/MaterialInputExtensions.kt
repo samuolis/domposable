@@ -103,3 +103,33 @@ fun DomposableDropdownMenuItem(
     ),
     modifier,
 )
+
+@Composable
+fun DomposableDropdownMenuItem(
+    textContent: @Composable () -> Unit,
+    onClick: () -> Unit,
+    modifier: DomposableModifier = DomposableModifier,
+    enabled: Boolean = true,
+    checked: Boolean? = null,
+    selected: Boolean? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    selectedIcon: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
+    supportingText: (@Composable () -> Unit)? = null,
+    appearance: DomposableItemAppearance? = null,
+) = DomposableDropdownMenuItem(
+    DomposableMenuItem(
+        "",
+        onClick,
+        enabled,
+        checked,
+        selected,
+        leadingIcon,
+        selectedIcon,
+        trailingContent,
+        supportingText,
+        appearance,
+        textContent,
+    ),
+    modifier,
+)

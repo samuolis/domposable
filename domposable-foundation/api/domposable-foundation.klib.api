@@ -330,6 +330,7 @@ final enum class io.github.samuolis.domposable.foundation/DomposableTextOverflow
 
 final enum class io.github.samuolis.domposable.foundation/DomposableTextStyle : kotlin/Enum<io.github.samuolis.domposable.foundation/DomposableTextStyle> { // io.github.samuolis.domposable.foundation/DomposableTextStyle|null[0]
     enum entry Body // io.github.samuolis.domposable.foundation/DomposableTextStyle.Body|null[0]
+    enum entry Inherit // io.github.samuolis.domposable.foundation/DomposableTextStyle.Inherit|null[0]
     enum entry Label // io.github.samuolis.domposable.foundation/DomposableTextStyle.Label|null[0]
     enum entry Title // io.github.samuolis.domposable.foundation/DomposableTextStyle.Title|null[0]
 

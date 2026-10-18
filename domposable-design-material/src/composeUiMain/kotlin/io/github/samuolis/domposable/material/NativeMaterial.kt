@@ -49,6 +49,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Label
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
@@ -107,6 +108,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -123,6 +125,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
+import io.github.samuolis.domposable.ui.DomposableArrangement
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableDataTableProps
 import io.github.samuolis.domposable.ui.DomposableLineChartProps
@@ -153,6 +156,26 @@ private fun DomposableAlignment.vertical() =
         DomposableAlignment.Start -> Alignment.Top
         DomposableAlignment.Center -> Alignment.CenterVertically
         DomposableAlignment.End -> Alignment.Bottom
+    }
+
+private fun DomposableArrangement.horizontal(gap: Dp): Arrangement.Horizontal =
+    when (this) {
+        DomposableArrangement.Start -> Arrangement.spacedBy(gap)
+        DomposableArrangement.Center -> Arrangement.spacedBy(gap, Alignment.CenterHorizontally)
+        DomposableArrangement.End -> Arrangement.spacedBy(gap, Alignment.End)
+        DomposableArrangement.SpaceBetween -> Arrangement.SpaceBetween
+        DomposableArrangement.SpaceAround -> Arrangement.SpaceAround
+        DomposableArrangement.SpaceEvenly -> Arrangement.SpaceEvenly
+    }
+
+private fun DomposableArrangement.vertical(gap: Dp): Arrangement.Vertical =
+    when (this) {
+        DomposableArrangement.Start -> Arrangement.spacedBy(gap)
+        DomposableArrangement.Center -> Arrangement.spacedBy(gap, Alignment.CenterVertically)
+        DomposableArrangement.End -> Arrangement.spacedBy(gap, Alignment.Bottom)
+        DomposableArrangement.SpaceBetween -> Arrangement.SpaceBetween
+        DomposableArrangement.SpaceAround -> Arrangement.SpaceAround
+        DomposableArrangement.SpaceEvenly -> Arrangement.SpaceEvenly
     }
 
 private fun DomposableAlignment.box() =
@@ -254,7 +277,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 ->
                 Column(
                     modifier.toComposeModifier(),
-                    verticalArrangement = Arrangement.spacedBy(props.gap.value.dp),
+                    verticalArrangement = props.arrangement.vertical(props.gap.value.dp),
                     horizontalAlignment = props.alignment.horizontal(),
                 ) {
                     ProvideDomposableColumnModifierScope { content() }
@@ -269,7 +292,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     modifier.toComposeModifier().let { if (props.stretch) it.fillMaxHeight() else it }
                 Row(
                     rowModifier,
-                    horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp),
+                    horizontalArrangement = props.arrangement.horizontal(props.gap.value.dp),
                     verticalAlignment = props.alignment.vertical(),
                 ) {
                     ProvideDomposableRowModifierScope { content() }
@@ -282,8 +305,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 ->
                 FlowRow(
                     modifier.toComposeModifier(),
-                    horizontalArrangement = Arrangement.spacedBy(props.gap.value.dp),
-                    verticalArrangement = Arrangement.spacedBy(props.gap.value.dp),
+                    horizontalArrangement = props.arrangement.horizontal(props.gap.value.dp),
+                    verticalArrangement = Arrangement.spacedBy(props.rowGap.value.dp),
+                    itemVerticalAlignment = props.alignment.vertical(),
                 ) {
                     ProvideDomposableRowModifierScope { content() }
                 }
@@ -381,6 +405,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
                         DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
                         DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
+                        DomposableTextStyle.Inherit -> LocalTextStyle.current
                     }
                 val style = appearance.nativeTextStyle(baseStyle)
                 val textModifier =
