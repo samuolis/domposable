@@ -407,7 +407,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         TagElement<HTMLElement>("h${props.headingLevel ?: 2}", applyAttrs = {
                             style { applyCatalogTextAppearance(DomposableTextAppearance(role = role)) }
                             domposableAttributes(modifier)
-                            classes(if (props.style == DomposableTextStyle.Inherit) "d-text" else "d-title")
+                            if (props.style == DomposableTextStyle.Inherit) {
+                                classes("d-text", "d-text-inherit")
+                            } else {
+                                classes("d-title")
+                            }
                             props.color?.let { style { property("color", it.css()) } }
                             applyAppearance()
                         }) { Text(props.text) }
@@ -424,6 +428,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     "d-text"
                                 },
                             )
+                            if (props.style == DomposableTextStyle.Inherit) classes("d-text-inherit")
                             props.color?.let { style { property("color", it.css()) } }
                             applyAppearance()
                         }) { Text(props.text) }
@@ -2194,7 +2199,7 @@ private const val MATERIAL_CSS = """
 .d-theme button{cursor:pointer}.d-theme button:disabled{cursor:default;opacity:.5}
 .d-theme :focus-visible{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
-.d-theme h1,.d-theme h2,.d-theme h3,.d-theme h4,.d-theme h5,.d-theme h6{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}
+.d-theme h1,.d-theme h2,.d-theme h3,.d-theme h4,.d-theme h5,.d-theme h6{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}:where(.d-text-inherit){font:inherit}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:9999px;min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
 .d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;align-items:center;justify-content:center}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
 @media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}
