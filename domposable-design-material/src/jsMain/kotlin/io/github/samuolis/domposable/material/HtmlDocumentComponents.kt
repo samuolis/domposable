@@ -294,7 +294,12 @@ internal fun HtmlDomposableLink(
             DomposableTextStyle.Inherit -> null
         }
     val lineHeight =
-        appearance?.lineHeight ?: fontSize?.times(tokens.typography.lineHeight)
+        appearance?.lineHeight
+            ?: if (props.textStyle == DomposableTextStyle.Inherit) {
+                null
+            } else {
+                fontSize?.times(tokens.typography.lineHeight)
+            }
     DomposableHtmlModifiers(modifier) {
         A(href = props.href, attrs = {
             domposableAttributes(modifier)

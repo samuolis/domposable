@@ -5,6 +5,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTypography
 import io.github.samuolis.domposable.foundation.DomposableTypographyRole
+import io.github.samuolis.domposable.ui.DomposableLink
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.htmlAttributes
@@ -87,6 +88,53 @@ class HtmlTypographyParityTest {
             root.style.setProperty("--host-weight", "500")
             assertComputedTypography(inherited, "16px", "24px", "500")
             assertComputedTypography(overridden, "22px", "27px", "700")
+        } finally {
+            composition.dispose()
+            styles.parentNode?.removeChild(styles)
+            root.parentNode?.removeChild(root)
+        }
+    }
+
+    @Test
+    fun inheritedLinkPartialFontOverrideKeepsHostLineHeight() {
+        val root = document.createElement("div") as HTMLElement
+        val styles = document.createElement("style")
+        styles.textContent = ".host-link-typography { font-size: 13px; line-height: 19px; font-weight: 300; }"
+        document.head!!.appendChild(styles)
+        document.body!!.appendChild(root)
+        val modifier = DomposableModifier.htmlAttributes { classes("host-link-typography") }
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableLink(
+                        label = "Partial font override",
+                        href = "#partial",
+                        modifier = modifier.testId("partial-link"),
+                        textStyle = DomposableTextStyle.Inherit,
+                        appearance = DomposableTextAppearance(fontSize = 22f),
+                    )
+                    DomposableLink(
+                        label = "Explicit line override",
+                        href = "#explicit",
+                        modifier = modifier.testId("explicit-link"),
+                        textStyle = DomposableTextStyle.Inherit,
+                        appearance = DomposableTextAppearance(fontSize = 22f, lineHeight = 27f),
+                    )
+                }
+            }
+        try {
+            assertComputedTypography(
+                root.querySelector("[data-testid=partial-link]") as HTMLElement,
+                "22px",
+                "19px",
+                "300",
+            )
+            assertComputedTypography(
+                root.querySelector("[data-testid=explicit-link]") as HTMLElement,
+                "22px",
+                "27px",
+                "300",
+            )
         } finally {
             composition.dispose()
             styles.parentNode?.removeChild(styles)
