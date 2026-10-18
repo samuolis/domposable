@@ -18,7 +18,42 @@ Feature code uses the same shared API in each case. A custom control may need pl
 
 Keep your component names, tokens and feature signatures. Start with [theme defaults and component overrides](#theme-defaults-and-component-overrides) behind those names, delegating ordinary control rendering to the library. Use your own native and HTML implementations at the design-system boundary when a custom component needs a different structure or behavior. A component does not need generated props, a registry or a renderer provider merely to call its own platform implementation.
 
-Shared design-system contract in `commonMain`:
+For standard controls, keep the implementation in `commonMain` too. The surrounding `DomposableMaterialTheme` supplies colors, typography, shapes and component styles to both renderers:
+
+```kotlin
+@Composable
+fun AppButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: DomposableModifier = DomposableModifier,
+) {
+    DomposableButton(onClick = onClick, modifier = modifier) {
+        DomposableText(label)
+    }
+}
+```
+
+Import `DomposableButton`, `DomposableText` and `DomposableModifier` from `io.github.samuolis.domposable.ui`. This wrapper needs no application CSS or platform actuals. Compose business components, such as a product summary or account form, from these shared controls in a business or feature module. Package and module ownership distinguish them from the design system; no runtime annotation or registration is required. Business content does not require a custom renderer.
+
+CSS still implements the library's HTML renderer. Application CSS is an extension for a specialized visual or behavior that the shared API cannot express, rather than a second implementation of every standard control. If the missing behavior is generally useful, prefer extending the shared component contract so both renderers can support it.
+
+For example, this application-owned account summary belongs in a business or feature package and composes the same controls on every target:
+
+```kotlin
+@Composable
+fun AccountSummary(name: String, onEdit: () -> Unit) {
+    DomposableCard(contentPadding = DomposableInsets(16.dp)) {
+        DomposableColumn(gap = 8.dp) {
+            DomposableText(name)
+            AppButton(label = "Edit account", onClick = onEdit)
+        }
+    }
+}
+```
+
+Import the component calls from `io.github.samuolis.domposable.ui` and `DomposableInsets`/`dp` from `io.github.samuolis.domposable.foundation`. Localize the action label in the application. No account-specific component or model is added to Domposable.
+
+The following separate native/HTML implementations are an escape hatch for a control that needs its own renderer. Its shared contract lives in `commonMain`:
 
 ```kotlin
 import androidx.compose.runtime.Composable

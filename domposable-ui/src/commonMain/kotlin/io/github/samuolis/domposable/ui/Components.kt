@@ -26,6 +26,7 @@ import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
+import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
 import io.github.samuolis.domposable.foundation.DomposableProgressVariant
@@ -84,6 +85,7 @@ data class DomposableMenuItem(
     val trailingContent: (@Composable () -> Unit)? = null,
     val supportingText: (@Composable () -> Unit)? = null,
     val appearance: DomposableItemAppearance? = null,
+    val textContent: (@Composable () -> Unit)? = null,
 ) {
     init {
         require(checked == null || selected == null) { "A menu item is checkable or selectable" }
@@ -117,7 +119,7 @@ data class DomposableRowProps(
 data class DomposableFlowRowProps(
     val gap: DomposableLength = 8.dp,
     val arrangement: DomposableArrangement = DomposableArrangement.Start,
-    val alignment: DomposableAlignment? = null,
+    val alignment: DomposableAlignment = DomposableAlignment.Start,
     val rowGap: DomposableLength = gap,
 )
 
@@ -428,6 +430,9 @@ data class DomposableMenuProps(
     val onDismiss: () -> Unit,
     val items: List<DomposableMenuItem>,
     val appearance: DomposableSurfaceAppearance? = null,
+    val anchor: (@Composable () -> Unit)? = null,
+    val contentSpacing: DomposableLength = 0.dp,
+    val anchorOffset: DomposableOffset = DomposableOffset(),
 )
 
 @DomposableComponent("Dialog")
@@ -590,7 +595,7 @@ fun DomposableTheme(
     modifier: DomposableModifier = DomposableModifier,
     gap: DomposableLength = 8.dp,
     arrangement: DomposableArrangement,
-    alignment: DomposableAlignment? = null,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
     rowGap: DomposableLength = gap,
     content: @Composable () -> Unit,
 ) = DomposableFlowRow(DomposableFlowRowProps(gap, arrangement, alignment, rowGap), modifier, content)

@@ -16,6 +16,10 @@ Migrate one feature first. Verify semantics, focus/keyboard behavior and measure
 
 The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing source calls keep their layout defaults after recompilation, but the added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
 
+## Anchored and rich-text menus
+
+The menu API now accepts an optional `anchor` slot, `contentSpacing`, and `anchorOffset`; menu items also accept optional `textContent`. These fields extend `DomposableMenuProps` and `DomposableMenuItem`, changing their data-class constructor and generated `copy` signatures. Existing source calls retain their defaults after recompilation; previously compiled consumers must rebuild. This is an intentional pre-1.0 binary break and requires a minor release. The rich text slot has a separate overload. HTML adapters that already own a trigger element can use the JS-only `htmlMenuAnchor` modifier to resolve an existing trigger from the rendered menu element without wrapping or moving that trigger.
+
 ## Direct calls and the expanded provider
 
 Feature code can replace `DomposableChip(DomposableChipProps(label, onClick, selected))` with `DomposableChip(label, onClick, selected = selected)`. Existing props overloads remain available. The demo and modular shop use direct calls throughout; props stay at custom renderer boundaries.

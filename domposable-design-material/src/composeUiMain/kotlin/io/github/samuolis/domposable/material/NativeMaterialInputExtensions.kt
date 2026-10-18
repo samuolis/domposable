@@ -440,7 +440,9 @@ internal fun NativeDropdownMenuItem(
         } else {
             appearance.textAppearance
         }
-    val text: @Composable () -> Unit = { StyledContent(textAppearance, { Text(props.label) }) }
+    val text: @Composable () -> Unit = {
+        StyledContent(textAppearance) { props.textContent?.invoke() ?: Text(props.label) }
+    }
     val supporting: (@Composable () -> Unit)? =
         props.supportingText?.let { slot ->
             { StyledContent(appearance.textAppearance, slot) }
@@ -517,7 +519,9 @@ internal fun NativeDropdownMenuItem(
                 enabled = enabled,
                 colors = menuColors,
                 interactionSource = interactionSource,
-                horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 0.dp),
+                horizontalArrangement =
+                    appearance.contentSpacing?.let { Arrangement.spacedBy(it.value.dp) }
+                        ?: MenuDefaults.DropdownMenuItemHorizontalArrangement,
                 contentPadding =
                     appearance.contentPadding?.nativePadding() ?: MenuDefaults.DropdownMenuSelectableItemContentPadding,
             )
@@ -537,7 +541,9 @@ internal fun NativeDropdownMenuItem(
                 enabled = enabled,
                 colors = menuColors,
                 interactionSource = interactionSource,
-                horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 0.dp),
+                horizontalArrangement =
+                    appearance.contentSpacing?.let { Arrangement.spacedBy(it.value.dp) }
+                        ?: MenuDefaults.DropdownMenuItemHorizontalArrangement,
                 contentPadding =
                     appearance.contentPadding?.nativePadding() ?: MenuDefaults.DropdownMenuSelectableItemContentPadding,
             )
@@ -555,6 +561,9 @@ internal fun NativeDropdownMenuItem(
                 enabled = enabled,
                 colors = regularMenuColors,
                 interactionSource = interactionSource,
+                horizontalArrangement =
+                    appearance.contentSpacing?.let { Arrangement.spacedBy(it.value.dp) }
+                        ?: MenuDefaults.DropdownMenuItemHorizontalArrangement,
                 contentPadding =
                     appearance.contentPadding?.nativePadding() ?: MenuDefaults.DropdownMenuItemContentPadding,
             )

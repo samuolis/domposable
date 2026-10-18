@@ -24,6 +24,48 @@ test('catalog menu has an opaque surface above the app header and restores focus
   await trigger.click();
   const menu = page.getByRole('menu');
   await expect(menu).toBeVisible();
+  const richItem = menu.getByRole('menuitem', { name: /Example action/ });
+  await expect(richItem).toContainText('★ Example action');
+  const placement = await menu.evaluate(element => {
+    const menuBounds = element.getBoundingClientRect();
+    const anchorBounds = document.querySelector('.d-menu-anchor button')!.getBoundingClientRect();
+    return {
+      left: menuBounds.left,
+      top: menuBounds.top,
+      right: menuBounds.right,
+      bottom: menuBounds.bottom,
+      anchorLeft: anchorBounds.left,
+      anchorRight: anchorBounds.right,
+      anchorTop: anchorBounds.top,
+      anchorBottom: anchorBounds.bottom,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  expect(placement.left).toBeGreaterThanOrEqual(8);
+  expect(placement.top).toBeGreaterThanOrEqual(8);
+  expect(placement.right).toBeLessThanOrEqual(placement.viewportWidth - 8);
+  expect(placement.bottom).toBeLessThanOrEqual(placement.viewportHeight - 8);
+  expect(placement.left).toBeLessThan(placement.anchorRight);
+  expect(placement.right).toBeGreaterThan(placement.anchorLeft);
+  expect(placement.bottom <= placement.anchorTop || placement.top >= placement.anchorBottom).toBe(true);
+  const reposition = await menu.evaluate(element => {
+    const before = element.getBoundingClientRect().top;
+    const anchor = document.querySelector('.d-menu-anchor') as HTMLElement;
+    anchor.style.transform = 'translateY(24px)';
+    window.dispatchEvent(new Event('scroll'));
+    const after = element.getBoundingClientRect().top;
+    anchor.style.transform = '';
+    window.dispatchEvent(new Event('scroll'));
+    return after - before;
+  });
+  expect(reposition).toBeGreaterThan(12);
+  await page.setViewportSize({ width: 320, height: 480 });
+  await expect.poll(() => menu.evaluate(element => {
+    const bounds = element.getBoundingClientRect();
+    return bounds.left >= 8 && bounds.top >= 8 && bounds.right <= innerWidth - 8 && bounds.bottom <= innerHeight - 8;
+  })).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
   const surface = await menu.evaluate(element => {
     const bounds = element.getBoundingClientRect();
     return {
@@ -39,6 +81,10 @@ test('catalog menu has an opaque surface above the app header and restores focus
   await expect(trigger).toBeFocused();
   await trigger.click();
   await expect(menu).toBeVisible();
+  await expect(menu.getByRole('menuitem').first()).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(menu.getByRole('menuitem').last()).toBeFocused();
+  await page.keyboard.press('Home');
   await expect(menu.getByRole('menuitem').first()).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toHaveCount(0);

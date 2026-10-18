@@ -306,7 +306,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     modifier.toComposeModifier(),
                     horizontalArrangement = props.arrangement.horizontal(props.gap.value.dp),
                     verticalArrangement = Arrangement.spacedBy(props.rowGap.value.dp),
-                    itemVerticalAlignment = props.alignment?.vertical() ?: Alignment.Top,
+                    itemVerticalAlignment = props.alignment.vertical(),
                 ) {
                     ProvideDomposableRowModifierScope { content() }
                 }

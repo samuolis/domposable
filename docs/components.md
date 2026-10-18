@@ -81,7 +81,7 @@ DomposableColumn(
 }
 ```
 
-`DomposableFlowRow` also accepts a main-axis arrangement, `alignment` for items within each line, and `rowGap` between lines. Its `rowGap` defaults to `gap`, preserving the previous wrapping behavior. Use these shared values instead of adding provider-specific layout CSS to feature code.
+`DomposableFlowRow` also accepts a main-axis arrangement, `alignment` for items within each line, and `rowGap` between lines. Its `rowGap` defaults to `gap`. Items align to the top by default on both renderers; HTML no longer stretches shorter items to the line height. Use these shared values instead of adding provider-specific layout CSS to feature code.
 
 ## Actions and help
 

@@ -6,8 +6,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableAutocomplete
@@ -22,6 +24,7 @@ import io.github.samuolis.domposable.foundation.DomposableImageScale
 import io.github.samuolis.domposable.foundation.DomposableInputPurpose
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableLiveRegion
+import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableSelectionColors
@@ -38,6 +41,7 @@ import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableDataTableProps
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
+import io.github.samuolis.domposable.ui.DomposableHtmlMenuAnchor
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableImageProps
 import io.github.samuolis.domposable.ui.DomposableLabelProps
@@ -86,6 +90,68 @@ import org.jetbrains.compose.web.dom.TextArea
 import org.jetbrains.compose.web.dom.Ul
 import org.w3c.dom.HTMLDialogElement
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.Node
+import org.w3c.dom.events.Event
+
+private const val HTML_MENU_VIEWPORT_MARGIN = 8.0
+
+private fun positionHtmlMenu(
+    overlay: HTMLElement,
+    anchor: HTMLElement?,
+    offset: DomposableOffset,
+    alignToLogicalEnd: Boolean,
+) {
+    val menu = overlay.querySelector(".d-menu-position") as? HTMLElement ?: return
+    if (anchor == null) return
+    val anchorBounds = anchor.getBoundingClientRect()
+    val viewportWidth = window.innerWidth.toDouble()
+    val viewportHeight = window.innerHeight.toDouble()
+    val menuWidth = menu.getBoundingClientRect().width
+    val menuHeight =
+        menu.getBoundingClientRect().height.coerceAtMost(
+            (viewportHeight - 2 * HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(0.0),
+        )
+    val rtl = window.getComputedStyle(anchor).direction == "rtl"
+    val anchorLeft =
+        if (alignToLogicalEnd || rtl) {
+            anchorBounds.right - menuWidth
+        } else {
+            anchorBounds.left
+        }
+    val horizontalOffset = if (rtl) -offset.x else offset.x
+    val left =
+        (anchorLeft + horizontalOffset).coerceIn(
+            HTML_MENU_VIEWPORT_MARGIN,
+            (viewportWidth - menuWidth - HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(HTML_MENU_VIEWPORT_MARGIN),
+        )
+    val below = viewportHeight - anchorBounds.bottom - offset.y
+    val above = anchorBounds.top - offset.y
+    val placeBelow =
+        below >= menuHeight + HTML_MENU_VIEWPORT_MARGIN ||
+            above < menuHeight + HTML_MENU_VIEWPORT_MARGIN
+    val verticalOffset = if (placeBelow) offset.y else -offset.y
+    val maxTop =
+        (viewportHeight - menuHeight - HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(HTML_MENU_VIEWPORT_MARGIN)
+    val top =
+        if (placeBelow) {
+            anchorBounds.bottom + verticalOffset
+        } else {
+            anchorBounds.top - menuHeight + verticalOffset
+        }.coerceIn(HTML_MENU_VIEWPORT_MARGIN, maxTop)
+    menu.style.setProperty("position", "fixed")
+    menu.style.setProperty("margin", "0")
+    menu.style.setProperty("left", "${left}px")
+    menu.style.setProperty("right", "auto")
+    menu.style.setProperty("inset-inline-end", "auto")
+    menu.style.setProperty("top", "${top}px")
+    menu.style.setProperty("bottom", "auto")
+    menu.style.setProperty("inset-block-end", "auto")
+    menu.style.setProperty(
+        "max-height",
+        "${(viewportHeight - 2 * HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(0.0)}px",
+    )
+    menu.style.setProperty("overflow-y", "auto")
+}
 
 private fun DomposableAlignment.css() =
     when (this) {
@@ -233,7 +299,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             )
                             property("row-gap", "${props.rowGap.value}px")
                             property("justify-content", props.arrangement.css())
-                            props.alignment?.let { property("align-items", it.css()) }
+                            property("align-items", props.alignment.css())
                         }
                     }) { content() }
                 }
@@ -1234,10 +1300,30 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 content,
                 ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.menu
+                val externalAnchor =
+                    modifier.elements
+                        .filterIsInstance<DomposableHtmlMenuAnchor>()
+                        .lastOrNull()
+                        ?.resolve
+                val menuModifier =
+                    modifier.elements
+                        .filterNot { it is DomposableHtmlMenuAnchor }
+                        .fold(DomposableModifier as DomposableModifier) { result, element -> result.then(element) }
+                var slotAnchor by remember { mutableStateOf<HTMLElement?>(null) }
+                val dismissMenu by rememberUpdatedState(props.onDismiss)
+                props.anchor?.let { anchorContent ->
+                    TagElement<HTMLElement>("span", applyAttrs = {
+                        classes("d-menu-anchor")
+                        style { property("display", "inline-flex") }
+                        ref { element ->
+                            slotAnchor = element
+                            onDispose { slotAnchor = null }
+                        }
+                    }) { anchorContent() }
+                }
                 if (props.expanded) {
                     val previousFocus = remember { document.activeElement as? HTMLElement }
                     TagElement<HTMLElement>("div", applyAttrs = {
-                        domposableAttributes(modifier)
                         classes("d-menu-backdrop")
                         attr("popover", "manual")
                         attr("aria-label", "Menu")
@@ -1256,7 +1342,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             property("background", "transparent")
                             property("color", "inherit")
                         }
-                        onClick { event -> if (event.target == event.currentTarget) props.onDismiss() }
+                        onClick { event ->
+                            val target = event.target as? Node
+                            val popup = (event.currentTarget as HTMLElement).querySelector(".d-menu-popup")
+                            if (target == null || popup == null || !popup.contains(target)) props.onDismiss()
+                        }
                         onKeyDown { event ->
                             when (event.key) {
                                 "Escape" -> {
@@ -1281,31 +1371,87 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                             )?.let { (it as? HTMLElement)?.focus() }
                                     }
                                 }
+
+                                "Home", "End" -> {
+                                    event.preventDefault()
+                                    val items =
+                                        (event.currentTarget as HTMLElement).querySelectorAll(
+                                            "[role^=menuitem]:not(:disabled)",
+                                        )
+                                    val index = if (event.key == "Home") 0 else items.length - 1
+                                    if (index >= 0) (items.item(index) as? HTMLElement)?.focus()
+                                }
                             }
                         }
                         ref { element ->
                             // The browser top layer keeps menus above application stacking contexts.
                             element.asDynamic().showPopover()
+                            val externalAnchorElement = externalAnchor?.invoke(element)
+                            val resolveAnchor = { slotAnchor ?: externalAnchorElement }
+                            positionHtmlMenu(
+                                element,
+                                resolveAnchor(),
+                                props.anchorOffset,
+                                alignToLogicalEnd = props.anchor == null,
+                            )
+                            val reposition: (Event) -> Unit = {
+                                positionHtmlMenu(
+                                    element,
+                                    resolveAnchor(),
+                                    props.anchorOffset,
+                                    alignToLogicalEnd = props.anchor == null,
+                                )
+                            }
+                            window.addEventListener("resize", reposition)
+                            window.addEventListener("scroll", reposition, true)
+                            var focusOutDismissed = false
+                            val focusOut: (Event) -> Unit = { event ->
+                                val next = event.asDynamic().relatedTarget as? Node
+                                if (!focusOutDismissed && (next == null || !element.contains(next))) {
+                                    focusOutDismissed = true
+                                    dismissMenu()
+                                }
+                            }
+                            element.addEventListener("focusout", focusOut)
                             val focusTarget =
                                 element.querySelector("[role^=menuitem]:not(:disabled)") as? HTMLElement ?: element
                             focusTarget.focus()
                             onDispose {
+                                window.removeEventListener("resize", reposition)
+                                window.removeEventListener("scroll", reposition, true)
+                                element.removeEventListener("focusout", focusOut)
                                 if (element.matches(":popover-open")) element.asDynamic().hidePopover()
                                 previousFocus?.takeIf { it.isConnected }?.focus()
                             }
                         }
                     }) {
                         Div(attrs = {
-                            attr("role", "menu")
-                            attr("aria-label", "Menu")
-                            classes("d-menu-popup")
-                            style { surfaceAppearance(appearance) }
+                            classes("d-menu-position")
+                            style {
+                                property("position", "fixed")
+                                property("display", "inline-flex")
+                                property("width", "max-content")
+                                property("max-width", "calc(100vw - 32px)")
+                            }
                         }) {
-                            CompositionLocalProvider(LocalHtmlMenuDismiss provides props.onDismiss) {
-                                props.items.forEach { item ->
-                                    HtmlDropdownMenuItem(item, DomposableModifier)
+                            DomposableHtmlModifiers(menuModifier) {
+                                Div(attrs = {
+                                    attr("role", "menu")
+                                    attr("aria-label", "Menu")
+                                    domposableAttributes(modifier)
+                                    classes("d-menu-popup")
+                                    style {
+                                        property("gap", "${props.contentSpacing.value}px")
+                                        surfaceAppearance(appearance)
+                                    }
+                                }) {
+                                    CompositionLocalProvider(LocalHtmlMenuDismiss provides props.onDismiss) {
+                                        props.items.forEach { item ->
+                                            HtmlDropdownMenuItem(item, DomposableModifier)
+                                        }
+                                        content()
+                                    }
                                 }
-                                content()
                             }
                         }
                     }
@@ -2156,8 +2302,13 @@ private const val MATERIAL_CSS = """
 .d-search-full-screen[role=search]{position:fixed;z-index:40;inset:0;display:flex;flex-direction:column;padding:16px;background:var(--d-surface)}.d-search-contained-full-screen[role=search]{position:fixed;z-index:40;inset:16px;display:flex;flex-direction:column;padding:16px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface);box-shadow:0 8px 28px rgb(0 0 0 / .22)} .d-search-full-screen[role=search] .d-search-results,
 .d-search-contained-full-screen[role=search] .d-search-results{position:static;flex:1;min-height:0;max-height:none}
 .d-search-docked-with-gap .d-search-control{gap:16px}.d-search-app-bar{min-width:0}.d-search-app-bar .d-search-control{min-height:48px;border-radius:var(--d-shape-extra-large,999px)}
-.d-dropdown-menu-item{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:8px 12px;border:var(--d-item-border-width,0) solid var(--d-item-border,transparent);border-radius:var(--d-item-radius,0);background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));text-align:start}.d-dropdown-menu-item[aria-checked=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-dropdown-menu-item:disabled{opacity:var(--d-item-disabled-opacity,1)}.d-dropdown-menu-labels{display:flex;flex:1;flex-direction:column;gap:2px}.d-dropdown-menu-supporting{font-size:var(--d-label);opacity:.72}.d-dropdown-menu-leading,.d-dropdown-menu-trailing{display:inline-flex;align-items:center}.d-menu-group{gap:2px;padding:8px;border-radius:var(--d-shape-small,var(--d-radius))}.d-component-label{display:block}.d-component-label-content{display:flex;flex-direction:column;gap:4px}.d-component-label-text{position:absolute;z-index:1;inset-inline-start:12px;inset-block-start:8px;max-width:calc(100% - 24px);padding:0 4px;overflow:hidden;background:var(--d-surface);color:var(--d-primary);font-size:var(--d-label);text-overflow:ellipsis;white-space:nowrap;opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity 120ms ease,transform 120ms ease}.d-component-label:hover .d-component-label-text,.d-component-label:focus-within .d-component-label-text,.d-component-label:active .d-component-label-text,.d-component-label-persistent .d-component-label-text{opacity:1;transform:translateY(0)}.d-component-label-persistent .d-component-label-text{position:static;display:block;max-width:none;padding:0;background:transparent;transform:none}.d-scroll-field{border:var(--d-item-border-width,1px) solid var(--d-item-border,var(--d-outline));border-radius:var(--d-item-radius,var(--d-shape-small,var(--d-radius)));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));padding:var(--d-item-padding,4px)}.d-scroll-field:focus-visible{outline:2px solid var(--d-primary);outline-offset:2px}.d-scroll-field[aria-disabled=true]{opacity:var(--d-item-disabled-opacity,1)}.d-scroll-field-viewport{width:min(160px,40vw);height:168px;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;scrollbar-width:none}.d-scroll-field-viewport::-webkit-scrollbar{display:none}.d-scroll-field-option{display:grid;min-height:44px;place-items:center;scroll-snap-align:center;cursor:pointer}.d-scroll-field-option-selected{font-weight:600}.d-app-bar-row,.d-app-bar-second-row{display:flex;align-items:center;gap:12px;width:100%}.d-app-bar-second-row{padding-inline-start:56px;font-size:var(--d-body)}.d-app-bar-heading{display:flex;flex:1;flex-direction:column;gap:2px}.d-app-bar-subtitle{font-size:var(--d-label);opacity:.8}.d-dialog-full-screen{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border-radius:0}.d-dialog-date-picker,.d-dialog-time-picker{max-width:min(560px,94vw)}
-.d-menu-popup{background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);position:fixed;inset-block-start:16px;inset-inline-end:16px;display:flex;flex-direction:column;min-width:196px;max-width:min(320px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));box-shadow:0 4px 12px rgb(0 0 0 / .2)}
+.d-dropdown-menu-item{display:flex;align-items:center;gap:var(--d-item-gap,12px);width:100%;min-height:var(--d-item-min-height,48px);padding:var(--d-item-padding,8px 12px);border:var(--d-item-border-width,0) solid var(--d-item-border,transparent);border-radius:var(--d-item-radius,0);background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));text-align:start}.d-dropdown-menu-item[aria-checked=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-dropdown-menu-item:disabled{opacity:var(--d-item-disabled-opacity,1)}.d-dropdown-menu-labels{display:flex;flex:1;flex-direction:column;gap:2px}.d-dropdown-menu-supporting{font-size:var(--d-label);opacity:.72}.d-dropdown-menu-leading,.d-dropdown-menu-trailing{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center}.d-menu-group{gap:2px;padding:8px;border-radius:var(--d-shape-small,var(--d-radius))}.d-component-label{display:block}.d-component-label-content{display:flex;flex-direction:column;gap:4px}.d-component-label-text{position:absolute;z-index:1;inset-inline-start:12px;inset-block-start:8px;max-width:calc(100% - 24px);padding:0 4px;overflow:hidden;background:var(--d-surface);color:var(--d-primary);font-size:var(--d-label);text-overflow:ellipsis;white-space:nowrap;opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity 120ms ease,transform 120ms ease}.d-component-label:hover .d-component-label-text,.d-component-label:focus-within .d-component-label-text,.d-component-label:active .d-component-label-text,.d-component-label-persistent .d-component-label-text{opacity:1;transform:translateY(0)}.d-component-label-persistent .d-component-label-text{position:static;display:block;max-width:none;padding:0;background:transparent;transform:none}.d-scroll-field{border:var(--d-item-border-width,1px) solid var(--d-item-border,var(--d-outline));border-radius:var(--d-item-radius,var(--d-shape-small,var(--d-radius)));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));padding:var(--d-item-padding,4px)}.d-scroll-field:focus-visible{outline:2px solid var(--d-primary);outline-offset:2px}.d-scroll-field[aria-disabled=true]{opacity:var(--d-item-disabled-opacity,1)}.d-scroll-field-viewport{width:min(160px,40vw);height:168px;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;scrollbar-width:none}.d-scroll-field-viewport::-webkit-scrollbar{display:none}.d-scroll-field-option{display:grid;min-height:44px;place-items:center;scroll-snap-align:center;cursor:pointer}.d-scroll-field-option-selected{font-weight:600}.d-app-bar-row,.d-app-bar-second-row{display:flex;align-items:center;gap:12px;width:100%}.d-app-bar-second-row{padding-inline-start:56px;font-size:var(--d-body)}.d-app-bar-heading{display:flex;flex:1;flex-direction:column;gap:2px}.d-app-bar-subtitle{font-size:var(--d-label);opacity:.8}.d-dialog-full-screen{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border-radius:0}.d-dialog-date-picker,.d-dialog-time-picker{max-width:min(560px,94vw)}
+.d-dropdown-menu-item{transition:background-color 120ms ease,color 120ms ease}.d-dropdown-menu-item:not(:disabled):hover{background:var(--d-item-hovered-container,var(--d-item-container,transparent));color:var(--d-item-hovered-content,var(--d-item-content,var(--d-on-surface)));box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-hover-opacity,8%),transparent)}.d-dropdown-menu-item:not(:disabled):focus-visible{background:var(--d-item-focused-container,var(--d-item-container,transparent));color:var(--d-item-focused-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-focused-border,var(--d-item-border,transparent));outline:2px solid var(--d-primary);outline-offset:-2px;box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-focus-opacity,12%),transparent)}.d-dropdown-menu-item:not(:disabled):active{background:var(--d-item-pressed-container,var(--d-item-container,transparent));color:var(--d-item-pressed-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-pressed-border,var(--d-item-border,transparent));box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-pressed-opacity,16%),transparent)}.d-dropdown-menu-item:disabled{background:var(--d-item-disabled-container,var(--d-item-container,transparent));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-item-border,transparent))}
+.d-dropdown-menu-item[aria-checked=true]:not(:disabled):hover{background:var(--d-item-hovered-container,var(--d-item-selected-container,var(--d-secondary-container)));color:var(--d-item-hovered-content,var(--d-item-selected-content,var(--d-on-secondary-container)))}.d-dropdown-menu-item[aria-checked=true]:not(:disabled):focus-visible{background:var(--d-item-focused-container,var(--d-item-selected-container,var(--d-secondary-container)));color:var(--d-item-focused-content,var(--d-item-selected-content,var(--d-on-secondary-container)))}.d-dropdown-menu-item[aria-checked=true]:not(:disabled):active{background:var(--d-item-pressed-container,var(--d-item-selected-container,var(--d-secondary-container)));color:var(--d-item-pressed-content,var(--d-item-selected-content,var(--d-on-secondary-container)))}
+@media(prefers-reduced-motion:reduce){.d-dropdown-menu-item{transition:none}}
+@media(forced-colors:active){.d-dropdown-menu-item:focus-visible{outline:2px solid Highlight;outline-offset:-2px;box-shadow:none}.d-dropdown-menu-item[aria-checked=true]{background:Highlight;color:HighlightText;border-color:Highlight}}
+.d-menu-position{inset-block-start:16px;inset-inline-end:16px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow:auto}
+.d-menu-popup{background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:112px;max-width:min(280px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));box-shadow:0 4px 12px rgb(0 0 0 / .2)}
 .d-chip.d-item-hittarget .d-chip-surface,.d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,0));border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,0));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,0));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,0))}
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
 .d-snackbar-host>.d-snackbar-message{max-width:min(720px,100%);min-height:48px;box-shadow:0 3px 8px rgb(0 0 0 / .24);pointer-events:auto}

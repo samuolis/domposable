@@ -74,6 +74,28 @@ class HtmlLayoutArrangementTest {
         }
 
     @Test
+    fun flowRowDefaultsToTopAlignmentWithoutStretchingShortItems() =
+        withLayoutHost(
+            content = {
+                DomposableFlowRow(modifier = DomposableModifier.width(130.dp), gap = 10.dp) {
+                    DomposableBox(DomposableModifier.width(60.dp)) {
+                        DomposableBox(DomposableModifier.height(40.dp)) {}
+                    }
+                    DomposableBox(DomposableModifier.width(60.dp)) {
+                        DomposableBox(DomposableModifier.height(20.dp)) {}
+                    }
+                }
+            },
+        ) { root ->
+            val row = root.querySelector(".d-flow-row") as HTMLElement
+            val tall = row.children.item(0) as HTMLElement
+            val short = row.children.item(1) as HTMLElement
+            assertEquals(40.0, tall.getBoundingClientRect().height, 0.5)
+            assertEquals(20.0, short.getBoundingClientRect().height, 0.5)
+            assertEquals(tall.getBoundingClientRect().top, short.getBoundingClientRect().top, 0.5)
+        }
+
+    @Test
     fun horizontalScrollRowKeepsChildrenAtTheirIntrinsicWidths() =
         withLayoutHost(
             content = {

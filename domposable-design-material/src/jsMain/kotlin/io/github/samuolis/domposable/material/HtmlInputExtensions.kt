@@ -225,7 +225,7 @@ internal fun HtmlDropdownMenuItem(
                 }) { it() }
             }
             Div(attrs = { classes("d-dropdown-menu-labels") }) {
-                Span { Text(props.label) }
+                Span { props.textContent?.invoke() ?: Text(props.label) }
                 props.supportingText?.let { Span(attrs = { classes("d-dropdown-menu-supporting") }) { it() } }
             }
             props.trailingContent?.let { Div(attrs = { classes("d-dropdown-menu-trailing") }) { it() } }

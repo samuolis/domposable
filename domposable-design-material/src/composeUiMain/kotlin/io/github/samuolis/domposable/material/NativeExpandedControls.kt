@@ -91,6 +91,7 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
@@ -129,12 +130,43 @@ internal fun NativeMenu(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
+    val anchor = props.anchor
+    if (anchor != null) {
+        Box {
+            anchor()
+            NativeMenuPopup(props, modifier, content)
+        }
+    } else {
+        NativeMenuPopup(props, modifier, content)
+    }
+}
+
+@Composable
+private fun NativeMenuPopup(
+    props: DomposableMenuProps,
+    modifier: DomposableModifier,
+    content: @Composable () -> Unit,
+) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.menu
+    val menuContent: @Composable () -> Unit = {
+        props.items.forEach { item ->
+            NativeDropdownMenuItem(
+                item.copy(onClick = {
+                    props.onDismiss()
+                    item.onClick()
+                }),
+                DomposableModifier,
+                {},
+            )
+        }
+        content()
+    }
     NativeWindow { featureRegistry ->
         DropdownMenu(
             expanded = props.expanded,
             onDismissRequest = props.onDismiss,
             modifier = modifier.toComposeModifier(),
+            offset = DpOffset(props.anchorOffset.x.dp, props.anchorOffset.y.dp),
             shape = appearance.nativeShape(MenuDefaults.shape),
             containerColor = appearance.container?.nativeColor() ?: MenuDefaults.containerColor,
             tonalElevation = appearance.tonalElevation?.value?.dp ?: MenuDefaults.TonalElevation,
@@ -145,17 +177,13 @@ internal fun NativeMenu(
                 },
         ) {
             CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) {
-                props.items.forEach { item ->
-                    NativeDropdownMenuItem(
-                        item.copy(onClick = {
-                            props.onDismiss()
-                            item.onClick()
-                        }),
-                        DomposableModifier,
-                        {},
-                    )
+                if (props.contentSpacing.value == 0f) {
+                    menuContent()
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(props.contentSpacing.value.dp)) {
+                        menuContent()
+                    }
                 }
-                content()
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTokens
@@ -16,10 +17,12 @@ import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableChip
 import io.github.samuolis.domposable.ui.DomposableDialog
+import io.github.samuolis.domposable.ui.DomposableDropdownMenuItem
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableIconButtonProps
 import io.github.samuolis.domposable.ui.DomposableMenu
 import io.github.samuolis.domposable.ui.DomposableMenuItem
+import io.github.samuolis.domposable.ui.DomposableMenuProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableModifierElement
 import io.github.samuolis.domposable.ui.DomposableSelect
@@ -33,6 +36,9 @@ import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.htmlAttributes
+import io.github.samuolis.domposable.ui.htmlMenuAnchor
+import io.github.samuolis.domposable.ui.minWidth
+import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.pointerPassthrough
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.weight
@@ -42,6 +48,7 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
@@ -266,6 +273,146 @@ class HtmlHostIntegrationTest {
             val hit = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2)
             assertTrue(menu.contains(hit), "Host headers must not paint above a menu")
         }
+
+    @Test
+    fun anchoredMenuUsesTriggerGeometryAndRendersRichAccessibleItemText() =
+        withHost(content = {
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                anchor = { Button { Text("Open actions") } },
+                contentSpacing = 4.dp,
+                anchorOffset = DomposableOffset(y = 4f),
+            ) {
+                DomposableDropdownMenuItem(
+                    textContent = { Span { Text("Rich action name") } },
+                    onClick = {},
+                )
+            }
+        }) { root ->
+            val anchor = root.querySelector(".d-menu-anchor") as HTMLElement
+            val menu = root.querySelector(".d-menu-popup") as HTMLElement
+            val item = menu.querySelector("[role=menuitem]") as HTMLElement
+            assertEquals("Rich action name", item.textContent?.trim())
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            assertEquals("fixed", position.style.position)
+            assertEquals("4px", menu.style.getPropertyValue("gap"))
+            assertTrue(
+                position.style.left.isNotEmpty() && position.style.top.isNotEmpty(),
+                "Anchored menus need a viewport position",
+            )
+            assertTrue(menu.getBoundingClientRect().top >= anchor.getBoundingClientRect().bottom)
+        }
+
+    @Test
+    fun externalAnchorResolverKeepsSizingModifiersOnTheMenuSurface() =
+        withHost(content = {
+            Button(attrs = { attr("data-testid", "external-menu-trigger") }) { Text("Open") }
+            DomposableMenu(
+                DomposableMenuProps(
+                    expanded = true,
+                    onDismiss = {},
+                    items = listOf(DomposableMenuItem("Action", {})),
+                    contentSpacing = 4.dp,
+                    anchorOffset = DomposableOffset(x = 10f, y = 4f),
+                ),
+                DomposableModifier
+                    .htmlMenuAnchor { menuElement ->
+                        menuElement.parentElement?.querySelector("[data-testid=external-menu-trigger]") as? HTMLElement
+                    }.width(192.dp)
+                    .minWidth(192.dp)
+                    .testId("external-menu-surface"),
+                {},
+            )
+        }) { root ->
+            val backdrop = root.querySelector(".d-menu-backdrop") as HTMLElement
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            val menu = root.querySelector("[data-testid=external-menu-surface]") as HTMLElement
+            val trigger = root.querySelector("[data-testid=external-menu-trigger]") as HTMLElement
+            assertEquals("100vw", backdrop.style.width)
+            assertTrue(position.style.left.isNotEmpty() && position.style.top.isNotEmpty())
+            assertTrue(menu.getBoundingClientRect().width >= 192.0)
+            assertTrue(position.getBoundingClientRect().top >= trigger.getBoundingClientRect().bottom)
+            assertEquals("4px", menu.style.getPropertyValue("gap"))
+        }
+
+    @Test
+    fun externalAnchorResolverIsCachedBeforeMenuAutofocus() {
+        var resolverCalls = 0
+        var resolvedAnchor: HTMLElement? = null
+        withHost(content = {
+            Button(attrs = {
+                attr("data-testid", "focused-external-trigger")
+                ref { element ->
+                    element.focus()
+                    onDispose {}
+                }
+            }) { Text("Open") }
+            DomposableMenu(
+                DomposableMenuProps(
+                    expanded = true,
+                    onDismiss = {},
+                    items = listOf(DomposableMenuItem("Action", {})),
+                ),
+                DomposableModifier.htmlMenuAnchor { _ ->
+                    resolverCalls += 1
+                    (document.activeElement as? HTMLElement).also { resolvedAnchor = it }
+                },
+                {},
+            )
+        }) { root ->
+            val trigger = root.querySelector("[data-testid=focused-external-trigger]")
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            val initialLeft = position.style.left
+            val initialTop = position.style.top
+            assertEquals(trigger, resolvedAnchor)
+            assertEquals(1, resolverCalls)
+            assertEquals(root.querySelector("[role=menuitem]"), document.activeElement)
+            window.dispatchEvent(js("new Event('resize')"))
+            window.dispatchEvent(js("new Event('scroll')"))
+            assertEquals(1, resolverCalls)
+            assertEquals(initialLeft, position.style.left)
+            assertEquals(initialTop, position.style.top)
+        }
+    }
+
+    @Test
+    fun menuPaddingModifierWrapsTheVisibleSurface() =
+        withHost(content = {
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                modifier = DomposableModifier.padding(12.dp).testId("padded-menu"),
+                items = listOf(DomposableMenuItem("Action", {})),
+            )
+        }) { root ->
+            val menu = root.querySelector("[data-testid=padded-menu]") as HTMLElement
+            val modifierWrapper = menu.parentElement as HTMLElement
+            assertEquals("12px", window.getComputedStyle(modifierWrapper).paddingLeft)
+            assertEquals(12.0, menu.getBoundingClientRect().left - modifierWrapper.getBoundingClientRect().left)
+            assertEquals("100vw", (root.querySelector(".d-menu-backdrop") as HTMLElement).style.width)
+        }
+
+    @Test
+    fun menuSupportsHomeEndAndDismissesWhenFocusLeaves() {
+        var dismissed = 0
+        withHost(content = {
+            DomposableMenu(
+                expanded = true,
+                onDismiss = { dismissed++ },
+                items = listOf(DomposableMenuItem("First", {}), DomposableMenuItem("Last", {})),
+            )
+        }) { root ->
+            val menu = root.querySelector("[role=menu]") as HTMLElement
+            val items = menu.querySelectorAll("[role=menuitem]")
+            menu.dispatchEvent(js("new KeyboardEvent('keydown', { key: 'End', bubbles: true })"))
+            assertEquals(items.item(1), document.activeElement)
+            menu.dispatchEvent(js("new KeyboardEvent('keydown', { key: 'Home', bubbles: true })"))
+            assertEquals(items.item(0), document.activeElement)
+            menu.dispatchEvent(js("new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body })"))
+            assertEquals(1, dismissed)
+        }
+    }
 
     @Test
     fun chipTouchTargetDoesNotPaintASecondSelectedSurface() {

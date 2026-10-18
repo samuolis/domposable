@@ -17,6 +17,7 @@ import io.github.samuolis.domposable.foundation.DomposableImageScale
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableLiveRegion
+import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableProgressAppearance
 import io.github.samuolis.domposable.foundation.DomposableProgressSemantics
@@ -430,6 +431,31 @@ fun DomposableMenu(
     appearance: DomposableSurfaceAppearance? = null,
     content: @Composable () -> Unit = {},
 ) = DomposableMenu(DomposableMenuProps(expanded, onDismiss, items, appearance = appearance), modifier, content)
+
+@Composable
+fun DomposableMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    anchor: @Composable () -> Unit,
+    items: List<DomposableMenuItem> = emptyList(),
+    modifier: DomposableModifier = DomposableModifier,
+    appearance: DomposableSurfaceAppearance? = null,
+    contentSpacing: DomposableLength = 0.dp,
+    anchorOffset: DomposableOffset = DomposableOffset(),
+    content: @Composable () -> Unit = {},
+) = DomposableMenu(
+    DomposableMenuProps(
+        expanded,
+        onDismiss,
+        items,
+        appearance = appearance,
+        anchor = anchor,
+        contentSpacing = contentSpacing,
+        anchorOffset = anchorOffset,
+    ),
+    modifier,
+    content,
+)
 
 @Composable
 fun DomposableDialog(

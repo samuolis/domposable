@@ -63,6 +63,7 @@ import io.github.samuolis.domposable.ui.DomposableChip
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableDivider
+import io.github.samuolis.domposable.ui.DomposableDropdownMenuItem
 import io.github.samuolis.domposable.ui.DomposableFlowRow
 import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableIconButton
@@ -691,7 +692,17 @@ fun ComponentCatalogScreen(
         DomposableFlowRow(gap = 12.dp) {
             DomposableButton("Open dialog", { dialog = true })
             DomposableButton("Open sheet", { sheet = true })
-            DomposableButton("Open menu", { menu = true })
+            DomposableMenu(
+                expanded = menu,
+                onDismiss = { menu = false },
+                anchor = { DomposableButton("Open menu", { menu = true }) },
+                items = listOf(DomposableMenuItem("Other action", {})),
+            ) {
+                DomposableDropdownMenuItem(
+                    textContent = { DomposableText("★ Example action") },
+                    onClick = { checked = !checked },
+                )
+            }
         }
         DomposableText("Keyed collections", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableLazyRow(
@@ -793,17 +804,6 @@ fun ComponentCatalogScreen(
             sheet = false
         }) { DomposableText("Platform-adapted presentation.") }
     }
-    DomposableMenu(
-        expanded = menu,
-        onDismiss = { menu = false },
-        items =
-            listOf(
-                DomposableMenuItem("Example action", {
-                    checked =
-                        !checked
-                }),
-            ),
-    )
 }
 
 @Composable
