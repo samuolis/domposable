@@ -6,6 +6,7 @@ import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBottomSheet
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableDialog
+import io.github.samuolis.domposable.ui.DomposableModalAlignment
 import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableText
 import kotlinx.browser.document
@@ -161,6 +162,51 @@ class HtmlModalLifecycleTest {
                 closeButton.dispatchEvent(pointerEvent("pointerdown", 21, bounds.left + 2, bounds.top + 2))
                 closeButton.dispatchEvent(pointerEvent("pointermove", 21, bounds.left + 2, bounds.top + 220))
                 closeButton.dispatchEvent(pointerEvent("pointerup", 21, bounds.left + 2, bounds.top + 220))
+                assertEquals(0, dismissals)
+            }
+        }
+    }
+
+    @Test
+    fun bottomSheetDragHandleFollowsCompactBreakpoint() {
+        withHost(content = {
+            DomposableBottomSheet(
+                "Adaptive sheet",
+                {},
+                layout = DomposableModalLayout(alignment = DomposableModalAlignment.BottomOnCompact),
+            ) { DomposableText("Sheet content") }
+        }) { root ->
+            val sheet = root.querySelector("dialog") as HTMLElement
+            val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
+            val compactViewport = window.matchMedia("(max-width: 40rem)").matches
+            assertEquals(
+                if (compactViewport) "flex" else "none",
+                window.getComputedStyle(handle).display,
+            )
+        }
+    }
+
+    @Test
+    fun hiddenSheetDragHandleDisablesHeaderDrag() {
+        withFallbackDialogs {
+            var dismissals = 0
+            withHost(content = {
+                DomposableBottomSheet(
+                    "Adaptive sheet",
+                    { dismissals++ },
+                    layout = DomposableModalLayout(alignment = DomposableModalAlignment.BottomOnCompact),
+                ) { DomposableText("Sheet content") }
+            }) { root ->
+                val sheet = root.querySelector("dialog") as HTMLElement
+                val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
+                handle.style.display = "none"
+                assertEquals("none", window.getComputedStyle(handle).display)
+
+                val header = sheet.querySelector(".d-dialog-header") as HTMLElement
+                val bounds = header.getBoundingClientRect()
+                header.dispatchEvent(pointerEvent("pointerdown", 22, bounds.left + 2, bounds.top + 2))
+                header.dispatchEvent(pointerEvent("pointermove", 22, bounds.left + 2, bounds.top + 220))
+                header.dispatchEvent(pointerEvent("pointerup", 22, bounds.left + 2, bounds.top + 220))
                 assertEquals(0, dismissals)
             }
         }
