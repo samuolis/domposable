@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.foundation
 
 import androidx.compose.runtime.Immutable
+import kotlin.jvm.JvmInline
 
 /**
  * Neutral text styling shared by native Material and semantic HTML renderers.
@@ -34,16 +35,27 @@ data class DomposableTextAppearance(
     }
 }
 
-enum class DomposableFontWeight {
-    Thin,
-    ExtraLight,
-    Light,
-    Normal,
-    Medium,
-    SemiBold,
-    Bold,
-    ExtraBold,
-    Black,
+/** A variable-font weight, matching the 1–1000 range accepted by native and HTML text. */
+@Immutable
+@JvmInline
+value class DomposableFontWeight(
+    val weight: Int,
+) {
+    init {
+        require(weight in 1..1000) { "Font weight must be between 1 and 1000" }
+    }
+
+    companion object {
+        val Thin = DomposableFontWeight(100)
+        val ExtraLight = DomposableFontWeight(200)
+        val Light = DomposableFontWeight(300)
+        val Normal = DomposableFontWeight(400)
+        val Medium = DomposableFontWeight(500)
+        val SemiBold = DomposableFontWeight(600)
+        val Bold = DomposableFontWeight(700)
+        val ExtraBold = DomposableFontWeight(800)
+        val Black = DomposableFontWeight(900)
+    }
 }
 
 enum class DomposableTextAlignment {

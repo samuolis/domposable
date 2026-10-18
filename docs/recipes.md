@@ -1,5 +1,60 @@
 # Navigation 3 recipes and web URLs
 
+## Button-styled links
+
+Use `buttonAppearance` when navigation should look like an action while staying a real link in HTML:
+
+```kotlin
+import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
+import io.github.samuolis.domposable.foundation.DomposableButtonStyle
+import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableLength
+import io.github.samuolis.domposable.ui.DomposableLink
+
+DomposableLink(
+    label = "View results",
+    href = "/results",
+    buttonAppearance = DomposableButtonAppearance(
+        container = DomposableColor(0xFF3157C8),
+        content = DomposableColor(0xFFFFFFFF),
+        minHeight = DomposableLength(48f),
+    ),
+    buttonStyle = DomposableButtonStyle.Filled,
+)
+```
+
+The HTML provider keeps the `href`, including browser open-in-new-tab behavior. On Compose UI, taps use `onClick` when supplied and otherwise open `href` through the platform URI handler. `buttonStyle` selects the shared filled, outlined, text, elevated, or tonal appearance on both renderers. Leave `buttonAppearance` unset for the existing text-link presentation.
+
+## Localized modal headers
+
+Supply a header slot to replace the default title and dismiss control together. The slot receives the same dismiss callback as the modal, so the app can use its own localized label and icon:
+
+```kotlin
+import io.github.samuolis.domposable.foundation.DomposableAlignment
+import io.github.samuolis.domposable.ui.DomposableDialog
+import io.github.samuolis.domposable.ui.DomposableIcon
+import io.github.samuolis.domposable.ui.DomposableIconButton
+import io.github.samuolis.domposable.ui.DomposableRow
+import io.github.samuolis.domposable.ui.DomposableText
+
+DomposableDialog(
+    title = localizedTitle,
+    onDismiss = onDismiss,
+    headerContent = { dismiss ->
+        DomposableRow(alignment = DomposableAlignment.Center) {
+            DomposableText(localizedTitle, headingLevel = 2)
+            DomposableIconButton(onClick = dismiss, label = localizedCloseLabel) {
+                DomposableIcon(symbol = "close", description = null)
+            }
+        }
+    },
+) {
+    DialogBody()
+}
+```
+
+When `headerContent` is omitted, the renderer keeps its standard title and Close action. When supplied, the app owns the header's heading semantics and the icon button's accessible label.
+
 The shared playground contains a working task list/detail feature and a nested inbox/detail/supporting-pane recipe. Open **Recipes**, type a reply, allow three panes, open context and resize. Entry identity and drafts survive pane changes. Going back disposes a removed entry; restorable state can recreate it later.
 
 ## One stack, responsive panes

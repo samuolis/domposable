@@ -465,9 +465,19 @@ fun DomposableDialog(
     actions: @Composable () -> Unit = {},
     appearance: DomposableSurfaceAppearance? = null,
     variant: DomposableDialogVariant = DomposableDialogVariant.Alert,
+    headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    layout: DomposableModalLayout = DomposableModalLayout(),
     content: @Composable () -> Unit,
 ) = DomposableDialog(
-    DomposableDialogProps(title, onDismiss, actions, appearance = appearance, variant = variant),
+    DomposableDialogProps(
+        title,
+        onDismiss,
+        actions,
+        appearance = appearance,
+        variant = variant,
+        headerContent = headerContent,
+        layout = layout,
+    ),
     modifier,
     content,
 )
@@ -479,9 +489,18 @@ fun DomposableBottomSheet(
     modifier: DomposableModifier = DomposableModifier,
     appearance: DomposableSurfaceAppearance? = null,
     modal: Boolean = true,
+    headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    layout: DomposableModalLayout = DomposableModalLayout(),
     content: @Composable () -> Unit,
 ) = DomposableBottomSheet(
-    DomposableBottomSheetProps(title, onDismiss, appearance = appearance, modal = modal),
+    DomposableBottomSheetProps(
+        title,
+        onDismiss,
+        appearance = appearance,
+        modal = modal,
+        headerContent = headerContent,
+        layout = layout,
+    ),
     modifier,
     content,
 )

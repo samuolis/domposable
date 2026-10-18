@@ -353,10 +353,33 @@ internal fun HtmlDataTable(
             classes("d-data-table-container", "d-data-table-${props.sizePreset.name.lowercase()}")
             style {
                 property("max-width", "100%")
+                property("min-width", "0")
                 property("overflow-x", if (props.allowHorizontalOverflow) "auto" else "hidden")
+            }
+            if (props.sizePreset == DomposableDataTableSize.Compact) {
+                ref { container ->
+                    val breakpoint = appearance.compactBreakpoint.value
+                    val update = {
+                        if (container.clientWidth <= breakpoint) {
+                            container.classList.add("d-data-table-compact-active")
+                        } else {
+                            container.classList.remove("d-data-table-compact-active")
+                        }
+                    }
+                    update()
+                    val observer =
+                        if (js("typeof ResizeObserver !== 'undefined'") as Boolean) {
+                            WindowResizeObserver { update() }
+                        } else {
+                            null
+                        }
+                    observer?.observe(container)
+                    onDispose { observer?.disconnect() }
+                }
             }
         }) {
             Table(attrs = {
+                classes("d-data-table")
                 attr("aria-rowcount", (props.rows.size + 1).toString())
                 attr("aria-colcount", props.columns.size.toString())
                 style {
@@ -406,21 +429,96 @@ internal fun HtmlDataTable(
                                     }
                                 }
                             Tr(attrs = {
+                                classes("d-data-table-row")
                                 attr("data-row-key", row.key)
                                 attr("aria-rowindex", (index + 2).toString())
                                 attr("aria-selected", row.selected.toString())
                                 row.accessibleLabel?.let { attr("aria-label", it) }
+                                val compactSurface =
+                                    appearance.compactRowAppearance?.takeIf {
+                                        props.sizePreset == DomposableDataTableSize.Compact
+                                    }
+                                if (rowAction != null) {
+                                    attr("role", "button")
+                                    attr("tabindex", "0")
+                                }
+                                if (rowAction != null && appearance.rowInteraction != null) {
+                                    attr("data-d-table-interaction", "true")
+                                }
                                 style {
-                                    (if (row.selected) appearance.selectedContainer else appearance.rowContainer)?.let {
-                                        property("background-color", it.css())
+                                    if (props.sizePreset == DomposableDataTableSize.Compact) {
+                                        property(
+                                            "--d-data-compact-label-width",
+                                            "${appearance.compactLabelMinWidth.value}px",
+                                        )
                                     }
-                                    (if (row.selected) appearance.selectedContent else appearance.rowContent)?.let {
-                                        property("color", it.css())
+                                    val rowContainer =
+                                        if (row.selected) {
+                                            appearance.selectedContainer ?: compactSurface?.container
+                                                ?: appearance.rowContainer
+                                        } else {
+                                            compactSurface?.container ?: appearance.rowContainer
+                                        }
+                                    val rowContent =
+                                        if (row.selected) {
+                                            appearance.selectedContent ?: compactSurface?.content
+                                                ?: appearance.rowContent
+                                        } else {
+                                            compactSurface?.content ?: appearance.rowContent
+                                        }
+                                    if (compactSurface == null || row.selected) {
+                                        rowContainer?.let { property("background-color", it.css()) }
+                                        rowContent?.let { property("color", it.css()) }
                                     }
-                                    appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                    if (props.sizePreset != DomposableDataTableSize.Compact) {
+                                        appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                    }
+                                    if (row.selected) {
+                                        appearance.selectedBorder?.let {
+                                            property(
+                                                "outline",
+                                                "${appearance.selectedBorderWidth?.value ?: 2f}px solid ${it.css()}",
+                                            )
+                                            property("outline-offset", "-2px")
+                                        }
+                                    }
+                                    compactSurface?.let { compact ->
+                                        compact.textAppearance?.let { applyCatalogTextAppearance(it) }
+                                        compact.container?.let { property("--d-data-compact-container", it.css()) }
+                                            ?: compact.tonalElevation?.let {
+                                                val tint =
+                                                    (4.5f * kotlin.math.ln(it.value + 1f) + 2f)
+                                                        .coerceAtMost(100f)
+                                                property(
+                                                    "--d-data-compact-container",
+                                                    "color-mix(in srgb,var(--d-surface-tint,var(--d-primary)) " +
+                                                        "$tint%,var(--d-surface))",
+                                                )
+                                            }
+                                        compact.content?.let { property("--d-data-compact-content", it.css()) }
+                                        compact.border?.let { property("--d-data-compact-border", it.css()) }
+                                        property("--d-data-compact-border-width", "${compact.borderWidth.value}px")
+                                        compact.shape?.let { property("--d-data-compact-radius", it.cssRadius()) }
+                                        compact.shadowElevation?.let {
+                                            property(
+                                                "--d-data-compact-shadow",
+                                                if (it.value ==
+                                                    0f
+                                                ) {
+                                                    "none"
+                                                } else {
+                                                    "0 ${it.value}px ${it.value * 2f}px rgb(0 0 0 / .12)"
+                                                },
+                                            )
+                                        }
+                                    }
+                                    if (rowAction !=
+                                        null
+                                    ) {
+                                        appearance.rowInteraction?.let { tableInteractionAppearance(it) }
+                                    }
                                 }
                                 if (rowAction != null) {
-                                    attr("tabindex", "0")
                                     onClick { rowAction(row.key) }
                                     onKeyDown { event ->
                                         if (event.key == "Enter" || event.key == " ") {
@@ -462,20 +560,6 @@ internal fun HtmlDataTable(
                                                         appearance.cellPadding?.cssPadding()
                                                             ?: props.sizePreset.htmlCellPadding(),
                                                     )
-                                                    val rowContainer =
-                                                        if (row.selected) {
-                                                            appearance.selectedContainer
-                                                        } else {
-                                                            appearance.rowContainer
-                                                        }
-                                                    val rowContent =
-                                                        if (row.selected) {
-                                                            appearance.selectedContent
-                                                        } else {
-                                                            appearance.rowContent
-                                                        }
-                                                    rowContainer?.let { property("background-color", it.css()) }
-                                                    rowContent?.let { property("color", it.css()) }
                                                     appearance.border?.let {
                                                         property(
                                                             "border-bottom",
@@ -500,20 +584,6 @@ internal fun HtmlDataTable(
                                                         appearance.cellPadding?.cssPadding()
                                                             ?: props.sizePreset.htmlCellPadding(),
                                                     )
-                                                    val rowContainer =
-                                                        if (row.selected) {
-                                                            appearance.selectedContainer
-                                                        } else {
-                                                            appearance.rowContainer
-                                                        }
-                                                    val rowContent =
-                                                        if (row.selected) {
-                                                            appearance.selectedContent
-                                                        } else {
-                                                            appearance.rowContent
-                                                        }
-                                                    rowContainer?.let { property("background-color", it.css()) }
-                                                    rowContent?.let { property("color", it.css()) }
                                                     appearance.border?.let {
                                                         property(
                                                             "border-bottom",
@@ -607,13 +677,6 @@ private fun DomposableTextAlignment.htmlTextAlign() =
         DomposableTextAlignment.Center -> "center"
         DomposableTextAlignment.End -> "end"
         DomposableTextAlignment.Justify -> "justify"
-    }
-
-private fun DomposableDataTableSize.htmlCellPadding() =
-    when (this) {
-        DomposableDataTableSize.Compact -> "4px 6px"
-        DomposableDataTableSize.Standard -> "8px"
-        DomposableDataTableSize.Expanded -> "12px"
     }
 
 private fun drawHtmlChart(

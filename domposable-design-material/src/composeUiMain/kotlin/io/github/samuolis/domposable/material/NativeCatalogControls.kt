@@ -51,6 +51,7 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.LocalTextStyle
@@ -97,11 +98,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -110,6 +113,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.state.ToggleableState
@@ -160,6 +164,10 @@ internal fun NativeIconButton(
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.iconButton
     val formEnabled = props.enabled && domposableFormEnabled()
     val checkedState = props.checked
+    if (appearance.interaction != null) {
+        NativeStyledIconButton(props, modifier, appearance, formEnabled, content)
+        return
+    }
     if (checkedState != null) {
         val shape =
             appearance.shape?.nativeShape() ?: when (props.variant) {
@@ -368,6 +376,194 @@ internal fun NativeIconButton(
                 verticalAlignment = Alignment.CenterVertically,
             ) { content() }
         }
+    }
+}
+
+@Composable
+private fun NativeStyledIconButton(
+    props: DomposableIconButtonProps,
+    modifier: io.github.samuolis.domposable.ui.DomposableModifier,
+    appearance: DomposableButtonAppearance,
+    enabled: Boolean,
+    content: @Composable () -> Unit,
+) {
+    val tokens = LocalDomposableTokens.current
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val hovered by interaction.collectIsHoveredAsState()
+    val focused by interaction.collectIsFocusedAsState()
+    val selected = props.checked == true
+    val defaultContainer =
+        when (props.variant) {
+            DomposableIconButtonVariant.Standard -> {
+                if (selected) {
+                    tokens.colors.secondaryContainer
+                        ?: tokens.colors.surfaceVariant
+                } else {
+                    tokens.colors.surface
+                }
+            }
+
+            DomposableIconButtonVariant.Filled -> {
+                if (selected) {
+                    tokens.colors.primary
+                } else {
+                    tokens.colors.surfaceContainerHighest
+                        ?: tokens.colors.surfaceVariant
+                }
+            }
+
+            DomposableIconButtonVariant.FilledTonal -> {
+                tokens.colors.secondaryContainer ?: tokens.colors.surfaceVariant
+            }
+
+            DomposableIconButtonVariant.Outlined -> {
+                tokens.colors.surface
+            }
+        }
+    val defaultContent =
+        when (props.variant) {
+            DomposableIconButtonVariant.Standard -> {
+                if (selected) {
+                    tokens.colors.onSecondaryContainer
+                        ?: tokens.colors.onSurface
+                } else {
+                    tokens.colors.onSurface
+                }
+            }
+
+            DomposableIconButtonVariant.Filled -> {
+                if (selected) {
+                    tokens.colors.onPrimary
+                } else {
+                    tokens.colors.onSurfaceVariant
+                        ?: tokens.colors.onSurface
+                }
+            }
+
+            DomposableIconButtonVariant.FilledTonal -> {
+                tokens.colors.onSecondaryContainer ?: tokens.colors.onSurface
+            }
+
+            DomposableIconButtonVariant.Outlined -> {
+                tokens.colors.onSurface
+            }
+        }
+    val container =
+        (appearance.container?.takeIf { enabled } ?: appearance.disabledContainer?.takeIf { !enabled })?.nativeColor()
+            ?: defaultContainer.nativeColor()
+    val contentColor =
+        (appearance.content?.takeIf { enabled } ?: appearance.disabledContent?.takeIf { !enabled })?.nativeColor()
+            ?: defaultContent.nativeColor()
+    val stateContainer =
+        when {
+            !enabled -> {
+                container
+            }
+
+            pressed -> {
+                appearance.interaction?.pressedContainer?.nativeColor()
+                    ?: appearance.interaction?.stateLayerOpacity?.let {
+                        contentColor
+                            .copy(
+                                alpha = it.pressed,
+                            ).compositeOver(container)
+                    }
+                    ?: container
+            }
+
+            hovered -> {
+                appearance.interaction?.hoveredContainer?.nativeColor()
+                    ?: appearance.interaction?.stateLayerOpacity?.let {
+                        contentColor
+                            .copy(
+                                alpha = it.hovered,
+                            ).compositeOver(container)
+                    }
+                    ?: container
+            }
+
+            focused -> {
+                appearance.interaction?.stateLayerOpacity?.let {
+                    contentColor
+                        .copy(
+                            alpha = it.focused,
+                        ).compositeOver(container)
+                }
+                    ?: container
+            }
+
+            else -> {
+                container
+            }
+        }
+    val stateContent =
+        when {
+            !enabled -> contentColor
+            pressed -> appearance.interaction?.pressedContent?.nativeColor() ?: contentColor
+            hovered -> appearance.interaction?.hoveredContent?.nativeColor() ?: contentColor
+            else -> contentColor
+        }
+    val shape =
+        appearance.shape?.nativeShape() ?: when (props.variant) {
+            DomposableIconButtonVariant.Standard -> IconButtonDefaults.standardShape
+            DomposableIconButtonVariant.Filled -> IconButtonDefaults.filledShape
+            DomposableIconButtonVariant.FilledTonal -> IconButtonDefaults.filledShape
+            DomposableIconButtonVariant.Outlined -> IconButtonDefaults.outlinedShape
+        }
+    val ring = appearance.interaction
+    val visual =
+        modifier
+            .toComposeModifier()
+            .alpha(if (!enabled) appearance.disabledOpacity ?: 1f else 1f)
+            .drawButtonFocusRing(
+                focused && enabled,
+                ring?.let { it.focusRingColor?.nativeColor() ?: MaterialTheme.colorScheme.primary },
+                ring?.focusRingWidth?.value ?: 3f,
+                ring?.focusRingOffset?.value ?: 3f,
+                shape,
+            ).scale(
+                when {
+                    enabled && pressed -> appearance.pressedScale
+                    enabled && hovered -> appearance.hoveredScale
+                    else -> 1f
+                },
+            ).minimumInteractiveComponentSize()
+            .defaultMinSize(
+                minWidth = (appearance.minWidth?.value ?: 0f).dp,
+                minHeight =
+                    (
+                        appearance.minHeight?.value
+                            ?: 0f
+                    ).dp,
+            ).clip(shape)
+            .background(stateContainer, shape)
+            .then(
+                appearance.border?.let {
+                    Modifier.border(BorderStroke(appearance.borderWidth?.value?.dp ?: 1.dp, it.nativeColor()), shape)
+                }
+                    ?: Modifier,
+            ).toggleable(
+                value = selected,
+                enabled = enabled,
+                role = Role.Button,
+                interactionSource = interaction,
+                indication = null,
+                onValueChange = { props.onClick() },
+            ).semantics {
+                contentDescription = props.label
+                props.checked?.let {
+                    this.selected = it
+                    stateDescription = if (it) "Selected" else "Not selected"
+                }
+            }.padding(
+                start = (appearance.contentPadding?.start?.value ?: 0f).dp,
+                top = (appearance.contentPadding?.top?.value ?: 0f).dp,
+                end = (appearance.contentPadding?.end?.value ?: 0f).dp,
+                bottom = (appearance.contentPadding?.bottom?.value ?: 0f).dp,
+            )
+    Box(visual, contentAlignment = Alignment.Center) {
+        CompositionLocalProvider(LocalContentColor provides stateContent) { content() }
     }
 }
 

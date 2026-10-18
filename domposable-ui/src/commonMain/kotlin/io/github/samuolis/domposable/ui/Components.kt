@@ -131,11 +131,16 @@ data class DomposableLinkProps(
     val onClick: (() -> Unit)? = null,
     val textStyle: DomposableTextStyle = DomposableTextStyle.Body,
     val appearance: DomposableTextAppearance? = null,
+    val buttonAppearance: DomposableButtonAppearance? = null,
+    val buttonStyle: DomposableButtonStyle = DomposableButtonStyle.Filled,
+    val content: (@Composable () -> Unit)? = null,
 )
 
 @DomposableComponent("Box")
 data class DomposableBoxProps(
+    /** Horizontal placement; also supplies the vertical default for existing callers. */
     val alignment: DomposableAlignment = DomposableAlignment.Start,
+    val verticalAlignment: DomposableAlignment = alignment,
 )
 
 @DomposableComponent("LazyColumn")
@@ -173,8 +178,10 @@ data class DomposableTextProps(
     val color: DomposableColor? = null,
     val headingLevel: Int? = null,
     val appearance: DomposableTextAppearance? = null,
+    val runs: List<DomposableTextRun> = emptyList(),
 ) {
     init {
+        require(runs.isEmpty() || text == runs.joinToString("") { it.text })
         require(headingLevel == null || headingLevel in HTML_HEADING_LEVELS)
     }
 }
@@ -435,6 +442,31 @@ data class DomposableMenuProps(
     val anchorOffset: DomposableOffset = DomposableOffset(),
 )
 
+/**
+ * Bounds of the modal surface itself rather than its modifier wrapper. Native dialogs/sheets
+ * retain platform placement; [alignment] adapts the HTML surface to the browser viewport.
+ * [padding] controls Basic/FullScreen dialog and sheet content; Material picker/alert variants
+ * retain their platform content spacing.
+ */
+data class DomposableModalLayout(
+    val maxWidth: DomposableLength? = null,
+    val fillViewportWidth: Boolean = false,
+    val padding: DomposableInsets? = null,
+    val heightFraction: Float? = null,
+    val maxHeight: DomposableLength? = null,
+    val maxViewportFraction: Float? = null,
+    val viewportInset: DomposableLength = 16.dp,
+    val alignment: DomposableModalAlignment = DomposableModalAlignment.Center,
+    val swipeToDismiss: Boolean = true,
+) {
+    init {
+        require(heightFraction == null || heightFraction in 0f..1f)
+        require(maxViewportFraction == null || maxViewportFraction in 0f..1f)
+    }
+}
+
+enum class DomposableModalAlignment { Center, Bottom, BottomOnCompact }
+
 @DomposableComponent("Dialog")
 data class DomposableDialogProps(
     val title: String,
@@ -442,6 +474,8 @@ data class DomposableDialogProps(
     val actions: @Composable () -> Unit = {},
     val appearance: DomposableSurfaceAppearance? = null,
     val variant: DomposableDialogVariant = DomposableDialogVariant.Alert,
+    val headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    val layout: DomposableModalLayout = DomposableModalLayout(),
 )
 
 @DomposableComponent("BottomSheet")
@@ -450,6 +484,8 @@ data class DomposableBottomSheetProps(
     val onDismiss: () -> Unit,
     val appearance: DomposableSurfaceAppearance? = null,
     val modal: Boolean = true,
+    val headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    val layout: DomposableModalLayout = DomposableModalLayout(),
 )
 
 @DomposableComponent("Scaffold")
@@ -607,13 +643,26 @@ fun DomposableTheme(
     onClick: (() -> Unit)? = null,
     textStyle: DomposableTextStyle = DomposableTextStyle.Body,
     appearance: DomposableTextAppearance? = null,
-) = DomposableLink(DomposableLinkProps(label, href, onClick, textStyle, appearance), modifier)
+    buttonAppearance: DomposableButtonAppearance? = null,
+    buttonStyle: DomposableButtonStyle = DomposableButtonStyle.Filled,
+    content: (@Composable () -> Unit)? = null,
+) = DomposableLink(
+    DomposableLinkProps(label, href, onClick, textStyle, appearance, buttonAppearance, buttonStyle, content),
+    modifier,
+)
 
 @Composable fun DomposableBox(
     modifier: DomposableModifier = DomposableModifier,
     alignment: DomposableAlignment = DomposableAlignment.Start,
     content: @Composable () -> Unit,
 ) = DomposableBox(DomposableBoxProps(alignment), modifier, content)
+
+@Composable fun DomposableBox(
+    modifier: DomposableModifier = DomposableModifier,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
+    verticalAlignment: DomposableAlignment,
+    content: @Composable () -> Unit,
+) = DomposableBox(DomposableBoxProps(alignment, verticalAlignment), modifier, content)
 
 @Composable fun DomposableCard(
     modifier: DomposableModifier = DomposableModifier,
