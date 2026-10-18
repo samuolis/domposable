@@ -5,12 +5,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableBottomSheet
 import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableCheckbox
+import io.github.samuolis.domposable.ui.DomposableChip
+import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableIconButtonProps
+import io.github.samuolis.domposable.ui.DomposableMenu
+import io.github.samuolis.domposable.ui.DomposableMenuItem
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableModifierElement
 import io.github.samuolis.domposable.ui.DomposableSelect
@@ -35,12 +40,73 @@ import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.MouseEvent
+import org.w3c.dom.events.MouseEventInit
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
+    @Test
+    fun modalBackdropClicksDismissButContentClicksDoNot() {
+        for (sheet in listOf(false, true)) {
+            var dismissed = 0
+            withHost(content = {
+                if (sheet) {
+                    DomposableBottomSheet("Options", { dismissed++ }) { DomposableText("Sheet body") }
+                } else {
+                    DomposableDialog("Options", { dismissed++ }) { DomposableText("Dialog body") }
+                }
+            }) { root ->
+                val dialog = root.querySelector("dialog") as HTMLElement
+                (dialog.querySelector("h2") as HTMLElement).click()
+                assertEquals(0, dismissed, "Content clicks must leave the modal open")
+                dialog.dispatchEvent(MouseEvent("click", MouseEventInit(bubbles = true, clientX = 1, clientY = 1)))
+                assertEquals(1, dismissed, "The backdrop must dismiss the modal")
+            }
+        }
+    }
+
+    @Test
+    fun menuSurfaceIsOpaqueAndAboveHostStackingContexts() =
+        withHost(content = {
+            Div(attrs = {
+                style {
+                    property("position", "fixed")
+                    property("inset", "0 0 auto")
+                    property("height", "160px")
+                    property("z-index", "9999")
+                    property("background", "red")
+                }
+            }) { Text("Application header") }
+            DomposableBox(DomposableModifier.zIndex(0f)) {
+                DomposableMenu(true, {}, listOf(DomposableMenuItem("Action", {})))
+            }
+        }) { root ->
+            val menu = root.querySelector("[role=menu]") as HTMLElement
+            val background = window.getComputedStyle(menu).backgroundColor
+            assertTrue(background != "transparent" && background != "rgba(0, 0, 0, 0)", "Menus need a surface")
+            val bounds = menu.getBoundingClientRect()
+            val hit = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2)
+            assertTrue(menu.contains(hit), "Host headers must not paint above a menu")
+        }
+
+    @Test
+    fun chipTouchTargetDoesNotPaintASecondSelectedSurface() {
+        for (elevated in listOf(false, true)) {
+            withHost(content = {
+                DomposableChip("Selected", {}, selected = true, elevated = elevated)
+            }) { root ->
+                val chip = root.querySelector(".d-chip") as HTMLElement
+                val style = window.getComputedStyle(chip)
+                assertEquals("rgba(0, 0, 0, 0)", style.backgroundColor)
+                assertEquals("0px", style.borderTopWidth)
+                assertEquals("none", style.boxShadow)
+            }
+        }
+    }
+
     @Test
     fun stackingOrderIncludesBackgroundBeforeTheZIndexModifier() =
         withHost(content = {
