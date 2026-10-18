@@ -34,7 +34,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableCarousel](#domposablecarousel) | Containment | 9 |
 | [DomposableCheckbox](#domposablecheckbox) | Selection | 9 |
 | [DomposableChip](#domposablechip) | Selection | 9 |
-| [DomposableColumn](#domposablecolumn) | Core / additional controls | 2 |
+| [DomposableColumn](#domposablecolumn) | Core / additional controls | 3 |
 | [DomposableDataTable](#domposabledatatable) | Core / additional controls | 9 |
 | [DomposableDatePicker](#domposabledatepicker) | Input | 8 |
 | [DomposableDateRangePicker](#domposabledaterangepicker) | Input | 9 |
@@ -46,7 +46,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableFloatingActionButton](#domposablefloatingactionbutton) | Actions | 5 |
 | [DomposableFloatingActionButtonMenu](#domposablefloatingactionbuttonmenu) | Expressive actions | 5 |
 | [DomposableFloatingToolbar](#domposablefloatingtoolbar) | Expressive actions | 6 |
-| [DomposableFlowRow](#domposableflowrow) | Core / additional controls | 1 |
+| [DomposableFlowRow](#domposableflowrow) | Core / additional controls | 4 |
 | [DomposableForm](#domposableform) | Core / additional controls | 4 |
 | [DomposableIcon](#domposableicon) | Graphics | 3 |
 | [DomposableIconButton](#domposableiconbutton) | Actions | 6 |
@@ -70,7 +70,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableRadioButton](#domposableradiobutton) | Selection | 9 |
 | [DomposableRangeSlider](#domposablerangeslider) | Selection | 8 |
 | [DomposableRichHtml](#domposablerichhtml) | Core / additional controls | 6 |
-| [DomposableRow](#domposablerow) | Core / additional controls | 3 |
+| [DomposableRow](#domposablerow) | Core / additional controls | 4 |
 | [DomposableScaffold](#domposablescaffold) | Structure | 9 |
 | [DomposableScrim](#domposablescrim) | Containment | 4 |
 | [DomposableScrollField](#domposablescrollfield) | Input | 8 |
@@ -130,7 +130,7 @@ Input. [Full API and overloads](https://samuolis.github.io/domposable/api/dompos
 
 ## DomposableAvatar
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-avatar.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-avatar-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L358)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-avatar.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-avatar-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L366)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -141,7 +141,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableBadge
 
-Communication. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-badge.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-badge-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L334)
+Communication. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-badge.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-badge-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L342)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -163,7 +163,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableBanner
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-banner.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-banner-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L366)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-banner.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-banner-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L374)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -183,7 +183,7 @@ Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/d
 
 ## DomposableBottomSheet
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L434)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L442)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -207,7 +207,7 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 
 ## DomposableBox
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-box.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-box-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L126)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-box.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-box-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L134)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -215,7 +215,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableButton
 
-Actions. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-button.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-button-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L172)
+Actions. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-button.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-button-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L180)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -240,7 +240,7 @@ Expressive actions. [Full API and overloads](https://samuolis.github.io/domposab
 
 ## DomposableCard
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-card.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-card-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L290)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-card.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-card-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L298)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -270,7 +270,7 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 
 ## DomposableCheckbox
 
-Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-checkbox.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-checkbox-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L234)
+Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-checkbox.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-checkbox-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L242)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -286,7 +286,7 @@ Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/do
 
 ## DomposableChip
 
-Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-chip.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-chip-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L345)
+Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-chip.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-chip-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L353)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -302,12 +302,13 @@ Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/do
 
 ## DomposableColumn
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-column.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-column-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L98)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-column.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-column-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L101)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
 | `gap` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-length/index.html">DomposableLength</a></code> | `0.dp` |
 | `alignment` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-alignment/index.html">DomposableAlignment</a></code> | `DomposableAlignment.Start` |
+| `arrangement` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-arrangement/index.html">DomposableArrangement</a></code> | `DomposableArrangement.Start` |
 
 ## DomposableDataTable
 
@@ -358,7 +359,7 @@ Input. [Full API and overloads](https://samuolis.github.io/domposable/api/dompos
 
 ## DomposableDialog
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L425)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L433)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -382,7 +383,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableDivider
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-divider.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-divider-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L323)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-divider.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-divider-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L331)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -456,11 +457,14 @@ Expressive actions. [Full API and overloads](https://samuolis.github.io/domposab
 
 ## DomposableFlowRow
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-flow-row.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-flow-row-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L111)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-flow-row.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-flow-row-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L116)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
 | `gap` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-length/index.html">DomposableLength</a></code> | `8.dp` |
+| `arrangement` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-arrangement/index.html">DomposableArrangement</a></code> | `DomposableArrangement.Start` |
+| `alignment` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-alignment/index.html">DomposableAlignment</a>?</code> | `null` |
+| `rowGap` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-length/index.html">DomposableLength</a></code> | `gap` |
 
 ## DomposableForm
 
@@ -475,7 +479,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableIcon
 
-Graphics. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L316)
+Graphics. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L324)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -485,7 +489,7 @@ Graphics. [Full API and overloads](https://samuolis.github.io/domposable/api/dom
 
 ## DomposableIconButton
 
-Actions. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon-button.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon-button-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L183)
+Actions. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon-button.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-icon-button-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L191)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -498,7 +502,7 @@ Actions. [Full API and overloads](https://samuolis.github.io/domposable/api/domp
 
 ## DomposableImage
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-image.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-image-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L307)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-image.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-image-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L315)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -520,7 +524,7 @@ Communication. [Full API and overloads](https://samuolis.github.io/domposable/ap
 
 ## DomposableLazyColumn
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-column.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-column-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L131)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-column.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-column-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L139)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -530,7 +534,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableLazyGrid
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-grid.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-grid-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L145)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-grid.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-grid-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L153)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -541,7 +545,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableLazyRow
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-row.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-row-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L138)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-row.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-lazy-row-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L146)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -568,7 +572,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableLink
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-link.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-link-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L117)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-link.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-link-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L125)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -610,7 +614,7 @@ Expressive communication. [Full API and overloads](https://samuolis.github.io/do
 
 ## DomposableMenu
 
-Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L417)
+Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L425)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -643,7 +647,7 @@ Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/do
 
 ## DomposableNavigationBar
 
-Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L405)
+Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L413)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -685,7 +689,7 @@ Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/d
 
 ## DomposableProgress
 
-Communication. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-progress.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-progress-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L373)
+Communication. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-progress.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-progress-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L381)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -712,7 +716,7 @@ Gestures. [Full API and overloads](https://samuolis.github.io/domposable/api/dom
 
 ## DomposableRadioButton
 
-Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-radio-button.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-radio-button-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L259)
+Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-radio-button.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-radio-button-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L267)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -756,17 +760,18 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableRow
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-row.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-row-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L104)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-row.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-row-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L108)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
 | `gap` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-length/index.html">DomposableLength</a></code> | `0.dp` |
 | `alignment` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-alignment/index.html">DomposableAlignment</a></code> | `DomposableAlignment.Start` |
 | `stretch` | <code>Boolean</code> | `false` |
+| `arrangement` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-arrangement/index.html">DomposableArrangement</a></code> | `DomposableArrangement.Start` |
 
 ## DomposableScaffold
 
-Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L442)
+Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L450)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -863,7 +868,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableSlider
 
-Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-slider.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-slider-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L276)
+Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-slider.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-slider-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L284)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -900,7 +905,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableSpacer
 
-Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-spacer.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-spacer-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L329)
+Core / additional controls. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-spacer.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-spacer-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L337)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -923,7 +928,7 @@ Expressive actions. [Full API and overloads](https://samuolis.github.io/domposab
 
 ## DomposableSurface
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-surface.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-surface-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L301)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-surface.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-surface-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L309)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -946,7 +951,7 @@ Gestures. [Full API and overloads](https://samuolis.github.io/domposable/api/dom
 
 ## DomposableSwitch
 
-Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-switch.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-switch-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L247)
+Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-switch.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-switch-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L255)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -973,7 +978,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableTabs
 
-Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-tabs.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-tabs-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L385)
+Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-tabs.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-tabs-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L393)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -988,7 +993,7 @@ Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/d
 
 ## DomposableText
 
-Typography. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L159)
+Typography. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L167)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -1000,7 +1005,7 @@ Typography. [Full API and overloads](https://samuolis.github.io/domposable/api/d
 
 ## DomposableTextField
 
-Input. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text-field.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text-field-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L198)
+Input. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text-field.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-text-field-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L206)
 
 | Parameter | Type | Default |
 | --- | --- | --- |

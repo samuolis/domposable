@@ -12,6 +12,10 @@ Use Kotlin/JS with Compose HTML for the web host. Wasm is an optional separate C
 
 Migrate one feature first. Verify semantics, focus/keyboard behavior and measured content breakpoints on each target. Use the [coverage matrix](coverage.md) to identify controls needing a custom renderer.
 
+## Layout arrangements
+
+The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing source calls keep their layout defaults after recompilation, but the added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
+
 ## Direct calls and the expanded provider
 
 Feature code can replace `DomposableChip(DomposableChipProps(label, onClick, selected))` with `DomposableChip(label, onClick, selected = selected)`. Existing props overloads remain available. The demo and modular shop use direct calls throughout; props stay at custom renderer boundaries.

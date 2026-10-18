@@ -45,11 +45,23 @@ test('catalog menu has an opaque surface above the app header and restores focus
   await expect(trigger).toBeFocused();
 });
 
+test('action chips remain actions while filter chips expose their controlled selection', async ({ page }) => {
+  await page.goto('/#/material/compare/light/selection');
+  for (const variant of ['assist', 'suggestion']) {
+    const chip = page.locator(`.d-chip-${variant}`).first();
+    await expect(chip).toBeVisible();
+    await expect(chip).not.toHaveAttribute('aria-pressed', /.+/);
+    await chip.click();
+    await expect(chip).not.toHaveAttribute('aria-pressed', /.+/);
+  }
+  await expect(page.locator('.d-chip-filter').first()).toHaveAttribute('aria-pressed', /^(true|false)$/);
+});
+
 for (const theme of ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-light', 'overrides-dark', 'expressive-light', 'expressive-dark']) {
   test(`chip interaction paint stays inside its visual surface in ${theme}`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/#/material/compare/${theme}/selection`);
-    const chip = page.locator('.d-chip').first();
+    const chip = page.locator('.d-chip-filter').first();
     await expect(chip).toBeVisible();
     for (const selected of ['false', 'true']) {
       if (await chip.getAttribute('aria-pressed') !== selected) await chip.click();
@@ -84,7 +96,7 @@ for (const theme of ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-li
 test('forced colors retain chip selection and a visible keyboard focus ring without painting its touch target', async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' });
   await page.goto('/#/material/compare/light/selection');
-  const chip = page.locator('.d-chip').first();
+  const chip = page.locator('.d-chip-filter').first();
   await expect(chip).toBeVisible();
   if (await chip.getAttribute('aria-pressed') !== 'true') await chip.click();
   await page.keyboard.press('Tab');

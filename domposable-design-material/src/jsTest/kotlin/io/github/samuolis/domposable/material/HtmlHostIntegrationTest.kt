@@ -2,6 +2,7 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
@@ -52,6 +53,59 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
+    @Test
+    fun actionChipsKeepPopupSemanticsWithoutBecomingToggleButtons() {
+        for (variant in DomposableChipVariant.entries) {
+            withHost(content = {
+                DomposableChip(
+                    "Open options",
+                    {},
+                    modifier =
+                        DomposableModifier.htmlAttributes {
+                            attr("aria-haspopup", "dialog")
+                            attr("aria-expanded", "true")
+                        },
+                    variant = variant,
+                    selected = true,
+                )
+            }) { root ->
+                val chip = root.querySelector(".d-chip") as HTMLElement
+                val selectable = variant == DomposableChipVariant.Filter || variant == DomposableChipVariant.Input
+                assertEquals(if (selectable) "true" else null, chip.getAttribute("aria-pressed"))
+                assertEquals("true", chip.getAttribute("data-selected"))
+                assertEquals("dialog", chip.getAttribute("aria-haspopup"))
+                assertEquals("true", chip.getAttribute("aria-expanded"))
+            }
+        }
+    }
+
+    @Test
+    fun inputChipPaddingTracksItsIconSlotsLikeMaterial() {
+        for (touchSize in listOf(0, 48)) {
+            for (leading in listOf(false, true)) {
+                for (trailing in listOf(false, true)) {
+                    withHost(content = {
+                        DomposableChip(
+                            "Label",
+                            {},
+                            variant = DomposableChipVariant.Input,
+                            appearance = DomposableItemAppearance(minimumInteractiveSize = touchSize.dp),
+                            leadingIcon = if (leading) ({ DomposableText("L") }) else null,
+                            trailingIcon = if (trailing) ({ DomposableText("R") }) else null,
+                        )
+                    }) { root ->
+                        val chip = root.querySelector(".d-chip") as HTMLElement
+                        val surface = chip.querySelector(".d-chip-surface") as HTMLElement
+                        val style = window.getComputedStyle(if (touchSize == 0) chip else surface)
+                        // The CSS border occupies one pixel of Material's internal 4/8 dp padding.
+                        assertEquals(if (leading) "7px" else "3px", style.paddingLeft)
+                        assertEquals(if (trailing) "7px" else "3px", style.paddingRight)
+                    }
+                }
+            }
+        }
+    }
+
     @Test
     fun chipIconSpacingUsesMaterialDefaultsAndHonorsOverrides() {
         for (touchSize in listOf(0, 48)) {
