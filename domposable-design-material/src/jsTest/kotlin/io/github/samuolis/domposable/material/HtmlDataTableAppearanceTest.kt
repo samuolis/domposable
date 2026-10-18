@@ -25,6 +25,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+private const val SPACED_TABLE_WIDTH = 328.0
+private const val TABLE_COLUMN_GAP = 8.0
+private const val TABLE_ROW_GAP = 6.0
+private const val GEOMETRY_TOLERANCE = 0.5
+
 class HtmlDataTableAppearanceTest {
     @Test
     fun compactRowsUseSurfaceAndInteractionAppearanceAndKeepKeyboardActivation() {
@@ -105,20 +110,8 @@ class HtmlDataTableAppearanceTest {
             val table = root.querySelector("[data-testid=spaced-table] table") as HTMLElement
             val headerRow = root.querySelector("thead tr") as HTMLElement
             val firstDataRow = root.querySelector("tbody tr[data-row-key=one]") as HTMLElement
-            val secondDataRow = root.querySelector("tbody tr[data-row-key=two]") as HTMLElement
             val headerFirstCell = root.querySelector("thead th[scope=col]") as HTMLElement
-            val headerLastCell = root.querySelector("thead th:last-child") as HTMLElement
-            val headerNextCell = root.querySelector("thead th:nth-child(2)") as HTMLElement
-
-            assertExplicitTableGeometry(
-                table,
-                headerRow,
-                firstDataRow,
-                secondDataRow,
-                headerFirstCell,
-                headerLastCell,
-                headerNextCell,
-            )
+            assertExplicitTableGeometry(table)
             assertExplicitTableAppearance(headerRow, firstDataRow)
             assertExplicitTableSemantics(root, table, headerRow, firstDataRow, headerFirstCell)
         } finally {
@@ -253,35 +246,33 @@ private fun assertCompactRowStyle(row: HTMLElement) {
     assertEquals("8px", window.getComputedStyle(row).marginTop)
 }
 
-private fun assertExplicitTableGeometry(
-    table: HTMLElement,
-    headerRow: HTMLElement,
-    firstDataRow: HTMLElement,
-    secondDataRow: HTMLElement,
-    headerFirstCell: HTMLElement,
-    headerLastCell: HTMLElement,
-    headerNextCell: HTMLElement,
-) {
+private fun assertExplicitTableGeometry(table: HTMLElement) {
+    val headerRow = table.querySelector("thead tr") as HTMLElement
+    val firstDataRow = table.querySelector("tbody tr[data-row-key=one]") as HTMLElement
+    val secondDataRow = table.querySelector("tbody tr[data-row-key=two]") as HTMLElement
+    val headerFirstCell = table.querySelector("thead th[scope=col]") as HTMLElement
+    val headerLastCell = table.querySelector("thead th:last-child") as HTMLElement
+    val headerNextCell = table.querySelector("thead th:nth-child(2)") as HTMLElement
     val tableBounds = table.getBoundingClientRect()
     val firstCellBounds = headerFirstCell.getBoundingClientRect()
     val lastCellBounds = headerLastCell.getBoundingClientRect()
-    assertEquals(328.0, tableBounds.width, 0.5)
-    assertEquals(tableBounds.left, firstCellBounds.left, 0.5)
-    assertEquals(tableBounds.right, lastCellBounds.right, 0.5)
+    assertEquals(SPACED_TABLE_WIDTH, tableBounds.width, GEOMETRY_TOLERANCE)
+    assertEquals(tableBounds.left, firstCellBounds.left, GEOMETRY_TOLERANCE)
+    assertEquals(tableBounds.right, lastCellBounds.right, GEOMETRY_TOLERANCE)
     assertEquals(
-        8.0,
+        TABLE_COLUMN_GAP,
         headerNextCell.getBoundingClientRect().left - firstCellBounds.right,
-        0.5,
+        GEOMETRY_TOLERANCE,
     )
     assertEquals(
-        6.0,
+        TABLE_ROW_GAP,
         firstDataRow.getBoundingClientRect().top - headerRow.getBoundingClientRect().bottom,
-        0.5,
+        GEOMETRY_TOLERANCE,
     )
     assertEquals(
-        6.0,
+        TABLE_ROW_GAP,
         secondDataRow.getBoundingClientRect().top - firstDataRow.getBoundingClientRect().bottom,
-        0.5,
+        GEOMETRY_TOLERANCE,
     )
 }
 
