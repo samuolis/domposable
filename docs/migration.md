@@ -14,6 +14,8 @@ Migrate one feature first. Verify semantics, focus/keyboard behavior and measure
 
 ## Layout arrangements
 
+`DomposableTextStyle.Inherit` is an optional addition for adapters that already own text styling. Existing presets are unchanged. Custom providers with an exhaustive text-style mapping must add the new enum case: inherit native ambient typography or HTML host typography, then apply explicit appearance overrides. Inherited HTML headings retain their heading semantics without forcing title typography.
+
 The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing Row/Column calls keep their layout defaults after recompilation. HTML FlowRow now defaults to top alignment rather than stretching, matching native; specify a different `alignment` when needed. The added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
 
 ## Anchored and rich-text menus

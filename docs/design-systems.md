@@ -37,6 +37,8 @@ Import `DomposableButton`, `DomposableText` and `DomposableModifier` from `io.gi
 
 CSS still implements the library's HTML renderer. Application CSS is an extension for a specialized visual or behavior that the shared API cannot express, rather than a second implementation of every standard control. If the missing behavior is generally useful, prefer extending the shared component contract so both renderers can support it.
 
+When an existing text adapter already owns typography, use `DomposableTextStyle.Inherit` rather than another fixed preset. Native text inherits the surrounding Material text style; HTML leaves host classes and CSS typography variables in control, including on semantic headings. Explicit text appearance values still override inherited values. Ordinary text keeps its existing Body, Title or Label default.
+
 For example, this application-owned account summary belongs in a business or feature package and composes the same controls on every target:
 
 ```kotlin

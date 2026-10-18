@@ -5,8 +5,8 @@ import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTypography
 import io.github.samuolis.domposable.foundation.DomposableTypographyRole
-import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.htmlAttributes
 import io.github.samuolis.domposable.ui.testId
 import kotlinx.browser.document
@@ -48,28 +48,31 @@ class HtmlTypographyParityTest {
     fun inheritedTextUsesHostTypographyAndKeepsExplicitAppearanceOverrides() {
         val root = document.createElement("div") as HTMLElement
         val styles = document.createElement("style")
-        styles.textContent = ".host-typography { font-size: var(--host-size); line-height: var(--host-line); font-weight: var(--host-weight); }"
+        styles.textContent =
+            ".host-typography { font-size: var(--host-size); line-height: var(--host-line); font-weight: var(--host-weight); }"
         document.head!!.appendChild(styles)
         root.style.setProperty("--host-size", "13px")
         root.style.setProperty("--host-line", "19px")
         root.style.setProperty("--host-weight", "300")
         document.body!!.appendChild(root)
-        val modifier = DomposableModifier.testId("inherited").htmlAttributes { classes("host-typography") }
-        val headingModifier = DomposableModifier.testId("inherited-heading").htmlAttributes { classes("host-typography") }
-        val overriddenModifier = DomposableModifier.testId("overridden").htmlAttributes { classes("host-typography") }
+        val modifier = DomposableModifier.htmlAttributes { classes("host-typography") }
         val composition =
             renderComposable(root) {
                 DomposableMaterialTheme {
-                    DomposableText("Inherited", modifier = modifier, style = DomposableTextStyle.Inherit)
+                    DomposableText(
+                        "Inherited",
+                        modifier = modifier.testId("inherited"),
+                        style = DomposableTextStyle.Inherit,
+                    )
                     DomposableText(
                         "Inherited heading",
-                        modifier = headingModifier,
+                        modifier = modifier.testId("inherited-heading"),
                         style = DomposableTextStyle.Inherit,
                         headingLevel = 3,
                     )
                     DomposableText(
                         "Overridden",
-                        modifier = overriddenModifier,
+                        modifier = modifier.testId("overridden"),
                         style = DomposableTextStyle.Inherit,
                         appearance =
                             DomposableTextAppearance(
