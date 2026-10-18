@@ -61,7 +61,7 @@ def main(argv=None):
     parser.add_argument('--build-framework', action='store_true', help='Compile the framework while the isolated simulator boots')
     args = parser.parse_args(argv)
     framework = subprocess.Popen([
-        './gradlew', ':demo:linkDebugFrameworkIosSimulatorArm64', ':demo:compileKotlinIosArm64',
+        './gradlew', ':demo:linkDebugFrameworkIosSimulatorArm64',
         '--no-daemon', '--console=plain',
     ], cwd=root) if args.build_framework else None
     try:
