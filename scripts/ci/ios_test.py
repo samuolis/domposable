@@ -23,7 +23,7 @@ def run_tests(framework_build=None):
         subprocess.run(["xcrun", "simctl", "bootstatus", identifier, "-b"], check=True, timeout=600)
         subprocess.run(["xcrun", "simctl", "status_bar", identifier, "override", "--time", "2026-10-11T09:41:00.000Z", "--batteryState", "charged", "--batteryLevel", "100", "--wifiMode", "active", "--wifiBars", "3"], check=True)
         if framework_build is not None:
-            result_code = framework_build.wait(timeout=1200)
+            result_code = framework_build.wait(timeout=1800)
             if result_code:
                 raise subprocess.CalledProcessError(result_code, framework_build.args)
         subprocess.run([
