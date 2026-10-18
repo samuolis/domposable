@@ -64,7 +64,7 @@ jobs:
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
       - run: python -m unittest discover -s scripts/tests -v
-      - run: xvfb-run -a ./gradlew jvmTest :domposable-ui:jsBrowserTest :domposable-design-material:jsBrowserTest :domposable-navigation3:jsBrowserTest :demo:testAndroidHostTest :domposable-design-material:testAndroidHostTest :androidApp:assembleDebug :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs dokkaGenerate --continue --console=plain
+      - run: xvfb-run -a ./gradlew jvmTest :domposable-ui:jsBrowserTest :domposable-design-material:jsBrowserTest :domposable-navigation3:jsBrowserTest :demo:testAndroidHostTest :domposable-design-material:testAndroidHostTest :androidApp:assembleDebug :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs dokkaGenerate --continue --console=plain
       - name: Export compiled references for review
         run: python scripts/ci/api_reference.py --output-dir build/generated-reference
       - name: Verify the Android demo version derived from SemVer
@@ -75,13 +75,6 @@ jobs:
         run: |
           python scripts/ci/kobweb_export.py
           npx playwright test --config playwright.integrations.config.ts
-      - run: python scripts/ci/browser_preview.py
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: browser-preview
-          path: build/browser-preview/
-          retention-days: 1
-          if-no-files-found: error
       - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution --console=plain
       - run: python scripts/ci/build_site.py
       - name: Verify fingerprinted production HTML and Wasm distributions
@@ -112,15 +105,31 @@ jobs:
             build/accessibility/
             **/build/reports/tests/
           retention-days: 30
+  preview:
+    name: Build shared browser preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: ./.github/actions/setup
+      - run: ./gradlew :demo:jsBrowserDevelopmentWebpack :demo:wasmJsBrowserDevelopmentWebpack --console=plain
+      - run: python scripts/ci/browser_preview.py
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-preview
+          path: build/browser-preview/
+          retention-days: 1
+          if-no-files-found: error
   browser:
-    name: Browser tests (${{ matrix.shard }}/4)
-    needs: portable
+    name: Browser tests (${{ matrix.shard }}/8)
+    needs: preview
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
@@ -134,10 +143,10 @@ jobs:
           name: browser-preview
           path: build/browser-preview
       - run: npx playwright install --with-deps chromium firefox webkit
-      - name: Run every browser test across four shards
+      - name: Run every browser test across eight shards
         env:
           SHARD: ${{ matrix.shard }}
-        run: npx playwright test --shard="$SHARD/4" --workers=2 --reporter=list,github,blob
+        run: npx playwright test --shard="$SHARD/8" --workers=2 --reporter=list,github,blob
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
@@ -315,7 +324,7 @@ jobs:
   passed:
     name: CI passed
     if: always()
-    needs: [hygiene, quality, portable, browser, portable-evidence, native, consumers, binary-api]
+    needs: [hygiene, quality, portable, preview, browser, portable-evidence, native, consumers, binary-api]
     runs-on: ubuntu-24.04
     steps:
       - name: Require validation and prevent recording from satisfying branch or release gates
@@ -323,10 +332,11 @@ jobs:
           HYGIENE: ${{ needs.hygiene.result }}
           QUALITY: ${{ needs.quality.result }}
           PORTABLE: ${{ needs.portable.result }}
+          PREVIEW: ${{ needs.preview.result }}
           BROWSER: ${{ needs.browser.result }}
           EVIDENCE: ${{ needs.portable-evidence.result }}
           CONSUMERS: ${{ needs.consumers.result }}
           NATIVE: ${{ needs.native.result }}
           BINARY_API: ${{ needs.binary-api.result }}
           RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
-        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$BROWSER" = success && test "$EVIDENCE" = success && test "$CONSUMERS" = success && test "$NATIVE" = success && test "$BINARY_API" = success && test "$RECORD" != true
+        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$BROWSER" = success && test "$PREVIEW" = success && test "$EVIDENCE" = success && test "$CONSUMERS" = success && test "$NATIVE" = success && test "$BINARY_API" = success && test "$RECORD" != true

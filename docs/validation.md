@@ -13,17 +13,17 @@ The required **CI passed** check combines workflow hygiene, Kotlin quality/cover
 
 ## Parallel CI
 
-CI builds the development browser preview once. Four Ubuntu runners then split the complete Chromium, Firefox and WebKit suite with Playwright's test-level sharding; each runner uses two workers. A failed shard does not cancel the others, so diagnostic captures remain available. Their blob reports are merged into one HTML report, and all captures are collected before the complete screenshot inventory is compared.
+CI builds the development browser preview once in a dedicated job, without waiting for Android tests, Dokka, integration exports or production packaging. Eight Ubuntu runners then split the complete Chromium, Firefox and WebKit suite with Playwright's test-level sharding; each runner uses two workers. A failed shard does not cancel the others, so diagnostic captures remain available. Their blob reports are merged into one HTML report, and all captures are collected before the complete screenshot inventory is compared.
 
-The iOS simulator/UI job runs alongside publication and six-target consumer compilation on separate standard macOS runners. Kotlin quality and ABI checks also remain independent. This removes sequential waiting without reducing test coverage, browser engines or visual thresholds. Wall time still depends on runner availability, cold builds and retries; the first hosted run establishes the new timing.
+The iOS simulator/UI job runs alongside publication and six-target consumer compilation on separate standard macOS runners. Kotlin quality and ABI checks also remain independent. This removes sequential waiting without reducing test coverage, browser engines or visual thresholds. Wall time still depends on runner availability, cold builds and retries; the first hosted run establishes the new timing. The normal PR budget is at most 20 minutes, targeting 10–15 minutes; queue delays and cold-cache runs are measured separately. No tests are skipped to meet that target.
 
 The final **CI passed** gate requires every build, shard, evidence comparison, native, consumer and ABI job to succeed. Intermediate preview artifacts expire after one day; review evidence remains available for 30 days. `android-html-evidence` and `native-evidence` keep the same paths used by the inline review publisher. The unsigned Maven bundle is retained separately in `published-consumer-evidence`.
 
 Reproduce an individual browser shard after building the preview:
 
 ```bash
-npx playwright test --shard=1/4 --workers=2 --reporter=list,blob
-# Collect blob-report/*.zip from all four runners before merging:
+npx playwright test --shard=1/8 --workers=2 --reporter=list,blob
+# Collect blob-report/*.zip from all eight runners before merging:
 npx playwright merge-reports --reporter=html blob-report
 ```
 
