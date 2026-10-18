@@ -150,7 +150,10 @@ jobs:
         with:
           name: browser-preview
           path: build/browser-preview
-      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Install the assigned browser
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: npx playwright install --with-deps "$BROWSER"
       - name: Run the assigned browser shard
         env:
           BROWSER: ${{ matrix.browser }}
