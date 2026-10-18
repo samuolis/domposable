@@ -1,6 +1,9 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableIntStateOf
@@ -14,15 +17,20 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodes
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
@@ -103,6 +111,42 @@ class NativeDataDisplaysTest {
             )
         firstDataRow.assertIsDisplayed().performTouchInput { click(center) }
         compose.runOnIdle { assertEquals(listOf("A-101"), activatedRows.value) }
+    }
+
+    @Test
+    fun nonOverflowingTableLeavesScrollOwnershipWithItsVerticalParent() {
+        compose.setContent {
+            DomposableTheme(components = rememberDomposableMaterialComponents()) {
+                Column(Modifier.height(120.dp).verticalScroll(rememberScrollState())) {
+                    DomposableDataTable(
+                        columns = listOf(DomposableDataTableColumn("name", "Name")),
+                        rows = List(20) { DomposableDataTableRow("Row $it") },
+                        allowHorizontalOverflow = false,
+                    ) { row, _ -> Text(row.key) }
+                }
+            }
+        }
+
+        compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
+            .assertCountEquals(0)
+        compose.onNodeWithText("Row 19").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun overflowingTableKeepsHorizontalScrollSemantics() {
+        compose.setContent {
+            DomposableTheme(components = rememberDomposableMaterialComponents()) {
+                DomposableDataTable(
+                    columns = listOf(DomposableDataTableColumn("name", "Name")),
+                    rows = listOf(DomposableDataTableRow("First row")),
+                    modifier = DomposableModifier.width(DomposableLength(120f)),
+                    allowHorizontalOverflow = true,
+                ) { row, _ -> Text(row.key) }
+            }
+        }
+
+        compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
+            .assertCountEquals(1)
     }
 
     @Test
