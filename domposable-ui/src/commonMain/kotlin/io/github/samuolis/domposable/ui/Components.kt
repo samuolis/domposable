@@ -335,6 +335,8 @@ data class DomposableIconProps(
     val symbol: String,
     val description: String?,
     val appearance: DomposableIconAppearance? = null,
+    /** Optional filled vector artwork; when present, the renderer uses it instead of [symbol]. */
+    val vector: DomposableVectorIcon? = null,
 )
 
 @DomposableComponent("Divider")

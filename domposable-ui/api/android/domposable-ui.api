@@ -30,6 +30,7 @@ public final class io/github/samuolis/domposable/ui/ComponentCallsKt {
 	public static final fun DomposableDialog (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lio/github/samuolis/domposable/ui/DomposableDialogVariant;Lkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableDivider (Lio/github/samuolis/domposable/foundation/DomposableOrientation;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableDividerAppearance;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableFloatingActionButton (Lkotlin/jvm/functions/Function0;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lio/github/samuolis/domposable/foundation/DomposableFabSize;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableIcon (Lio/github/samuolis/domposable/ui/DomposableVectorIcon;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableIcon (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableIconButton (Lkotlin/jvm/functions/Function0;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLio/github/samuolis/domposable/foundation/DomposableButtonAppearance;Lio/github/samuolis/domposable/foundation/DomposableIconButtonVariant;Ljava/lang/Boolean;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableImage (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableImageScale;Landroidx/compose/runtime/Composer;II)V
@@ -1660,17 +1661,19 @@ public abstract interface class io/github/samuolis/domposable/ui/DomposableIconB
 
 public final class io/github/samuolis/domposable/ui/DomposableIconProps {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;Lio/github/samuolis/domposable/ui/DomposableVectorIcon;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;Lio/github/samuolis/domposable/ui/DomposableVectorIcon;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;)Lio/github/samuolis/domposable/ui/DomposableIconProps;
-	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableIconProps;Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableIconProps;
+	public final fun component4 ()Lio/github/samuolis/domposable/ui/DomposableVectorIcon;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;Lio/github/samuolis/domposable/ui/DomposableVectorIcon;)Lio/github/samuolis/domposable/ui/DomposableIconProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableIconProps;Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;Lio/github/samuolis/domposable/ui/DomposableVectorIcon;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableIconProps;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppearance ()Lio/github/samuolis/domposable/foundation/DomposableIconAppearance;
 	public final fun getDescription ()Ljava/lang/String;
 	public final fun getSymbol ()Ljava/lang/String;
+	public final fun getVector ()Lio/github/samuolis/domposable/ui/DomposableVectorIcon;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4042,6 +4045,25 @@ public final class io/github/samuolis/domposable/ui/DomposableValueChartProps {
 
 public abstract interface class io/github/samuolis/domposable/ui/DomposableValueChartRenderer {
 	public abstract fun Render (Lio/github/samuolis/domposable/ui/DomposableValueChartProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/samuolis/domposable/ui/DomposableVectorIcon {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;FFZ)V
+	public synthetic fun <init> (Ljava/lang/String;FFZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;FFZ)Lio/github/samuolis/domposable/ui/DomposableVectorIcon;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableVectorIcon;Ljava/lang/String;FFZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableVectorIcon;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEvenOdd ()Z
+	public final fun getPathData ()Ljava/lang/String;
+	public final fun getViewportHeight ()F
+	public final fun getViewportWidth ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/samuolis/domposable/ui/DomposableViewportHeightMode : java/lang/Enum {

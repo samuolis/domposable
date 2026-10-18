@@ -47,6 +47,7 @@ import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.InputChip
@@ -110,9 +111,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -959,6 +964,31 @@ internal fun NativeIcon(
     modifier: io.github.samuolis.domposable.ui.DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.icon
+    val vector = props.vector
+    if (vector != null) {
+        val imageVector =
+            remember(vector) {
+                ImageVector
+                    .Builder(
+                        name = "DomposableIcon",
+                        defaultWidth = vector.viewportWidth.dp,
+                        defaultHeight = vector.viewportHeight.dp,
+                        viewportWidth = vector.viewportWidth,
+                        viewportHeight = vector.viewportHeight,
+                    ).addPath(
+                        pathData = PathParser().parsePathString(vector.pathData).toNodes(),
+                        fill = SolidColor(Color.Black),
+                        pathFillType = if (vector.evenOdd) PathFillType.EvenOdd else PathFillType.NonZero,
+                    ).build()
+            }
+        Icon(
+            imageVector = imageVector,
+            contentDescription = props.description,
+            modifier = modifier.toComposeModifier().size(vector.viewportWidth.dp, vector.viewportHeight.dp),
+            tint = appearance.color?.nativeColor() ?: LocalContentColor.current,
+        )
+        return
+    }
     val style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.bodyLarge)
     Text(
         props.symbol,

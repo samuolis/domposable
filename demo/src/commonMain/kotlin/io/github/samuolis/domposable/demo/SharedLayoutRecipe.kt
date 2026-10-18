@@ -17,6 +17,7 @@ import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCarousel
 import io.github.samuolis.domposable.ui.DomposableCarouselLabels
 import io.github.samuolis.domposable.ui.DomposableColumn
+import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableLazyItem
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposablePagedCarouselLayout
@@ -27,9 +28,11 @@ import io.github.samuolis.domposable.ui.DomposableTabs
 import io.github.samuolis.domposable.ui.DomposableTabsActivation
 import io.github.samuolis.domposable.ui.DomposableTabsAppearance
 import io.github.samuolis.domposable.ui.DomposableText
+import io.github.samuolis.domposable.ui.DomposableVectorIcon
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.padding
+import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.weight
 
@@ -41,7 +44,21 @@ internal fun SharedLayoutRecipe() {
     DomposableTabs(
         items =
             listOf(
-                DomposableTabItem("overview", "Overview", icon = { DomposableText("◇") }),
+                DomposableTabItem(
+                    "overview",
+                    "Overview",
+                    icon = {
+                        DomposableIcon(
+                            vector =
+                                DomposableVectorIcon(
+                                    "M12 2L22 12L12 22L2 12Z M12 6L6 12L12 18L18 12Z",
+                                    evenOdd = true,
+                                ),
+                            description = null,
+                            modifier = DomposableModifier.size(24.dp),
+                        )
+                    },
+                ),
                 DomposableTabItem("saved", "Saved", badgeContent = { DomposableBadge("3") }),
                 DomposableTabItem("unavailable", "Unavailable", enabled = false),
             ),

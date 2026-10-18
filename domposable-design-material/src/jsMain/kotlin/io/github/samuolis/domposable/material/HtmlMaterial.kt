@@ -29,6 +29,7 @@ import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
@@ -91,6 +92,23 @@ import org.jetbrains.compose.web.dom.Ul
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
+
+@Composable
+private fun HtmlSurfaceBorderOverlay(appearance: DomposableSurfaceAppearance) {
+    val border = appearance.border ?: return
+    if (appearance.borderWidth.value <= 0f) return
+    Span(attrs = {
+        attr("aria-hidden", "true")
+        style {
+            property("position", "absolute")
+            property("inset", "0")
+            property("box-sizing", "border-box")
+            property("pointer-events", "none")
+            property("border", "${appearance.borderWidth.value}px solid ${border.css()}")
+            property("border-radius", "inherit")
+        }
+    }) { }
+}
 
 private const val HTML_MENU_VIEWPORT_MARGIN = 8.0
 
@@ -908,36 +926,43 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 content,
                 ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.surface
+                val hasBorder = appearance.border != null && appearance.borderWidth.value > 0f
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
                         classes("d-surface")
                         style {
-                            surfaceAppearance(appearance)
+                            if (hasBorder) property("position", "relative")
+                            surfaceAppearance(if (hasBorder) appearance.copy(border = null) else appearance)
                             (props.color ?: appearance.container)?.let { property("background-color", it.css()) }
                         }
-                    }) { content() }
+                    }) {
+                        content()
+                        if (hasBorder) HtmlSurfaceBorderOverlay(appearance)
+                    }
                 }
             },
             image = { props, modifier, _ -> HtmlImage(props, modifier) },
             icon = { props, modifier, _ ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.icon
-                DomposableHtmlModifiers(modifier) {
-                    Span(attrs = {
-                        domposableAttributes(modifier)
-                        if (props.description ==
-                            null
-                        ) {
-                            attr("aria-hidden", "true")
-                        } else {
-                            attr("role", "img")
-                            attr("aria-label", props.description.orEmpty())
-                        }
-                        style {
-                            appearance.color?.let { property("color", it.css()) }
-                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
-                        }
-                    }) { Text(props.symbol) }
+                if (props.vector != null) {
+                    HtmlDomposableVectorIcon(props, modifier, appearance)
+                } else {
+                    DomposableHtmlModifiers(modifier) {
+                        Span(attrs = {
+                            domposableAttributes(modifier)
+                            if (props.description == null) {
+                                attr("aria-hidden", "true")
+                            } else {
+                                attr("role", "img")
+                                attr("aria-label", props.description.orEmpty())
+                            }
+                            style {
+                                appearance.color?.let { property("color", it.css()) }
+                                appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                            }
+                        }) { Text(props.symbol) }
+                    }
                 }
             },
             divider = {
@@ -1082,15 +1107,24 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 _,
                 ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.avatar
+                val hasBorder = appearance.border != null && appearance.borderWidth.value > 0f
                 DomposableHtmlModifiers(modifier) {
                     Span(attrs = {
                         domposableAttributes(modifier)
                         attr("role", "img")
                         attr("aria-label", props.description.orEmpty())
                         classes("d-avatar")
-                        style { surfaceAppearance(appearance) }
+                        style {
+                            if (hasBorder) property("position", "relative")
+                            if (modifier.hasExplicitHtmlWidth()) property("width", "100%")
+                            if (modifier.hasExplicitHtmlHeight()) property("height", "100%")
+                            property("max-width", "100%")
+                            property("max-height", "100%")
+                            surfaceAppearance(if (hasBorder) appearance.copy(border = null) else appearance)
+                        }
                     }) {
                         props.content?.invoke() ?: Text(props.initials)
+                        if (hasBorder) HtmlSurfaceBorderOverlay(appearance)
                     }
                 }
             },

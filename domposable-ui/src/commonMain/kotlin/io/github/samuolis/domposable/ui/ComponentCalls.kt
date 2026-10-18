@@ -280,6 +280,15 @@ fun DomposableIcon(
     appearance: DomposableIconAppearance? = null,
 ) = DomposableIcon(DomposableIconProps(symbol, description, appearance = appearance), modifier)
 
+/** Renders a reusable filled vector path as an accessible icon on native and HTML platforms. */
+@Composable
+fun DomposableIcon(
+    vector: DomposableVectorIcon,
+    description: String?,
+    modifier: DomposableModifier = DomposableModifier,
+    appearance: DomposableIconAppearance? = null,
+) = DomposableIcon(DomposableIconProps("", description, appearance = appearance, vector = vector), modifier)
+
 @Composable
 fun DomposableDivider(
     orientation: DomposableOrientation,

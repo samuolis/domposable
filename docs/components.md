@@ -126,6 +126,20 @@ Tooltips provide supplemental descriptions. The control still needs its own acce
 
 Use `description = null` for a decorative Icon inside a labelled control. IconButton and FloatingActionButton take the control's accessible `label`; the decorative glyph does not become part of that name.
 
+For custom filled vector artwork, pass SVG path data rather than encoding it as a text glyph. The vector inherits the current content color, uses a 24-unit viewport by default, and follows the supplied modifier size on both renderers:
+
+```kotlin
+DomposableIcon(
+    vector = DomposableVectorIcon(
+        pathData = "M12 2 3 21h18L12 2z",
+    ),
+    description = "Warning",
+    modifier = DomposableModifier.size(24.dp),
+)
+```
+
+Set `evenOdd = true` for paths that use the even-odd fill rule, and provide a description for standalone meaningful icons. Decorative icons should use `description = null`.
+
 ## Content and collections
 
 Text layout can be configured without renderer-specific CSS:
