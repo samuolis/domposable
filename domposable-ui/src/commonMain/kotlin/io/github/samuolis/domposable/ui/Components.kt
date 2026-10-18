@@ -409,10 +409,61 @@ data class DomposableTabsProps(
     val scrollable: Boolean = false,
     val icons: List<(@Composable () -> Unit)?> = labels.map { null },
     val leadingIcons: Boolean = false,
+    /** Keyed items add per-tab semantics and content while keeping the labels API compatible. */
+    val items: List<DomposableTabItem>? = null,
+    /** Localized name for the tab list. */
+    val label: String = "Sections",
+    /** Optional shared layout and interaction tuning for tab rows. */
+    val tabsAppearance: DomposableTabsAppearance? = null,
 ) {
     init {
-        require(labels.isNotEmpty() && selectedIndex in labels.indices)
+        val itemCount = items?.size ?: labels.size
+        require(itemCount > 0 && selectedIndex in 0 until itemCount)
         require(icons.size == labels.size) { "Supply one optional icon for each tab" }
+        require(items == null || items.map { it.key }.distinct().size == items.size) {
+            "Tab item keys must be unique"
+        }
+    }
+}
+
+/** Portable layout details that are specific to tab rows. Null fields keep Material defaults. */
+data class DomposableTabsAppearance(
+    val minHeight: DomposableLength? = null,
+    val contentPadding: DomposableInsets? = null,
+    val indicatorThickness: DomposableLength? = null,
+    val indicatorMatchContent: Boolean? = null,
+    val scrollableEdgePadding: DomposableLength? = null,
+    val scrollableMinWidth: DomposableLength? = null,
+    val disabledOpacity: Float? = null,
+    val activation: DomposableTabsActivation = DomposableTabsActivation.Automatic,
+    val badgeClearance: DomposableLength? = null,
+    val badgeOffset: DomposableOffset = DomposableOffset(DEFAULT_TAB_BADGE_OFFSET_X, DEFAULT_TAB_BADGE_OFFSET_Y),
+) {
+    init {
+        require(disabledOpacity == null || (disabledOpacity.isFinite() && disabledOpacity in 0f..1f))
+    }
+}
+
+private const val DEFAULT_TAB_BADGE_OFFSET_X = 8f
+private const val DEFAULT_TAB_BADGE_OFFSET_Y = -4f
+
+/** Whether arrow-key navigation also changes the selected tab. */
+enum class DomposableTabsActivation { Automatic, Manual }
+
+/** Stable, accessible tab data with optional generic icon and badge/content slots. */
+data class DomposableTabItem(
+    val key: String,
+    val label: String,
+    val contentDescription: String = label,
+    val enabled: Boolean = true,
+    val testTag: String? = null,
+    val icon: (@Composable () -> Unit)? = null,
+    val badgeContent: (@Composable () -> Unit)? = null,
+    val textAppearance: DomposableTextAppearance? = null,
+    val selectedTextAppearance: DomposableTextAppearance? = null,
+) {
+    init {
+        require(key.isNotBlank()) { "Tab item keys must not be blank" }
     }
 }
 

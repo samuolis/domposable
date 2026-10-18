@@ -98,7 +98,7 @@ internal fun NativeDialog(
                                 .nativeModifier(
                                     appearance,
                                     AlertDialogDefaults.shape,
-                                ).then(modalLayout(props.layout)),
+                                ).modalLayout(props.layout),
                         ),
                     shape = appearance.nativeShape(AlertDialogDefaults.shape),
                     containerColor = appearance.container?.nativeColor() ?: AlertDialogDefaults.containerColor,
@@ -110,7 +110,7 @@ internal fun NativeDialog(
                     onDismissRequest = props.onDismiss,
                     confirmButton = confirm,
                     dismissButton = close,
-                    modifier = modifier.toComposeModifier().then(modalLayout(props.layout)),
+                    modifier = modifier.toComposeModifier().modalLayout(props.layout),
                     shape = appearance.nativeShape(DatePickerDefaults.shape),
                     tonalElevation = appearance.tonalElevation?.value?.dp ?: DatePickerDefaults.TonalElevation,
                     colors =
@@ -130,7 +130,7 @@ internal fun NativeDialog(
                     confirmButton = confirm,
                     dismissButton = close,
                     title = title,
-                    modifier = modifier.toComposeModifier().then(modalLayout(props.layout)),
+                    modifier = modifier.toComposeModifier().modalLayout(props.layout),
                     shape = appearance.nativeShape(TimePickerDialogDefaults.shape),
                     containerColor = appearance.container?.nativeColor() ?: TimePickerDialogDefaults.containerColor,
                 ) { body() }
@@ -140,7 +140,7 @@ internal fun NativeDialog(
                 BasicAlertDialog(
                     onDismissRequest = props.onDismiss,
                     modifier =
-                        modifier.toComposeModifier().then(modalLayout(props.layout)).then(
+                        modifier.toComposeModifier().modalLayout(props.layout).then(
                             if (props.variant ==
                                 DomposableDialogVariant.FullScreen
                             ) {
@@ -219,7 +219,7 @@ internal fun NativeBottomSheet(
                     modifier
                         .toComposeModifier()
                         .then(Modifier.nativeModifier(appearance, shape))
-                        .then(modalLayout(props.layout)),
+                        .modalLayout(props.layout),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,
@@ -235,7 +235,7 @@ internal fun NativeBottomSheet(
                     modifier
                         .toComposeModifier()
                         .then(Modifier.nativeModifier(appearance, shape))
-                        .then(modalLayout(props.layout)),
+                        .modalLayout(props.layout),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,
@@ -247,13 +247,13 @@ internal fun NativeBottomSheet(
 }
 
 @Composable
-private fun modalLayout(layout: DomposableModalLayout): Modifier {
+private fun Modifier.modalLayout(layout: DomposableModalLayout): Modifier {
     val density = LocalDensity.current
     val windowSize = LocalWindowInfo.current.containerSize
     val viewportWidth = with(density) { windowSize.width.toDp() }
     val viewportHeight = with(density) { windowSize.height.toDp() }
     val inset = layout.viewportInset.value.dp
-    var result: Modifier = Modifier
+    var result: Modifier = this
     layout.maxWidth?.let { result = result.widthIn(max = it.value.dp) }
     if (layout.fillViewportWidth) {
         result = result.width((viewportWidth - inset * 2).coerceAtLeast(0.dp))

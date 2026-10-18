@@ -31,7 +31,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableButton](#domposablebutton) | Actions | 7 |
 | [DomposableButtonGroup](#domposablebuttongroup) | Expressive actions | 4 |
 | [DomposableCard](#domposablecard) | Containment | 7 |
-| [DomposableCarousel](#domposablecarousel) | Containment | 9 |
+| [DomposableCarousel](#domposablecarousel) | Containment | 11 |
 | [DomposableCheckbox](#domposablecheckbox) | Selection | 9 |
 | [DomposableChip](#domposablechip) | Selection | 9 |
 | [DomposableColumn](#domposablecolumn) | Core / additional controls | 3 |
@@ -86,7 +86,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableSwipeToDismiss](#domposableswipetodismiss) | Gestures | 7 |
 | [DomposableSwitch](#domposableswitch) | Selection | 8 |
 | [DomposableTable](#domposabletable) | Core / additional controls | 5 |
-| [DomposableTabs](#domposabletabs) | Navigation | 8 |
+| [DomposableTabs](#domposabletabs) | Navigation | 11 |
 | [DomposableText](#domposabletext) | Typography | 6 |
 | [DomposableTextField](#domposabletextfield) | Input | 27 |
 | [DomposableTheme](#domposabletheme) | Core / additional controls | 1 |
@@ -183,7 +183,7 @@ Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/d
 
 ## DomposableBottomSheet
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L481)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L532)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -257,7 +257,7 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 
 ## DomposableCarousel
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-carousel.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-carousel-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/InteractionComponents.kt#L16)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-carousel.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-carousel-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/InteractionComponents.kt#L63)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -270,6 +270,8 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 | `spacing` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-length/index.html">DomposableLength</a></code> | `8.dp` |
 | `currentItem` | <code>Int</code> | `0` |
 | `onCurrentItemChange` | <code>(Int) -&gt; Unit?</code> | `null` |
+| `pagedLayout` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-paged-carousel-layout/index.html">DomposablePagedCarouselLayout</a>?</code> | `null` |
+| `onApproachingEnd` | <code>(Int) -&gt; Unit?</code> | `null` |
 
 ## DomposableCheckbox
 
@@ -362,7 +364,7 @@ Input. [Full API and overloads](https://samuolis.github.io/domposable/api/dompos
 
 ## DomposableDialog
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L470)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L521)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -623,7 +625,7 @@ Expressive communication. [Full API and overloads](https://samuolis.github.io/do
 
 ## DomposableMenu
 
-Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L434)
+Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-menu-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L485)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -659,7 +661,7 @@ Selection. [Full API and overloads](https://samuolis.github.io/domposable/api/do
 
 ## DomposableNavigationBar
 
-Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L422)
+Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-navigation-bar-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L473)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -715,7 +717,7 @@ Communication. [Full API and overloads](https://samuolis.github.io/domposable/ap
 
 ## DomposablePullToRefresh
 
-Gestures. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-pull-to-refresh.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-pull-to-refresh-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/InteractionComponents.kt#L65)
+Gestures. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-pull-to-refresh.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-pull-to-refresh-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/InteractionComponents.kt#L118)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -783,7 +785,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableScaffold
 
-Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L491)
+Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L542)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -949,7 +951,7 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 
 ## DomposableSwipeToDismiss
 
-Gestures. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-swipe-to-dismiss.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-swipe-to-dismiss-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/InteractionComponents.kt#L96)
+Gestures. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-swipe-to-dismiss.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-swipe-to-dismiss-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/InteractionComponents.kt#L149)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -1002,6 +1004,9 @@ Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/d
 | `scrollable` | <code>Boolean</code> | `false` |
 | `icons` | <code>List&lt;@Composable () -&gt; Unit?&gt;</code> | `labels.map { null }` |
 | `leadingIcons` | <code>Boolean</code> | `false` |
+| `items` | <code>List&lt;<a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-tab-item/index.html">DomposableTabItem</a>&gt;?</code> | `null` |
+| `label` | <code>String</code> | `"Sections"` |
+| `tabsAppearance` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-tabs-appearance/index.html">DomposableTabsAppearance</a>?</code> | `null` |
 
 ## DomposableText
 

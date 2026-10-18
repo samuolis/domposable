@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -114,6 +115,20 @@ fun DomposableModifier.toComposeModifier(
 
                 is DomposableModifierOperation.Height -> {
                     result.height(operation.length.value.dp)
+                }
+
+                is DomposableModifierOperation.ViewportHeight -> {
+                    val viewport =
+                        with(LocalDensity.current) {
+                            LocalWindowInfo.current.containerSize.height
+                                .toDp()
+                        }
+                    val height = (viewport * operation.fraction - operation.subtract.value.dp).coerceAtLeast(0.dp)
+                    when (operation.mode) {
+                        DomposableViewportHeightMode.Fixed -> result.height(height)
+                        DomposableViewportHeightMode.Minimum -> result.heightIn(min = height)
+                        DomposableViewportHeightMode.Maximum -> result.heightIn(max = height)
+                    }
                 }
 
                 is DomposableModifierOperation.MaxWidth -> {

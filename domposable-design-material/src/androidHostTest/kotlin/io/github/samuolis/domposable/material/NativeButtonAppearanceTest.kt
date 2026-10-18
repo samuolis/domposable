@@ -154,6 +154,7 @@ class NativeButtonAppearanceTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun typedInteractionUsesHoveredAndPressedColorsAndKeepsFocusRingVisible() {
         lateinit var inputMode: InputModeManager
         compose.setContent {
@@ -229,6 +230,7 @@ class NativeButtonAppearanceTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun disabledOpacityAppliesToTheWholeNativeButton() {
         var surface = Color.Unspecified
         compose.setContent {

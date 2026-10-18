@@ -37,7 +37,7 @@ internal val ComparisonThemes =
         "expressive-light",
         "expressive-dark",
     )
-internal val ComparisonFamilies = listOf("states") + MaterialSections
+internal val ComparisonFamilies = listOf("states", "integration") + MaterialSections
 
 internal fun materialComparisonPath(path: String): Boolean {
     val parts = path.split('/')
@@ -82,6 +82,7 @@ internal fun MaterialComparisonScreen(path: String) {
                     DomposableText("$family · $theme", style = DomposableTextStyle.Title, headingLevel = 1)
                     when (family) {
                         "states" -> MaterialControlStates()
+                        "integration" -> SharedLayoutRecipe()
                         "actions" -> MaterialActions()
                         "selection" -> MaterialSelection()
                         "inputs" -> MaterialInputs()

@@ -329,7 +329,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
 
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
                     val inlineText = props.style != DomposableTextStyle.Title && props.headingLevel == null
-                    style { appearance?.let { applyCatalogTextAppearance(it) } }
+                    style {
+                        if (props.style != DomposableTextStyle.Inherit && appearance?.alignment == null) {
+                            property("text-align", "start")
+                        }
+                        appearance?.let { applyCatalogTextAppearance(it) }
+                    }
                     (props.color ?: appearance?.color)?.let { style { property("color", it.css()) } }
                     appearance?.minLines?.takeIf { it > 1 }?.let { lines ->
                         style {
@@ -1110,86 +1115,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             progress = { props, modifier, _ ->
                 HtmlProgress(props, modifier)
             },
-            tabs = { props, modifier, _ ->
-                val appearance = props.appearance ?: LocalDomposableTokens.current.components.tabs
-                val formEnabled = domposableFormEnabled()
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        attr("role", "tablist")
-                        attr("aria-label", "Sections")
-                        classes("d-tabs", "d-tabs-${props.variant.name.lowercase()}")
-                        if (props.leadingIcons) classes("d-tabs-leading-icons")
-                        style { itemAppearance(appearance) }
-                        if (props.scrollable) {
-                            classes("d-tabs-scrollable")
-                            style {
-                                property("overflow-x", "auto")
-                                property("white-space", "nowrap")
-                            }
-                        }
-                    }) {
-                        props.labels.forEachIndexed { index, label ->
-                            Button(attrs = {
-                                attr("type", "button")
-                                classes("d-tab")
-                                attr("role", "tab")
-                                attr(
-                                    "aria-selected",
-                                    (
-                                        props.selectedIndex ==
-                                            index
-                                    ).toString(),
-                                )
-                                attr(
-                                    "tabindex",
-                                    if (props.selectedIndex ==
-                                        index
-                                    ) {
-                                        "0"
-                                    } else {
-                                        "-1"
-                                    },
-                                )
-                                if (!formEnabled) disabled()
-                                style { itemAppearance(appearance, props.selectedIndex == index) }
-                                onClick { if (formEnabled) props.onSelect(index) }
-                                onKeyDown { event ->
-                                    val offset =
-                                        when (event.key) {
-                                            "ArrowRight" -> 1
-                                            "ArrowLeft" -> -1
-                                            else -> 0
-                                        }
-                                    if (formEnabled && offset !=
-                                        0
-                                    ) {
-                                        event.preventDefault()
-                                        val next =
-                                            (index + offset + props.labels.size) % props.labels.size
-                                        props.onSelect(next)
-                                        (
-                                            (event.target as? HTMLElement)?.parentElement?.children?.item(
-                                                next,
-                                            ) as? HTMLElement
-                                        )?.focus()
-                                    }
-                                }
-                            }) {
-                                Div(attrs = { classes("d-tab-content") }) {
-                                    props.icons[index]?.let { icon ->
-                                        Span(attrs = {
-                                            attr("aria-hidden", "true")
-                                            classes("d-tab-icon")
-                                        }) { icon() }
-                                    }
-                                    Span(attrs = { classes("d-tab-label") }) { Text(label) }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
+            tabs = { props, modifier, _ -> HtmlTabs(props, modifier) },
             navigationBar = { props, modifier, _ ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationBar
                 val formEnabled = domposableFormEnabled()
@@ -2118,7 +2044,7 @@ private const val MATERIAL_CSS = """
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
 .d-theme h1,.d-theme h2,.d-theme h3,.d-theme h4,.d-theme h5,.d-theme h6{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}:where(.d-text-inherit){font:inherit}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:9999px;min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
-.d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;align-items:center;justify-content:center}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
+.d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;flex:1;min-width:0;align-items:center;justify-content:inherit}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
 @media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}
 .d-button:not(:disabled):active{filter:brightness(.9)}.d-button:not(:disabled):focus-visible{outline:none;box-shadow:var(--d-button-feedback,0 0 0 0 transparent),0 0 0 3px var(--d-primary)}
 .d-button[data-d-button-interaction=true]:not(:disabled):hover,.d-button[data-d-button-interaction=true]:not(:disabled):active,.d-icon-button[data-d-button-interaction=true]:not(:disabled):hover,.d-icon-button[data-d-button-interaction=true]:not(:disabled):active{filter:none}

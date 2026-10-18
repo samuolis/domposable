@@ -383,6 +383,7 @@ fun DomposableTabs(
     scrollable: Boolean = false,
     icons: List<(@Composable () -> Unit)?> = labels.map { null },
     leadingIcons: Boolean = false,
+    tabsAppearance: DomposableTabsAppearance? = null,
 ) = DomposableTabs(
     DomposableTabsProps(
         labels,
@@ -393,6 +394,37 @@ fun DomposableTabs(
         scrollable = scrollable,
         icons = icons,
         leadingIcons = leadingIcons,
+        tabsAppearance = tabsAppearance,
+    ),
+    modifier,
+)
+
+/** Keyed tabs with per-item enabled state, accessible names, and optional content slots. */
+@Composable
+fun DomposableTabs(
+    items: List<DomposableTabItem>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: DomposableModifier = DomposableModifier,
+    label: String = "Sections",
+    appearance: DomposableItemAppearance? = null,
+    variant: DomposableTabsVariant = DomposableTabsVariant.Primary,
+    scrollable: Boolean = false,
+    leadingIcons: Boolean = false,
+    tabsAppearance: DomposableTabsAppearance? = null,
+) = DomposableTabs(
+    DomposableTabsProps(
+        labels = items.map(DomposableTabItem::label),
+        selectedIndex = selectedIndex,
+        onSelect = onSelect,
+        appearance = appearance,
+        variant = variant,
+        scrollable = scrollable,
+        icons = items.map(DomposableTabItem::icon),
+        leadingIcons = leadingIcons,
+        items = items,
+        label = label,
+        tabsAppearance = tabsAppearance,
     ),
     modifier,
 )

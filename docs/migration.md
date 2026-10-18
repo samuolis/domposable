@@ -170,3 +170,19 @@ Text with independently styled runs can use `DomposableText(runs = ...)`. Unspec
 inherit the surrounding text style, and `contentAlpha` changes only that run's foreground. Direct
 `DomposableTextProps` construction must supply `text` equal to the concatenated run text, keeping
 renderer content and accessibility text consistent. Existing plain text calls remain unchanged.
+
+`DomposableTabs(labels = ...)` remains source-compatible. Migrate to `DomposableTabs(items = ...)`
+when tabs need stable keys, per-tab enabled state, accessible names, test tags, icons, badges, or
+individual text appearance. Supply a localized `label` for the tab list; keyboard navigation wraps
+among enabled tabs and supports Home and End.
+
+The next minor release adds optional paged carousel layout, keyed tab items, viewport-height
+modifiers and button content alignment. Constructors/copy methods and affected composable
+signatures change: recompile consumers and custom providers together. Existing label-only tabs,
+Material carousel variants and centered button defaults remain available. New modifier operations
+must be handled by custom exhaustive adapters; stock Compose UI and HTML adapters handle them.
+
+Use `contentAlignment = DomposableAlignment.Start` in shared button/link appearance instead of
+HTML `justify-content` overrides. Custom content slots inherit the button text appearance, and
+full-width rows can lay out weighted labels and trailing content on both renderers. See the
+[design-system example](design-systems.md#aligning-custom-control-content).

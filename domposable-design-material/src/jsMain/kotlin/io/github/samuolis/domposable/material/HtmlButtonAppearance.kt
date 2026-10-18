@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.material
 
+import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import org.jetbrains.compose.web.css.StyleScope
 
@@ -63,7 +64,19 @@ private fun StyleScope.buttonColors(
     (if (enabled) appearance.border else appearance.disabledBorder)?.let { property("border-color", it.css()) }
 }
 
+internal fun StyleScope.buttonContentAlignment(appearance: DomposableButtonAppearance) {
+    property(
+        "justify-content",
+        when (appearance.contentAlignment) {
+            DomposableAlignment.Start -> "flex-start"
+            DomposableAlignment.Center -> "center"
+            DomposableAlignment.End -> "flex-end"
+        },
+    )
+}
+
 private fun StyleScope.buttonGeometry(appearance: DomposableButtonAppearance) {
+    buttonContentAlignment(appearance)
     appearance.borderWidth?.let { property("border-width", "${it.value}px") }
     appearance.shape?.let { materialShape(it) }
     appearance.minHeight?.let { property("min-height", "${it.value}px") }

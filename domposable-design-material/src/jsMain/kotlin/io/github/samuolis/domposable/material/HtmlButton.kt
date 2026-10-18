@@ -46,6 +46,7 @@ internal fun HtmlButton(
             }
             style {
                 constrainedControlWidth(modifier)
+                buttonContentAlignment(appearance)
                 when (props.style) {
                     DomposableButtonStyle.Elevated -> {
                         if (appearance.container ==

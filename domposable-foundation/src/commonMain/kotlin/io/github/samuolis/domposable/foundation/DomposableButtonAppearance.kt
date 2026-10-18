@@ -25,6 +25,8 @@ data class DomposableButtonAppearance(
     /** Optional whole-control opacity while disabled; loading keeps enabled styling. */
     val disabledOpacity: Float? = null,
     val interaction: DomposableInteractionAppearance? = null,
+    /** Logical horizontal alignment of the content inside a wider control. */
+    val contentAlignment: DomposableAlignment = DomposableAlignment.Center,
 ) {
     init {
         require(pressedScale.isFinite() && pressedScale > 0f && pressedScale <= 1f)

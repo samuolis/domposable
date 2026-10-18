@@ -2,6 +2,7 @@ package io.github.samuolis.domposable.material
 
 // Namespaced defaults also work in provider-only hosts; :root preserves theme-selector specificity.
 internal const val MATERIAL_DEFAULTS_CSS = """
+[hidden]:not([hidden=until-found]){display:none!important}
 :root .d-button,:root .d-chip,:root .d-segment-surface,:root .d-multi-segment,:root .d-tab{
  font-size:var(--d-type-label-large-size);line-height:var(--d-type-label-large-line-height);
  font-weight:var(--d-type-label-large-weight);letter-spacing:var(--d-type-label-large-letter-spacing)
@@ -39,13 +40,15 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-app-bar-medium .d-app-bar-title{font-size:var(--d-type-headline-small-size);line-height:var(--d-type-headline-small-line-height)}
 .d-app-bar-large .d-app-bar-title,.d-app-bar-mediumflexible .d-app-bar-title,.d-app-bar-tworows .d-app-bar-title{font-size:var(--d-type-headline-medium-size);line-height:var(--d-type-headline-medium-line-height)}
 .d-tabs{width:100%;gap:0;border-bottom:0;box-shadow:inset 0 -1px var(--d-outline-variant)}
-.d-tabs-primary .d-tab{color:var(--d-item-content,var(--d-primary))}.d-tabs-secondary .d-tab{color:var(--d-item-content,var(--d-on-surface))}
+.d-tabs-primary .d-tab,.d-tabs-secondary .d-tab{color:var(--d-item-content,var(--d-on-surface-variant))}
 .d-tabs-scrollable{padding-inline:52px;overflow-x:auto}.d-tabs.d-tabs-scrollable .d-tab{flex:none;min-width:90px}
 .d-tabs .d-tab{flex:1;min-width:0;min-height:var(--d-item-min-height,48px);justify-content:center;position:relative;padding:0 16px;border:0}
 .d-tabs .d-tab[aria-selected=true]{color:var(--d-item-selected-content,var(--d-primary));border:0}.d-tabs-secondary .d-tab[aria-selected=true]{color:var(--d-item-selected-content,var(--d-on-surface))}
 .d-tabs .d-tab[aria-selected=true]::after{content:"";position:absolute;inset-inline:0;bottom:0;height:var(--d-tabs-indicator-height,3px);background:var(--d-item-selected-border,var(--d-primary))}
 .d-tabs-primary .d-tab[aria-selected=true]::after{width:40px;inset-inline:calc(50% - 20px);border-radius:3px 3px 0 0}
-.d-tabs-secondary .d-tab[aria-selected=true]::after{height:2px}
+.d-tabs-secondary .d-tab[aria-selected=true]::after{height:var(--d-tabs-indicator-height,2px)}
+.d-tabs[data-indicator-match-content=false] .d-tab[aria-selected=true]::after{width:auto;inset-inline:0;border-radius:0}
+.d-tabs[data-indicator-match-content=true] .d-tab[aria-selected=true]::after{width:var(--d-tab-content-width,40px);inset-inline:calc(50% - var(--d-tab-content-width,40px)/2)}
 :root .d-navigation.d-navigation-rail{width:80px;min-width:80px;gap:0;padding:4px 0;background:var(--d-item-container,var(--d-surface));align-items:stretch}
 :root .d-navigation.d-navigation-rail>button,:root .d-navigation.d-navigation-rail>a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:64px;padding:4px 0;font-size:12px;line-height:16px;font-weight:500;letter-spacing:.5px;border:0;border-radius:0;background:transparent;color:var(--d-item-content,var(--d-on-surface-variant))}
 :root .d-navigation-rail>[aria-current=page]{border:0;background:transparent;color:var(--d-item-selected-content,var(--d-on-secondary-container))}

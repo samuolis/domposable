@@ -62,6 +62,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableShape
@@ -304,7 +305,14 @@ internal fun NativeButton(
         ) {
             ProvideTextStyle(appearance.textAppearance.materialTextStyle(MaterialTheme.typography.labelLarge)) {
                 Row(
-                    Modifier.alpha(if (props.loading) 0f else 1f),
+                    Modifier
+                        .align(
+                            when (appearance.contentAlignment) {
+                                DomposableAlignment.Start -> Alignment.CenterStart
+                                DomposableAlignment.Center -> Alignment.Center
+                                DomposableAlignment.End -> Alignment.CenterEnd
+                            },
+                        ).alpha(if (props.loading) 0f else 1f),
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             appearance.contentSpacing.value.dp,

@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
@@ -282,7 +283,7 @@ internal fun HtmlDomposableLink(
 ) {
     val currentOnClick by rememberUpdatedState(props.onClick)
     val tokens = LocalDomposableTokens.current
-    val appearance = props.appearance ?: tokens.components.link
+    val appearance = props.appearance ?: props.buttonAppearance?.textAppearance ?: tokens.components.link
     val fontSize =
         appearance?.fontSize ?: when (props.textStyle) {
             DomposableTextStyle.Body -> tokens.typography.bodySize
@@ -336,6 +337,12 @@ internal fun HtmlDomposableLink(
                     }
                 }
             }
-        }) { props.content?.invoke() ?: Text(props.label) }
+        }) {
+            CompositionLocalProvider(
+                LocalMaterialButtonTextAppearance provides props.buttonAppearance?.textAppearance,
+            ) {
+                props.content?.invoke() ?: Text(props.label)
+            }
+        }
     }
 }
