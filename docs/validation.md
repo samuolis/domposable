@@ -11,6 +11,22 @@ The required **CI passed** check combines workflow hygiene, Kotlin quality/cover
 - Kotlin ABI validation checks 22 baselines across all eight published modules: Android/JVM signatures, JS/Wasm/iOS Klibs and the JVM KSP processor. macOS CI compiles all targets with inference disabled, fails on missing/incomplete inventories, and retains compiled dumps plus PR-base/release diffs for 30 days. Two published consumers also compile every runtime artifact's six target variants. Optional Metro/Koin graphs compile on every target; Kobweb exports and browser routes run separately.
 - Strict MkDocs/Dokka and both production browser distributions build before website packaging. Version/release/Central recovery tests protect publishing behavior.
 
+## Parallel CI
+
+CI builds the development browser preview once. Four Ubuntu runners then split the complete Chromium, Firefox and WebKit suite with Playwright's test-level sharding; each runner uses two workers. A failed shard does not cancel the others, so diagnostic captures remain available. Their blob reports are merged into one HTML report, and all captures are collected before the complete screenshot inventory is compared.
+
+The iOS simulator/UI job runs alongside publication and six-target consumer compilation on separate standard macOS runners. Kotlin quality and ABI checks also remain independent. This removes sequential waiting without reducing test coverage, browser engines or visual thresholds. Wall time still depends on runner availability, cold builds and retries; the first hosted run establishes the new timing.
+
+The final **CI passed** gate requires every build, shard, evidence comparison, native, consumer and ABI job to succeed. Intermediate preview artifacts expire after one day; review evidence remains available for 30 days. `android-html-evidence` and `native-evidence` keep the same paths used by the inline review publisher. The unsigned Maven bundle is retained separately in `published-consumer-evidence`.
+
+Reproduce an individual browser shard after building the preview:
+
+```bash
+npx playwright test --shard=1/4 --workers=2 --reporter=list,blob
+# Collect blob-report/*.zip from all four runners before merging:
+npx playwright merge-reports --reporter=html blob-report
+```
+
 ## Where images live
 
 Reviewed golden PNGs live in `screenshots/<platform>/` in **Git**, with an explicit inventory in `screenshots/manifest.json`. They remain available across branches and releases without an expiring artifact or third-party service. PR checks do not overwrite them.

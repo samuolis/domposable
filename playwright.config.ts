@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/browser',
+  fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.GITHUB_ACTIONS
     ? [['list'], ['github'], ['html', { open: 'never' }]]

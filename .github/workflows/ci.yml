@@ -56,7 +56,7 @@ jobs:
             **/build/reports/tests/
           retention-days: 30
   portable:
-    name: Android, desktop, DOM and Wasm
+    name: Build and packaged web validation
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -76,7 +76,106 @@ jobs:
           python scripts/ci/kobweb_export.py
           npx playwright test --config playwright.integrations.config.ts
       - run: python scripts/ci/browser_preview.py
-      - run: npx playwright test
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-preview
+          path: build/browser-preview/
+          retention-days: 1
+          if-no-files-found: error
+      - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution --console=plain
+      - run: python scripts/ci/build_site.py
+      - name: Verify fingerprinted production HTML and Wasm distributions
+        run: npx playwright test --config playwright.production.config.ts
+      - name: Verify component and modifier reference matches the compiled API
+        run: python scripts/ci/api_reference.py --check
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: portable-build-evidence
+          path: |
+            androidApp/build/outputs/apk/debug/*.apk
+            test-results/
+            playwright-report/
+            production-test-results/
+            integration-test-results/
+            integration-playwright-report/
+            build/integration-captures/
+            kobweb-example/.kobweb/site/
+            playwright-production-report/
+            build/site/
+            build/generated-reference/
+            build/screenshots/
+            build/visual-report/
+            build/renderer-comparison/
+            build/renderer-report/
+            build/benchmarks/
+            build/accessibility/
+            **/build/reports/tests/
+          retention-days: 30
+  browser:
+    name: Browser tests (${{ matrix.shard }}/4)
+    needs: portable
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: {python-version: '3.13'}
+      - run: npm ci
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: browser-preview
+          path: build/browser-preview
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Run every browser test across four shards
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: npx playwright test --shard="$SHARD/4" --workers=2 --reporter=list,github,blob
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: browser-shard-${{ matrix.shard }}
+          path: |
+            blob-report/
+            test-results/
+            build/screenshots/
+            build/renderer-comparison/
+            build/benchmarks/
+            build/accessibility/
+          retention-days: 30
+          if-no-files-found: error
+  portable-evidence:
+    name: Android, desktop, DOM and Wasm
+    if: always()
+    needs: [portable, browser]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: {node-version: '24', cache: npm}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with: {python-version: '3.13'}
+      - run: npm ci
+      - run: python -m pip install --requirement docs/requirements.txt
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with: {name: portable-build-evidence}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: always()
+        with:
+          pattern: browser-shard-*
+          merge-multiple: true
+      - name: Merge all browser reports
+        if: always()
+        run: npx playwright merge-reports --reporter=html blob-report
       - name: Export direct HTML and Compose UI theme comparisons
         if: always()
         run: python scripts/ci/renderer_comparison.py
@@ -94,12 +193,6 @@ jobs:
             fi
           done
           exit "$status"
-      - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution --console=plain
-      - run: python scripts/ci/build_site.py
-      - name: Verify fingerprinted production HTML and Wasm distributions
-        run: npx playwright test --config playwright.production.config.ts
-      - name: Verify component and modifier reference matches the compiled API
-        run: python scripts/ci/api_reference.py --check
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
@@ -124,6 +217,12 @@ jobs:
             build/accessibility/
             **/build/reports/tests/
           retention-days: 30
+      - name: Require build and every browser shard
+        if: always()
+        env:
+          BUILD: ${{ needs.portable.result }}
+          BROWSER: ${{ needs.browser.result }}
+        run: test "$BUILD" = success && test "$BROWSER" = success
   binary-api:
     name: Binary API compatibility
     runs-on: macos-26
@@ -155,7 +254,7 @@ jobs:
           retention-days: 30
           if-no-files-found: error
   native:
-    name: iOS and published consumers
+    name: iOS UI and visual regression
     runs-on: macos-26
     timeout-minutes: 90
     env:
@@ -164,12 +263,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
-      - run: ./gradlew publishAllPublicationsToFixtureRepository :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 --console=plain
-      - run: python scripts/ci/package_publications.py --unsigned
-      - name: Resolve and compile published artifacts on all six targets
-        run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 :koin-example:compileKotlinJvm :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
-      - name: Verify stable Compose core in every packaged consumer target
-        run: ./gradlew :consumer-fixture:verifyStableComposeBaseline -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
+      - run: ./gradlew :demo:linkDebugFrameworkIosSimulatorArm64 :demo:compileKotlinIosArm64 --console=plain
       - run: python scripts/ci/generate_xcode_project.py
       - run: python scripts/ci/ios_test.py
       - name: iOS visual regression
@@ -192,12 +286,36 @@ jobs:
             build/screenshots/
             build/visual-report/
             build/ios-tests/**/Build/Products/Debug-iphonesimulator/DomposableDemo.app
+          retention-days: 30
+  consumers:
+    name: Published consumers on six targets
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx2g -Dorg.gradle.workers.max=1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: ./.github/actions/setup
+      - run: ./gradlew publishAllPublicationsToFixtureRepository :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 --console=plain
+      - run: python scripts/ci/package_publications.py --unsigned
+      - name: Resolve and compile published artifacts on all six targets
+        run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 :koin-example:compileKotlinJvm :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
+      - name: Verify stable Compose core in every packaged consumer target
+        run: ./gradlew :consumer-fixture:verifyStableComposeBaseline -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: published-consumer-evidence
+          include-hidden-files: true
+          path: |
             .release/artifacts/maven-bundle.zip
+            **/build/reports/tests/
           retention-days: 30
   passed:
     name: CI passed
     if: always()
-    needs: [hygiene, quality, portable, native, binary-api]
+    needs: [hygiene, quality, portable, browser, portable-evidence, native, consumers, binary-api]
     runs-on: ubuntu-24.04
     steps:
       - name: Require validation and prevent recording from satisfying branch or release gates
@@ -205,7 +323,10 @@ jobs:
           HYGIENE: ${{ needs.hygiene.result }}
           QUALITY: ${{ needs.quality.result }}
           PORTABLE: ${{ needs.portable.result }}
+          BROWSER: ${{ needs.browser.result }}
+          EVIDENCE: ${{ needs.portable-evidence.result }}
+          CONSUMERS: ${{ needs.consumers.result }}
           NATIVE: ${{ needs.native.result }}
           BINARY_API: ${{ needs.binary-api.result }}
           RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
-        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$NATIVE" = success && test "$BINARY_API" = success && test "$RECORD" != true
+        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$BROWSER" = success && test "$EVIDENCE" = success && test "$CONSUMERS" = success && test "$NATIVE" = success && test "$BINARY_API" = success && test "$RECORD" != true
