@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -40,11 +41,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
@@ -55,6 +62,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableShape
@@ -171,11 +179,63 @@ internal fun NativeButton(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val hovered by interactionSource.collectIsHoveredAsState()
+    val focused by interactionSource.collectIsFocusedAsState()
+    val interactionEnabled = props.enabled && formEnabled && !props.loading
+    val interaction = appearance.interaction
+    val resolvedContainer =
+        when {
+            !interactionEnabled -> {
+                containerColor
+            }
+
+            pressed -> {
+                interaction?.pressedContainer?.let { Color(it.argb) }
+                    ?: interaction?.stateLayerOpacity?.let {
+                        contentColor
+                            .copy(
+                                alpha = it.pressed,
+                            ).compositeOver(containerColor)
+                    }
+                    ?: containerColor
+            }
+
+            hovered -> {
+                interaction?.hoveredContainer?.let { Color(it.argb) }
+                    ?: interaction?.stateLayerOpacity?.let {
+                        contentColor
+                            .copy(
+                                alpha = it.hovered,
+                            ).compositeOver(containerColor)
+                    }
+                    ?: containerColor
+            }
+
+            focused -> {
+                interaction?.stateLayerOpacity?.let {
+                    contentColor
+                        .copy(
+                            alpha = it.focused,
+                        ).compositeOver(containerColor)
+                }
+                    ?: containerColor
+            }
+
+            else -> {
+                containerColor
+            }
+        }
+    val resolvedContent =
+        when {
+            !interactionEnabled -> contentColor
+            pressed -> interaction?.pressedContent?.let { Color(it.argb) } ?: contentColor
+            hovered -> interaction?.hoveredContent?.let { Color(it.argb) } ?: contentColor
+            else -> contentColor
+        }
     val scale by animateFloatAsState(
         targetValue =
             when {
-                pressed -> appearance.pressedScale
-                hovered -> appearance.hoveredScale
+                interactionEnabled && pressed -> appearance.pressedScale
+                interactionEnabled && hovered -> appearance.hoveredScale
                 else -> 1f
             },
         animationSpec =
@@ -188,7 +248,17 @@ internal fun NativeButton(
     val buttonModifier =
         modifier
             .toComposeModifier()
-            .scale(scale)
+            .alpha(if (!interactionEnabled && !props.loading) appearance.disabledOpacity ?: 1f else 1f)
+            .drawButtonFocusRing(
+                focused && interactionEnabled,
+                interaction?.let {
+                    it.focusRingColor?.let { color -> Color(color.argb) }
+                        ?: MaterialTheme.colorScheme.primary
+                },
+                interaction?.focusRingWidth?.value ?: if (interaction != null) 3f else null,
+                interaction?.focusRingOffset?.value ?: if (interaction != null) 3f else null,
+                shape,
+            ).scale(scale)
             .minimumInteractiveComponentSize()
             .shadow(if (props.style == DomposableButtonStyle.Elevated && useEnabledColors) 1.dp else 0.dp, shape)
             .heightIn(min = (appearance.minHeight?.value ?: 40f).dp)
@@ -200,13 +270,13 @@ internal fun NativeButton(
                     props.loadingLabel?.let { contentDescription = it }
                     disabled()
                 }
-            }.background(containerColor, shape)
+            }.background(resolvedContainer, shape)
             .then(
                 border?.let { Modifier.border(it, shape) }
                     ?: Modifier,
             ).clickable(
                 interactionSource = interactionSource,
-                indication = LocalIndication.current,
+                indication = if (interaction == null) LocalIndication.current else null,
                 enabled =
                     props.enabled && formEnabled && !props.loading,
                 role = Role.Button,
@@ -230,12 +300,19 @@ internal fun NativeButton(
             )
     Box(buttonModifier, contentAlignment = Alignment.Center) {
         CompositionLocalProvider(
-            LocalContentColor provides contentColor,
+            LocalContentColor provides resolvedContent,
             LocalMaterialButtonTextAppearance provides appearance.textAppearance,
         ) {
             ProvideTextStyle(appearance.textAppearance.materialTextStyle(MaterialTheme.typography.labelLarge)) {
                 Row(
-                    Modifier.alpha(if (props.loading) 0f else 1f),
+                    Modifier
+                        .align(
+                            when (appearance.contentAlignment) {
+                                DomposableAlignment.Start -> Alignment.CenterStart
+                                DomposableAlignment.Center -> Alignment.Center
+                                DomposableAlignment.End -> Alignment.CenterEnd
+                            },
+                        ).alpha(if (props.loading) 0f else 1f),
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             appearance.contentSpacing.value.dp,
@@ -259,6 +336,33 @@ internal fun NativeButton(
                     strokeWidth = (appearance.indicatorStrokeWidth?.value ?: 2f).dp,
                 )
             }
+        }
+    }
+}
+
+internal fun Modifier.drawButtonFocusRing(
+    focused: Boolean,
+    color: Color?,
+    widthDp: Float?,
+    offsetDp: Float?,
+    shape: Shape,
+): Modifier {
+    if (!focused || color == null || widthDp == null) return this
+    if (widthDp == 0f) return this
+    val ringOffset = offsetDp ?: return this
+    return drawBehind {
+        val strokeWidth = widthDp.dp.toPx()
+        val expansion = ringOffset.dp.toPx() + strokeWidth / 2f
+        translate(-expansion, -expansion) {
+            drawOutline(
+                shape.createOutline(
+                    Size(size.width + expansion * 2f, size.height + expansion * 2f),
+                    layoutDirection,
+                    this,
+                ),
+                color,
+                style = Stroke(strokeWidth),
+            )
         }
     }
 }

@@ -35,6 +35,7 @@ import io.github.samuolis.domposable.ui.DomposableDisclosure
 import io.github.samuolis.domposable.ui.DomposableDivider
 import io.github.samuolis.domposable.ui.DomposableDragHandle
 import io.github.samuolis.domposable.ui.DomposableFlowRow
+import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableLazyItem
 import io.github.samuolis.domposable.ui.DomposableListItem
@@ -58,12 +59,14 @@ import io.github.samuolis.domposable.ui.DomposableTabs
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTooltip
 import io.github.samuolis.domposable.ui.DomposableTopAppBar
+import io.github.samuolis.domposable.ui.DomposableVectorIcon
 import io.github.samuolis.domposable.ui.DomposableWideNavigationRail
 import io.github.samuolis.domposable.ui.DomposableWideNavigationRailItem
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.rememberDomposableSnackbarHostState
+import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.width
 import kotlinx.coroutines.delay
@@ -88,7 +91,20 @@ internal fun MaterialSurfaces() {
     DomposableListItem(
         "Standard list item",
         supportingText = "Leading and trailing content are caller-owned",
-        leadingContent = { DomposableText("◉") },
+        leadingContent = {
+            DomposableIcon(
+                vector =
+                    DomposableVectorIcon(
+                        pathData =
+                            "M12 2A10 10 0 1 0 12 22A10 10 0 1 0 12 2" +
+                                "M12 4A8 8 0 1 1 12 20A8 8 0 1 1 12 4" +
+                                "M12 8A4 4 0 1 0 12 16A4 4 0 1 0 12 8",
+                        evenOdd = true,
+                    ),
+                description = null,
+                modifier = DomposableModifier.size(16.dp),
+            )
+        },
         trailingContent = { DomposableText("›") },
     )
     listOf(

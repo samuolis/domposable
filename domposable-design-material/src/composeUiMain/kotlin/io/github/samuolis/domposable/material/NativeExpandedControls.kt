@@ -427,6 +427,10 @@ internal fun NativeCarousel(
     modifier: DomposableModifier,
 ) {
     if (props.items.isEmpty()) return
+    if (props.pagedLayout != null) {
+        NativeWindow { featureRegistry -> NativePagedCarousel(props, modifier, featureRegistry) }
+        return
+    }
     NativeWindow { featureRegistry -> NativeCarouselContent(props, modifier, featureRegistry) }
 }
 

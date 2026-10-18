@@ -280,6 +280,15 @@ fun DomposableIcon(
     appearance: DomposableIconAppearance? = null,
 ) = DomposableIcon(DomposableIconProps(symbol, description, appearance = appearance), modifier)
 
+/** Renders a reusable filled vector path as an accessible icon on native and HTML platforms. */
+@Composable
+fun DomposableIcon(
+    vector: DomposableVectorIcon,
+    description: String?,
+    modifier: DomposableModifier = DomposableModifier,
+    appearance: DomposableIconAppearance? = null,
+) = DomposableIcon(DomposableIconProps("", description, appearance = appearance, vector = vector), modifier)
+
 @Composable
 fun DomposableDivider(
     orientation: DomposableOrientation,
@@ -383,6 +392,7 @@ fun DomposableTabs(
     scrollable: Boolean = false,
     icons: List<(@Composable () -> Unit)?> = labels.map { null },
     leadingIcons: Boolean = false,
+    tabsAppearance: DomposableTabsAppearance? = null,
 ) = DomposableTabs(
     DomposableTabsProps(
         labels,
@@ -393,6 +403,37 @@ fun DomposableTabs(
         scrollable = scrollable,
         icons = icons,
         leadingIcons = leadingIcons,
+        tabsAppearance = tabsAppearance,
+    ),
+    modifier,
+)
+
+/** Keyed tabs with per-item enabled state, accessible names, and optional content slots. */
+@Composable
+fun DomposableTabs(
+    items: List<DomposableTabItem>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: DomposableModifier = DomposableModifier,
+    label: String = "Sections",
+    appearance: DomposableItemAppearance? = null,
+    variant: DomposableTabsVariant = DomposableTabsVariant.Primary,
+    scrollable: Boolean = false,
+    leadingIcons: Boolean = false,
+    tabsAppearance: DomposableTabsAppearance? = null,
+) = DomposableTabs(
+    DomposableTabsProps(
+        labels = items.map(DomposableTabItem::label),
+        selectedIndex = selectedIndex,
+        onSelect = onSelect,
+        appearance = appearance,
+        variant = variant,
+        scrollable = scrollable,
+        icons = items.map(DomposableTabItem::icon),
+        leadingIcons = leadingIcons,
+        items = items,
+        label = label,
+        tabsAppearance = tabsAppearance,
     ),
     modifier,
 )
@@ -465,9 +506,19 @@ fun DomposableDialog(
     actions: @Composable () -> Unit = {},
     appearance: DomposableSurfaceAppearance? = null,
     variant: DomposableDialogVariant = DomposableDialogVariant.Alert,
+    headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    layout: DomposableModalLayout = DomposableModalLayout(),
     content: @Composable () -> Unit,
 ) = DomposableDialog(
-    DomposableDialogProps(title, onDismiss, actions, appearance = appearance, variant = variant),
+    DomposableDialogProps(
+        title,
+        onDismiss,
+        actions,
+        appearance = appearance,
+        variant = variant,
+        headerContent = headerContent,
+        layout = layout,
+    ),
     modifier,
     content,
 )
@@ -479,9 +530,18 @@ fun DomposableBottomSheet(
     modifier: DomposableModifier = DomposableModifier,
     appearance: DomposableSurfaceAppearance? = null,
     modal: Boolean = true,
+    headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    layout: DomposableModalLayout = DomposableModalLayout(),
     content: @Composable () -> Unit,
 ) = DomposableBottomSheet(
-    DomposableBottomSheetProps(title, onDismiss, appearance = appearance, modal = modal),
+    DomposableBottomSheetProps(
+        title,
+        onDismiss,
+        appearance = appearance,
+        modal = modal,
+        headerContent = headerContent,
+        layout = layout,
+    ),
     modifier,
     content,
 )
@@ -612,4 +672,9 @@ fun DomposableButton(
     style: DomposableButtonStyle,
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
-) = DomposableButton(onClick, modifier, enabled, style) { DomposableText(text) }
+) {
+    val textAppearance = buttonLabelTextAppearance()
+    DomposableButton(onClick, modifier, enabled, style) {
+        DomposableText(text, appearance = textAppearance)
+    }
+}

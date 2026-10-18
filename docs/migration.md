@@ -12,6 +12,43 @@ Use Kotlin/JS with Compose HTML for the web host. Wasm is an optional separate C
 
 Migrate one feature first. Verify semantics, focus/keyboard behavior and measured content breakpoints on each target. Use the [coverage matrix](coverage.md) to identify controls needing a custom renderer.
 
+## Variable-font weights
+
+`DomposableFontWeight` is now a validated value type rather than an enum, so shared text and
+component appearances can use exact variable-font weights such as `DomposableFontWeight(750)`
+on native and HTML. The named `Thin` through `Black` values remain available. Recompile consumers;
+replace enum `entries`/`valueOf` usage with your app's explicit preset list and handle arbitrary
+weights in any previous exhaustive `when`. This is an intentional pre-1.0 breaking change requiring
+a minor release. Brand typography should configure weight through the theme rather than CSS.
+
+## Independent overlay alignment
+
+`DomposableBox` now accepts `verticalAlignment`, defaulting to `alignment`. Existing calls keep their
+previous top-start, centre or bottom-end placement. Specify the two axes for the other six combinations.
+The added `DomposableBoxProps` field changes constructor and `copy` binary signatures: recompile consumers
+and use a minor pre-1.0 release. The existing direct composable overload is retained, including positional content arguments.
+
+## Shared interaction appearance
+
+`DomposableButtonAppearance` adds optional `disabledOpacity` and `interaction` values. Null keeps
+previous rendering. The interaction model configures state colors, state-layer opacity and focus
+ring geometry for buttons, icon buttons and button-styled links. Its added data-class fields change
+constructor/copy signatures: recompile consumers as part of this pre-1.0 minor release.
+
+## Styled links and custom modal headers
+
+`DomposableLink` can opt into shared button geometry and select a `DomposableButtonStyle` while retaining
+anchor navigation on HTML. Dialog and bottom-sheet props can replace the default title/close pair with
+`headerContent`; apps that provide it own the heading semantics and localized dismiss label. The new
+optional fields preserve source calls after recompilation, but change props constructor/copy signatures.
+Recompile consumers and custom providers and include this pre-1.0 ABI change in a minor release.
+
+`DomposableModalLayout` adds explicit surface bounds, viewport insets, alignment and sheet swipe
+control to both renderers. Existing defaults retain the library's normal presentation; apps should
+set only the layout values required by their design. HTML modal dismissal now checks both pointer
+start and end positions, and its fallback path blocks background interaction and traps focus when
+native `showModal()` is unavailable.
+
 ## Layout arrangements
 
 `DomposableTextStyle.Inherit` is an optional addition for adapters that already own text styling. Existing presets are unchanged. Custom providers with an exhaustive text-style mapping must add the new enum case: inherit native ambient typography or HTML host typography, then apply explicit appearance overrides. Inherited HTML headings retain their heading semantics without forcing title typography.
@@ -128,3 +165,24 @@ Image cards can use the same `DomposableBox`, `DomposableImage`, gradient backgr
 An existing router can adopt the [caller-owned browser-history binding](caller-owned-browser-history.md) without adopting `DomposableNavigator`, the screen registry or KSP. Provide a snapshot codec and URL policy, then restore application state from its callback. The library handles physical history positions and retained branches; app-specific asynchronous scroll restoration stays with the app.
 
 Row, badge, avatar and segmented-button props gain optional layout/content fields. Ordinary source calls retain defaults after recompilation. Their constructor/copy signatures and affected convenience overloads change, so this is a pre-1.0 **breaking ABI change** requiring the 0.9 minor release. Recompile applications and custom providers together. Custom providers must honor supplied content slots, equal-width segments and stretched rows or inherit the Material defaults. New modifier operations require custom exhaustive renderer mappings to be updated; the stock native and HTML adapters already support them.
+
+Text with independently styled runs can use `DomposableText(runs = ...)`. Unspecified run values
+inherit the surrounding text style, and `contentAlpha` changes only that run's foreground. Direct
+`DomposableTextProps` construction must supply `text` equal to the concatenated run text, keeping
+renderer content and accessibility text consistent. Existing plain text calls remain unchanged.
+
+`DomposableTabs(labels = ...)` remains source-compatible. Migrate to `DomposableTabs(items = ...)`
+when tabs need stable keys, per-tab enabled state, accessible names, test tags, icons, badges, or
+individual text appearance. Supply a localized `label` for the tab list; keyboard navigation wraps
+among enabled tabs and supports Home and End.
+
+The next minor release adds optional paged carousel layout, keyed tab items, viewport-height
+modifiers and button content alignment. Constructors/copy methods and affected composable
+signatures change: recompile consumers and custom providers together. Existing label-only tabs,
+Material carousel variants and centered button defaults remain available. New modifier operations
+must be handled by custom exhaustive adapters; stock Compose UI and HTML adapters handle them.
+
+Use `contentAlignment = DomposableAlignment.Start` in shared button/link appearance instead of
+HTML `justify-content` overrides. Custom content slots inherit the button text appearance, and
+full-width rows can lay out weighted labels and trailing content on both renderers. See the
+[design-system example](design-systems.md#aligning-custom-control-content).

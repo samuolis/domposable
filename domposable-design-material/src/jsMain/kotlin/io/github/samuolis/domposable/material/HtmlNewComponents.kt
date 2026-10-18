@@ -1373,6 +1373,10 @@ internal fun HtmlCarousel(
     props: DomposableCarouselProps,
     modifier: DomposableModifier,
 ) {
+    if (props.pagedLayout != null) {
+        DomposableHtmlModifiers(modifier) { HtmlPagedCarousel(props, modifier) }
+        return
+    }
     DomposableHtmlModifiers(modifier) {
         val id = remember { "d-carousel-${nextCatalogId++}" }
         val formEnabled = domposableFormEnabled()

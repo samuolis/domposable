@@ -40,19 +40,16 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.samuolis.domposable.foundation.DomposableFontWeight
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
-import io.github.samuolis.domposable.foundation.DomposableTextAlignment
-import io.github.samuolis.domposable.foundation.DomposableTextDecoration
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
+import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableDisclosureProps
 import io.github.samuolis.domposable.ui.DomposableFormProps
 import io.github.samuolis.domposable.ui.DomposableLinkProps
@@ -65,6 +62,7 @@ import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.parseDomposableRichHtml
 import io.github.samuolis.domposable.ui.toComposeModifier
 import androidx.compose.ui.text.font.FontWeight as ComposeFontWeight
+import io.github.samuolis.domposable.ui.contentDescription as linkDescription
 
 @Composable
 internal fun NativeDomposableForm(
@@ -92,12 +90,26 @@ internal fun NativeDomposableLink(
     val currentOnClick by rememberUpdatedState(props.onClick)
     val uriHandler = LocalUriHandler.current
     val appearance = props.appearance
+    val linkModifier = if (props.content == null) modifier else modifier.linkDescription(props.label)
+    props.buttonAppearance?.let { buttonAppearance ->
+        NativeButton(
+            props =
+                DomposableButtonProps(
+                    onClick = { currentOnClick?.invoke() ?: uriHandler.openUri(props.href) },
+                    style = props.buttonStyle,
+                    appearance = buttonAppearance,
+                ),
+            modifier = linkModifier,
+            content = { props.content?.invoke() ?: Text(props.label) },
+        )
+        return
+    }
     // Keep the existing native link's touch target, typography and spacing for default calls.
     if (appearance == null && props.textStyle == DomposableTextStyle.Body) {
         TextButton(
             onClick = { currentOnClick?.invoke() ?: uriHandler.openUri(props.href) },
-            modifier = modifier.toComposeModifier(),
-        ) { Text(props.label) }
+            modifier = linkModifier.toComposeModifier(),
+        ) { props.content?.invoke() ?: Text(props.label) }
         return
     }
     val baseStyle =
@@ -107,28 +119,40 @@ internal fun NativeDomposableLink(
             DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
             DomposableTextStyle.Inherit -> LocalTextStyle.current
         }
-    val style =
-        baseStyle.copy(
-            fontSize = appearance?.fontSize?.sp ?: baseStyle.fontSize,
-            lineHeight = appearance?.lineHeight?.sp ?: baseStyle.lineHeight,
-            fontWeight = appearance?.fontWeight?.nativeFontWeight() ?: baseStyle.fontWeight,
-            textAlign = appearance?.alignment?.nativeTextAlign() ?: baseStyle.textAlign,
-            textDecoration = appearance?.decoration?.nativeTextDecoration() ?: baseStyle.textDecoration,
-        )
-    val text: @Composable () -> Unit = {
-        Text(
-            text = props.label,
+    val style = appearance.nativeTextStyle(baseStyle)
+    val customContent = props.content
+    if (customContent != null) {
+        androidx.compose.foundation.layout.Box(
             modifier =
-                modifier.toComposeModifier().clickable(role = Role.Button) {
-                    currentOnClick?.invoke() ?: uriHandler.openUri(props.href)
-                },
-            color = Color(LocalDomposableTokens.current.colors.primary.argb),
-            style = style,
-            maxLines = appearance?.maxLines ?: Int.MAX_VALUE,
-            overflow = appearance?.overflow?.nativeTextOverflow() ?: TextOverflow.Clip,
-        )
+                linkModifier
+                    .toComposeModifier()
+                    .clickable(role = Role.Button) {
+                        currentOnClick?.invoke() ?: uriHandler.openUri(props.href)
+                    }.semantics { contentDescription = props.label },
+        ) {
+            androidx.compose.material3.ProvideTextStyle(style) {
+                CompositionLocalProvider(
+                    androidx.compose.material3.LocalContentColor provides
+                        (appearance?.color?.nativeColor() ?: Color(LocalDomposableTokens.current.colors.primary.argb)),
+                ) { customContent() }
+            }
+        }
+    } else {
+        val text: @Composable () -> Unit = {
+            Text(
+                text = props.label,
+                modifier =
+                    linkModifier.toComposeModifier().clickable(role = Role.Button) {
+                        currentOnClick?.invoke() ?: uriHandler.openUri(props.href)
+                    },
+                color = appearance?.color?.nativeColor() ?: Color(LocalDomposableTokens.current.colors.primary.argb),
+                style = style,
+                maxLines = appearance?.maxLines ?: Int.MAX_VALUE,
+                overflow = appearance?.overflow?.nativeTextOverflow() ?: TextOverflow.Clip,
+            )
+        }
+        if (appearance?.selectable == true) SelectionContainer { text() } else text()
     }
-    if (appearance?.selectable == true) SelectionContainer { text() } else text()
 }
 
 @Composable
@@ -355,34 +379,6 @@ private class NativeRichHtmlWriter(
         }
     }
 }
-
-private fun DomposableFontWeight.nativeFontWeight(): ComposeFontWeight =
-    when (this) {
-        DomposableFontWeight.Thin -> ComposeFontWeight.Thin
-        DomposableFontWeight.ExtraLight -> ComposeFontWeight.ExtraLight
-        DomposableFontWeight.Light -> ComposeFontWeight.Light
-        DomposableFontWeight.Normal -> ComposeFontWeight.Normal
-        DomposableFontWeight.Medium -> ComposeFontWeight.Medium
-        DomposableFontWeight.SemiBold -> ComposeFontWeight.SemiBold
-        DomposableFontWeight.Bold -> ComposeFontWeight.Bold
-        DomposableFontWeight.ExtraBold -> ComposeFontWeight.ExtraBold
-        DomposableFontWeight.Black -> ComposeFontWeight.Black
-    }
-
-private fun DomposableTextAlignment.nativeTextAlign(): TextAlign =
-    when (this) {
-        DomposableTextAlignment.Start -> TextAlign.Start
-        DomposableTextAlignment.Center -> TextAlign.Center
-        DomposableTextAlignment.End -> TextAlign.End
-        DomposableTextAlignment.Justify -> TextAlign.Justify
-    }
-
-private fun DomposableTextDecoration.nativeTextDecoration(): TextDecoration? =
-    when (this) {
-        DomposableTextDecoration.None -> TextDecoration.None
-        DomposableTextDecoration.Underline -> TextDecoration.Underline
-        DomposableTextDecoration.LineThrough -> TextDecoration.LineThrough
-    }
 
 private fun DomposableTextOverflow.nativeTextOverflow(): TextOverflow =
     when (this) {

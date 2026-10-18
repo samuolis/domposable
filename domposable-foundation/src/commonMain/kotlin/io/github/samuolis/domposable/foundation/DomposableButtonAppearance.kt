@@ -22,9 +22,15 @@ data class DomposableButtonAppearance(
     val indicatorStrokeWidth: DomposableLength? = null,
     val pressedScale: Float = 1f,
     val hoveredScale: Float = 1f,
+    /** Optional whole-control opacity while disabled; loading keeps enabled styling. */
+    val disabledOpacity: Float? = null,
+    val interaction: DomposableInteractionAppearance? = null,
+    /** Logical horizontal alignment of the content inside a wider control. */
+    val contentAlignment: DomposableAlignment = DomposableAlignment.Center,
 ) {
     init {
         require(pressedScale.isFinite() && pressedScale > 0f && pressedScale <= 1f)
         require(hoveredScale.isFinite() && hoveredScale > 0f)
+        require(disabledOpacity == null || (disabledOpacity.isFinite() && disabledOpacity in 0f..1f))
     }
 }

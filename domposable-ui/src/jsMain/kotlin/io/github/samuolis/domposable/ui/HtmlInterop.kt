@@ -290,6 +290,7 @@ private fun HtmlModifierBox(
         }
     val establishesHeight =
         operation is DomposableModifierOperation.Height ||
+            operation is DomposableModifierOperation.ViewportHeight ||
             operation is DomposableModifierOperation.MinHeight ||
             operation is DomposableModifierOperation.MaxHeight ||
             operation == DomposableModifierOperation.FillHeight
@@ -327,6 +328,24 @@ private fun HtmlModifierBox(
 
                 is DomposableModifierOperation.Height -> {
                     property("height", "${operation.length.value}px")
+                }
+
+                is DomposableModifierOperation.ViewportHeight -> {
+                    val propertyName =
+                        when (operation.mode) {
+                            DomposableViewportHeightMode.Fixed -> "height"
+                            DomposableViewportHeightMode.Minimum -> "min-height"
+                            DomposableViewportHeightMode.Maximum -> "max-height"
+                        }
+                    val viewportUnit = if (operation.unit == DomposableViewportUnit.Small) "svh" else "dvh"
+                    property(
+                        propertyName,
+                        "max(0px, calc(${operation.fraction * 100}vh - ${operation.subtract.value}px))",
+                    )
+                    property(
+                        propertyName,
+                        "max(0px, calc(${operation.fraction * 100}$viewportUnit - ${operation.subtract.value}px))",
+                    )
                 }
 
                 is DomposableModifierOperation.MaxWidth -> {

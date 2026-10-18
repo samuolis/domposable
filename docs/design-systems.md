@@ -422,3 +422,35 @@ These defaults style the standard Material renderers. A custom provider owns its
 
 
 The [Material catalog](material-catalog.md) lists the standard and expressive variants and provides examples for selection controls, queued messages, badge anchors and screen chrome.
+
+### Aligning custom control content
+
+Buttons and button-styled links support the same `DomposableButtonAppearance`. A wide drawer link
+can align its content to the logical start, while an ordinary action keeps the centered default:
+
+```kotlin
+val drawerAction = DomposableButtonAppearance(
+    contentAlignment = DomposableAlignment.Start,
+    minHeight = 48.dp,
+    contentPadding = DomposableInsets(start = 12.dp, end = 12.dp),
+    contentSpacing = 12.dp,
+)
+
+DomposableLink(
+    label = localizedSettings,
+    href = "/settings",
+    modifier = DomposableModifier.fillMaxWidth(),
+    buttonStyle = DomposableButtonStyle.Text,
+    buttonAppearance = drawerAction,
+) {
+    DomposableRow(gap = 12.dp, alignment = DomposableAlignment.Center) {
+        SettingsIcon()
+        DomposableText(localizedSettings)
+    }
+}
+```
+
+`Start` and `End` follow the layout direction on native and HTML. Custom button content can use a
+full-width row and weighted children when it needs a trailing counter or disclosure icon. Loading
+keeps the content's measured space and centers the progress indicator independently of content
+alignment. Set this appearance once in your app's design-system adapter; features need no CSS.

@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
@@ -13,6 +14,52 @@ import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.dp
 
+@Immutable
+data class DomposableCarouselLabels(
+    val previous: String,
+    val next: String,
+    val itemPosition: (position: Int, total: Int) -> String,
+) {
+    init {
+        require(previous.isNotBlank() && next.isNotBlank())
+    }
+}
+
+@Immutable
+data class DomposableCarouselControlsAppearance(
+    val navigationButton: DomposableButtonAppearance? = null,
+    val activeIndicator: DomposableColor? = null,
+    val inactiveIndicator: DomposableColor? = null,
+    val previousIcon: (@Composable () -> Unit)? = null,
+    val nextIcon: (@Composable () -> Unit)? = null,
+    val wideInactiveIndicator: DomposableColor? = null,
+)
+
+/** Layout and accessibility options for a one-item-at-a-time responsive carousel. */
+@Immutable
+data class DomposablePagedCarouselLayout(
+    val compactHeight: DomposableLength? = null,
+    val wideHeight: DomposableLength? = null,
+    /** When set, card heights grow with BodyMedium text size relative to this reference size. */
+    val heightTextScaleReference: DomposableLength? = null,
+    val breakpoint: DomposableLength = 600.dp,
+    val contentInset: DomposableLength = 16.dp,
+    val itemSpacing: DomposableLength = 12.dp,
+    val compactTrailingPeek: DomposableLength = 14.dp,
+    val showIndicators: Boolean = true,
+    val showNavigation: Boolean = true,
+    val labels: DomposableCarouselLabels,
+    val controls: DomposableCarouselControlsAppearance = DomposableCarouselControlsAppearance(),
+) {
+    init {
+        require(breakpoint.value > 0f)
+        require(contentInset.value >= 0f && itemSpacing.value >= 0f && compactTrailingPeek.value >= 0f)
+        require(compactHeight == null || compactHeight.value > 0f)
+        require(wideHeight == null || wideHeight.value > 0f)
+        require(heightTextScaleReference == null || heightTextScaleReference.value > 0f)
+    }
+}
+
 @DomposableComponent("Carousel")
 data class DomposableCarouselProps(
     val items: List<DomposableLazyItem>,
@@ -24,6 +71,8 @@ data class DomposableCarouselProps(
     val spacing: DomposableLength = 8.dp,
     val currentItem: Int = 0,
     val onCurrentItemChange: ((Int) -> Unit)? = null,
+    val pagedLayout: DomposablePagedCarouselLayout? = null,
+    val onApproachingEnd: ((Int) -> Unit)? = null,
 ) {
     init {
         require(items.map { it.key }.distinct().size == items.size)
@@ -47,6 +96,8 @@ fun DomposableCarousel(
     modifier: DomposableModifier = DomposableModifier,
     currentItem: Int = 0,
     onCurrentItemChange: ((Int) -> Unit)? = null,
+    pagedLayout: DomposablePagedCarouselLayout? = null,
+    onApproachingEnd: ((Int) -> Unit)? = null,
 ) = DomposableCarousel(
     DomposableCarouselProps(
         items,
@@ -58,6 +109,8 @@ fun DomposableCarousel(
         spacing,
         currentItem = currentItem,
         onCurrentItemChange = onCurrentItemChange,
+        pagedLayout = pagedLayout,
+        onApproachingEnd = onApproachingEnd,
     ),
     modifier,
 )

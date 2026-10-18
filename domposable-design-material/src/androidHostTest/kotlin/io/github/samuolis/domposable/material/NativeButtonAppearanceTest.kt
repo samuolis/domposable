@@ -1,37 +1,52 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.InputModeManager
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponentStyles
+import io.github.samuolis.domposable.foundation.DomposableInteractionAppearance
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSwitchAppearance
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableButtonProps
+import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableSwitch
 import io.github.samuolis.domposable.ui.DomposableText
@@ -43,6 +58,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import androidx.compose.ui.unit.dp as nativeDp
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -134,6 +151,116 @@ class NativeButtonAppearanceTest {
         }
         compose.onNodeWithTag("save").assertIsEnabled().performClick()
         compose.runOnIdle { assertEquals(2, clicks) }
+    }
+
+    @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
+    fun typedInteractionUsesHoveredAndPressedColorsAndKeepsFocusRingVisible() {
+        lateinit var inputMode: InputModeManager
+        compose.setContent {
+            inputMode = LocalInputModeManager.current
+            InteractionControls()
+        }
+        val button = compose.onNodeWithTag("interaction-button")
+        button.performMouseInput { moveTo(center) }
+        val hovered = button.captureToImage().toPixelMap()
+        assertEquals(Color(0xFFAA0000), hovered[hovered.width / 2, hovered.height / 2])
+        button.performTouchInput { down(center) }
+        val pressed = button.captureToImage().toPixelMap()
+        assertEquals(Color(0xFF00AA00), pressed[pressed.width / 2, pressed.height / 2])
+        button.performTouchInput { up() }
+        compose.runOnIdle { inputMode.requestInputMode(InputMode.Keyboard) }
+        button.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
+        button.assertIsFocused()
+        val focused = compose.onNodeWithTag("interaction-host").captureToImage().toPixelMap()
+        assertTrue(
+            (0 until focused.height).any { y ->
+                (0 until focused.width).any { x -> focused[x, y] == Color(0xFFFFFF00) }
+            },
+            "The configured focus ring must be painted outside the button, without clipping",
+        )
+        val icon = compose.onNodeWithTag("interaction-icon")
+        icon.performMouseInput { moveTo(center) }
+        val hoveredIcon = icon.captureToImage().toPixelMap()
+        assertEquals(Color(0xFFAA0000), hoveredIcon[hoveredIcon.width / 2, hoveredIcon.height / 2])
+        icon.performTouchInput { down(center) }
+        val pressedIcon = icon.captureToImage().toPixelMap()
+        assertEquals(Color(0xFF00AA00), pressedIcon[pressedIcon.width / 2, pressedIcon.height / 2])
+        icon.performTouchInput { up() }
+    }
+
+    @Composable
+    private fun InteractionControls() {
+        DomposableMaterialTheme {
+            Column(Modifier.testTag("interaction-host").padding(16.nativeDp)) {
+                DomposableButton(
+                    DomposableButtonProps(
+                        onClick = {},
+                        appearance =
+                            DomposableButtonAppearance(
+                                container = DomposableColor(0xFF123456),
+                                interaction =
+                                    DomposableInteractionAppearance(
+                                        hoveredContainer = DomposableColor(0xFFAA0000),
+                                        pressedContainer = DomposableColor(0xFF00AA00),
+                                        focusRingColor = DomposableColor(0xFFFFFF00),
+                                        focusRingWidth = 4.dp,
+                                        focusRingOffset = 6.dp,
+                                    ),
+                            ),
+                    ),
+                    DomposableModifier.testId("interaction-button"),
+                ) { }
+                DomposableIconButton(
+                    onClick = {},
+                    label = "Close",
+                    modifier = DomposableModifier.testId("interaction-icon"),
+                    appearance =
+                        DomposableButtonAppearance(
+                            container = DomposableColor(0xFF123456),
+                            interaction =
+                                DomposableInteractionAppearance(
+                                    hoveredContainer = DomposableColor(0xFFAA0000),
+                                    pressedContainer = DomposableColor(0xFF00AA00),
+                                ),
+                        ),
+                ) { Box(Modifier.size(20.nativeDp)) }
+            }
+        }
+    }
+
+    @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
+    fun disabledOpacityAppliesToTheWholeNativeButton() {
+        var surface = Color.Unspecified
+        compose.setContent {
+            DomposableMaterialTheme {
+                val surfaceColor = MaterialTheme.colorScheme.surface
+                SideEffect { surface = surfaceColor }
+                Box(Modifier.background(surfaceColor)) {
+                    DomposableButton(
+                        DomposableButtonProps(
+                            onClick = {},
+                            enabled = false,
+                            appearance =
+                                DomposableButtonAppearance(
+                                    disabledContainer = DomposableColor(0xFFFF0000),
+                                    disabledOpacity = .38f,
+                                ),
+                        ),
+                        DomposableModifier.testId("faded-disabled"),
+                    ) { }
+                }
+            }
+        }
+        val image = compose.onNodeWithTag("faded-disabled").captureToImage().toPixelMap()
+        assertEquals(
+            Color(0xFFFF0000).copy(alpha = .38f).compositeOver(surface).toArgb(),
+            image[
+                image.width / 2, image.height /
+                    2,
+            ].toArgb(),
+        )
     }
 
     @Test

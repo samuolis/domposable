@@ -215,3 +215,40 @@ Use `pointerPassthrough()` for a decorative scrim or a full-size content overlay
 `region(label)` exposes a labelled section/traversal group. `DomposableVisibility(false)` keeps the content composed while excluding it from layout and accessibility. Use it when an adaptive layout should retain a pane's draft rather than recreating it after resizing. Prefer an ordinary `if` when the hidden content should be disposed.
 
 See the [CSS-free card and pane example](custom-components.md#image-cards-and-overlays-without-application-css).
+
+## Viewport bounds without CSS
+
+Use viewport bounds for document shells and scrollable modal bodies. `fillMaxHeight()` fills the
+parent's available height; these operations deliberately measure the host window instead:
+
+```kotlin
+import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableColumn
+import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableViewportUnit
+import io.github.samuolis.domposable.ui.maxViewportHeight
+import io.github.samuolis.domposable.ui.minViewportHeight
+import io.github.samuolis.domposable.ui.verticalScroll
+
+DomposableColumn(
+    modifier = DomposableModifier.minViewportHeight(
+        subtract = 64.dp,
+        unit = DomposableViewportUnit.Small,
+    ),
+) { DocumentContent() }
+
+DomposableColumn(
+    modifier = DomposableModifier.maxViewportHeight(subtract = 80.dp).verticalScroll(),
+) { ModalBody() }
+```
+
+`viewportHeight` requests a fixed height, `minViewportHeight` lets longer documents grow, and
+`maxViewportHeight` leaves shorter content at its natural height. All accept a fraction from more
+than zero through one and a nonnegative `subtract` value for app-owned chrome; results clamp at
+zero and native parent constraints still apply. These operations do not add safe-area padding.
+
+HTML uses small viewport units for `Small` and dynamic viewport units for `Dynamic`, with ordinary
+viewport units as a fallback. Small viewport height avoids resizing document shells when browser
+bars move. Native Compose uses the current host window size for both choices, because browser-bar
+states do not exist there. Keep a single scroll owner and use the scaffold's measured available
+content size when a parent region, rather than the whole window, owns the height.

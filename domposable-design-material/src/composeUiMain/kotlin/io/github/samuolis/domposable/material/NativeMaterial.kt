@@ -178,25 +178,34 @@ private fun DomposableArrangement.vertical(gap: Dp): Arrangement.Vertical =
         DomposableArrangement.SpaceEvenly -> Arrangement.SpaceEvenly
     }
 
-private fun DomposableAlignment.box() =
-    when (this) {
-        DomposableAlignment.Start -> Alignment.TopStart
-        DomposableAlignment.Center -> Alignment.Center
-        DomposableAlignment.End -> Alignment.BottomEnd
+private fun DomposableAlignment.box(vertical: DomposableAlignment): Alignment =
+    when (vertical) {
+        DomposableAlignment.Start -> {
+            when (this) {
+                DomposableAlignment.Start -> Alignment.TopStart
+                DomposableAlignment.Center -> Alignment.TopCenter
+                DomposableAlignment.End -> Alignment.TopEnd
+            }
+        }
+
+        DomposableAlignment.Center -> {
+            when (this) {
+                DomposableAlignment.Start -> Alignment.CenterStart
+                DomposableAlignment.Center -> Alignment.Center
+                DomposableAlignment.End -> Alignment.CenterEnd
+            }
+        }
+
+        DomposableAlignment.End -> {
+            when (this) {
+                DomposableAlignment.Start -> Alignment.BottomStart
+                DomposableAlignment.Center -> Alignment.BottomCenter
+                DomposableAlignment.End -> Alignment.BottomEnd
+            }
+        }
     }
 
-internal fun DomposableFontWeight.native() =
-    when (this) {
-        DomposableFontWeight.Thin -> FontWeight.Thin
-        DomposableFontWeight.ExtraLight -> FontWeight.ExtraLight
-        DomposableFontWeight.Light -> FontWeight.Light
-        DomposableFontWeight.Normal -> FontWeight.Normal
-        DomposableFontWeight.Medium -> FontWeight.Medium
-        DomposableFontWeight.SemiBold -> FontWeight.SemiBold
-        DomposableFontWeight.Bold -> FontWeight.Bold
-        DomposableFontWeight.ExtraBold -> FontWeight.ExtraBold
-        DomposableFontWeight.Black -> FontWeight.Black
-    }
+internal fun DomposableFontWeight.native() = FontWeight(weight)
 
 private fun DomposableTextAlignment.native() =
     when (this) {
@@ -318,7 +327,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                Box(modifier.toComposeModifier(), contentAlignment = props.alignment.box()) {
+                Box(modifier.toComposeModifier(), contentAlignment = props.alignment.box(props.verticalAlignment)) {
                     ProvideDomposableBoxModifierScope { content() }
                 }
             },
@@ -421,7 +430,15 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
 
                 val renderText: @Composable () -> Unit = {
                     Text(
-                        props.text,
+                        props.annotatedText(
+                            if (style.color ==
+                                Color.Unspecified
+                            ) {
+                                androidx.compose.material3.LocalContentColor.current
+                            } else {
+                                style.color
+                            },
+                        ),
                         textModifier,
                         color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
                         style = style,

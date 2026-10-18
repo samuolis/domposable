@@ -39,6 +39,7 @@ import io.github.samuolis.domposable.foundation.DomposableSliderColors
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableSwitchAppearance
 import io.github.samuolis.domposable.foundation.DomposableTabsVariant
+import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
@@ -131,11 +132,16 @@ data class DomposableLinkProps(
     val onClick: (() -> Unit)? = null,
     val textStyle: DomposableTextStyle = DomposableTextStyle.Body,
     val appearance: DomposableTextAppearance? = null,
+    val buttonAppearance: DomposableButtonAppearance? = null,
+    val buttonStyle: DomposableButtonStyle = DomposableButtonStyle.Filled,
+    val content: (@Composable () -> Unit)? = null,
 )
 
 @DomposableComponent("Box")
 data class DomposableBoxProps(
+    /** Horizontal placement; also supplies the vertical default for existing callers. */
     val alignment: DomposableAlignment = DomposableAlignment.Start,
+    val verticalAlignment: DomposableAlignment = alignment,
 )
 
 @DomposableComponent("LazyColumn")
@@ -173,8 +179,10 @@ data class DomposableTextProps(
     val color: DomposableColor? = null,
     val headingLevel: Int? = null,
     val appearance: DomposableTextAppearance? = null,
+    val runs: List<DomposableTextRun> = emptyList(),
 ) {
     init {
+        require(runs.isEmpty() || text == runs.joinToString("") { it.text })
         require(headingLevel == null || headingLevel in HTML_HEADING_LEVELS)
     }
 }
@@ -328,6 +336,8 @@ data class DomposableIconProps(
     val symbol: String,
     val description: String?,
     val appearance: DomposableIconAppearance? = null,
+    /** Optional filled vector artwork; when present, the renderer uses it instead of [symbol]. */
+    val vector: DomposableVectorIcon? = null,
 )
 
 @DomposableComponent("Divider")
@@ -402,10 +412,61 @@ data class DomposableTabsProps(
     val scrollable: Boolean = false,
     val icons: List<(@Composable () -> Unit)?> = labels.map { null },
     val leadingIcons: Boolean = false,
+    /** Keyed items add per-tab semantics and content while keeping the labels API compatible. */
+    val items: List<DomposableTabItem>? = null,
+    /** Localized name for the tab list. */
+    val label: String = "Sections",
+    /** Optional shared layout and interaction tuning for tab rows. */
+    val tabsAppearance: DomposableTabsAppearance? = null,
 ) {
     init {
-        require(labels.isNotEmpty() && selectedIndex in labels.indices)
+        val itemCount = items?.size ?: labels.size
+        require(itemCount > 0 && selectedIndex in 0 until itemCount)
         require(icons.size == labels.size) { "Supply one optional icon for each tab" }
+        require(items == null || items.map { it.key }.distinct().size == items.size) {
+            "Tab item keys must be unique"
+        }
+    }
+}
+
+/** Portable layout details that are specific to tab rows. Null fields keep Material defaults. */
+data class DomposableTabsAppearance(
+    val minHeight: DomposableLength? = null,
+    val contentPadding: DomposableInsets? = null,
+    val indicatorThickness: DomposableLength? = null,
+    val indicatorMatchContent: Boolean? = null,
+    val scrollableEdgePadding: DomposableLength? = null,
+    val scrollableMinWidth: DomposableLength? = null,
+    val disabledOpacity: Float? = null,
+    val activation: DomposableTabsActivation = DomposableTabsActivation.Automatic,
+    val badgeClearance: DomposableLength? = null,
+    val badgeOffset: DomposableOffset = DomposableOffset(DEFAULT_TAB_BADGE_OFFSET_X, DEFAULT_TAB_BADGE_OFFSET_Y),
+) {
+    init {
+        require(disabledOpacity == null || (disabledOpacity.isFinite() && disabledOpacity in 0f..1f))
+    }
+}
+
+private const val DEFAULT_TAB_BADGE_OFFSET_X = 8f
+private const val DEFAULT_TAB_BADGE_OFFSET_Y = -4f
+
+/** Whether arrow-key navigation also changes the selected tab. */
+enum class DomposableTabsActivation { Automatic, Manual }
+
+/** Stable, accessible tab data with optional generic icon and badge/content slots. */
+data class DomposableTabItem(
+    val key: String,
+    val label: String,
+    val contentDescription: String = label,
+    val enabled: Boolean = true,
+    val testTag: String? = null,
+    val icon: (@Composable () -> Unit)? = null,
+    val badgeContent: (@Composable () -> Unit)? = null,
+    val textAppearance: DomposableTextAppearance? = null,
+    val selectedTextAppearance: DomposableTextAppearance? = null,
+) {
+    init {
+        require(key.isNotBlank()) { "Tab item keys must not be blank" }
     }
 }
 
@@ -435,6 +496,31 @@ data class DomposableMenuProps(
     val anchorOffset: DomposableOffset = DomposableOffset(),
 )
 
+/**
+ * Bounds of the modal surface itself rather than its modifier wrapper. Native dialogs/sheets
+ * retain platform placement; [alignment] adapts the HTML surface to the browser viewport.
+ * [padding] controls Basic/FullScreen dialog and sheet content; Material picker/alert variants
+ * retain their platform content spacing.
+ */
+data class DomposableModalLayout(
+    val maxWidth: DomposableLength? = null,
+    val fillViewportWidth: Boolean = false,
+    val padding: DomposableInsets? = null,
+    val heightFraction: Float? = null,
+    val maxHeight: DomposableLength? = null,
+    val maxViewportFraction: Float? = null,
+    val viewportInset: DomposableLength = 16.dp,
+    val alignment: DomposableModalAlignment = DomposableModalAlignment.Center,
+    val swipeToDismiss: Boolean = true,
+) {
+    init {
+        require(heightFraction == null || heightFraction in 0f..1f)
+        require(maxViewportFraction == null || maxViewportFraction in 0f..1f)
+    }
+}
+
+enum class DomposableModalAlignment { Center, Bottom, BottomOnCompact }
+
 @DomposableComponent("Dialog")
 data class DomposableDialogProps(
     val title: String,
@@ -442,6 +528,8 @@ data class DomposableDialogProps(
     val actions: @Composable () -> Unit = {},
     val appearance: DomposableSurfaceAppearance? = null,
     val variant: DomposableDialogVariant = DomposableDialogVariant.Alert,
+    val headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    val layout: DomposableModalLayout = DomposableModalLayout(),
 )
 
 @DomposableComponent("BottomSheet")
@@ -450,6 +538,8 @@ data class DomposableBottomSheetProps(
     val onDismiss: () -> Unit,
     val appearance: DomposableSurfaceAppearance? = null,
     val modal: Boolean = true,
+    val headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
+    val layout: DomposableModalLayout = DomposableModalLayout(),
 )
 
 @DomposableComponent("Scaffold")
@@ -536,7 +626,27 @@ fun DomposableTheme(
     onClick: () -> Unit,
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
-) = DomposableButton(onClick, modifier, enabled) { DomposableText(text) }
+) {
+    val textAppearance = buttonLabelTextAppearance()
+    DomposableButton(onClick, modifier, enabled) {
+        DomposableText(text, appearance = textAppearance)
+    }
+}
+
+@Composable
+internal fun buttonLabelTextAppearance(): DomposableTextAppearance {
+    val tokens = LocalDomposableTokens.current
+    val button = tokens.components.button
+    val textAppearance = button.textAppearance ?: tokens.components.text
+    if (textAppearance.alignment != null) return textAppearance
+    val alignment =
+        when (button.contentAlignment) {
+            DomposableAlignment.Start -> DomposableTextAlignment.Start
+            DomposableAlignment.Center -> DomposableTextAlignment.Center
+            DomposableAlignment.End -> DomposableTextAlignment.End
+        }
+    return textAppearance.copy(alignment = alignment)
+}
 
 @Composable fun DomposableColumn(
     modifier: DomposableModifier = DomposableModifier,
@@ -607,13 +717,26 @@ fun DomposableTheme(
     onClick: (() -> Unit)? = null,
     textStyle: DomposableTextStyle = DomposableTextStyle.Body,
     appearance: DomposableTextAppearance? = null,
-) = DomposableLink(DomposableLinkProps(label, href, onClick, textStyle, appearance), modifier)
+    buttonAppearance: DomposableButtonAppearance? = null,
+    buttonStyle: DomposableButtonStyle = DomposableButtonStyle.Filled,
+    content: (@Composable () -> Unit)? = null,
+) = DomposableLink(
+    DomposableLinkProps(label, href, onClick, textStyle, appearance, buttonAppearance, buttonStyle, content),
+    modifier,
+)
 
 @Composable fun DomposableBox(
     modifier: DomposableModifier = DomposableModifier,
     alignment: DomposableAlignment = DomposableAlignment.Start,
     content: @Composable () -> Unit,
 ) = DomposableBox(DomposableBoxProps(alignment), modifier, content)
+
+@Composable fun DomposableBox(
+    modifier: DomposableModifier = DomposableModifier,
+    alignment: DomposableAlignment = DomposableAlignment.Start,
+    verticalAlignment: DomposableAlignment,
+    content: @Composable () -> Unit,
+) = DomposableBox(DomposableBoxProps(alignment, verticalAlignment), modifier, content)
 
 @Composable fun DomposableCard(
     modifier: DomposableModifier = DomposableModifier,

@@ -23,6 +23,7 @@ import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableColumn
+import io.github.samuolis.domposable.ui.DomposableFlowRow
 import io.github.samuolis.domposable.ui.DomposableImage
 import io.github.samuolis.domposable.ui.DomposableMeasure
 import io.github.samuolis.domposable.ui.DomposableModifier
@@ -37,6 +38,7 @@ import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.pointerPassthrough
 import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.width
 
 /** The card and pane content are the same Kotlin composition on every renderer. */
 @Composable
@@ -80,6 +82,33 @@ fun SharedCompositionScreen() {
                     }
                 } else {
                     SharedWorkshopCard()
+                }
+            }
+        }
+        SharedOverlayAlignments()
+    }
+}
+
+/** Both axes are configured once, rather than in renderer-specific child selectors. */
+@Composable
+private fun SharedOverlayAlignments() {
+    DomposableText("Overlay alignments", headingLevel = 2)
+    DomposableFlowRow(gap = 12.dp) {
+        DomposableAlignment.entries.forEach { vertical ->
+            DomposableAlignment.entries.forEach { horizontal ->
+                val id = "overlay-${horizontal.name}-${vertical.name}"
+                DomposableBox(
+                    modifier = DomposableModifier.width(100.dp).height(80.dp).testId(id),
+                    alignment = horizontal,
+                    verticalAlignment = vertical,
+                ) {
+                    DomposableBox(
+                        DomposableModifier
+                            .width(20.dp)
+                            .height(16.dp)
+                            .background(DomposableColor(0xFF4059AD))
+                            .testId("$id-child"),
+                    ) {}
                 }
             }
         }

@@ -29,6 +29,7 @@ import io.github.samuolis.domposable.foundation.DomposableOrientation
 import io.github.samuolis.domposable.foundation.DomposableScaffoldFabPosition
 import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableSwitchColors
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextOverflow
@@ -40,7 +41,6 @@ import io.github.samuolis.domposable.ui.DomposableBadgedBoxProps
 import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableDataTableProps
-import io.github.samuolis.domposable.ui.DomposableDialogVariant
 import io.github.samuolis.domposable.ui.DomposableHtmlMenuAnchor
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableImageProps
@@ -71,6 +71,7 @@ import kotlinx.browser.window
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
+import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Aside
 import org.jetbrains.compose.web.dom.Button
@@ -88,10 +89,26 @@ import org.jetbrains.compose.web.dom.TagElement
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.jetbrains.compose.web.dom.Ul
-import org.w3c.dom.HTMLDialogElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
+
+@Composable
+private fun HtmlSurfaceBorderOverlay(appearance: DomposableSurfaceAppearance) {
+    val border = appearance.border ?: return
+    if (appearance.borderWidth.value <= 0f) return
+    Span(attrs = {
+        attr("aria-hidden", "true")
+        style {
+            property("position", "absolute")
+            property("inset", "0")
+            property("box-sizing", "border-box")
+            property("pointer-events", "none")
+            property("border", "${appearance.borderWidth.value}px solid ${border.css()}")
+            property("border-radius", "inherit")
+        }
+    }) { }
+}
 
 private const val HTML_MENU_VIEWPORT_MARGIN = 8.0
 
@@ -153,51 +170,7 @@ private fun positionHtmlMenu(
     menu.style.setProperty("overflow-y", "auto")
 }
 
-private fun DomposableAlignment.css() =
-    when (this) {
-        DomposableAlignment.Start -> "flex-start"
-        DomposableAlignment.Center -> "center"
-        DomposableAlignment.End -> "flex-end"
-    }
-
-private fun DomposableArrangement.css() =
-    when (this) {
-        DomposableArrangement.Start -> "flex-start"
-        DomposableArrangement.Center -> "center"
-        DomposableArrangement.End -> "flex-end"
-        DomposableArrangement.SpaceBetween -> "space-between"
-        DomposableArrangement.SpaceAround -> "space-around"
-        DomposableArrangement.SpaceEvenly -> "space-evenly"
-    }
-
-private fun DomposableArrangement.distributesSpace() =
-    this == DomposableArrangement.SpaceBetween ||
-        this == DomposableArrangement.SpaceAround ||
-        this == DomposableArrangement.SpaceEvenly
-
-internal fun DomposableFontWeight.css() =
-    when (this) {
-        DomposableFontWeight.Thin -> "100"
-        DomposableFontWeight.ExtraLight -> "200"
-        DomposableFontWeight.Light -> "300"
-        DomposableFontWeight.Normal -> "400"
-        DomposableFontWeight.Medium -> "500"
-        DomposableFontWeight.SemiBold -> "600"
-        DomposableFontWeight.Bold -> "700"
-        DomposableFontWeight.ExtraBold -> "800"
-        DomposableFontWeight.Black -> "900"
-    }
-
-internal fun DomposableAutocomplete.htmlValue() =
-    when (this) {
-        DomposableAutocomplete.Off -> "off"
-        DomposableAutocomplete.Email -> "email"
-        DomposableAutocomplete.Phone -> "tel"
-        DomposableAutocomplete.Username -> "username"
-        DomposableAutocomplete.CurrentPassword -> "current-password"
-        DomposableAutocomplete.NewPassword -> "new-password"
-        DomposableAutocomplete.OneTimeCode -> "one-time-code"
-    }
+internal fun DomposableFontWeight.css() = weight.toString()
 
 @Composable
 private fun navItemContent(item: DomposableNavigationItem) {
@@ -318,14 +291,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             property("display", "grid")
                             property("position", "relative")
                             property("grid-template-columns", "minmax(0,1fr)")
-                            property(
-                                "place-items",
-                                when (props.alignment) {
-                                    DomposableAlignment.Start -> "start"
-                                    DomposableAlignment.Center -> "center"
-                                    DomposableAlignment.End -> "end"
-                                },
-                            )
+                            property("justify-items", props.alignment.css())
+                            property("align-items", props.verticalAlignment.css())
                         }
                     }) { content() }
                 }
@@ -380,7 +347,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
 
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
                     val inlineText = props.style != DomposableTextStyle.Title && props.headingLevel == null
-                    style { appearance?.let { applyCatalogTextAppearance(it) } }
+                    style {
+                        if (props.style != DomposableTextStyle.Inherit && appearance?.alignment == null) {
+                            property("text-align", "start")
+                        }
+                        appearance?.let { applyCatalogTextAppearance(it) }
+                    }
                     (props.color ?: appearance?.color)?.let { style { property("color", it.css()) } }
                     appearance?.minLines?.takeIf { it > 1 }?.let { lines ->
                         style {
@@ -414,7 +386,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             }
                             props.color?.let { style { property("color", it.css()) } }
                             applyAppearance()
-                        }) { Text(props.text) }
+                        }) { HtmlTextRuns(props) }
                     } else {
                         Span(attrs = {
                             style { applyCatalogTextAppearance(DomposableTextAppearance(role = role)) }
@@ -431,7 +403,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             if (props.style == DomposableTextStyle.Inherit) classes("d-text-inherit")
                             props.color?.let { style { property("color", it.css()) } }
                             applyAppearance()
-                        }) { Text(props.text) }
+                        }) { HtmlTextRuns(props) }
                     }
                 }
             },
@@ -451,6 +423,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             attr("type", "button")
                             attr("aria-label", props.label)
                             classes("d-icon-button")
+                            if (appearance.interaction != null) attr("data-d-button-interaction", "true")
                             classes(
                                 "d-icon-button-${props.variant.name.lowercase().replace(
                                     "filledtonal",
@@ -554,6 +527,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 appearance.minWidth?.let { property("min-width", "${it.value}px") }
                                 appearance.contentPadding?.let { property("padding", it.cssPadding()) }
                                 appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                                buttonInteractionAppearance(appearance)
+                                if (!enabled) appearance.disabledOpacity?.let { property("opacity", it.toString()) }
                             }
                             onClick { if (enabled) props.onClick() }
                         }) { content() }
@@ -951,36 +926,43 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 content,
                 ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.surface
+                val hasBorder = appearance.border != null && appearance.borderWidth.value > 0f
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
                         classes("d-surface")
                         style {
-                            surfaceAppearance(appearance)
+                            if (hasBorder) property("position", "relative")
+                            surfaceAppearance(if (hasBorder) appearance.copy(border = null) else appearance)
                             (props.color ?: appearance.container)?.let { property("background-color", it.css()) }
                         }
-                    }) { content() }
+                    }) {
+                        content()
+                        if (hasBorder) HtmlSurfaceBorderOverlay(appearance)
+                    }
                 }
             },
             image = { props, modifier, _ -> HtmlImage(props, modifier) },
             icon = { props, modifier, _ ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.icon
-                DomposableHtmlModifiers(modifier) {
-                    Span(attrs = {
-                        domposableAttributes(modifier)
-                        if (props.description ==
-                            null
-                        ) {
-                            attr("aria-hidden", "true")
-                        } else {
-                            attr("role", "img")
-                            attr("aria-label", props.description.orEmpty())
-                        }
-                        style {
-                            appearance.color?.let { property("color", it.css()) }
-                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
-                        }
-                    }) { Text(props.symbol) }
+                if (props.vector != null) {
+                    HtmlDomposableVectorIcon(props, modifier, appearance)
+                } else {
+                    DomposableHtmlModifiers(modifier) {
+                        Span(attrs = {
+                            domposableAttributes(modifier)
+                            if (props.description == null) {
+                                attr("aria-hidden", "true")
+                            } else {
+                                attr("role", "img")
+                                attr("aria-label", props.description.orEmpty())
+                            }
+                            style {
+                                appearance.color?.let { property("color", it.css()) }
+                                appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                            }
+                        }) { Text(props.symbol) }
+                    }
                 }
             },
             divider = {
@@ -1125,15 +1107,24 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 _,
                 ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.avatar
+                val hasBorder = appearance.border != null && appearance.borderWidth.value > 0f
                 DomposableHtmlModifiers(modifier) {
                     Span(attrs = {
                         domposableAttributes(modifier)
                         attr("role", "img")
                         attr("aria-label", props.description.orEmpty())
                         classes("d-avatar")
-                        style { surfaceAppearance(appearance) }
+                        style {
+                            if (hasBorder) property("position", "relative")
+                            if (modifier.hasExplicitHtmlWidth()) property("width", "100%")
+                            if (modifier.hasExplicitHtmlHeight()) property("height", "100%")
+                            property("max-width", "100%")
+                            property("max-height", "100%")
+                            surfaceAppearance(if (hasBorder) appearance.copy(border = null) else appearance)
+                        }
                     }) {
                         props.content?.invoke() ?: Text(props.initials)
+                        if (hasBorder) HtmlSurfaceBorderOverlay(appearance)
                     }
                 }
             },
@@ -1158,86 +1149,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             progress = { props, modifier, _ ->
                 HtmlProgress(props, modifier)
             },
-            tabs = { props, modifier, _ ->
-                val appearance = props.appearance ?: LocalDomposableTokens.current.components.tabs
-                val formEnabled = domposableFormEnabled()
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        attr("role", "tablist")
-                        attr("aria-label", "Sections")
-                        classes("d-tabs", "d-tabs-${props.variant.name.lowercase()}")
-                        if (props.leadingIcons) classes("d-tabs-leading-icons")
-                        style { itemAppearance(appearance) }
-                        if (props.scrollable) {
-                            classes("d-tabs-scrollable")
-                            style {
-                                property("overflow-x", "auto")
-                                property("white-space", "nowrap")
-                            }
-                        }
-                    }) {
-                        props.labels.forEachIndexed { index, label ->
-                            Button(attrs = {
-                                attr("type", "button")
-                                classes("d-tab")
-                                attr("role", "tab")
-                                attr(
-                                    "aria-selected",
-                                    (
-                                        props.selectedIndex ==
-                                            index
-                                    ).toString(),
-                                )
-                                attr(
-                                    "tabindex",
-                                    if (props.selectedIndex ==
-                                        index
-                                    ) {
-                                        "0"
-                                    } else {
-                                        "-1"
-                                    },
-                                )
-                                if (!formEnabled) disabled()
-                                style { itemAppearance(appearance, props.selectedIndex == index) }
-                                onClick { if (formEnabled) props.onSelect(index) }
-                                onKeyDown { event ->
-                                    val offset =
-                                        when (event.key) {
-                                            "ArrowRight" -> 1
-                                            "ArrowLeft" -> -1
-                                            else -> 0
-                                        }
-                                    if (formEnabled && offset !=
-                                        0
-                                    ) {
-                                        event.preventDefault()
-                                        val next =
-                                            (index + offset + props.labels.size) % props.labels.size
-                                        props.onSelect(next)
-                                        (
-                                            (event.target as? HTMLElement)?.parentElement?.children?.item(
-                                                next,
-                                            ) as? HTMLElement
-                                        )?.focus()
-                                    }
-                                }
-                            }) {
-                                Div(attrs = { classes("d-tab-content") }) {
-                                    props.icons[index]?.let { icon ->
-                                        Span(attrs = {
-                                            attr("aria-hidden", "true")
-                                            classes("d-tab-icon")
-                                        }) { icon() }
-                                    }
-                                    Span(attrs = { classes("d-tab-label") }) { Text(label) }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
+            tabs = { props, modifier, _ -> HtmlTabs(props, modifier) },
             navigationBar = { props, modifier, _ ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationBar
                 val formEnabled = domposableFormEnabled()
@@ -1491,6 +1403,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     sheet = false,
                     appearance = appearance,
                     variant = props.variant,
+                    headerContent = props.headerContent?.let { header -> { header(props.onDismiss) } },
+                    layout = props.layout,
                 ) {
                     content()
                     props.actions()
@@ -1509,6 +1423,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         modifier,
                         sheet = true,
                         appearance = appearance,
+                        headerContent = props.headerContent?.let { header -> { header(props.onDismiss) } },
+                        layout = props.layout,
                         content = content,
                     )
                 } else {
@@ -1516,18 +1432,33 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     DomposableHtmlModifiers(modifier) {
                         Section(attrs = {
                             domposableAttributes(modifier)
-                            attr("aria-labelledby", titleId)
+                            if (props.headerContent == null) {
+                                attr("aria-labelledby", titleId)
+                            } else {
+                                attr("aria-label", props.title)
+                            }
                             classes("d-sheet", "d-bottom-sheet-nonmodal")
-                            style { surfaceAppearance(appearance) }
+                            style {
+                                surfaceAppearance(appearance)
+                                modalLayout(props.layout)
+                            }
                         }) {
-                            H2(attrs = { attr("id", titleId) }) { Text(props.title) }
+                            if (props.headerContent == null) {
+                                H2(attrs = { attr("id", titleId) }) { Text(props.title) }
+                            } else {
+                                Div(attrs = { classes("d-dialog-header") }) {
+                                    props.headerContent?.invoke(props.onDismiss)
+                                }
+                            }
                             content()
-                            HtmlButton(
-                                DomposableButtonProps(props.onDismiss, style = DomposableButtonStyle.Text),
-                                DomposableModifier.contentDescription("Close ${props.title}"),
-                                { Text("Close") },
-                                respectFormEnabled = false,
-                            )
+                            if (props.headerContent == null) {
+                                HtmlButton(
+                                    DomposableButtonProps(props.onDismiss, style = DomposableButtonStyle.Text),
+                                    DomposableModifier.contentDescription("Close ${props.title}"),
+                                    { Text("Close") },
+                                    respectFormEnabled = false,
+                                )
+                            }
                         }
                     }
                 }
@@ -1551,29 +1482,29 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlToggleButton(props, modifier, content) }
+                HtmlToggleButton(props, modifier, content)
             },
             buttonGroup = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlButtonGroup(props, modifier) }
+                HtmlButtonGroup(props, modifier)
             },
-            appBar = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { HtmlAppBar(props, modifier) } },
+            appBar = { props, modifier, _ -> HtmlAppBar(props, modifier) },
             multiChoiceSegmentedButtons = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlMultiChoiceSegmentedButtons(props, modifier) }
+                HtmlMultiChoiceSegmentedButtons(props, modifier)
             },
             splitButton = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlSplitButton(props, modifier) }
+                HtmlSplitButton(props, modifier)
             },
             loadingIndicator = {
                 props,
@@ -1587,114 +1518,114 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlFloatingToolbar(props, modifier, content) }
+                HtmlFloatingToolbar(props, modifier, content)
             },
             floatingActionButtonMenu = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlFloatingActionButtonMenu(props, modifier) }
+                HtmlFloatingActionButtonMenu(props, modifier)
             },
             dragHandle = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlDragHandle(props, modifier) }
+                HtmlDragHandle(props, modifier)
             },
-            listItem = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { HtmlListItem(props, modifier) } },
+            listItem = { props, modifier, _ -> HtmlListItem(props, modifier) },
             bottomAppBar = {
                 props,
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlBottomAppBar(props, modifier, content) }
+                HtmlBottomAppBar(props, modifier, content)
             },
             navigationDrawer = {
                 props,
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlNavigationDrawer(props, modifier, content) }
+                HtmlNavigationDrawer(props, modifier, content)
             },
             navigationDrawerItem = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlNavigationDrawerItem(props, modifier) }
+                HtmlNavigationDrawerItem(props, modifier)
             },
             wideNavigationRail = {
                 props,
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlWideNavigationRail(props, modifier, content) }
+                HtmlWideNavigationRail(props, modifier, content)
             },
             wideNavigationRailItem = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlWideNavigationRailItem(props, modifier) }
+                HtmlWideNavigationRailItem(props, modifier)
             },
             bottomSheetScaffold = {
                 props,
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlBottomSheetScaffold(props, modifier, content) }
+                HtmlBottomSheetScaffold(props, modifier, content)
             },
             searchBar = {
                 props,
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlSearchBar(props, modifier, content) }
+                HtmlSearchBar(props, modifier, content)
             },
             autocomplete = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlAutocomplete(props, modifier) }
+                HtmlAutocomplete(props, modifier)
             },
             datePicker = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlDatePicker(props, modifier) }
+                HtmlDatePicker(props, modifier)
             },
             dateRangePicker = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlDateRangePicker(props, modifier) }
+                HtmlDateRangePicker(props, modifier)
             },
             timePicker = {
                 props,
                 modifier,
                 _,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlTimePicker(props, modifier) }
+                HtmlTimePicker(props, modifier)
             },
-            carousel = { props, modifier, _ -> DomposableHtmlModifiers(modifier) { HtmlCarousel(props, modifier) } },
+            carousel = { props, modifier, _ -> HtmlCarousel(props, modifier) },
             pullToRefresh = {
                 props,
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlPullToRefresh(props, modifier, content) }
+                HtmlPullToRefresh(props, modifier, content)
             },
             swipeToDismiss = {
                 props,
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) { HtmlSwipeToDismiss(props, modifier, content) }
+                HtmlSwipeToDismiss(props, modifier, content)
             },
             scaffold = { props, modifier, content ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.scaffold
@@ -2105,60 +2036,6 @@ private fun HtmlCollection(
 }
 
 @Composable
-private fun HtmlModal(
-    title: String,
-    onDismiss: () -> Unit,
-    modifier: DomposableModifier,
-    sheet: Boolean,
-    appearance: io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance,
-    variant: DomposableDialogVariant = DomposableDialogVariant.Basic,
-    content: @Composable () -> Unit,
-) {
-    val dismiss by rememberUpdatedState(onDismiss)
-    val titleId = remember { "d-dialog-${nextInputId++}" }
-    DomposableHtmlModifiers(modifier) {
-        TagElement<HTMLDialogElement>("dialog", applyAttrs = {
-            domposableAttributes(modifier)
-            attr("aria-labelledby", titleId)
-            classes("d-dialog", "d-dialog-${variant.name.toKebabCase()}")
-            if (sheet) classes("d-sheet")
-            style { surfaceAppearance(appearance) }
-            onClick { event ->
-                if (event.target == event.currentTarget) {
-                    val bounds = (event.currentTarget as HTMLElement).getBoundingClientRect()
-                    val outsideX = event.clientX < bounds.left || event.clientX > bounds.right
-                    val outsideY = event.clientY < bounds.top || event.clientY > bounds.bottom
-                    if (outsideX || outsideY) dismiss()
-                }
-            }
-            ref { element ->
-                val previousFocus = document.activeElement as? HTMLElement
-                val cancel: (org.w3c.dom.events.Event) -> Unit = {
-                    it.preventDefault()
-                    dismiss()
-                }
-                element.addEventListener("cancel", cancel)
-                element.showModal()
-                onDispose {
-                    element.removeEventListener("cancel", cancel)
-                    element.close()
-                    previousFocus?.focus()
-                }
-            }
-        }) {
-            H2(attrs = { id(titleId) }) { Text(title) }
-            content()
-            HtmlButton(
-                DomposableButtonProps({ dismiss() }, style = DomposableButtonStyle.Text),
-                DomposableModifier,
-                { Text("Close") },
-                respectFormEnabled = false,
-            )
-        }
-    }
-}
-
-@Composable
 private fun HtmlTheme(
     tokens: DomposableTokens,
     content: @Composable () -> Unit,
@@ -2201,13 +2078,24 @@ private const val MATERIAL_CSS = """
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
 .d-theme h1,.d-theme h2,.d-theme h3,.d-theme h4,.d-theme h5,.d-theme h6{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}:where(.d-text-inherit){font:inherit}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:9999px;min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
-.d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;align-items:center;justify-content:center}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
+.d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;flex:1;min-width:0;align-items:center;justify-content:inherit}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
 @media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}
 .d-button:not(:disabled):active{filter:brightness(.9)}.d-button:not(:disabled):focus-visible{outline:none;box-shadow:var(--d-button-feedback,0 0 0 0 transparent),0 0 0 3px var(--d-primary)}
+.d-button[data-d-button-interaction=true]:not(:disabled):hover,.d-button[data-d-button-interaction=true]:not(:disabled):active,.d-icon-button[data-d-button-interaction=true]:not(:disabled):hover,.d-icon-button[data-d-button-interaction=true]:not(:disabled):active{filter:none}
+.d-button[data-d-button-interaction=true]:not(:disabled):hover,.d-icon-button[data-d-button-interaction=true]:not(:disabled):hover{box-shadow:var(--d-button-hover-feedback,none)}
+.d-button[data-d-button-interaction=true]:not(:disabled):active,.d-icon-button[data-d-button-interaction=true]:not(:disabled):active{box-shadow:var(--d-button-pressed-feedback,none)}
+.d-button[data-d-button-interaction=true][style*="--d-button-hovered-container"]:not(:disabled):hover,.d-icon-button[data-d-button-interaction=true][style*="--d-button-hovered-container"]:not(:disabled):hover{background:var(--d-button-hovered-container)!important}
+.d-button[data-d-button-interaction=true][style*="--d-button-hovered-content"]:not(:disabled):hover,.d-icon-button[data-d-button-interaction=true][style*="--d-button-hovered-content"]:not(:disabled):hover{color:var(--d-button-hovered-content)!important}
+.d-button[data-d-button-interaction=true][style*="--d-button-pressed-container"]:not(:disabled):active,.d-icon-button[data-d-button-interaction=true][style*="--d-button-pressed-container"]:not(:disabled):active{background:var(--d-button-pressed-container)!important}
+.d-button[data-d-button-interaction=true][style*="--d-button-pressed-content"]:not(:disabled):active,.d-icon-button[data-d-button-interaction=true][style*="--d-button-pressed-content"]:not(:disabled):active{color:var(--d-button-pressed-content)!important}
+.d-button[data-d-button-interaction=true]:not(:disabled):focus-visible,.d-icon-button[data-d-button-interaction=true]:not(:disabled):focus-visible{outline:var(--d-button-focus-ring-width,3px) solid var(--d-button-focus-ring-color,var(--d-primary));outline-offset:var(--d-button-focus-ring-offset,3px);box-shadow:var(--d-button-focus-feedback,none)}
 .d-button:disabled{cursor:default}
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}.d-button-elevated{background:var(--d-surface-container-low,var(--d-surface));color:var(--d-primary);box-shadow:0 1px 3px rgb(0 0 0 / .24)}.d-button-filledtonal{background:var(--d-secondary-container,var(--d-variant));color:var(--d-on-secondary-container,var(--d-on-surface))}
 .d-icon-button{border-radius:50%;padding:10px}.d-chip{min-height:var(--d-item-min-height,32px);padding:var(--d-item-padding,6px 12px);border-radius:var(--d-item-radius,var(--d-shape-small,8px));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,var(--d-outline))}.d-chip[data-selected=true]{border-color:var(--d-primary)}
 .d-card{position:relative;min-width:0;padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}.d-card::after{content:"";position:absolute;z-index:3;inset:0;box-sizing:border-box;pointer-events:none;border:var(--d-card-border-width,0px) solid var(--d-card-border-color,transparent);border-radius:inherit}:root .d-card .d-field{--d-surface:var(--d-card-container,var(--d-variant))}
+.d-data-table-container{min-width:0;max-width:100%;overflow-x:auto;container-type:inline-size}.d-data-table{width:100%;border-collapse:collapse;table-layout:fixed}.d-data-table th,.d-data-table td{border-bottom:1px solid var(--d-outline);text-align:start}.d-data-table tbody tr:last-child>th,.d-data-table tbody tr:last-child>td{border-bottom:0}.d-data-table-row[tabindex="0"]{cursor:pointer}.d-data-table-row[data-d-table-interaction=true]:hover{background:var(--d-data-hovered-container,inherit)!important;color:var(--d-data-hovered-content,inherit)!important}.d-data-table-row[data-d-table-interaction=true]:hover>td,.d-data-table-row[data-d-table-interaction=true]:hover>th[scope=row]{background:var(--d-data-hovered-container,inherit)!important;color:var(--d-data-hovered-content,inherit)!important;box-shadow:var(--d-data-hover-feedback,none)}.d-data-table-row[data-d-table-interaction=true]:active{background:var(--d-data-pressed-container,inherit)!important;color:var(--d-data-pressed-content,inherit)!important}.d-data-table-row[data-d-table-interaction=true]:active>td,.d-data-table-row[data-d-table-interaction=true]:active>th[scope=row]{background:var(--d-data-pressed-container,inherit)!important;color:var(--d-data-pressed-content,inherit)!important;box-shadow:var(--d-data-pressed-feedback,none)}.d-data-table-row[data-d-table-interaction=true]:focus-visible{outline:var(--d-data-focus-ring-width,3px) solid var(--d-data-focus-ring-color,var(--d-primary))!important;outline-offset:var(--d-data-focus-ring-offset,3px)}.d-data-table-row[data-d-table-interaction=true]:focus-visible>td,.d-data-table-row[data-d-table-interaction=true]:focus-visible>th[scope=row]{box-shadow:var(--d-data-focus-feedback,none)}
+.d-data-table-container.d-data-table-compact-active table,.d-data-table-container.d-data-table-compact-active thead,.d-data-table-container.d-data-table-compact-active tbody,.d-data-table-container.d-data-table-compact-active tr,.d-data-table-container.d-data-table-compact-active td,.d-data-table-container.d-data-table-compact-active th[scope=row]{display:block;width:100%}.d-data-table-container.d-data-table-compact-active thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.d-data-table-container.d-data-table-compact-active .d-data-table-row{margin-block:8px;border:var(--d-data-compact-border-width,1px) solid var(--d-data-compact-border,var(--d-outline));border-radius:var(--d-data-compact-radius,12px);overflow:visible;background:var(--d-data-compact-container,transparent);color:var(--d-data-compact-content,inherit);box-shadow:var(--d-data-compact-shadow,none)}.d-data-table-container.d-data-table-compact-active .d-data-table-row>td,.d-data-table-container.d-data-table-compact-active .d-data-table-row>th[scope=row]{display:grid;grid-template-columns:minmax(var(--d-data-compact-label-width,6rem),1fr) 2fr;gap:8px;padding:8px;border-bottom:0!important}.d-data-table-container.d-data-table-compact-active .d-data-table-row>td::before,.d-data-table-container.d-data-table-compact-active .d-data-table-row>th[scope=row]::before{content:attr(data-column-label);color:var(--d-on-surface-variant)}
+@media(forced-colors:active){.d-data-table-row[aria-selected=true]{outline:2px solid Highlight!important}.d-data-table-row[data-d-table-interaction=true]:focus-visible{outline:2px solid Highlight!important;outline-offset:3px;box-shadow:none}.d-data-table-row[data-d-table-interaction=true]:focus-visible>td,.d-data-table-row[data-d-table-interaction=true]:focus-visible>th[scope=row]{box-shadow:none!important}}
 .d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{box-sizing:border-box;min-height:56px;padding:16px;border:1px solid var(--d-outline);border-radius:4px;color:var(--d-on-surface);background:var(--d-surface);line-height:24px}.d-field input::placeholder,.d-field textarea::placeholder{color:var(--d-field-placeholder);font-size:var(--d-field-placeholder-size,inherit);line-height:var(--d-field-placeholder-line,inherit);font-weight:var(--d-field-placeholder-weight,inherit);letter-spacing:var(--d-field-placeholder-spacing,inherit)}
 .d-field input[type=search]{appearance:none;-webkit-appearance:none}
 .d-field input[type=search]::-webkit-search-decoration,.d-field input[type=search]::-webkit-search-cancel-button,.d-field input[type=search]::-webkit-search-results-button,.d-field input[type=search]::-webkit-search-results-decoration{display:none}
@@ -2218,8 +2106,9 @@ private const val MATERIAL_CSS = """
 .d-divider{margin:0;padding:0;flex:none;align-self:stretch;border:0;border-top:1px solid var(--d-outline-variant);width:100%}.d-banner{border-radius:var(--d-radius);background:transparent}
 .d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button,.d-navigation a{text-decoration:none;display:inline-flex;align-items:center;padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
 .d-tabs [aria-selected=true],.d-navigation [aria-current=page]{color:var(--d-primary);border-bottom:3px solid var(--d-primary)}
-.d-dialog{border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface);max-width:min(600px,90vw)}
-.d-dialog::backdrop{background:#0006}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw)}
+.d-dialog{box-sizing:border-box;max-width:min(600px,90vw);display:flex;flex-direction:column;gap:16px;overflow-y:auto;border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface)}.d-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:12px}.d-sheet .d-dialog-header{touch-action:none}
+.d-dialog::backdrop{background:color-mix(in srgb,var(--d-scrim,rgb(0 0 0)) 32%,transparent)}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw);overflow:hidden}.d-sheet-drag-handle{display:flex;align-items:center;justify-content:center;min-height:24px;touch-action:none}.d-sheet-drag-indicator{width:32px;height:4px;border-radius:999px;background:var(--d-on-surface-variant,var(--d-outline));opacity:.6}.d-sheet{transition:transform 180ms ease-out}.d-dialog-bottom{margin:auto auto 0}.d-dialog-fallback{position:fixed;inset:50% auto auto 50%;z-index:2147483647;transform:translate(-50%,-50%)}.d-dialog-fallback-scrim{position:fixed;inset:0;background:color-mix(in srgb,var(--d-scrim,rgb(0 0 0)) 32%,transparent)}
+@media(max-width:40rem){.d-dialog-bottom-on-compact{position:fixed;inset:auto 0 0;margin:0 auto;max-width:100%}}
 .d-scaffold{display:flex;flex-direction:column;height:100dvh}.d-scaffold-constrained{height:100%;min-height:0;min-width:0;overflow:hidden}.d-scaffold-middle{display:flex;flex:1;min-height:0}.d-scaffold-constrained>.d-scaffold-middle{min-height:0;overflow:hidden}.d-scaffold-body{flex:1;min-width:0;min-height:0;position:relative;overflow:auto}.d-scaffold-constrained>.d-scaffold-middle>.d-scaffold-body{height:100%;min-height:0}.d-floating{position:absolute;bottom:16px;right:16px}.d-snackbar{position:absolute;bottom:16px;left:16px}
 .d-app-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;background:var(--d-surface)}.d-app-bar h2{font-size:var(--d-title);flex:1}.d-app-bar-actions{display:flex;gap:8px}.d-fab{min-width:56px;min-height:56px;border-radius:16px;box-shadow:0 3px 8px #0003}
 .d-snackbar-message{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:48px;padding:0 8px 0 16px;border-radius:4px;background:var(--d-inverse-surface);color:var(--d-inverse-on-surface)}.d-snackbar-message>span{flex:1;padding-block:14px;font-size:14px;line-height:20px;letter-spacing:.25px}.d-snackbar-message button{border:0;background:transparent;color:var(--d-inverse-primary);min-height:48px;padding:0 12px;font-size:14px;line-height:20px;font-weight:500;letter-spacing:.1px}
@@ -2231,6 +2120,7 @@ private const val MATERIAL_CSS = """
 .d-field *,.d-toggle *,.d-segments *,.d-tabs *,.d-navigation *,.d-scaffold *,.d-dialog *{box-sizing:border-box}
 @media(prefers-reduced-motion:reduce){.d-button,.d-chip,.d-icon-button,.d-field *,.d-tabs *,.d-navigation *,.d-scaffold *{transition:none!important;animation:none!important}.d-button-spinner{animation:none!important}}
 @media(forced-colors:active){.d-button:not(:disabled):focus-visible{outline:2px solid Highlight;outline-offset:3px;box-shadow:none}}
+@media(forced-colors:active){.d-button[data-d-button-interaction=true]:not(:disabled):focus-visible,.d-icon-button[data-d-button-interaction=true]:not(:disabled):focus-visible{outline:2px solid Highlight;outline-offset:3px;box-shadow:none}}
 .d-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{appearance:none;display:inline-grid;flex:0 0 20px;width:20px;height:20px;margin:0;border:2px solid var(--d-control-unselected,var(--d-on-surface-variant,var(--d-outline)));border-radius:2px;background:transparent;background-clip:padding-box;color:var(--d-control-checkmark,var(--d-on-primary));accent-color:var(--d-control-selected,var(--d-primary));transition:background-color 120ms ease,border-color 120ms ease}
 .d-toggle input[type=checkbox]:not([role=switch]){position:relative}.d-toggle input[type=checkbox]:not([role=switch]),.d-toggle input[type=radio]{margin:2px}

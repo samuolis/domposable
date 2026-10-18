@@ -57,6 +57,18 @@ sealed interface DomposableModifierOperation : DomposableModifierElement {
         val length: DomposableLength,
     ) : DomposableModifierOperation
 
+    data class ViewportHeight(
+        val mode: DomposableViewportHeightMode,
+        val fraction: Float,
+        val subtract: DomposableLength,
+        val unit: DomposableViewportUnit,
+    ) : DomposableModifierOperation {
+        init {
+            require(fraction.isFinite() && fraction > 0f && fraction <= 1f)
+            require(subtract.value.isFinite() && subtract.value >= 0f)
+        }
+    }
+
     data class MaxWidth(
         val length: DomposableLength,
     ) : DomposableModifierOperation

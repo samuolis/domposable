@@ -8,7 +8,7 @@ from review_assets import panel, png
 
 ROOT = Path(__file__).resolve().parents[2]
 THEMES = ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-light', 'overrides-dark', 'expressive-light', 'expressive-dark']
-FAMILIES = ['states', 'actions', 'selection', 'inputs', 'surfaces', 'navigation', 'feedback', 'gestures', 'scaffold']
+FAMILIES = ['states', 'integration', 'actions', 'selection', 'inputs', 'surfaces', 'navigation', 'feedback', 'gestures', 'scaffold']
 
 
 def comparison(html, wasm):
