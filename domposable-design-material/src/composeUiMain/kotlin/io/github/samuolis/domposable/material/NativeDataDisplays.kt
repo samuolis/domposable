@@ -399,7 +399,11 @@ internal fun NativeDataTable(
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
     val scroll = rememberScrollState()
     BoxWithConstraints(modifier.toComposeModifier().fillMaxWidth()) {
-        val naturalWidth = (props.columns.size.coerceAtLeast(1) * 160).dp
+        val columnCount = props.columns.size.coerceAtLeast(1)
+        val naturalWidth =
+            appearance.columnSpacing?.let { spacing ->
+                (columnCount * 160 + spacing.value * (props.columns.size - 1).coerceAtLeast(0)).dp
+            } ?: (columnCount * 160).dp
         val tableWidth = if (props.allowHorizontalOverflow) maxOf(maxWidth, naturalWidth) else maxWidth
         val rowModifier =
             if (props.allowHorizontalOverflow) {
@@ -412,7 +416,8 @@ internal fun NativeDataTable(
                 Modifier.width(tableWidth).semantics {
                     collectionInfo = CollectionInfo(props.rows.size + 1, props.columns.size)
                 },
-                verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
+                verticalArrangement =
+                    Arrangement.spacedBy(appearance.rowSpacing?.value?.dp ?: props.sizePreset.nativeGap()),
             ) {
                 Row(
                     Modifier
@@ -423,6 +428,8 @@ internal fun NativeDataTable(
                             collectionItemInfo = CollectionItemInfo(0, 1, 0, props.columns.size)
                         },
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement =
+                        Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
                 ) {
                     props.columns.forEach { column ->
                         key(column.key) {
@@ -646,7 +653,10 @@ internal fun NativeDataTable(
                                         ) { rowAction(row.key) }
                                     },
                                 ),
-                            verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    appearance.rowSpacing?.value?.dp ?: props.sizePreset.nativeGap(),
+                                ),
                         ) {
                             CompositionLocalProvider(
                                 LocalTextStyle provides
@@ -669,12 +679,21 @@ internal fun NativeDataTable(
                                         }
                                     }
                                     if (compactSurface != null) {
-                                        Column(Modifier.padding(16.dp)) { compactCells() }
+                                        Column(
+                                            Modifier.padding(16.dp),
+                                            verticalArrangement =
+                                                Arrangement.spacedBy(appearance.rowSpacing?.value?.dp ?: 0.dp),
+                                        ) { compactCells() }
                                     } else {
                                         compactCells()
                                     }
                                 } else {
-                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement =
+                                            Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
                                         props.columns.forEach { column ->
                                             NativeDataTableCell(
                                                 props,
@@ -732,7 +751,12 @@ private fun NativeDataTableCell(
                 contentDescription = column.accessibleLabel
             }
     if (compact) {
-        Row(cellModifier, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            cellModifier,
+            horizontalArrangement =
+                Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 column.label,
                 Modifier.weight(1f).widthIn(min = appearance.compactLabelMinWidth.value.dp),

@@ -55,6 +55,35 @@ native `showModal()` is unavailable.
 
 The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing Row/Column calls keep their layout defaults after recompilation. HTML FlowRow now defaults to top alignment rather than stretching, matching native; specify a different `alignment` when needed. The added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
 
+## Data-table track spacing
+
+`DomposableTableAppearance` adds optional `rowSpacing` and `columnSpacing` values for shared data-table renderers. Null values keep the existing size-preset layout. Set them to tune gaps between rows and columns; Compact mode also applies `rowSpacing` between fields within each card, while `columnSpacing` controls each card's label-to-value gap. `cellPadding` continues to control content insets.
+
+```kotlin
+val appearance = DomposableTableAppearance(
+    rowSpacing = 0.dp,
+    columnSpacing = 8.dp,
+    cellPadding = DomposableInsets(top = 4.dp, bottom = 4.dp),
+)
+
+DomposableDataTable(
+    columns = listOf(DomposableDataTableColumn("name", "Name")),
+    rows = listOf(DomposableDataTableRow("Ada Lovelace")),
+    rowHeaderColumnKey = "name",
+    appearance = appearance,
+) { row, _ ->
+    DomposableText(row.key)
+}
+```
+
+The new data-class fields preserve source calls after recompilation but change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this pre-1.0 binary break requires a minor release.
+
+## HTML navigation sizing and adaptive sheets
+
+HTML `DomposableNavDisplay` relays its host's allocated flex space through each entry while honoring explicit height modifiers. Entry content owns its scrolling; callers that relied on the display's previous implicit scroll area should add `verticalScroll()` to that content. This layout correction does not change the public API.
+
+`BottomOnCompact` sheets now center in expanded view and hide their drag handle there. Compact view retains bottom placement and swipe dismissal. Header dragging is disabled whenever the handle is hidden.
+
 ## Anchored and rich-text menus
 
 The menu API now accepts an optional `anchor` slot, `contentSpacing`, and `anchorOffset`; menu items also accept optional `textContent`. These fields extend `DomposableMenuProps` and `DomposableMenuItem`, changing their data-class constructor and generated `copy` signatures. Existing source calls retain their defaults after recompilation; previously compiled consumers must rebuild. This is an intentional pre-1.0 binary break and requires a minor release. The rich text slot has a separate overload. HTML adapters that already own a trigger element can use the JS-only `htmlMenuAnchor` modifier to resolve an existing trigger from the rendered menu element without wrapping or moving that trigger.
