@@ -37,6 +37,10 @@ DomposableColumn(
 
 Types and `.dp` live in `io.github.samuolis.domposable.foundation`; modifier functions live in `io.github.samuolis.domposable.ui`.
 
+On HTML, `weight` distributes available space when the parent bounds that axis. In a naturally sized document column, a weighted child keeps its intrinsic content height. Weight does not create a scroll viewport; provide a finite height when the content should scroll within a panel.
+
+`zIndex` orders the whole component, including backgrounds and decorations earlier in the chain. Use whole-number stacking levels when targeting HTML.
+
 ## Combine existing modifiers
 
 An ordinary extension works across all renderers without registration:

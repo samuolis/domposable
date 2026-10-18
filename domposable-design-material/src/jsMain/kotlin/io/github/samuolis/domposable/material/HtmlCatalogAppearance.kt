@@ -57,6 +57,7 @@ internal fun StyleScope.surfaceAppearance(appearance: DomposableSurfaceAppearanc
 internal fun StyleScope.itemAppearance(
     appearance: DomposableItemAppearance,
     selected: Boolean = false,
+    includeTextLineLimits: Boolean = true,
 ) {
     itemColors(appearance.colors)
     itemShape(appearance.shape)
@@ -68,8 +69,15 @@ internal fun StyleScope.itemAppearance(
     itemGeometry(appearance)
     appearance.disabledOpacity?.let { property("--d-item-disabled-opacity", it.toString()) }
     appearance.stateLayerOpacity?.let { applyStateLayerOpacity(it) }
-    appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
-    if (selected) appearance.selectedTextAppearance?.let { applyCatalogTextAppearance(it) }
+    appearance.textAppearance?.let { applyCatalogTextAppearance(it, includeLineLimits = includeTextLineLimits) }
+    if (selected) {
+        appearance.selectedTextAppearance?.let {
+            applyCatalogTextAppearance(
+                it,
+                includeLineLimits = includeTextLineLimits,
+            )
+        }
+    }
 }
 
 private const val PERCENT_SCALE = 100

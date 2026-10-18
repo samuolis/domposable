@@ -836,7 +836,10 @@ internal fun NativeChip(
     val enabled = props.enabled && domposableFormEnabled()
     val interaction = remember { MutableInteractionSource() }
     val resolved = appearance.resolveInteractionColors(interaction, props.selected, enabled)
+    val disabledContent = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified
+    val disabledContainer = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified
     val minInteractive = appearance.minimumInteractiveSize?.value?.dp ?: 48.dp
+    val horizontalArrangement = appearance.chipHorizontalArrangement(props.variant)
     val chipModifier =
         modifier
             .toComposeModifier()
@@ -879,7 +882,16 @@ internal fun NativeChip(
         } else {
             appearance.textAppearance
         }
-    val label: @Composable () -> Unit = { StyledContent(textAppearance, { Text(props.label) }) }
+    val label: @Composable () -> Unit = {
+        StyledContent(textAppearance) {
+            Text(
+                text = props.label,
+                minLines = textAppearance?.minLines ?: 1,
+                maxLines = textAppearance?.maxLines ?: Int.MAX_VALUE,
+                overflow = textAppearance?.overflow?.nativeOverflow() ?: TextOverflow.Clip,
+            )
+        }
+    }
     val leading = props.leadingIcon
     val trailing = props.trailingIcon
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides minInteractive) {
@@ -901,16 +913,22 @@ internal fun NativeChip(
                                 containerColor = resolved.container,
                                 labelColor = resolved.content,
                                 disabledContainerColor =
-                                    appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledContainer,
                                 disabledLabelColor =
-                                    appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledContent,
+                                iconColor = resolved.content,
+                                disabledLeadingIconColor = disabledContent,
+                                disabledTrailingIconColor = disabledContent,
                                 selectedContainerColor = resolved.selectedContainer,
+                                disabledSelectedContainerColor = disabledContainer,
                                 selectedLabelColor = resolved.selectedContent,
+                                selectedLeadingIconColor = resolved.selectedContent,
+                                selectedTrailingIconColor = resolved.selectedContent,
                             ),
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: FilterChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 } else {
@@ -929,16 +947,22 @@ internal fun NativeChip(
                                 containerColor = resolved.container,
                                 labelColor = resolved.content,
                                 disabledContainerColor =
-                                    appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledContainer,
                                 disabledLabelColor =
-                                    appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledContent,
+                                iconColor = resolved.content,
+                                disabledLeadingIconColor = disabledContent,
+                                disabledTrailingIconColor = disabledContent,
                                 selectedContainerColor = resolved.selectedContainer,
+                                disabledSelectedContainerColor = disabledContainer,
                                 selectedLabelColor = resolved.selectedContent,
+                                selectedLeadingIconColor = resolved.selectedContent,
+                                selectedTrailingIconColor = resolved.selectedContent,
                             ),
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: FilterChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 }
@@ -959,14 +983,18 @@ internal fun NativeChip(
                                 containerColor = resolved.container,
                                 labelColor = resolved.content,
                                 disabledContainerColor =
-                                    appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledContainer,
                                 disabledLabelColor =
-                                    appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledContent,
+                                leadingIconContentColor = resolved.content,
+                                trailingIconContentColor = resolved.content,
+                                disabledLeadingIconContentColor = disabledContent,
+                                disabledTrailingIconContentColor = disabledContent,
                             ),
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: AssistChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 } else {
@@ -976,20 +1004,25 @@ internal fun NativeChip(
                         modifier = chipModifier,
                         enabled = enabled,
                         leadingIcon = leading,
+                        trailingIcon = trailing,
                         shape = appearance.shape?.nativeShape() ?: AssistChipDefaults.shape,
                         colors =
                             AssistChipDefaults.assistChipColors(
                                 containerColor = resolved.container,
                                 labelColor = resolved.content,
                                 disabledContainerColor =
-                                    appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledContainer,
                                 disabledLabelColor =
-                                    appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledContent,
+                                leadingIconContentColor = resolved.content,
+                                trailingIconContentColor = resolved.content,
+                                disabledLeadingIconContentColor = disabledContent,
+                                disabledTrailingIconContentColor = disabledContent,
                             ),
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: AssistChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 }
@@ -1009,14 +1042,16 @@ internal fun NativeChip(
                                 containerColor = resolved.container,
                                 labelColor = resolved.content,
                                 disabledContainerColor =
-                                    appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledContainer,
                                 disabledLabelColor =
-                                    appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledContent,
+                                iconContentColor = resolved.content,
+                                disabledIconContentColor = disabledContent,
                             ),
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: SuggestionChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 } else {
@@ -1032,14 +1067,16 @@ internal fun NativeChip(
                                 containerColor = resolved.container,
                                 labelColor = resolved.content,
                                 disabledContainerColor =
-                                    appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
+                                disabledContainer,
                                 disabledLabelColor =
-                                    appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                                disabledContent,
+                                iconContentColor = resolved.content,
+                                disabledIconContentColor = disabledContent,
                             ),
                         border = border,
                         contentPadding =
                             appearance.contentPadding?.nativePadding() ?: SuggestionChipDefaults.ContentPadding,
-                        horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                        horizontalArrangement = horizontalArrangement,
                         interactionSource = interaction,
                     )
                 }
@@ -1052,7 +1089,7 @@ internal fun NativeChip(
                     label = label,
                     modifier = chipModifier,
                     enabled = enabled,
-                    avatar = leading,
+                    leadingIcon = leading,
                     trailingIcon = trailing,
                     shape =
                         appearance.shape?.nativeShape() ?: InputChipDefaults.shape,
@@ -1061,18 +1098,68 @@ internal fun NativeChip(
                             containerColor = resolved.container,
                             labelColor = resolved.content,
                             disabledContainerColor =
-                                appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                            disabledLabelColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                            disabledContainer,
+                            disabledLabelColor = disabledContent,
+                            leadingIconColor = resolved.content,
+                            trailingIconColor = resolved.content,
+                            disabledLeadingIconColor = disabledContent,
+                            disabledTrailingIconColor = disabledContent,
                             selectedContainerColor = resolved.selectedContainer,
+                            disabledSelectedContainerColor = disabledContainer,
                             selectedLabelColor = resolved.selectedContent,
+                            selectedLeadingIconColor = resolved.selectedContent,
+                            selectedTrailingIconColor = resolved.selectedContent,
                         ),
                     border = border,
                     contentPadding =
                         appearance.contentPadding?.nativePadding()
-                            ?: InputChipDefaults.contentPadding(leading != null, leading != null, trailing != null),
-                    horizontalArrangement = Arrangement.spacedBy(appearance.contentSpacing?.value?.dp ?: 4.dp),
+                            ?: InputChipDefaults.contentPadding(
+                                hasAvatar = false,
+                                hasLeadingIcon = leading != null,
+                                hasTrailingIcon = trailing != null,
+                            ),
+                    horizontalArrangement = horizontalArrangement,
                     interactionSource = interaction,
                 )
+            }
+        }
+    }
+}
+
+private fun DomposableItemAppearance.chipHorizontalArrangement(
+    variant: DomposableChipVariant,
+): Arrangement.Horizontal {
+    val spacing = contentSpacing?.value?.dp
+    return when (variant) {
+        DomposableChipVariant.Assist -> {
+            if (spacing == null) {
+                AssistChipDefaults.horizontalArrangement()
+            } else {
+                AssistChipDefaults.horizontalArrangement(spacing)
+            }
+        }
+
+        DomposableChipVariant.Filter -> {
+            if (spacing == null) {
+                FilterChipDefaults.horizontalArrangement()
+            } else {
+                FilterChipDefaults.horizontalArrangement(spacing)
+            }
+        }
+
+        DomposableChipVariant.Suggestion -> {
+            if (spacing == null) {
+                SuggestionChipDefaults.horizontalArrangement()
+            } else {
+                SuggestionChipDefaults.horizontalArrangement(spacing)
+            }
+        }
+
+        DomposableChipVariant.Input -> {
+            if (spacing == null) {
+                InputChipDefaults.horizontalArrangement()
+            } else {
+                InputChipDefaults.horizontalArrangement(spacing)
             }
         }
     }
