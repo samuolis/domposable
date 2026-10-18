@@ -438,10 +438,7 @@ internal fun HtmlDataTable(
                                     appearance.compactRowAppearance?.takeIf {
                                         props.sizePreset == DomposableDataTableSize.Compact
                                     }
-                                if (rowAction != null) {
-                                    attr("role", "button")
-                                    attr("tabindex", "0")
-                                }
+                                if (rowAction != null) attr("tabindex", "0")
                                 if (rowAction != null && appearance.rowInteraction != null) {
                                     attr("data-d-table-interaction", "true")
                                 }

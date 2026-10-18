@@ -34,6 +34,7 @@ class HtmlDataTableAppearanceTest {
                         rows = listOf(DomposableDataTableRow("one", accessibleLabel = "First row", selected = true)),
                         modifier = DomposableModifier.testId("table"),
                         sizePreset = DomposableDataTableSize.Compact,
+                        rowHeaderColumnKey = "name",
                         onRowActivate = { activated = it },
                         appearance =
                             DomposableTableAppearance(
@@ -64,10 +65,12 @@ class HtmlDataTableAppearanceTest {
             val table = root.querySelector("[data-testid=table] table") as HTMLElement
             val row = root.querySelector("tr[data-row-key=one]") as HTMLElement
             assertTrue(table.classList.contains("d-data-table"))
-            assertEquals("button", row.getAttribute("role"))
+            assertEquals("TR", row.tagName)
+            assertEquals(null, row.getAttribute("role"))
             assertEquals("0", row.getAttribute("tabindex"))
             assertEquals("true", row.getAttribute("aria-selected"))
             assertEquals("First row", row.getAttribute("aria-label"))
+            assertEquals("row", row.querySelector("th")?.getAttribute("scope"))
             assertEquals("96px", row.style.getPropertyValue("--d-data-compact-label-width"))
             assertEquals("rgba(17,34,51,1)", row.style.getPropertyValue("--d-data-compact-container"))
             assertEquals("rgba(68,85,102,1)", row.style.getPropertyValue("--d-data-compact-border"))

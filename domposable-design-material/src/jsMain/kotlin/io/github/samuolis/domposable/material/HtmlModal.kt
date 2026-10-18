@@ -11,7 +11,6 @@ import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModalAlignment
 import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableModifier
-import io.github.samuolis.domposable.ui.contentDescription
 import io.github.samuolis.domposable.ui.domposableAttributes
 import kotlinx.browser.document
 import org.jetbrains.compose.web.dom.Div
@@ -155,6 +154,7 @@ internal fun HtmlModal(
                     try {
                         element.showModal()
                         fallback = false
+                        focusModal(element)
                     } catch (_: Throwable) {
                         // Some browsers expose showModal but reject it for an attached dialog.
                     }
@@ -215,17 +215,19 @@ internal fun HtmlModal(
             Div(attrs = { classes("d-dialog-header") }) {
                 if (headerContent == null) {
                     H2(attrs = { id(titleId) }) { Text(title) }
-                    HtmlButton(
-                        DomposableButtonProps({ dismiss() }, style = DomposableButtonStyle.Text),
-                        DomposableModifier.contentDescription("Close $title"),
-                        { Text("Close") },
-                        respectFormEnabled = false,
-                    )
                 } else {
                     headerContent()
                 }
             }
             content()
+            if (headerContent == null) {
+                HtmlButton(
+                    DomposableButtonProps({ dismiss() }, style = DomposableButtonStyle.Text),
+                    DomposableModifier,
+                    { Text("Close") },
+                    respectFormEnabled = false,
+                )
+            }
         }
     }
 }

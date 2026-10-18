@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBottomSheet
+import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableText
@@ -144,7 +145,16 @@ class HtmlModalLifecycleTest {
         withFallbackDialogs {
             var dismissals = 0
             withHost(content = {
-                DomposableBottomSheet("Options", { dismissals++ }) { DomposableText("Sheet content") }
+                DomposableBottomSheet(
+                    "Options",
+                    { dismissals++ },
+                    headerContent = { dismiss ->
+                        Button(attrs = {
+                            attr("aria-label", "Dismiss options")
+                            onClick { dismiss() }
+                        }) { DomposableText("Close") }
+                    },
+                ) { DomposableText("Sheet content") }
             }) { root ->
                 val closeButton = root.querySelector(".d-dialog-header button") as HTMLElement
                 val bounds = closeButton.getBoundingClientRect()
@@ -169,6 +179,57 @@ class HtmlModalLifecycleTest {
             val style = window.getComputedStyle(dialog)
             assertEquals("240px", style.maxWidth)
             assertEquals("calc(100dvw - 32px)", dialog.style.width)
+        }
+    }
+
+    @Test
+    fun defaultCloseRemainsAfterDialogContentAndFirstActionGetsFocus() {
+        withHost(content = {
+            DomposableDialog(
+                "Legacy order",
+                {},
+                actions = { DomposableButton("Confirm", {}) },
+            ) {
+                DomposableButton("First action", {})
+            }
+        }) { root ->
+            val dialog = root.querySelector("dialog") as HTMLElement
+            val firstAction = dialog.querySelector("button") as HTMLElement
+            val defaultClose = dialog.lastElementChild as HTMLElement
+
+            assertEquals("Legacy order", dialog.firstElementChild?.textContent)
+            assertEquals("First action", firstAction.textContent)
+            assertEquals("Close", defaultClose.textContent)
+            assertEquals(dialog, defaultClose.parentElement)
+            assertEquals(null, defaultClose.getAttribute("aria-label"))
+            assertEquals(firstAction, document.activeElement)
+        }
+    }
+
+    @Test
+    fun nativeAndFallbackScrimsUseTranslucentMaterialColor() {
+        withHost(content = {
+            DomposableDialog("Native scrim", {}) { DomposableText("Dialog content") }
+        }) { root ->
+            val dialog = root.querySelector("dialog") as HTMLElement
+            val backdropColor = window.asDynamic().getComputedStyle(dialog, "::backdrop").backgroundColor as String
+            assertTrue(
+                backdropColor.contains("0.32"),
+                "Native backdrop should apply the Material scrim alpha: $backdropColor",
+            )
+        }
+
+        withFallbackDialogs {
+            withHost(content = {
+                DomposableDialog("Fallback scrim", {}) { DomposableText("Dialog content") }
+            }) { root ->
+                val scrim = document.querySelector(".d-dialog-fallback-scrim") as HTMLElement
+                val backgroundColor = window.getComputedStyle(scrim).backgroundColor
+                assertTrue(
+                    backgroundColor.contains("0.32"),
+                    "Fallback scrim should apply the Material scrim alpha: $backgroundColor",
+                )
+            }
         }
     }
 }

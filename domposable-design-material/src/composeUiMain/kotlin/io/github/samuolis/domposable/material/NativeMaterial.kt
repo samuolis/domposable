@@ -429,23 +429,35 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }
 
                 val renderText: @Composable () -> Unit = {
-                    Text(
-                        props.annotatedText(
-                            if (style.color ==
-                                Color.Unspecified
-                            ) {
-                                androidx.compose.material3.LocalContentColor.current
-                            } else {
-                                style.color
-                            },
-                        ),
-                        textModifier,
-                        color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
-                        style = style,
-                        minLines = appearance.minLines,
-                        maxLines = appearance.maxLines ?: Int.MAX_VALUE,
-                        overflow = appearance.overflow.nativeOverflow(),
-                    )
+                    if (props.runs.isEmpty()) {
+                        Text(
+                            props.text,
+                            textModifier,
+                            color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
+                            style = style,
+                            minLines = appearance.minLines,
+                            maxLines = appearance.maxLines ?: Int.MAX_VALUE,
+                            overflow = appearance.overflow.nativeOverflow(),
+                        )
+                    } else {
+                        Text(
+                            props.annotatedText(
+                                if (style.color ==
+                                    Color.Unspecified
+                                ) {
+                                    androidx.compose.material3.LocalContentColor.current
+                                } else {
+                                    style.color
+                                },
+                            ),
+                            textModifier,
+                            color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
+                            style = style,
+                            minLines = appearance.minLines,
+                            maxLines = appearance.maxLines ?: Int.MAX_VALUE,
+                            overflow = appearance.overflow.nativeOverflow(),
+                        )
+                    }
                 }
                 if (appearance.selectable == true) SelectionContainer { renderText() } else renderText()
             },

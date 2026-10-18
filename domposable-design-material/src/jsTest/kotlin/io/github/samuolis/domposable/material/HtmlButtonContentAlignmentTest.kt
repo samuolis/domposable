@@ -3,6 +3,8 @@ package io.github.samuolis.domposable.material
 import io.github.samuolis.domposable.foundation.DomposableAlignment
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableInsets
+import io.github.samuolis.domposable.foundation.DomposableTextAlignment
+import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableLink
@@ -19,9 +21,93 @@ import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
 import kotlin.math.abs
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlButtonContentAlignmentTest {
+    @Test
+    fun plainTextButtonCentersWrappedDefaultLabel() {
+        verifyPlainLabelAlignment(
+            DomposableTokens(),
+            "A long button label that wraps across multiple lines",
+            "center",
+            wraps = true,
+        )
+    }
+
+    @Test
+    fun plainTextButtonUsesConfiguredContentAlignment() {
+        val tokens = DomposableTokens()
+        val startAligned =
+            tokens.copy(
+                components =
+                    tokens.components.copy(
+                        button =
+                            tokens.components.button.copy(
+                                contentAlignment = DomposableAlignment.Start,
+                            ),
+                    ),
+            )
+        verifyPlainLabelAlignment(
+            startAligned,
+            "Start aligned label",
+            "start",
+        )
+    }
+
+    @Test
+    fun explicitTextAlignmentOverridesButtonAlignment() {
+        val tokens = DomposableTokens()
+        val explicitTextAlignment =
+            tokens.copy(
+                components =
+                    tokens.components.copy(
+                        button =
+                            tokens.components.button.copy(
+                                contentAlignment = DomposableAlignment.Start,
+                            ),
+                        text =
+                            tokens.components.text.copy(
+                                alignment = DomposableTextAlignment.End,
+                            ),
+                    ),
+            )
+        verifyPlainLabelAlignment(
+            explicitTextAlignment,
+            "Explicit text alignment",
+            "end",
+        )
+    }
+
+    private fun verifyPlainLabelAlignment(
+        tokens: DomposableTokens,
+        text: String,
+        expected: String,
+        wraps: Boolean = false,
+    ) {
+        val root = document.createElement("div") as HTMLElement
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme(tokens = tokens) {
+                    DomposableButton(text, {}, DomposableModifier.width(180.dp))
+                }
+            }
+        try {
+            val label = root.querySelector(".d-button-copy > .d-text") as HTMLElement
+            assertEquals(
+                expected,
+                kotlinx.browser.window
+                    .getComputedStyle(label)
+                    .textAlign,
+            )
+            if (wraps) assertTrue(label.getBoundingClientRect().height > 20)
+        } finally {
+            composition.dispose()
+            root.remove()
+        }
+    }
+
     @Test
     fun buttonsAndLinksAlignContentLogicallyInBothDirections() {
         for (direction in listOf("ltr", "rtl")) {

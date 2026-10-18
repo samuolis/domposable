@@ -672,4 +672,9 @@ fun DomposableButton(
     style: DomposableButtonStyle,
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
-) = DomposableButton(onClick, modifier, enabled, style) { DomposableText(text) }
+) {
+    val textAppearance = buttonLabelTextAppearance()
+    DomposableButton(onClick, modifier, enabled, style) {
+        DomposableText(text, appearance = textAppearance)
+    }
+}

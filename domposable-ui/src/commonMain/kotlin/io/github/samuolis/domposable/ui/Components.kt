@@ -39,6 +39,7 @@ import io.github.samuolis.domposable.foundation.DomposableSliderColors
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableSwitchAppearance
 import io.github.samuolis.domposable.foundation.DomposableTabsVariant
+import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
@@ -625,7 +626,27 @@ fun DomposableTheme(
     onClick: () -> Unit,
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
-) = DomposableButton(onClick, modifier, enabled) { DomposableText(text) }
+) {
+    val textAppearance = buttonLabelTextAppearance()
+    DomposableButton(onClick, modifier, enabled) {
+        DomposableText(text, appearance = textAppearance)
+    }
+}
+
+@Composable
+internal fun buttonLabelTextAppearance(): DomposableTextAppearance {
+    val tokens = LocalDomposableTokens.current
+    val button = tokens.components.button
+    val textAppearance = button.textAppearance ?: tokens.components.text
+    if (textAppearance.alignment != null) return textAppearance
+    val alignment =
+        when (button.contentAlignment) {
+            DomposableAlignment.Start -> DomposableTextAlignment.Start
+            DomposableAlignment.Center -> DomposableTextAlignment.Center
+            DomposableAlignment.End -> DomposableTextAlignment.End
+        }
+    return textAppearance.copy(alignment = alignment)
+}
 
 @Composable fun DomposableColumn(
     modifier: DomposableModifier = DomposableModifier,
