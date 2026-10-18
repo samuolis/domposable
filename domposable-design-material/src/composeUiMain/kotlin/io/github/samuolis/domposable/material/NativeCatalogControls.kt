@@ -870,8 +870,16 @@ internal fun NativeChip(
             DomposableChipVariant.Suggestion -> SuggestionChipDefaults.suggestionChipBorder(enabled)
             DomposableChipVariant.Input -> InputChipDefaults.inputChipBorder(enabled, props.selected)
         }
+    val usesMaterialElevatedDefaultBorder =
+        props.elevated &&
+            props.variant != DomposableChipVariant.Input &&
+            borderColor == Color.Unspecified &&
+            appearance.borderWidth.value == 1f &&
+            appearance.selectedBorderWidth == null
     val border =
-        if (borderColor == Color.Unspecified) {
+        if (usesMaterialElevatedDefaultBorder) {
+            null
+        } else if (borderColor == Color.Unspecified) {
             BorderStroke(borderWidth, defaultBorder.brush)
         } else {
             BorderStroke(borderWidth, borderColor)

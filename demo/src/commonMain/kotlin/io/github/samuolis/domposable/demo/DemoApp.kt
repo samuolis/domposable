@@ -700,7 +700,10 @@ fun ComponentCatalogScreen(
             ) {
                 DomposableDropdownMenuItem(
                     textContent = { DomposableText("★ Example action") },
-                    onClick = { checked = !checked },
+                    onClick = {
+                        checked = !checked
+                        menu = false
+                    },
                 )
             }
         }

@@ -6,7 +6,7 @@ Migration needs more than changing imports: props, units, layout constraints and
 
 Keep your existing ViewModels/state machines and DI containers. Pass values/callbacks or app-owned models through screen signatures. Add screen ownership, Navigation 3 or KSP only where useful; replacing an application's navigation architecture is not required to use the components.
 
-If your app already has shared component names, start with [native/HTML design-system adapters](design-systems.md#adopt-inside-an-existing-design-system). Keep the feature API and branded renderer bodies, alias the portable modifier behind your own modifier name, and delegate generic infrastructure to the library. A second props/provider layer around every application component is unnecessary for this path.
+If your app already has shared component names, start with [native/HTML design-system adapters](design-systems.md#adopt-inside-an-existing-design-system). Keep the feature API and shared brand configuration, alias the portable modifier behind your own modifier name, and delegate ordinary rendering and generic infrastructure to the library. Retain platform renderer bodies for specialized controls that the shared API cannot express. A second props/provider layer around every application component is unnecessary for this path.
 
 Use Kotlin/JS with Compose HTML for the web host. Wasm is an optional separate Compose UI renderer, not a prerequisite for HTML and not a conversion step for existing native widgets.
 
@@ -14,11 +14,15 @@ Migrate one feature first. Verify semantics, focus/keyboard behavior and measure
 
 ## Layout arrangements
 
-The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing source calls keep their layout defaults after recompilation, but the added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
+The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing Row/Column calls keep their layout defaults after recompilation. HTML FlowRow now defaults to top alignment rather than stretching, matching native; specify a different `alignment` when needed. The added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
 
 ## Anchored and rich-text menus
 
 The menu API now accepts an optional `anchor` slot, `contentSpacing`, and `anchorOffset`; menu items also accept optional `textContent`. These fields extend `DomposableMenuProps` and `DomposableMenuItem`, changing their data-class constructor and generated `copy` signatures. Existing source calls retain their defaults after recompilation; previously compiled consumers must rebuild. This is an intentional pre-1.0 binary break and requires a minor release. The rich text slot has a separate overload. HTML adapters that already own a trigger element can use the JS-only `htmlMenuAnchor` modifier to resolve an existing trigger from the rendered menu element without wrapping or moving that trigger.
+
+Menu content items now leave dismissal to the caller on HTML, matching native Material. If an HTML content action relied on implicit dismissal, set `expanded = false` inside its `onClick`. The `items` convenience list still dismisses before invoking an action. Outside interactions request dismissal once; leaving the menu with keyboard focus keeps the next control focused.
+
+Elevated Filter, Assist and Suggestion chips now keep Material's border-free default on native. Explicit appearance borders remain honored. HTML Input chip padding follows its icon slots, and Assist/Suggestion chips expose action semantics rather than `aria-pressed` toggle state. Explicit per-call padding and selectable Filter/Input semantics remain available.
 
 ## Direct calls and the expanded provider
 

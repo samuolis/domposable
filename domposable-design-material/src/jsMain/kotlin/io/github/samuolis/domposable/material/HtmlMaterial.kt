@@ -1322,6 +1322,17 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }) { anchorContent() }
                 }
                 if (props.expanded) {
+                    val requestDismiss =
+                        remember {
+                            var requested = false
+                            val request: () -> Unit = {
+                                if (!requested) {
+                                    requested = true
+                                    dismissMenu()
+                                }
+                            }
+                            request
+                        }
                     val previousFocus = remember { document.activeElement as? HTMLElement }
                     TagElement<HTMLElement>("div", applyAttrs = {
                         classes("d-menu-backdrop")
@@ -1344,14 +1355,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         }
                         onClick { event ->
                             val target = event.target as? Node
-                            val popup = (event.currentTarget as HTMLElement).querySelector(".d-menu-popup")
-                            if (target == null || popup == null || !popup.contains(target)) props.onDismiss()
+                            val popup = (event.currentTarget as HTMLElement).querySelector(".d-menu-position")
+                            if (target == null || popup == null || !popup.contains(target)) requestDismiss()
                         }
                         onKeyDown { event ->
                             when (event.key) {
                                 "Escape" -> {
                                     event.preventDefault()
-                                    props.onDismiss()
+                                    requestDismiss()
                                 }
 
                                 "ArrowDown", "ArrowUp" -> {
@@ -1404,12 +1415,12 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             }
                             window.addEventListener("resize", reposition)
                             window.addEventListener("scroll", reposition, true)
-                            var focusOutDismissed = false
+                            var restorePreviousFocus = true
                             val focusOut: (Event) -> Unit = { event ->
                                 val next = event.asDynamic().relatedTarget as? Node
-                                if (!focusOutDismissed && (next == null || !element.contains(next))) {
-                                    focusOutDismissed = true
-                                    dismissMenu()
+                                if (next == null || !element.contains(next)) {
+                                    if (next != null) restorePreviousFocus = false
+                                    requestDismiss()
                                 }
                             }
                             element.addEventListener("focusout", focusOut)
@@ -1421,7 +1432,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 window.removeEventListener("scroll", reposition, true)
                                 element.removeEventListener("focusout", focusOut)
                                 if (element.matches(":popover-open")) element.asDynamic().hidePopover()
-                                previousFocus?.takeIf { it.isConnected }?.focus()
+                                if (restorePreviousFocus) previousFocus?.takeIf { it.isConnected }?.focus()
                             }
                         }
                     }) {
@@ -1445,12 +1456,16 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                         surfaceAppearance(appearance)
                                     }
                                 }) {
-                                    CompositionLocalProvider(LocalHtmlMenuDismiss provides props.onDismiss) {
-                                        props.items.forEach { item ->
-                                            HtmlDropdownMenuItem(item, DomposableModifier)
-                                        }
-                                        content()
+                                    props.items.forEach { item ->
+                                        HtmlDropdownMenuItem(
+                                            item.copy(onClick = {
+                                                requestDismiss()
+                                                item.onClick()
+                                            }),
+                                            DomposableModifier,
+                                        )
                                     }
+                                    content()
                                 }
                             }
                         }

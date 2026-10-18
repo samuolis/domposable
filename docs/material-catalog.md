@@ -260,6 +260,8 @@ DomposableMenu(
 
 `checked` and `selected` are mutually exclusive. HTML uses `menuitemcheckbox` or `menuitemradio`; native uses the corresponding Material item. Each item can provide leading, selected, trailing, supporting and rich text slots. Use `textContent` when the visible item name combines composable content, such as an icon and label; that content remains the menu item's accessible name on HTML and native hosts. `contentSpacing` adds space between menu items and custom content, and `anchorOffset` moves the popup from its default position below the trigger (the vertical offset reverses when it opens above). Anchored HTML menus remain within the viewport while the page scrolls or resizes. The old overload without `anchor` remains available for overlays positioned by an application.
 
+Menu content items leave dismissal to their `onClick` handler, matching Material. Set `expanded = false` explicitly when an action should close the menu. The `items` convenience list dismisses before invoking its action on both renderers.
+
 Date values are UTC milliseconds at the shared boundary. A range may have a start without an end while the user selects it; an end without a start or a reversed range is rejected. `yearRange` and `isDateSelectable` constrain selection. The caller owns picker mode, selected date and range; changing those values updates the mounted control.
 
 ```kotlin
