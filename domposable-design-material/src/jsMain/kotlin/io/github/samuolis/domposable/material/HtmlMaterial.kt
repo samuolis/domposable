@@ -369,6 +369,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         DomposableTextStyle.Body -> DomposableTypographyRole.BodyLarge
                         DomposableTextStyle.Title -> DomposableTypographyRole.TitleLarge
                         DomposableTextStyle.Label -> DomposableTypographyRole.LabelLarge
+                        DomposableTextStyle.Inherit -> null
                     }
                 val liveRegion =
                     when (appearance?.liveRegion) {
@@ -406,7 +407,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         TagElement<HTMLElement>("h${props.headingLevel ?: 2}", applyAttrs = {
                             style { applyCatalogTextAppearance(DomposableTextAppearance(role = role)) }
                             domposableAttributes(modifier)
-                            classes("d-title")
+                            classes(if (props.style == DomposableTextStyle.Inherit) "d-text" else "d-title")
                             props.color?.let { style { property("color", it.css()) } }
                             applyAppearance()
                         }) { Text(props.text) }

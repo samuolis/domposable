@@ -180,7 +180,13 @@ data class DomposableTokens(
 
 enum class DomposableImageScale { Fit, Crop, Fill }
 
-enum class DomposableTextStyle { Body, Title, Label }
+/** Typography preset; custom providers should map [Inherit] to their surrounding or host text style. */
+enum class DomposableTextStyle {
+    Body,
+    Title,
+    Label,
+    Inherit,
+}
 
 enum class DomposableAlignment { Start, Center, End }
 

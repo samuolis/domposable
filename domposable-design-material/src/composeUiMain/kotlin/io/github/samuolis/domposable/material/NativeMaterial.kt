@@ -49,6 +49,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Label
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
@@ -404,6 +405,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
                         DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
                         DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
+                        DomposableTextStyle.Inherit -> LocalTextStyle.current
                     }
                 val style = appearance.nativeTextStyle(baseStyle)
                 val textModifier =

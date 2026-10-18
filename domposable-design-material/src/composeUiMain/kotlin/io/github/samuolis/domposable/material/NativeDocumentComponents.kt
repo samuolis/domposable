@@ -105,6 +105,7 @@ internal fun NativeDomposableLink(
             DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
             DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
             DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
+            DomposableTextStyle.Inherit -> LocalTextStyle.current
         }
     val style =
         baseStyle.copy(
@@ -208,6 +209,7 @@ internal fun NativeDomposableRichHtml(
                 DomposableTextStyle.Body -> MaterialTheme.typography.bodyLarge
                 DomposableTextStyle.Title -> MaterialTheme.typography.titleLarge
                 DomposableTextStyle.Label -> MaterialTheme.typography.labelLarge
+                DomposableTextStyle.Inherit -> LocalTextStyle.current
             },
         )
     val headlineSize = MaterialTheme.typography.headlineSmall.fontSize
