@@ -162,7 +162,7 @@ jobs:
           if-no-files-found: error
   portable-evidence:
     name: Android, desktop, DOM and Wasm
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [portable, browser]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -291,6 +291,7 @@ jobs:
           name: native-evidence
           include-hidden-files: true
           path: |
+            version.properties
             build/ios-tests-*.xcresult
             build/screenshots/
             build/visual-report/

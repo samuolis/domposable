@@ -17,7 +17,7 @@ CI builds the development browser preview once in a dedicated job, without waiti
 
 The iOS simulator/UI job runs alongside publication and six-target consumer compilation on separate standard macOS runners. Kotlin quality and ABI checks also remain independent. This removes sequential waiting without reducing test coverage, browser engines or visual thresholds. Wall time still depends on runner availability, cold builds and retries; the first hosted run establishes the new timing. The normal PR budget is at most 20 minutes, targeting 10–15 minutes; queue delays and cold-cache runs are measured separately. No tests are skipped to meet that target.
 
-The final **CI passed** gate requires every build, shard, evidence comparison, native, consumer and ABI job to succeed. Intermediate preview artifacts expire after one day; review evidence remains available for 30 days. `android-html-evidence` and `native-evidence` keep the same paths used by the inline review publisher. The unsigned Maven bundle is retained separately in `published-consumer-evidence`.
+The final **CI passed** gate requires every build, shard, evidence comparison, native, consumer and ABI job to succeed. Same-repository PRs save branch-scoped Gradle caches for subsequent updates; fork PRs remain read-only, and their entries cannot replace main caches. Intermediate preview artifacts expire after one day; review evidence remains available for 30 days. `android-html-evidence` and `native-evidence` keep the same paths used by the inline review publisher. The unsigned Maven bundle is retained separately in `published-consumer-evidence`.
 
 Reproduce an individual browser shard after building the preview:
 
