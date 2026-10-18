@@ -3,8 +3,6 @@ package io.github.samuolis.domposable.material
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import org.jetbrains.compose.web.css.StyleScope
 
-private const val DEFAULT_FONT_SIZE_PX = 16f
-
 internal fun StyleScope.applyCatalogTextAppearance(appearance: DomposableTextAppearance) {
     applyRoleTextAppearance(appearance)
     appearance.color?.let { property("color", it.css()) }
@@ -58,10 +56,7 @@ private fun StyleScope.applyMaxLines(appearance: DomposableTextAppearance) {
     appearance.maxLines?.let { lines ->
         when (appearance.overflow) {
             io.github.samuolis.domposable.foundation.DomposableTextOverflow.Clip -> {
-                property(
-                    "max-height",
-                    "${(appearance.lineHeight ?: appearance.fontSize ?: DEFAULT_FONT_SIZE_PX) * lines}px",
-                )
+                property("max-height", "${lines}lh")
                 property("overflow", "hidden")
             }
 

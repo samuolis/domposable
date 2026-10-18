@@ -3,6 +3,8 @@ package io.github.samuolis.domposable.material
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBottomSheet
@@ -28,6 +30,7 @@ import io.github.samuolis.domposable.ui.background
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
+import io.github.samuolis.domposable.ui.htmlAttributes
 import io.github.samuolis.domposable.ui.pointerPassthrough
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.weight
@@ -48,6 +51,52 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlHostIntegrationTest {
+    @Test
+    fun selectableTextOverridesItsHostSelectionPolicy() {
+        for (selectable in listOf(false, true)) {
+            withHost(content = {
+                DomposableBox(DomposableModifier.htmlAttributes { style { property("user-select", "none") } }) {
+                    DomposableText(
+                        "Selectable content",
+                        modifier = DomposableModifier.testId("selection-text"),
+                        appearance = DomposableTextAppearance(selectable = selectable),
+                    )
+                }
+            }) { root ->
+                val text = root.querySelector("[data-testid=selection-text]") as HTMLElement
+                assertEquals(
+                    if (selectable) "text" else "none",
+                    window.getComputedStyle(text).getPropertyValue("user-select"),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun clippedTextUsesItsRenderedLineHeightForInlineTextAndHeadings() {
+        for (heading in listOf(null, 2)) {
+            withHost(content = {
+                DomposableText(
+                    "One\nTwo\nThree",
+                    modifier =
+                        DomposableModifier.testId("clipped-text").htmlAttributes {
+                            style {
+                                property("line-height", "10px")
+                                property("white-space", "pre-line")
+                            }
+                        },
+                    headingLevel = heading,
+                    appearance = DomposableTextAppearance(maxLines = 2, overflow = DomposableTextOverflow.Clip),
+                )
+            }) { root ->
+                val text = root.querySelector("[data-testid=clipped-text]") as HTMLElement
+                assertEquals("10px", window.getComputedStyle(text).lineHeight)
+                assertEquals(20.0, text.getBoundingClientRect().height)
+                assertTrue(text.scrollHeight > text.clientHeight, "Extra lines must be clipped")
+            }
+        }
+    }
+
     @Test
     fun modalBackdropClicksDismissButContentClicksDoNot() {
         for (sheet in listOf(false, true)) {

@@ -248,14 +248,6 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         DomposableTextStyle.Title -> DomposableTypographyRole.TitleLarge
                         DomposableTextStyle.Label -> DomposableTypographyRole.LabelLarge
                     }
-                val defaults = tokens.typography.materialTypeStyle(role)
-                val configuredRole =
-                    if (appearance?.role != null && appearance.emphasized) {
-                        tokens.typography.emphasizedRoles[role] ?: tokens.typography.roles[role]
-                    } else {
-                        tokens.typography.roles[role]
-                    }
-                val effectiveLineHeight = appearance?.lineHeight ?: configuredRole?.lineHeight ?: defaults.lineHeight!!
                 val liveRegion =
                     when (appearance?.liveRegion) {
                         DomposableLiveRegion.Polite -> "polite"
@@ -264,41 +256,22 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     }
 
                 fun <T : HTMLElement> AttrsScope<T>.applyAppearance() {
+                    val inlineText = props.style != DomposableTextStyle.Title && props.headingLevel == null
                     style { appearance?.let { applyCatalogTextAppearance(it) } }
                     (props.color ?: appearance?.color)?.let { style { property("color", it.css()) } }
                     appearance?.minLines?.takeIf { it > 1 }?.let { lines ->
                         style {
-                            val inlineText = props.style != DomposableTextStyle.Title && props.headingLevel == null
                             val clampsLines =
                                 appearance.maxLines != null && appearance.overflow == DomposableTextOverflow.Ellipsis
                             if (inlineText && !clampsLines) property("display", "inline-block")
                             property("min-height", "${lines}lh")
                         }
                     }
-                    appearance?.maxLines?.let { lines ->
-                        when (appearance.overflow) {
-                            DomposableTextOverflow.Clip -> {
-                                style {
-                                    property("max-height", "${effectiveLineHeight * lines}px")
-                                    property("overflow", "hidden")
-                                }
-                            }
-
-                            DomposableTextOverflow.Ellipsis -> {
-                                style {
-                                    property("display", "-webkit-box")
-                                    property("-webkit-line-clamp", lines.toString())
-                                    property("-webkit-box-orient", "vertical")
-                                    property("overflow", "hidden")
-                                }
-                            }
-
-                            DomposableTextOverflow.Visible -> {
-                                style { property("overflow", "visible") }
-                            }
-                        }
+                    if (appearance?.maxLines != null && appearance.overflow == DomposableTextOverflow.Clip &&
+                        inlineText
+                    ) {
+                        style { property("display", "inline-block") }
                     }
-                    if (appearance?.selectable == false) style { property("user-select", "none") }
                     liveRegion?.let {
                         attr("aria-live", it)
                         attr("aria-atomic", "true")

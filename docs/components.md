@@ -75,6 +75,25 @@ Use `description = null` for a decorative Icon inside a labelled control. IconBu
 
 ## Content and collections
 
+Text layout can be configured without renderer-specific CSS:
+
+```kotlin
+DomposableText(
+    summary,
+    appearance = DomposableTextAppearance(
+        minLines = 2,
+        maxLines = 3,
+        overflow = DomposableTextOverflow.Clip,
+        selectable = true,
+    ),
+)
+```
+
+`Clip` hides content beyond `maxLines`; `Ellipsis` truncates it with an ellipsis.
+The HTML renderer uses the text's rendered line height, including theme and custom
+typography overrides. `minLines` reserves space; it does not add text. The app
+controls selection with `selectable` on both renderers.
+
 ```kotlin
 DomposableCard(onClick = onOpenProduct) {
     DomposableColumn(gap = 8.dp) {
