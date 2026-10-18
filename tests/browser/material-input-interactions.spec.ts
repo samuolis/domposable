@@ -120,7 +120,8 @@ test('selected chip stays selected after its controlled click callback', async (
   await chip.click();
   await expect(chip).toHaveAttribute('aria-pressed', 'true');
   await expect(chip).toHaveCSS('font-weight', '600');
-  await expect(chip).toHaveCSS('border-top-width', '3px');
+  await expect(chip).toHaveCSS('border-top-width', '0px');
+  await expect(chip.locator('.d-chip-surface')).toHaveCSS('border-top-width', '3px');
 });
 
 test('snackbar host presents queued message actions and completes the request', async ({ page }) => {
