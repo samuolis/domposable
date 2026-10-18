@@ -69,6 +69,9 @@ def validate_manifest(manifest):
     ):
         raise ValueError('Expected five bounded, unique platform screenshot inventories')
 
+REVIEW_PLATFORMS = {'android', 'desktop', 'dom', 'wasm'}
+REVIEW_ARTIFACTS = {'android-html-evidence'}
+
 def release_assets(release_id):
     assets = []
     for page in range(1, 12):
@@ -132,18 +135,20 @@ def main():
     if pr['state'] != 'open' or pr['head']['repo']['full_name'] != REPO: raise SystemExit('Only open same-repository PRs are supported')
     if run['head_sha'] != pr['head']['sha'] or run['path'] != '.github/workflows/ci.yml' or run['status'] != 'completed': raise SystemExit('Use completed CI for the current PR head')
     artifacts = api(f'actions/runs/{args.run}/artifacts')['artifacts']
-    names = {'android-html-evidence','native-evidence'}
+    platforms, names = REVIEW_PLATFORMS, REVIEW_ARTIFACTS
     selected = [a for a in artifacts if a['name'] in names and not a['expired']]
     if {a['name'] for a in selected} != names or any(a['size_in_bytes'] > 600 * 1024 * 1024 for a in selected):
-        raise SystemExit('Expected two bounded, available CI evidence artifacts')
+        raise SystemExit('Expected bounded, available CI evidence artifacts for this validation scope')
     manifest_file = api(f'contents/screenshots/manifest.json?ref={run["head_sha"]}')
     manifest = json.loads(base64.b64decode(manifest_file['content']))
     validate_manifest(manifest)
     files = []
     with tempfile.TemporaryDirectory(prefix='domposable-visual-review-') as directory:
-        subprocess.run(['gh','run','download',str(args.run),'--repo',REPO,'--dir',directory,'--name','android-html-evidence','--name','native-evidence'],check=True)
+        for artifact in sorted(names):
+            subprocess.run(['gh','run','download',str(args.run),'--repo',REPO,'--dir',str(Path(directory)/artifact),'--name',artifact],check=True)
         for platform, names in manifest.items():
             if platform not in {'android','desktop','ios','dom','wasm'}: raise SystemExit('Unknown screenshot platform')
+            if platform not in platforms: continue
             for name in names:
                 if not re.fullmatch(r'[a-z0-9-]+', name): raise SystemExit('Invalid scenario name')
                 candidates = list(Path(directory).glob(f'*/build/screenshots/{platform}/{name}.png'))

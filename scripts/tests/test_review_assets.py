@@ -12,6 +12,10 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class ReviewEvidenceTest(unittest.TestCase):
+    def test_review_requires_only_automatically_captured_platforms(self):
+        self.assertEqual(module.REVIEW_PLATFORMS, {'android', 'desktop', 'dom', 'wasm'})
+        self.assertEqual(module.REVIEW_ARTIFACTS, {'android-html-evidence'})
+
     def test_catalog_manifest_is_bounded_per_platform(self):
         manifest = {platform: [f'scenario-{i}' for i in range(24)] for platform in ('android', 'desktop', 'ios', 'dom', 'wasm')}
         module.validate_manifest(manifest)
