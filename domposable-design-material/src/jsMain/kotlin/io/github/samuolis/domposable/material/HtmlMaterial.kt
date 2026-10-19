@@ -1360,7 +1360,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     (!popup.contains(target) && !isMenuAnchor(target))
                                 ) {
                                     val active = document.activeElement
-                                    if (active != null && active != document.body && active != document.documentElement &&
+                                    if (active != null &&
+                                        active != document.body &&
+                                        active != document.documentElement &&
                                         !element.contains(active)
                                     ) {
                                         restorePreviousFocus = false
