@@ -747,6 +747,7 @@ fun ComponentCatalogScreen(
                             base.components.button.copy(
                                 container = DomposableColor(0xFF77503B),
                                 content = DomposableColor(0xFFFFFFFF),
+                                indicatorTrackColor = DomposableColor(0x40FFFFFF),
                                 shape = DomposableShape.Rounded(6.dp),
                                 minHeight = 48.dp,
                             ),

@@ -16,11 +16,18 @@ class ComponentThemeTest {
     fun themeCopyKeepsUnchangedComponentDefaults() {
         val themed =
             DomposableComponentStyles(
-                button = DomposableButtonAppearance(shape = DomposableShape.Circle, minHeight = 48.dp),
+                button =
+                    DomposableButtonAppearance(
+                        shape = DomposableShape.Circle,
+                        minHeight = 48.dp,
+                        indicatorTrackColor = DomposableColor(0x408A7755),
+                    ),
             )
         val local = themed.button.copy(content = DomposableColor(0xFFFFFFFF))
         assertEquals(themed.button.shape, local.shape)
         assertEquals(48.dp, local.minHeight)
+        assertEquals(DomposableColor(0x408A7755), local.indicatorTrackColor)
+        assertEquals(null, DomposableButtonAppearance().indicatorTrackColor)
         assertEquals(null, themed.button.content)
         assertEquals(themed.textField, themed.copy(button = local).textField)
     }

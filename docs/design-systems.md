@@ -355,6 +355,7 @@ val brandStyles = DomposableComponentStyles(
     button = DomposableButtonAppearance(
         shape = DomposableShape.Circle,
         minHeight = 48.dp,
+        indicatorTrackColor = DomposableColor(0x40FFFFFF),
         contentPadding = DomposableInsets(start = 20.dp, end = 20.dp),
     ),
     textField = DomposableTextFieldAppearance(
@@ -393,6 +394,9 @@ DomposableMaterialTheme(
     ) { DomposableText("Delete") }
 }
 ```
+
+`indicatorTrackColor` sets the ring track used while a button is loading in both renderers. Leave
+it unset to keep the platform renderer's default.
 
 The types above live in `io.github.samuolis.domposable.foundation`; component calls and the current `DomposableTheme` values live in `io.github.samuolis.domposable.ui`. Import `foundation.dp` for portable dimensions and `material.DomposableMaterialTheme` for the standard renderers.
 
