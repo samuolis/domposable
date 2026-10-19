@@ -7,11 +7,7 @@ import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableRow
-import io.github.samuolis.domposable.ui.DomposableVisibility
-import io.github.samuolis.domposable.ui.fillMaxHeight
 import io.github.samuolis.domposable.ui.fillMaxWidth
-import io.github.samuolis.domposable.ui.region
-import io.github.samuolis.domposable.ui.weight
 
 /**
  * Renders caller-owned entries in one or two panes, without owning navigation or ViewModels.
@@ -76,19 +72,15 @@ fun <T : Any> DomposablePaneScaffold(
     ) {
         list?.let { entry ->
             key(contentKey(entry)) {
-                val width =
-                    if (expanded) {
-                        DomposableModifier.fillMaxWidth(listFraction, minListWidth, maxListWidth)
-                    } else {
-                        DomposableModifier.fillMaxWidth()
-                    }
-                DomposableVisibility(
+                DomposablePaneContentHost(
+                    pane = DomposablePaneScaffoldPane.List,
+                    expanded = expanded,
                     visible = expanded || singlePaneRole == DomposablePaneRole.List,
-                    modifier =
-                        width
-                            .then(if (expanded) DomposableModifier.fillMaxHeight() else DomposableModifier)
-                            .region(listLabel)
-                            .then(listModifier),
+                    label = listLabel,
+                    widthFraction = listFraction,
+                    minListWidth = minListWidth,
+                    maxListWidth = maxListWidth,
+                    modifier = listModifier,
                 ) {
                     CompositionLocalProvider(
                         LocalDomposablePaneRole provides DomposablePaneRole.List.takeIf { expanded },
@@ -100,11 +92,15 @@ fun <T : Any> DomposablePaneScaffold(
         }
         detail?.let { entry ->
             key(contentKey(entry)) {
-                val width = if (expanded) DomposableModifier.weight(1f) else DomposableModifier.fillMaxWidth()
-                val height = if (expanded) DomposableModifier.fillMaxHeight() else DomposableModifier
-                DomposableVisibility(
+                DomposablePaneContentHost(
+                    pane = DomposablePaneScaffoldPane.Detail,
+                    expanded = expanded,
                     visible = true,
-                    modifier = width.then(height).region(detailLabel).then(detailModifier),
+                    label = detailLabel,
+                    widthFraction = 1f,
+                    minListWidth = minListWidth,
+                    maxListWidth = maxListWidth,
+                    modifier = detailModifier,
                 ) {
                     CompositionLocalProvider(
                         LocalDomposablePaneRole provides DomposablePaneRole.Detail.takeIf { expanded },
@@ -116,3 +112,18 @@ fun <T : Any> DomposablePaneScaffold(
         }
     }
 }
+
+internal enum class DomposablePaneScaffoldPane { List, Detail }
+
+@Composable
+internal expect fun DomposablePaneContentHost(
+    pane: DomposablePaneScaffoldPane,
+    expanded: Boolean,
+    visible: Boolean,
+    label: String,
+    widthFraction: Float,
+    minListWidth: DomposableLength,
+    maxListWidth: DomposableLength?,
+    modifier: DomposableModifier,
+    content: @Composable () -> Unit,
+)

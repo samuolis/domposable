@@ -41,6 +41,11 @@ kotlin {
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
+        val composeUiMain = create("composeUiMain") { dependsOn(commonMain) }
+        getByName("androidMain").dependsOn(composeUiMain)
+        getByName("jvmMain").dependsOn(composeUiMain)
+        getByName("wasmJsMain").dependsOn(composeUiMain)
+        iosMain.dependsOn(composeUiMain)
         wasmJsMain { dependencies { implementation(libs.kotlinx.browser) } }
         jsMain {
             dependencies {
