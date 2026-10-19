@@ -121,6 +121,7 @@ class NativeButtonAppearanceTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun themedButtonPreventsActivationDuringLoadingAndRecovers() {
         val loading = mutableStateOf(false)
         var clicks = 0
