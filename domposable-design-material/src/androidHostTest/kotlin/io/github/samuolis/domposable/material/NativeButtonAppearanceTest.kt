@@ -131,6 +131,7 @@ class NativeButtonAppearanceTest {
                         button =
                             DomposableButtonAppearance(
                                 container = DomposableColor(0xFF77503B),
+                                indicatorTrackColor = DomposableColor(0xFFFF0000),
                                 shape = DomposableShape.Circle,
                                 minHeight = 48.dp,
                             ),
@@ -145,6 +146,15 @@ class NativeButtonAppearanceTest {
         compose.onNodeWithTag("save").assertIsEnabled().performClick()
         compose.runOnIdle { loading.value = true }
         compose.onNodeWithTag("save").assertIsNotEnabled().performTouchInput { click() }
+        val loadingPixels = compose.onNodeWithTag("save").captureToImage().toPixelMap()
+        assertTrue(
+            (0 until loadingPixels.height).any { y ->
+                (0 until loadingPixels.width).any { x ->
+                    loadingPixels[x, y].red > .8f && loadingPixels[x, y].green < .2f && loadingPixels[x, y].blue < .2f
+                }
+            },
+            "The configured loading indicator track must be rendered",
+        )
         compose.runOnIdle {
             assertEquals(1, clicks)
             loading.value = false

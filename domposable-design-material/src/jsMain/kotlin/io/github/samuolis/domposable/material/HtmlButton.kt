@@ -145,6 +145,7 @@ internal fun HtmlButton(
                 }
                 appearance.indicatorSize?.let { property("--d-button-indicator-size", "${it.value}px") }
                 appearance.indicatorStrokeWidth?.let { property("--d-button-indicator-stroke", "${it.value}px") }
+                appearance.indicatorTrackColor?.let { property("--d-button-indicator-track", it.css()) }
                 property("--d-button-pressed-scale", appearance.pressedScale.toString())
                 property("--d-button-hovered-scale", appearance.hoveredScale.toString())
                 buttonInteractionAppearance(appearance)

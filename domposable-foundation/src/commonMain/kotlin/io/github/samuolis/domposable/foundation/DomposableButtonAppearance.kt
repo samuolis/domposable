@@ -27,6 +27,8 @@ data class DomposableButtonAppearance(
     val interaction: DomposableInteractionAppearance? = null,
     /** Logical horizontal alignment of the content inside a wider control. */
     val contentAlignment: DomposableAlignment = DomposableAlignment.Center,
+    /** Optional track behind the loading indicator; null keeps each renderer's default. */
+    val indicatorTrackColor: DomposableColor? = null,
 ) {
     init {
         require(pressedScale.isFinite() && pressedScale > 0f && pressedScale <= 1f)

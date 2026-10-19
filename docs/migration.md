@@ -1,5 +1,12 @@
 # Migrating a Compose feature
 
+## Button indicator track in 0.14
+
+`DomposableButtonAppearance.indicatorTrackColor` optionally sets the loading ring's track on
+native and HTML renderers. `null` keeps each renderer's existing default. Since this adds a field
+to a public data-class constructor and generated `copy`, previously compiled consumers must be
+rebuilt with 0.14; Kotlin source calls keep their defaults.
+
 Keep Compose runtime APIs (`remember`, effects, state, composition locals). Move shared UI to `Domposable*` components and `DomposableModifier`.
 
 Migration needs more than changing imports: props, units, layout constraints and renderer behavior are deliberately portable. Replace native `Modifier` chains with supported portable operations. Move unsupported platform widgets and native interop into provider implementations or platform slots.
