@@ -140,9 +140,13 @@ class HtmlHostIntegrationTest {
                                 expected += (icons.item(index) as HTMLElement).getBoundingClientRect().width
                             }
                             expected += iconCount * style.columnGap.removeSuffix("px").toDouble()
-                            expected += listOf(
-                                style.paddingLeft, style.paddingRight, style.borderLeftWidth, style.borderRightWidth,
-                            ).sumOf { it.removeSuffix("px").toDouble() }
+                            expected +=
+                                listOf(
+                                    style.paddingLeft,
+                                    style.paddingRight,
+                                    style.borderLeftWidth,
+                                    style.borderRightWidth,
+                                ).sumOf { it.removeSuffix("px").toDouble() }
                             assertTrue(abs(visual.getBoundingClientRect().width - expected) < 0.5)
                         }
                     }

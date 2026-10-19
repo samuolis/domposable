@@ -5,6 +5,7 @@ import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableLink
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.testId
 import kotlinx.browser.document
@@ -38,7 +39,23 @@ class HtmlControlSizingTest {
             DomposableLink(label = "Destination", href = "/destination", modifier = modifier)
         }
 
-    private fun assertFullWidth(content: @Composable (DomposableModifier) -> Unit) {
+    @Test
+    fun equalWidthSegmentsFillBoundedWidthWhenRequested() =
+        assertFullWidth(selector = ".d-segments") { modifier ->
+            DomposableSegmentedButtons(
+                labels = listOf("One", "Two"),
+                selectedIndex = 0,
+                onSelect = {},
+                label = "Mode",
+                modifier = modifier,
+                equalWidth = true,
+            )
+        }
+
+    private fun assertFullWidth(
+        selector: String = "[data-testid=control]",
+        content: @Composable (DomposableModifier) -> Unit,
+    ) {
         val root = document.createElement("div") as HTMLElement
         root.style.width = "320px"
         document.body!!.appendChild(root)
@@ -49,7 +66,7 @@ class HtmlControlSizingTest {
                 }
             }
         try {
-            val control = root.querySelector("[data-testid=control]") as HTMLElement
+            val control = root.querySelector(selector) as HTMLElement
             assertTrue(abs(control.getBoundingClientRect().width - root.getBoundingClientRect().width) < 1.0)
         } finally {
             composition.dispose()
