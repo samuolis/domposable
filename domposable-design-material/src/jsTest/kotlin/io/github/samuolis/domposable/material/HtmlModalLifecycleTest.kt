@@ -257,7 +257,7 @@ class HtmlModalLifecycleTest {
             val dialog = root.querySelector("dialog") as HTMLElement
             val style = window.getComputedStyle(dialog)
             assertEquals("240px", style.maxWidth)
-            assertEquals("calc(100dvw - 32px)", dialog.style.width)
+            assertEquals("calc(100dvw - var(--d-modal-inline-inset, 32px))", dialog.style.width)
         }
     }
 
