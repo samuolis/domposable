@@ -169,9 +169,12 @@ test('forced colors retain chip selection and a visible keyboard focus ring with
   await expect.poll(() => chip.evaluate(element => element.matches(':focus-visible'))).toBe(true);
   const paint = await chip.evaluate(element => {
     const style = getComputedStyle(element);
-    return { target: style.backgroundColor, surface: getComputedStyle(element.querySelector('.d-chip-surface')!).backgroundColor, outline: style.outlineStyle };
+    const surface = getComputedStyle(element.querySelector('.d-chip-surface')!);
+    return { target: style.backgroundColor, surface: surface.backgroundColor, targetOutline: style.outlineStyle, outline: surface.outlineStyle, outlineWidth: surface.outlineWidth };
   });
   expect(paint.target).toMatch(/^rgba\([\d.]+,\s*[\d.]+,\s*[\d.]+,\s*0\)$/);
   expect(paint.surface).not.toMatch(/^(transparent|rgba\(0, 0, 0, 0\))$/);
+  expect(paint.targetOutline).toBe('none');
   expect(paint.outline).toBe('solid');
+  expect(paint.outlineWidth).toBe('2px');
 });
