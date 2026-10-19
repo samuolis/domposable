@@ -13,6 +13,7 @@ import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
 import kotlin.math.abs
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlControlSizingTest {
@@ -51,6 +52,36 @@ class HtmlControlSizingTest {
                 equalWidth = true,
             )
         }
+
+    @Test
+    fun fullWidthSegmentRadiosOwnTheirPointerTarget() {
+        for (enabled in listOf(true, false)) {
+            var selected = -1
+            withHost(content = {
+                DomposableSegmentedButtons(
+                    labels = listOf("One", "Two"),
+                    selectedIndex = 0,
+                    onSelect = { selected = it },
+                    label = "Mode",
+                    modifier = DomposableModifier.fillMaxWidth(),
+                    enabled = enabled,
+                    equalWidth = true,
+                )
+            }) { root ->
+                val input = root.querySelectorAll(".d-segment input").item(1) as HTMLElement
+                val bounds = input.getBoundingClientRect()
+                val label = requireNotNull(input.parentElement).getBoundingClientRect()
+                assertTrue(abs(bounds.width - label.width) < 1.0)
+                assertTrue(abs(bounds.height - label.height) < 1.0)
+                assertEquals(
+                    input,
+                    document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2),
+                )
+                input.click()
+                assertEquals(if (enabled) 1 else -1, selected)
+            }
+        }
+    }
 
     private fun assertFullWidth(
         selector: String = "[data-testid=control]",
