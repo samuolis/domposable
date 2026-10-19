@@ -2112,7 +2112,7 @@ internal fun InstallDomposableMaterialStyles() {
 
 private const val MATERIAL_CSS = """
 /* A stretched flex item needs auto height; its inner fill wrappers then resolve against that height. */
-.d-row-stretch>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-modifier=FillHeight],.d-row-stretch>[data-domposable-visibility]>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-visibility]>[data-domposable-modifier=FillHeight]{height:auto!important}
+.d-row-stretch>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-modifier=FillHeight],.d-row-stretch>[data-domposable-layout-item],.d-row-stretch>[data-domposable-visibility]>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-visibility]>[data-domposable-modifier=FillHeight],.d-row-stretch>[data-domposable-visibility]>[data-domposable-layout-item]{height:auto!important}
 .d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-field select{font:inherit}
 .d-box>*{grid-area:1/1;min-width:0;min-height:0}
 .d-theme *{box-sizing:border-box}.d-link{color:var(--d-primary);padding:8px;display:inline-flex;align-items:center;min-height:44px}.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
