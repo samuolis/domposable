@@ -17,7 +17,7 @@ Modifiers are immutable, ordered operations on shared UI. Use the same chain in 
 | Transforms | `offset`, `scale`, `rotate`, `alpha`, `zIndex` | Visual transforms do not reserve new layout space; negative scale mirrors content |
 | Child layout | `weight`, `align`, `boxAlignment` | Use in the corresponding row, column or box scope; invalid native scopes fail explicitly |
 | Interaction | `clickable` | Enabled state, role and accessible action label; HTML also supports keyboard activation |
-| Semantics | `contentDescription`, `testId` | Semantic attributes attach to the control rather than only its layout wrapper |
+| Semantics | `contentDescription`, `testId` | Semantic attributes attach to the control rather than only its layout wrapper; the outermost `testId` wins when tags are chained |
 | Scroll | `verticalScroll`, `horizontalScroll`, optional shared scroll state | Ordered viewport wrappers on HTML; native scroll state on Compose UI |
 | Composition | `then` | Append another chain or an app-owned element without changing the original modifier |
 
