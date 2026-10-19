@@ -2,19 +2,37 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import io.github.samuolis.domposable.foundation.DomposableButtonStyle
+import io.github.samuolis.domposable.foundation.DomposableInsets
+import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBottomSheet
 import io.github.samuolis.domposable.ui.DomposableButton
+import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableDialog
+import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModalAlignment
 import io.github.samuolis.domposable.ui.DomposableModalLayout
+import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableRow
 import io.github.samuolis.domposable.ui.DomposableText
+import io.github.samuolis.domposable.ui.DomposableTextField
+import io.github.samuolis.domposable.ui.fillMaxHeight
+import io.github.samuolis.domposable.ui.fillMaxSize
+import io.github.samuolis.domposable.ui.fillMaxWidth
+import io.github.samuolis.domposable.ui.height
+import io.github.samuolis.domposable.ui.minHeight
+import io.github.samuolis.domposable.ui.padding
+import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.verticalScroll
+import io.github.samuolis.domposable.ui.weight
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.promise
 import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
@@ -216,6 +234,181 @@ class HtmlModalLifecycleTest {
                 if (compactViewport) "flex" else "none",
                 window.getComputedStyle(handle).display,
             )
+        }
+    }
+
+    @Test
+    fun fullSizeBodyWrapperDoesNotConsumeHandleSpace() {
+        val assertSheet = {
+            withHost(content = {
+                DomposableBottomSheet(
+                    "Sponsors",
+                    {},
+                    headerContent = { dismiss ->
+                        DomposableRow(
+                            modifier = DomposableModifier.fillMaxWidth().padding(20.dp, 16.dp),
+                            gap = 16.dp,
+                        ) {
+                            DomposableText("Sponsors")
+                            DomposableButton(
+                                "Close",
+                                { dismiss() },
+                                DomposableButtonStyle.Filled,
+                                modifier = DomposableModifier.height(48.dp),
+                            )
+                        }
+                    },
+                    layout = DomposableModalLayout(
+                        maxWidth = 560.dp,
+                        fillViewportWidth = true,
+                        padding = DomposableInsets(DomposableLength(0f)),
+                        heightFraction = 1f,
+                        maxViewportFraction = 1f,
+                        viewportInset = 32.dp,
+                        alignment = DomposableModalAlignment.BottomOnCompact,
+                    ),
+                ) {
+                    DomposableHtmlModifiers(
+                        DomposableModifier.fillMaxSize().testId("full-size-sheet-body"),
+                        wrapSemantics = true,
+                    ) {
+                        DomposableColumn {
+                            DomposableColumn(
+                                modifier = DomposableModifier.fillMaxWidth().weight(1f).minHeight(0.dp),
+                            ) {
+                                DomposableHtmlModifiers(
+                                    DomposableModifier.fillMaxWidth().weight(1f).minHeight(0.dp)
+                                        .verticalScroll().padding(16.dp).testId("full-size-sheet-list"),
+                                    wrapSemantics = true,
+                                ) {
+                                    DomposableColumn {
+                                        DomposableTextField(
+                                            value = "",
+                                            onValueChange = {},
+                                            label = "Search sponsors",
+                                            autofocus = true,
+                                        )
+                                        repeat(48) { DomposableText("Sponsor $it") }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }) { root ->
+                val dialog = root.querySelector("dialog") as HTMLElement
+                val handle = dialog.querySelector(".d-sheet-drag-handle") as HTMLElement
+                val header = dialog.querySelector(".d-dialog-header") as HTMLElement
+                val body = dialog.querySelector("[data-testid='full-size-sheet-body']") as HTMLElement
+                val listWrapper = dialog.querySelector("[data-testid='full-size-sheet-list']") as HTMLElement
+                val list = listWrapper.parentElement?.parentElement as? HTMLElement
+                    ?: error("Missing inner scrolling list")
+                val bodyFlexItem = body.parentElement?.parentElement as? HTMLElement
+                    ?: error("Missing full-size flex item")
+
+                dialog.style.position = "fixed"
+                dialog.style.left = "0"
+                dialog.style.top = "32px"
+                dialog.style.width = "390px"
+                dialog.style.height = "812px"
+                dialog.style.maxHeight = "none"
+                dialog.style.margin = "0"
+                dialog.style.border = "0"
+                dialog.style.setProperty("overflow", "hidden")
+                handle.style.display = "flex"
+
+                assertEquals(dialog, bodyFlexItem.parentElement)
+                assertEquals(24.0, handle.getBoundingClientRect().height)
+                assertEquals(80.0, header.getBoundingClientRect().height)
+                assertEquals(812, dialog.scrollHeight)
+                assertEquals(
+                    676.0,
+                    bodyFlexItem.getBoundingClientRect().height,
+                    "The body must fit the space left after the handle, header, and gaps",
+                )
+                assertTrue(bodyFlexItem.getBoundingClientRect().bottom <= dialog.getBoundingClientRect().bottom)
+                assertTrue(list.scrollHeight > list.clientHeight, "The inner list must own scrolling")
+                assertTrue(handle.getBoundingClientRect().top >= dialog.getBoundingClientRect().top)
+            }
+        }
+
+        assertSheet()
+        withFallbackDialogs { assertSheet() }
+    }
+
+    @Test
+    fun fullHeightWrappersPreserveExplicitMinimumHeightInEitherOrder() {
+        withHost(content = {
+            Div(attrs = {
+                attr("id", "default-height-parent")
+                style {
+                    property("display", "flex")
+                    property("height", "200px")
+                }
+            }) {
+                DomposableHtmlModifiers(
+                    DomposableModifier.fillMaxHeight().testId("default-height-wrapper"),
+                    wrapSemantics = true,
+                ) { DomposableText("Fill available height") }
+            }
+            Div(attrs = {
+                attr("id", "explicit-height-parent")
+                style {
+                    property("display", "flex")
+                    property("height", "200px")
+                }
+            }) {
+                DomposableHtmlModifiers(
+                    DomposableModifier.fillMaxHeight().minHeight(128.dp).testId("explicit-height-after-fill"),
+                    wrapSemantics = true,
+                ) { DomposableText("Explicit minimum") }
+            }
+            Div(attrs = {
+                attr("id", "ordered-height-parent")
+                style {
+                    property("display", "flex")
+                    property("height", "200px")
+                }
+            }) {
+                DomposableHtmlModifiers(
+                    DomposableModifier.minHeight(128.dp).fillMaxHeight().testId("explicit-height-before-fill"),
+                    wrapSemantics = true,
+                ) { DomposableText("Explicit minimum before fill") }
+            }
+            Div(attrs = {
+                attr("id", "fixed-height-parent")
+                style {
+                    property("display", "flex")
+                    property("height", "200px")
+                }
+            }) {
+                DomposableHtmlModifiers(
+                    DomposableModifier.height(80.dp).testId("fixed-height-wrapper"),
+                    wrapSemantics = true,
+                ) { DomposableText("Fixed height") }
+            }
+        }) { root ->
+            val default = root.querySelector("[data-testid='default-height-wrapper']") as HTMLElement
+            val defaultFill = default.parentElement as HTMLElement
+            assertEquals("0px", window.getComputedStyle(defaultFill).minHeight)
+            assertEquals(200.0, defaultFill.getBoundingClientRect().height)
+
+            listOf("explicit-height-after-fill", "explicit-height-before-fill").forEach { testId ->
+                val semantic = root.querySelector("[data-testid='$testId']") as HTMLElement
+                var explicitMinHeight = semantic.parentElement as? HTMLElement
+                while (
+                    explicitMinHeight != null &&
+                        explicitMinHeight.getAttribute("data-domposable-modifier") != "MinHeight"
+                ) {
+                    explicitMinHeight = explicitMinHeight.parentElement as? HTMLElement
+                }
+                assertEquals("128px", window.getComputedStyle(explicitMinHeight as HTMLElement).minHeight)
+            }
+
+            val fixedSemantic = root.querySelector("[data-testid='fixed-height-wrapper']") as HTMLElement
+            val fixedHeight = fixedSemantic.parentElement as HTMLElement
+            assertEquals("80px", window.getComputedStyle(fixedHeight).height)
+            assertEquals("auto", window.getComputedStyle(fixedHeight).minHeight)
         }
     }
 
