@@ -109,19 +109,19 @@ def publish_images(files, pr: int, run: int):
             png(data)
             name = asset_name(pr, run, platform, scenario, data)
             digest = 'sha256:' + hashlib.sha256(data).hexdigest()
+            expected = f'https://github.com/{REPO}/releases/download/{release["tag_name"]}/{name}'
             asset = by_name.get(name)
             if asset is None:
                 path = Path(directory) / name
                 path.write_bytes(data)
                 # No --clobber: a previously published image is never overwritten.
                 subprocess.run(['gh', 'release', 'upload', release['tag_name'], str(path), '--repo', REPO], check=True)
-                by_name = {asset['name']: asset for asset in release_assets(release['id'])}
-                asset = by_name[name]
-            if asset.get('digest') not in (None, digest):
-                raise ValueError('Published asset digest does not match its filename')
-            url = asset['browser_download_url']
-            expected = f'https://github.com/{REPO}/releases/download/{release["tag_name"]}/{name}'
-            if url != expected: raise ValueError('Unexpected release asset URL')
+                url = expected
+            else:
+                if asset.get('digest') not in (None, digest):
+                    raise ValueError('Published asset digest does not match its filename')
+                url = asset['browser_download_url']
+                if url != expected: raise ValueError('Unexpected release asset URL')
             with urlopen(url, timeout=30) as response: downloaded = response.read(MAX_IMAGE + 1)
             if downloaded != data: raise ValueError('Published image bytes differ from reviewed evidence')
             png(downloaded)
