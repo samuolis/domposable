@@ -13,14 +13,36 @@ import uuid
 from release import ASSETS, GitHub, checkpoint, read_state, verify_assets
 
 BASE = "https://central.sonatype.com/api/v1/publisher"
+STATUS_TIMEOUT_SECONDS = 30
+STATUS_RETRY_DELAYS = (2, 4)
 
-def request(path, data=b"", content_type="application/json"):
+class CentralHttpError(RuntimeError):
+    def __init__(self, code):
+        self.code = code
+        super().__init__(f"Central request failed ({code}); credentials and response bodies are not logged")
+
+
+def request(path, data=b"", content_type="application/json", timeout=300):
     token = base64.b64encode(f"{os.environ['CENTRAL_USERNAME']}:{os.environ['CENTRAL_PASSWORD']}".encode()).decode()
     req = urllib.request.Request(BASE + path, data=data, headers={"Authorization": "Bearer " + token, "Content-Type": content_type}, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=300) as response: return response.read().decode()
+        with urllib.request.urlopen(req, timeout=timeout) as response: return response.read().decode()
     except urllib.error.HTTPError as error:
-        raise RuntimeError(f"Central request failed ({error.code}); credentials and response bodies are not logged") from None
+        raise CentralHttpError(error.code) from None
+
+def request_status(deployment_id):
+    path = "/status?id=" + deployment_id
+    for attempt in range(len(STATUS_RETRY_DELAYS) + 1):
+        try:
+            return request(path, timeout=STATUS_TIMEOUT_SECONDS)
+        except CentralHttpError as error:
+            if error.code != 429 and not 500 <= error.code <= 599:
+                raise RuntimeError(str(error)) from None
+        except (urllib.error.URLError, TimeoutError):
+            pass
+        if attempt == len(STATUS_RETRY_DELAYS):
+            raise RuntimeError("Central status polling failed after retries; rerun to resume this deployment") from None
+        time.sleep(STATUS_RETRY_DELAYS[attempt])
 
 def publish(mode, recovered_id=None):
     verify_assets(); state = read_state(); github = GitHub()
@@ -44,7 +66,7 @@ def publish(mode, recovered_id=None):
         state['deployment_id'] = deployment; checkpoint(state, github)
     deadline = time.monotonic() + 3600
     while time.monotonic() < deadline:
-        status = json.loads(request("/status?id=" + state['deployment_id']))
+        status = json.loads(request_status(state['deployment_id']))
         current = status['deploymentState']
         if current != state.get('central_state'):
             state['central_state'] = current; checkpoint(state, github)
