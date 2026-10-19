@@ -262,6 +262,8 @@ DomposableMenu(
 
 Menu content items leave dismissal to their `onClick` handler, matching Material. Set `expanded = false` explicitly when an action should close the menu. The `items` convenience list dismisses before invoking its action on both renderers.
 
+HTML menus use the browser top layer without blocking controls outside the visible popup. An outside pointer interaction requests `onDismiss` while still reaching the clicked control. Escape returns focus to the opener; moving focus or activating another control keeps the new focus. The app owns `expanded` and closes the menu in its dismissal callback.
+
 Date values are UTC milliseconds at the shared boundary. A range may have a start without an end while the user selects it; an end without a start or a reversed range is rejected. `yearRange` and `isDateSelectable` constrain selection. The caller owns picker mode, selected date and range; changing those values updates the mounted control.
 
 ```kotlin

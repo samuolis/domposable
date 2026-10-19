@@ -52,6 +52,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.MouseEvent
 import org.w3c.dom.events.MouseEventInit
 import kotlin.math.abs
@@ -213,7 +214,9 @@ class HtmlMenuHostTest {
                 DomposableDropdownMenuItem(label = "Action", onClick = { invoked++ })
             }
         }) { root ->
-            (root.querySelector("[role=menuitem]") as HTMLElement).click()
+            val item = root.querySelector("[role=menuitem]") as HTMLElement
+            item.dispatchEvent(js("new Event('pointerdown', { bubbles: true, cancelable: true })") as Event)
+            item.click()
             assertEquals(1, invoked)
             assertEquals(0, dismissed, "Content slots must retain Material's caller-owned dismissal")
         }
@@ -229,6 +232,33 @@ class HtmlMenuHostTest {
             backdrop.dispatchEvent(js("new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body })"))
             backdrop.click()
             assertEquals(1, dismissed, "A single outside interaction must not consume two dismissals")
+        }
+    }
+
+    @Test
+    fun outsidePointerDownDismissesWithoutCancelingControlActivation() {
+        var dismissed = 0
+        var pointerDowns = 0
+        var clicks = 0
+        withHost(content = {
+            DomposableMenu(true, { dismissed++ }, listOf(DomposableMenuItem("Action", {})))
+            Button(attrs = { onClick { clicks++ } }) { Text("Open dialog") }
+        }) { root ->
+            val backdrop = root.querySelector(".d-menu-backdrop") as HTMLElement
+            val popupPosition = root.querySelector(".d-menu-position") as HTMLElement
+            assertEquals("none", window.getComputedStyle(backdrop).pointerEvents)
+            assertEquals("auto", window.getComputedStyle(popupPosition).pointerEvents)
+
+            val outside = root.querySelector("button:not([role=menuitem])") as HTMLElement
+            outside.addEventListener("pointerdown", { pointerDowns++ })
+            val pointerDown = js("new Event('pointerdown', { bubbles: true, cancelable: true })") as Event
+            outside.dispatchEvent(pointerDown)
+            outside.click()
+
+            assertEquals(1, dismissed)
+            assertEquals(1, pointerDowns)
+            assertEquals(1, clicks)
+            assertEquals(false, pointerDown.defaultPrevented)
         }
     }
 
