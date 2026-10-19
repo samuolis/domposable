@@ -112,6 +112,46 @@ class HtmlHostIntegrationTest {
     }
 
     @Test
+    fun absentChipIconsDoNotReserveSlotsOrGaps() {
+        for (variant in DomposableChipVariant.entries) {
+            for (touchSize in listOf(0, 48)) {
+                for (leading in listOf(false, true)) {
+                    for (trailing in listOf(false, true)) {
+                        withHost(content = {
+                            DomposableChip(
+                                "Long enough label",
+                                {},
+                                variant = variant,
+                                appearance = DomposableItemAppearance(minimumInteractiveSize = touchSize.dp),
+                                leadingIcon = if (leading) ({ DomposableText("L") }) else null,
+                                trailingIcon = if (trailing) ({ DomposableText("R") }) else null,
+                            )
+                        }) { root ->
+                            val chip = root.querySelector(".d-chip") as HTMLElement
+                            val surface = chip.querySelector(".d-chip-surface") as HTMLElement
+                            val visual = if (touchSize == 0) chip else surface
+                            val style = window.getComputedStyle(visual)
+                            val icons = surface.querySelectorAll(".d-chip-icon")
+                            val iconCount = (if (leading) 1 else 0) + (if (trailing) 1 else 0)
+                            assertEquals(iconCount, icons.length)
+                            val label = surface.querySelector(".d-chip-label") as HTMLElement
+                            var expected = label.getBoundingClientRect().width
+                            for (index in 0 until icons.length) {
+                                expected += (icons.item(index) as HTMLElement).getBoundingClientRect().width
+                            }
+                            expected += iconCount * style.columnGap.removeSuffix("px").toDouble()
+                            expected += listOf(
+                                style.paddingLeft, style.paddingRight, style.borderLeftWidth, style.borderRightWidth,
+                            ).sumOf { it.removeSuffix("px").toDouble() }
+                            assertTrue(abs(visual.getBoundingClientRect().width - expected) < 0.5)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     fun chipIconSpacingUsesMaterialDefaultsAndHonorsOverrides() {
         for (touchSize in listOf(0, 48)) {
             for (spacing in listOf(null, 12)) {

@@ -1110,7 +1110,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         onClick { if (enabled) props.onClick() }
                     }) {
                         Span(attrs = { classes("d-chip-surface") }) {
-                            Span(attrs = { classes("d-chip-icon") }) { props.leadingIcon?.invoke() }
+                            props.leadingIcon?.let { icon ->
+                                Span(attrs = { classes("d-chip-icon") }) { icon() }
+                            }
                             Span(attrs = {
                                 classes("d-chip-label")
                                 style {
@@ -1120,7 +1122,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
                                 }
                             }) { Text(props.label) }
-                            Span(attrs = { classes("d-chip-icon") }) { props.trailingIcon?.invoke() }
+                            props.trailingIcon?.let { icon ->
+                                Span(attrs = { classes("d-chip-icon") }) { icon() }
+                            }
                         }
                     }
                 }
