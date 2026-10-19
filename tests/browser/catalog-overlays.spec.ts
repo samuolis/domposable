@@ -98,6 +98,9 @@ test('clicking outside a menu activates the control and preserves dialog focus',
   const menu = page.getByRole('menu');
   await expect(menu).toBeVisible();
 
+  await page.getByRole('button', { name: 'Open menu', exact: true }).click();
+  await expect(menu).toBeVisible();
+
   await page.getByRole('button', { name: 'Open dialog', exact: true }).click();
 
   await expect(menu).toHaveCount(0);

@@ -236,10 +236,11 @@ class HtmlMenuHostTest {
     }
 
     @Test
-    fun outsidePointerDownDismissesWithoutCancelingControlActivation() {
+    fun outsideClickDismissesWithoutCancelingControlActivation() {
         var dismissed = 0
-        var pointerDowns = 0
+        var outsideClicks = 0
         var clicks = 0
+        var activationEvent: Event? = null
         withHost(content = {
             DomposableMenu(true, { dismissed++ }, listOf(DomposableMenuItem("Action", {})))
             Button(attrs = { onClick { clicks++ } }) { Text("Open dialog") }
@@ -250,15 +251,16 @@ class HtmlMenuHostTest {
             assertEquals("auto", window.getComputedStyle(popupPosition).getPropertyValue("pointer-events"))
 
             val outside = root.querySelector("button:not([role=menuitem])") as HTMLElement
-            outside.addEventListener("pointerdown", { pointerDowns++ })
-            val pointerDown = js("new Event('pointerdown', { bubbles: true, cancelable: true })") as Event
-            outside.dispatchEvent(pointerDown)
+            outside.addEventListener("click", { event ->
+                outsideClicks++
+                activationEvent = event
+            })
             outside.click()
 
             assertEquals(1, dismissed)
-            assertEquals(1, pointerDowns)
+            assertEquals(1, outsideClicks)
             assertEquals(1, clicks)
-            assertEquals(false, pointerDown.defaultPrevented)
+            assertEquals(false, activationEvent?.defaultPrevented)
         }
     }
 
