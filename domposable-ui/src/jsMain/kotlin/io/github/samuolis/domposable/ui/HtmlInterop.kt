@@ -331,7 +331,10 @@ private fun HtmlModifierBox(
                             property("width", "100%")
                             property("min-width", "0")
                         }
-                        if (fillAvailableHeight || fillHeightAhead) property("height", "100%")
+                        if (fillAvailableHeight || fillHeightAhead) {
+                            property("height", "100%")
+                            property("min-height", "0")
+                        }
                     }
                 }) { decoratedContent() }
             } else {
@@ -357,6 +360,7 @@ private fun HtmlModifierBox(
                         property("grid-template-rows", "minmax(0, 1fr)")
                     }
                     if (fillHeightAhead) property("height", "100%")
+                    if (fillAvailableHeight || fillHeightAhead) property("min-height", "0")
                 }
             }
             val attributes =
@@ -411,6 +415,8 @@ private fun HtmlModifierBox(
     val childFillsHeight =
         !verticalScroll &&
             (establishesHeight || (fillAvailableHeight && !wrapContentSize) || fillHeightAhead)
+    val shrinkToAvailableHeight =
+        fillAvailableHeight || fillHeightAhead || operation == DomposableModifierOperation.FillHeight
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
         if (wrapSemantics) {
@@ -438,6 +444,7 @@ private fun HtmlModifierBox(
             }
             if (fillHeightAhead) property("height", "100%")
             if (fillAvailableHeight && wrapContentSize) property("height", "100%")
+            if (shrinkToAvailableHeight) property("min-height", "0")
             if (operation == DomposableModifierOperation.PointerPassthrough) property("pointer-events", "none")
             when (operation) {
                 is DomposableModifierOperation.Padding -> {
