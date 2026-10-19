@@ -1356,14 +1356,11 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             val outsideClick: (Event) -> Unit = { event ->
                                 val target = event.target as? Node
                                 val popup = element.querySelector(".d-menu-position")
-                                if (target == null || popup == null ||
-                                    (!popup.contains(target) && !isMenuAnchor(target))
-                                ) {
-                                    val active = document.activeElement
-                                    if (active != null &&
-                                        active != document.body &&
-                                        active != document.documentElement &&
-                                        !element.contains(active)
+                                val insidePopup = target?.let { popup?.contains(it) } == true
+                                if (!insidePopup && !isMenuAnchor(target)) {
+                                    val active = document.activeElement?.takeUnless { element.contains(it) }
+                                    if (active != null && active != document.body &&
+                                        active != document.documentElement
                                     ) {
                                         restorePreviousFocus = false
                                     }
