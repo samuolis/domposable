@@ -18,6 +18,7 @@ import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableChip
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableDropdownMenuItem
+import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableIconButtonProps
 import io.github.samuolis.domposable.ui.DomposableMenu
@@ -37,6 +38,7 @@ import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.htmlAttributes
 import io.github.samuolis.domposable.ui.htmlMenuAnchor
+import io.github.samuolis.domposable.ui.htmlMenuPlacement
 import io.github.samuolis.domposable.ui.minWidth
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.pointerPassthrough
@@ -208,6 +210,118 @@ class HtmlMenuHostTest {
             assertEquals(1, resolverCalls)
             assertEquals(initialLeft, position.style.left)
             assertEquals(initialTop, position.style.top)
+        }
+    }
+
+    @Test
+    fun htmlMenuPlacementPrefersAboveWhenBothSidesFit() =
+        withHost(content = {
+            Button(attrs = {
+                attr("data-testid", "placement-trigger")
+                style {
+                    property("position", "fixed")
+                    property("top", "300px")
+                    property("left", "100px")
+                }
+            }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement(DomposableHtmlMenuPlacement.Above),
+            )
+        }) { root ->
+            val trigger = root.querySelector("[data-testid=placement-trigger]") as HTMLElement
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            val bounds = position.getBoundingClientRect()
+            assertTrue(bounds.bottom <= trigger.getBoundingClientRect().top)
+        }
+
+    @Test
+    fun htmlMenuPlacementFallsBackBelowWhenPreferredAboveDoesNotFit() =
+        withHost(content = {
+            Button(attrs = {
+                attr("data-testid", "placement-trigger")
+                style {
+                    property("position", "fixed")
+                    property("top", "4px")
+                    property("left", "100px")
+                }
+            }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement(DomposableHtmlMenuPlacement.Above),
+            )
+        }) { root ->
+            val trigger = root.querySelector("[data-testid=placement-trigger]") as HTMLElement
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            assertTrue(position.getBoundingClientRect().top >= trigger.getBoundingClientRect().bottom)
+        }
+
+    @Test
+    fun autoPlacementStillUsesTheAvailableBelowSide() =
+        withHost(content = {
+            Button(attrs = {
+                attr("data-testid", "placement-trigger")
+                style {
+                    property("position", "fixed")
+                    property("top", "200px")
+                    property("left", "100px")
+                }
+            }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement(DomposableHtmlMenuPlacement.Auto),
+            )
+        }) { root ->
+            val trigger = root.querySelector("[data-testid=placement-trigger]") as HTMLElement
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            assertTrue(position.getBoundingClientRect().top >= trigger.getBoundingClientRect().bottom)
+        }
+
+    @Test
+    fun placementResolverRunsOnceAgainstMenuAncestry() {
+        var resolverCalls = 0
+        var resolvedTrigger: HTMLElement? = null
+        withHost(content = {
+            Button(attrs = { attr("data-testid", "placement-trigger") }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement { menuRoot ->
+                            resolverCalls++
+                            resolvedTrigger =
+                                menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                            DomposableHtmlMenuPlacement.Above
+                        },
+            )
+        }) { root ->
+            assertEquals(root.querySelector("[data-testid=placement-trigger]"), resolvedTrigger)
+            assertEquals(1, resolverCalls)
+            window.dispatchEvent(js("new Event('resize')"))
+            window.dispatchEvent(js("new Event('scroll')"))
+            assertEquals(1, resolverCalls)
         }
     }
 

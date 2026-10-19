@@ -107,6 +107,28 @@ Feature code calls `AppCounterLabel(count)` in either renderer. Include a shared
 
 The full [native](https://github.com/samuolis/domposable/blob/main/demo/src/composeUiMain/kotlin/io/github/samuolis/domposable/demo/ExtensionExample.compose.kt) and [HTML](https://github.com/samuolis/domposable/blob/main/demo/src/jsMain/kotlin/io/github/samuolis/domposable/demo/ExtensionExample.dom.kt) files include imports and identifiers. Their stateful caller lives in [commonMain](https://github.com/samuolis/domposable/blob/main/demo/src/commonMain/kotlin/io/github/samuolis/domposable/demo/ExtensionExample.kt). The example's native `drawBehind` and HTML decoration also demonstrate app-owned [modifier extensions](modifiers.md).
 
+### Prefer a side for an HTML menu
+
+When an app-owned DOM trigger has a known placement preference, add the JS-only menu hint alongside its anchor resolver. The menu prefers that side when it has enough room and falls back to its normal viewport-aware placement when it does not:
+
+```kotlin
+val menuModifier =
+    DomposableModifier
+        .htmlMenuAnchor { menuRoot ->
+            menuRoot.parentElement?.querySelector("[data-menu-trigger]") as? HTMLElement
+        }
+        .htmlMenuPlacement(DomposableHtmlMenuPlacement.Above)
+
+DomposableMenu(
+    expanded = expanded,
+    onDismiss = onDismiss,
+    items = actions,
+    modifier = menuModifier,
+)
+```
+
+Use `DomposableHtmlMenuPlacement.Auto` to retain automatic placement, or pass a resolver when the preference depends on the rendered menu's ancestry. This API exists only in the JS source set; native menu placement remains unchanged.
+
 ## Replace an existing library renderer
 
 If every `DomposableButton` should use your design system, copy the default provider and replace its button slot. If your application does not use Material, supply a complete provider instead; the core UI module does not require the Material artifact.

@@ -42,6 +42,8 @@ import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableDataTableProps
 import io.github.samuolis.domposable.ui.DomposableHtmlMenuAnchor
+import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement
+import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacementHint
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableImageProps
 import io.github.samuolis.domposable.ui.DomposableLabelProps
@@ -118,6 +120,7 @@ private fun positionHtmlMenu(
     anchor: HTMLElement?,
     offset: DomposableOffset,
     alignToLogicalEnd: Boolean,
+    placement: DomposableHtmlMenuPlacement = DomposableHtmlMenuPlacement.Auto,
 ) {
     val menu = overlay.querySelector(".d-menu-position") as? HTMLElement ?: return
     if (anchor == null) return
@@ -144,9 +147,15 @@ private fun positionHtmlMenu(
         )
     val below = viewportHeight - anchorBounds.bottom - offset.y
     val above = anchorBounds.top - offset.y
-    val placeBelow =
+    val placeBelowAutomatically =
         below >= menuHeight + HTML_MENU_VIEWPORT_MARGIN ||
             above < menuHeight + HTML_MENU_VIEWPORT_MARGIN
+    val placeBelow =
+        when {
+            placement == DomposableHtmlMenuPlacement.Above && above >= menuHeight + HTML_MENU_VIEWPORT_MARGIN -> false
+            placement == DomposableHtmlMenuPlacement.Below && below >= menuHeight + HTML_MENU_VIEWPORT_MARGIN -> true
+            else -> placeBelowAutomatically
+        }
     val verticalOffset = if (placeBelow) offset.y else -offset.y
     val maxTop =
         (viewportHeight - menuHeight - HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(HTML_MENU_VIEWPORT_MARGIN)
@@ -1238,9 +1247,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         .filterIsInstance<DomposableHtmlMenuAnchor>()
                         .lastOrNull()
                         ?.resolve
+                val placementHint =
+                    modifier.elements
+                        .filterIsInstance<DomposableHtmlMenuPlacementHint>()
+                        .lastOrNull()
+                        ?.resolve
                 val menuModifier =
                     modifier.elements
-                        .filterNot { it is DomposableHtmlMenuAnchor }
+                        .filterNot { it is DomposableHtmlMenuAnchor || it is DomposableHtmlMenuPlacementHint }
                         .fold(DomposableModifier as DomposableModifier) { result, element -> result.then(element) }
                 var slotAnchor by remember { mutableStateOf<HTMLElement?>(null) }
                 val dismissMenu by rememberUpdatedState(props.onDismiss)
@@ -1341,12 +1355,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             // The browser top layer keeps menus above application stacking contexts.
                             element.asDynamic().showPopover()
                             val externalAnchorElement = externalAnchor?.invoke(element)
+                            val placement = placementHint?.invoke(element) ?: DomposableHtmlMenuPlacement.Auto
                             val resolveAnchor = { slotAnchor ?: externalAnchorElement }
                             positionHtmlMenu(
                                 element,
                                 resolveAnchor(),
                                 props.anchorOffset,
                                 alignToLogicalEnd = props.anchor == null,
+                                placement = placement,
                             )
                             val reposition: (Event) -> Unit = {
                                 positionHtmlMenu(
@@ -1354,6 +1370,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     resolveAnchor(),
                                     props.anchorOffset,
                                     alignToLogicalEnd = props.anchor == null,
+                                    placement = placement,
                                 )
                             }
                             window.addEventListener("resize", reposition)
