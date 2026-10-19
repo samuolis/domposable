@@ -2,6 +2,8 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
@@ -14,6 +16,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -21,6 +24,9 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.unit.LayoutDirection
+import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableItemColors
 import io.github.samuolis.domposable.ui.DomposableForm
 import io.github.samuolis.domposable.ui.DomposableTabItem
 import io.github.samuolis.domposable.ui.DomposableTabs
@@ -65,6 +71,35 @@ class NativeTabsInteractionTest {
             .performClick()
         compose.runOnIdle { assertEquals(listOf(0), selected) }
         compose.onNodeWithTag("locked-tab").assertIsNotEnabled()
+    }
+
+    @Test
+    fun disabledSelectedTabKeepsItsLegacySelectedContainerWhenNoOverrideIsSet() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableTabs(
+                    items =
+                        listOf(
+                            DomposableTabItem("locked", "Locked", enabled = false, testTag = "locked-selected-tab"),
+                            DomposableTabItem("active", "Active"),
+                        ),
+                    selectedIndex = 0,
+                    onSelect = {},
+                    appearance =
+                        DomposableItemAppearance(
+                            colors =
+                                DomposableItemColors(
+                                    selectedContainer = DomposableColor(0xFFCC2211),
+                                    disabledContainer = DomposableColor(0xFF1122CC),
+                                ),
+                            disabledOpacity = 1f,
+                        ),
+                )
+            }
+        }
+
+        val pixels = compose.onNodeWithTag("locked-selected-tab").captureToImage().toPixelMap()
+        assertEquals(Color(0xFFCC2211), pixels[1, pixels.height / 2])
     }
 
     @Test
