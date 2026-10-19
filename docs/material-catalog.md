@@ -262,6 +262,8 @@ DomposableMenu(
 
 Menu content items leave dismissal to their `onClick` handler, matching Material. Set `expanded = false` explicitly when an action should close the menu. The `items` convenience list dismisses before invoking its action on both renderers.
 
+HTML menus use the browser top layer without blocking controls outside the visible popup. An outside pointer interaction requests `onDismiss` while still reaching the clicked control. Escape returns focus to the opener; moving focus or activating another control keeps the new focus. The app owns `expanded` and closes the menu in its dismissal callback.
+
 Date values are UTC milliseconds at the shared boundary. A range may have a start without an end while the user selects it; an end without a start or a reversed range is rejected. `yearRange` and `isDateSelectable` constrain selection. The caller owns picker mode, selected date and range; changing those values updates the mounted control.
 
 ```kotlin
@@ -290,6 +292,8 @@ DomposableScrollField(
 
 A slider uses `orientation = DomposableOrientation.Vertical` for vertical adjustment. `topToBottom` sets the vertical value direction. Time inputs support dial and typed modes; search supports full-screen, docked, contained and app-bar variants. These are component options, independent of the application's navigation approach.
 
+
+Modal bottom sheets request `onDismiss` for a backdrop click, Escape or a downward drag from the visible handle/header. Remove the sheet from composition in that callback. Controls inside the header keep their own interactions; horizontal, upward and cancelled drags keep the sheet open. Adaptive sheets hide the drag handle and disable header dragging in their expanded dialog presentation.
 
 A modal bottom sheet is the default. Use `modal = false` for a standard sheet inside the caller's layout; it does not make the background inert or trap focus. `DomposableScrim` is available for custom overlay hosts. Supply a label when it can be clicked to dismiss an overlay, and keep the modal's focus and dismissal policy in its host.
 

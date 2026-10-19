@@ -36,7 +36,7 @@ private fun findModalSwipeStart(
     val control = target?.closest(HTML_MODAL_SWIPE_CONTROL_SELECTOR)
     val primaryPointer = pointer.isPrimary == true && pointer.button == 0
     val validArea = area != null && sheet.contains(area)
-    val startsOnContent = control == null
+    val startsOnContent = control == null || area?.contains(control) != true
     if (!primaryPointer || !validArea || !startsOnContent) return null
     val pointerId = (pointer.pointerId as? Number)?.toInt() ?: return null
     val x = (pointer.clientX as? Number)?.toDouble() ?: return null
@@ -125,6 +125,18 @@ private class ModalSheetSwipeController(
             return
         }
         val elapsed = max(1.0, event.timeStamp.toDouble() - startTime)
+        val pointer = event.asDynamic()
+        val endY = (pointer.clientY as? Number)?.toDouble()
+        if (endY != null) {
+            val endX = (pointer.clientX as? Number)?.toDouble()
+            val dx = endX?.minus(startX) ?: 0.0
+            val dy = endY - startY
+            if (endX != null && isHorizontalSwipe(dx, dy)) {
+                reset()
+                return
+            }
+            distance = max(0.0, dy)
+        }
         val shouldDismiss = shouldDismissSwipe(distance, elapsed)
         reset()
         if (shouldDismiss && isTopmostModal(sheet)) dismiss()

@@ -168,6 +168,39 @@ class HtmlModalLifecycleTest {
     }
 
     @Test
+    fun sheetSwipeUsesPointerUpPositionWhenMoveEventsAreCoalesced() {
+        withFallbackDialogs {
+            var dismissals = 0
+            withHost(content = {
+                DomposableBottomSheet("Swipe", { dismissals++ }) { DomposableText("Sheet content") }
+            }) { root ->
+                val sheet = root.querySelector("dialog") as HTMLElement
+                val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
+                assertEquals("-1", sheet.getAttribute("tabindex"))
+                handle.asDynamic().setPointerCapture = js("(pointerId) => {}")
+                handle.asDynamic().hasPointerCapture = js("(pointerId) => false")
+                val bounds = handle.getBoundingClientRect()
+                val x = bounds.left + bounds.width / 2
+                val y = bounds.top + bounds.height / 2
+
+                handle.dispatchEvent(pointerEvent("pointerdown", 23, x, y))
+                handle.dispatchEvent(pointerEvent("pointerup", 23, x + 180, y + 130))
+                assertEquals(0, dismissals, "A horizontally dominant release must not dismiss")
+
+                handle.dispatchEvent(pointerEvent("pointerdown", 24, x, y))
+                handle.dispatchEvent(pointerEvent("pointermove", 24, x, y + 180))
+                handle.dispatchEvent(pointerEvent("pointerup", 24, x, y + 20))
+                assertEquals(0, dismissals, "The release position, not the earlier peak, determines distance")
+
+                handle.dispatchEvent(pointerEvent("pointerdown", 25, x, y))
+                handle.dispatchEvent(pointerEvent("pointerup", 25, x, y + 180))
+
+                assertEquals(1, dismissals)
+            }
+        }
+    }
+
+    @Test
     fun bottomSheetDragHandleFollowsCompactBreakpoint() {
         withHost(content = {
             DomposableBottomSheet(

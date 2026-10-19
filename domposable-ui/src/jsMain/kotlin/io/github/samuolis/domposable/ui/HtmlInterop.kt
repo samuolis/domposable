@@ -72,6 +72,9 @@ fun DomposableModifier.htmlAttributes(attributes: AttrsScope<*>.() -> Unit): Dom
 
 /** Semantic attributes attach to the control, not to its layout wrappers. */
 fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableModifier) {
+    modifier.elements.filterIsInstance<DomposableModifierOperation.TestId>().firstOrNull()?.let {
+        attr("data-testid", it.value)
+    }
     modifier.elements.forEach { element ->
         when (element) {
             is DomposableModifierOperation.Description -> {
@@ -79,7 +82,7 @@ fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableMod
             }
 
             is DomposableModifierOperation.TestId -> {
-                attr("data-testid", element.value)
+                Unit
             }
 
             is HtmlAttributes -> {

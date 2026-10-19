@@ -1252,6 +1252,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             request
                         }
                     val previousFocus = remember { document.activeElement as? HTMLElement }
+                    val opener =
+                        previousFocus?.takeUnless {
+                            it == document.body || it == document.documentElement
+                        }
+
+                    fun isMenuAnchor(target: Node?): Boolean =
+                        target != null &&
+                            (opener?.contains(target) == true || slotAnchor?.contains(target) == true)
                     TagElement<HTMLElement>("div", applyAttrs = {
                         classes("d-menu-backdrop")
                         attr("popover", "manual")
@@ -1270,6 +1278,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             property("max-height", "none")
                             property("background", "transparent")
                             property("color", "inherit")
+                            // The visible popup remains interactive; outside hits reach app controls.
+                            property("pointer-events", "none")
                         }
                         onClick { event ->
                             val target = event.target as? Node
@@ -1336,11 +1346,28 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             var restorePreviousFocus = true
                             val focusOut: (Event) -> Unit = { event ->
                                 val next = event.asDynamic().relatedTarget as? Node
-                                if (next == null || !element.contains(next)) {
-                                    if (next != null) restorePreviousFocus = false
+                                if (next == null || (!element.contains(next) && !isMenuAnchor(next))) {
+                                    if (next != null && next != document.body && next != document.documentElement) {
+                                        restorePreviousFocus = false
+                                    }
                                     requestDismiss()
                                 }
                             }
+                            val outsideClick: (Event) -> Unit = { event ->
+                                val target = event.target as? Node
+                                val popup = element.querySelector(".d-menu-position")
+                                val insidePopup = target?.let { popup?.contains(it) } == true
+                                if (!insidePopup && !isMenuAnchor(target)) {
+                                    val active = document.activeElement?.takeUnless { element.contains(it) }
+                                    if (active != null && active != document.body &&
+                                        active != document.documentElement
+                                    ) {
+                                        restorePreviousFocus = false
+                                    }
+                                    requestDismiss()
+                                }
+                            }
+                            document.addEventListener("click", outsideClick)
                             element.addEventListener("focusout", focusOut)
                             val focusTarget =
                                 element.querySelector("[role^=menuitem]:not(:disabled)") as? HTMLElement ?: element
@@ -1348,6 +1375,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             onDispose {
                                 window.removeEventListener("resize", reposition)
                                 window.removeEventListener("scroll", reposition, true)
+                                document.removeEventListener("click", outsideClick)
                                 element.removeEventListener("focusout", focusOut)
                                 if (element.matches(":popover-open")) element.asDynamic().hidePopover()
                                 if (restorePreviousFocus) previousFocus?.takeIf { it.isConnected }?.focus()
@@ -1361,6 +1389,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 property("display", "inline-flex")
                                 property("width", "max-content")
                                 property("max-width", "calc(100vw - 32px)")
+                                property("pointer-events", "auto")
                             }
                         }) {
                             DomposableHtmlModifiers(menuModifier) {
