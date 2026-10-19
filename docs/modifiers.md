@@ -41,6 +41,8 @@ On HTML, `weight` distributes available space when the parent bounds that axis. 
 
 `zIndex` orders the whole component, including backgrounds and decorations earlier in the chain. Use whole-number stacking levels when targeting HTML.
 
+HTML click modifiers activate with Enter on keydown and Space on release; link roles use Enter. Nested buttons, links and other controls own their interactions, so activating a child does not also invoke its clickable parent.
+
 ## Combine existing modifiers
 
 An ordinary extension works across all renderers without registration:
@@ -121,6 +123,26 @@ DomposableText(
 This does not add a layout wrapper. It runs where the renderer attaches `testId` and `contentDescription`; it does not select or rewrite private descendants. Custom HTML renderers must call `domposableAttributes(modifier)` on their semantic element to support it. Prefer appearance parameters for shared colors, typography and geometry: a renderer can apply its own attributes/styles after this callback. Preserve accessible labels and native control behavior when adding attributes or events.
 
 `htmlAttributes` is available only to Kotlin/JS HTML code. Keep it inside `jsMain` adapters; use a typed app-owned modifier with native and HTML implementations when the feature itself needs a portable extension.
+
+## Wrap arbitrary HTML content
+
+A custom container can delegate its complete modifier chain, including ordered semantic wrappers, to the shared HTML engine:
+
+```kotlin
+@Composable
+fun AppFrame(
+    modifier: DomposableModifier = DomposableModifier,
+    content: @Composable () -> Unit,
+) {
+    DomposableHtmlModifiers(modifier, wrapSemantics = true) {
+        content()
+    }
+}
+```
+
+Use this Kotlin/JS overload for adapters around arbitrary content. It renders `testId`, `contentDescription` and `htmlAttributes` on wrapper nodes at their position in the chain, alongside shared sizing, scrolling and interaction behavior. App-owned modifier elements still use the existing renderer or decoration hooks; there is no need to copy the portable operation renderer.
+
+For a component with its own semantic control, keep the default overload and call `domposableAttributes(modifier)` on that control. This keeps labels and test IDs on the actual button, input or link. Do not apply those attributes again inside `wrapSemantics = true`, which already emits their wrappers. These are HTML renderer choices; shared feature code and native modifiers do not change.
 
 ## Render custom HTML and CSS
 

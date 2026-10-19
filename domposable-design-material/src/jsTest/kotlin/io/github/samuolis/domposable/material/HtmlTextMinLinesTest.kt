@@ -40,12 +40,12 @@ class HtmlTextMinLinesTest {
             val clip = textNodes.item(1) as HTMLElement
             val visible = textNodes.item(2) as HTMLElement
 
-            assertEquals("ellipsis", window.getComputedStyle(ellipsis).textOverflow)
+            assertEquals("ellipsis", window.getComputedStyle(ellipsis).getPropertyValue("text-overflow"))
             assertEquals("2", window.getComputedStyle(ellipsis).getPropertyValue("-webkit-line-clamp"))
             assertEquals("hidden", window.getComputedStyle(ellipsis).getPropertyValue("overflow"))
-            assertEquals("clip", window.getComputedStyle(clip).textOverflow)
+            assertEquals("clip", window.getComputedStyle(clip).getPropertyValue("text-overflow"))
             assertEquals("hidden", window.getComputedStyle(clip).getPropertyValue("overflow"))
-            assertEquals("clip", window.getComputedStyle(visible).textOverflow)
+            assertEquals("clip", window.getComputedStyle(visible).getPropertyValue("text-overflow"))
             assertEquals("visible", window.getComputedStyle(visible).getPropertyValue("overflow"))
         } finally {
             composition.dispose()

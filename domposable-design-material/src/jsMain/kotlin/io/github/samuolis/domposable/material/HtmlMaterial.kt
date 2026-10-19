@@ -89,6 +89,7 @@ import org.jetbrains.compose.web.dom.TagElement
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.jetbrains.compose.web.dom.Ul
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
@@ -851,11 +852,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 if (enabled) attr("tabindex", "0") else attr("aria-disabled", "true")
                                 onClick { event ->
                                     if (enabled) {
-                                        val target = event.target as? HTMLElement
+                                        val target = event.target as? Element
                                         val interactive =
                                             target?.closest(
-                                                "a,button,input,select,textarea,label,[role=button],[role=link]",
-                                            ) as? HTMLElement
+                                                "a[href],button,input,select,textarea,label,summary," +
+                                                    "[contenteditable='true'],[role=button],[role=link]," +
+                                                    "[role=checkbox],[role=radio],[role=switch]," +
+                                                    "[role=menuitem],[role=tab]",
+                                            ) as? Element
                                         if (interactive == null ||
                                             interactive == event.currentTarget as? HTMLElement
                                         ) {
@@ -864,11 +868,22 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
                                 }
                                 onKeyDown {
-                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement) && (
-                                            it.key ==
-                                                "Enter" ||
-                                                it.key == " "
-                                        )
+                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement)) {
+                                        when (it.key) {
+                                            "Enter" -> {
+                                                it.preventDefault()
+                                                if (enabled) click()
+                                            }
+
+                                            " " -> {
+                                                it.preventDefault()
+                                            }
+                                        }
+                                    }
+                                }
+                                onKeyUp {
+                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement) &&
+                                        it.key == " "
                                     ) {
                                         it.preventDefault()
                                         if (enabled) click()
