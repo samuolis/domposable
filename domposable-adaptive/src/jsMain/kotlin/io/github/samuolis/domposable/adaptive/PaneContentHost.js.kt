@@ -37,7 +37,7 @@ internal actual fun DomposablePaneContentHost(
                 property("display", "none")
             }
             if (expanded) {
-                property("height", "100%")
+                property("align-self", "stretch")
                 when (pane) {
                     DomposablePaneScaffoldPane.List -> {
                         property("width", "${widthFraction * 100}%")

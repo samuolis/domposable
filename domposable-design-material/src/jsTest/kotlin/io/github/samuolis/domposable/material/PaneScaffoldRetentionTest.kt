@@ -11,12 +11,14 @@ import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBorderEdge
+import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableScrollState
 import io.github.samuolis.domposable.ui.border
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.rememberDomposableScrollState
+import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.verticalScroll
 import io.github.samuolis.domposable.ui.width
 import kotlinx.browser.document
@@ -35,6 +37,64 @@ import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class PaneScaffoldRetentionTest {
+    @Test
+    fun unboundedRowStretchesListRegionAndBorderToTallerDetail() =
+        runTest {
+            val root = document.createElement("div") as HTMLElement
+            document.body!!.appendChild(root)
+            val composition =
+                renderComposable(root) {
+                    DomposableMaterialTheme {
+                        DomposablePaneScaffold(
+                            layout = DomposablePaneLayout.ListDetail("directory", "details"),
+                            listLabel = "Organization directory",
+                            detailLabel = "Organization details",
+                            modifier = DomposableModifier.width(1000.dp),
+                            listModifier =
+                                DomposableModifier.border(
+                                    1.dp,
+                                    DomposableColor(0xFF777777),
+                                    DomposableBorderEdge.End,
+                                ),
+                            listFraction = 0.32f,
+                            minListWidth = 260.dp,
+                            maxListWidth = 360.dp,
+                        ) { entry ->
+                            when (entry) {
+                                "directory" -> {
+                                    Text("Short directory")
+                                }
+
+                                else -> {
+                                    DomposableBox(DomposableModifier.height(400.dp).testId("tall-detail")) {
+                                        Text("Tall detail")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            try {
+                settleComposition()
+                val listHost = root.querySelector("[data-domposable-pane-host='list']") as HTMLElement
+                val listRegion =
+                    listHost.querySelector("[role='region'][aria-label='Organization directory']") as HTMLElement
+                val listBorder = listHost.querySelector("[data-domposable-modifier='EdgeBorder']") as HTMLElement
+                val detailRegion =
+                    root.querySelector("[role='region'][aria-label='Organization details']") as HTMLElement
+                val detailContent = root.querySelector("[data-domposable-modifier='Height']") as HTMLElement
+
+                assertEquals(400.0, detailContent.getBoundingClientRect().height)
+                assertEquals(detailContent.getBoundingClientRect().height, detailRegion.getBoundingClientRect().height)
+                assertEquals(detailRegion.getBoundingClientRect().height, listRegion.getBoundingClientRect().height)
+                assertEquals(detailRegion.getBoundingClientRect().height, listBorder.getBoundingClientRect().height)
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+            }
+        }
+
     @Test
     @Suppress("LongMethod")
     fun responsivePaneSizingKeepsContentScrollAndFocusNodesInPlace() =
