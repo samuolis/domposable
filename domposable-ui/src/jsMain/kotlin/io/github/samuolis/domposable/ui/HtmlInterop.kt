@@ -321,7 +321,12 @@ private fun HtmlModifierBox(
                         property("box-sizing", "border-box")
                         property("display", "grid")
                         property("grid-template-columns", "minmax(0, 1fr)")
-                        property("grid-template-rows", "minmax(0, 1fr)")
+                        if (inheritedWidth && !fillAvailableHeight && !fillHeightAhead) {
+                            property("align-items", "start")
+                        }
+                        if (fillAvailableHeight || fillHeightAhead) {
+                            property("grid-template-rows", "minmax(0, 1fr)")
+                        }
                         if (inheritedWidth) {
                             property("width", "100%")
                             property("min-width", "0")
@@ -345,7 +350,12 @@ private fun HtmlModifierBox(
                     }
                     property("display", "grid")
                     property("grid-template-columns", "minmax(0, 1fr)")
-                    property("grid-template-rows", "minmax(0, 1fr)")
+                    if (inheritedWidth && !fillAvailableHeight && !fillHeightAhead) {
+                        property("align-items", "start")
+                    }
+                    if (fillAvailableHeight || fillHeightAhead) {
+                        property("grid-template-rows", "minmax(0, 1fr)")
+                    }
                     if (fillHeightAhead) property("height", "100%")
                 }
             }
@@ -419,7 +429,8 @@ private fun HtmlModifierBox(
             if (childFillsHeight || childFillsWidth) {
                 property("display", "grid")
                 property("grid-template-columns", "minmax(0, 1fr)")
-                property("grid-template-rows", "minmax(0, 1fr)")
+                if (childFillsWidth && !childFillsHeight) property("align-items", "start")
+                if (childFillsHeight) property("grid-template-rows", "minmax(0, 1fr)")
             }
             if (inheritedWidth) {
                 property("width", "100%")
