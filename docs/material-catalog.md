@@ -293,6 +293,8 @@ DomposableScrollField(
 A slider uses `orientation = DomposableOrientation.Vertical` for vertical adjustment. `topToBottom` sets the vertical value direction. Time inputs support dial and typed modes; search supports full-screen, docked, contained and app-bar variants. These are component options, independent of the application's navigation approach.
 
 
+Modal bottom sheets request `onDismiss` for a backdrop click, Escape or a downward drag from the visible handle/header. Remove the sheet from composition in that callback. Controls inside the header keep their own interactions; horizontal, upward and cancelled drags keep the sheet open. Adaptive sheets hide the drag handle and disable header dragging in their expanded dialog presentation.
+
 A modal bottom sheet is the default. Use `modal = false` for a standard sheet inside the caller's layout; it does not make the background inert or trap focus. `DomposableScrim` is available for custom overlay hosts. Supply a label when it can be clicked to dismiss an overlay, and keep the modal's focus and dismissal policy in its host.
 
 ## Carousels and placement
