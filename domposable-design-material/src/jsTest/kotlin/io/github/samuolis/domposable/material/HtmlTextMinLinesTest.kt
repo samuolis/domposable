@@ -42,11 +42,11 @@ class HtmlTextMinLinesTest {
 
             assertEquals("ellipsis", window.getComputedStyle(ellipsis).textOverflow)
             assertEquals("2", window.getComputedStyle(ellipsis).getPropertyValue("-webkit-line-clamp"))
-            assertEquals("hidden", window.getComputedStyle(ellipsis).overflow)
+            assertEquals("hidden", window.getComputedStyle(ellipsis).getPropertyValue("overflow"))
             assertEquals("clip", window.getComputedStyle(clip).textOverflow)
-            assertEquals("hidden", window.getComputedStyle(clip).overflow)
+            assertEquals("hidden", window.getComputedStyle(clip).getPropertyValue("overflow"))
             assertEquals("clip", window.getComputedStyle(visible).textOverflow)
-            assertEquals("visible", window.getComputedStyle(visible).overflow)
+            assertEquals("visible", window.getComputedStyle(visible).getPropertyValue("overflow"))
         } finally {
             composition.dispose()
             root.parentNode?.removeChild(root)
