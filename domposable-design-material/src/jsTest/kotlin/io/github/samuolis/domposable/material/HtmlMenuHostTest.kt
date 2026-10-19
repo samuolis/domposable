@@ -2,6 +2,9 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
@@ -48,6 +51,9 @@ import io.github.samuolis.domposable.ui.width
 import io.github.samuolis.domposable.ui.zIndex
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.promise
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
@@ -57,6 +63,8 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.MouseEvent
 import org.w3c.dom.events.MouseEventInit
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -440,6 +448,70 @@ class HtmlMenuHostTest {
             assertEquals(items.item(0), document.activeElement)
             menu.dispatchEvent(js("new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body })"))
             assertEquals(1, dismissed)
+        }
+    }
+
+    @Test
+    fun escapeDismissesNestedMenuBeforeBubblingToItsParent() =
+        CoroutineScope(Dispatchers.Unconfined).promise {
+            var expanded by mutableStateOf(false)
+            var menuDismissals = 0
+            var parentEscapes = 0
+            val root = document.createElement("div") as HTMLElement
+            document.body!!.appendChild(root)
+            val composition =
+                renderComposable(root) {
+                    DomposableMaterialTheme {
+                        Div(attrs = {
+                            onKeyDown { if (it.key == "Escape") parentEscapes++ }
+                        }) {
+                            DomposableMenu(
+                                expanded = expanded,
+                                onDismiss = {
+                                    menuDismissals++
+                                    expanded = false
+                                },
+                                anchor = {
+                                    Button(attrs = {
+                                        attr("data-testid", "nested-menu-trigger")
+                                        onClick { expanded = true }
+                                    }) { Text("Open menu") }
+                                },
+                                items = listOf(DomposableMenuItem("Action", {})),
+                            )
+                        }
+                    }
+                }
+            try {
+                val trigger = root.querySelector("[data-testid=nested-menu-trigger]") as HTMLElement
+                trigger.focus()
+                trigger.click()
+                settleMenuComposition()
+                val menuItem = root.querySelector("[role=menuitem]") as HTMLElement
+                assertEquals(menuItem, document.activeElement)
+
+                val escape =
+                    js("new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })") as Event
+                menuItem.dispatchEvent(escape)
+
+                assertTrue(escape.defaultPrevented)
+                assertEquals(1, menuDismissals)
+                assertEquals(0, parentEscapes, "The first Escape should be consumed by the open menu")
+                settleMenuComposition()
+                assertEquals(null, root.querySelector(".d-menu-backdrop"))
+                assertEquals(trigger, document.activeElement, "Closing the menu should restore focus to its trigger")
+
+                trigger.dispatchEvent(js("new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })") as Event)
+                assertEquals(1, parentEscapes, "A later Escape should reach the parent after the menu closes")
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+            }
+        }
+
+    private suspend fun settleMenuComposition() {
+        repeat(2) {
+            suspendCoroutine<Unit> { continuation -> window.requestAnimationFrame { continuation.resume(Unit) } }
         }
     }
 }

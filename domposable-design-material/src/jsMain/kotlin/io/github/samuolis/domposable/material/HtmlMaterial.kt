@@ -1319,6 +1319,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             when (event.key) {
                                 "Escape" -> {
                                     event.preventDefault()
+                                    event.stopPropagation()
                                     requestDismiss()
                                 }
 
