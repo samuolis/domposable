@@ -11,13 +11,60 @@ import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.width
 import kotlinx.browser.document
+import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.Event
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlCardAppearanceTest {
+    @Test
+    fun clickableCardUsesSpaceKeyupAndDoesNotClaimNestedSvgClicks() {
+        val root = document.createElement("div") as HTMLElement
+        document.body!!.appendChild(root)
+        var cardClicks = 0
+        var nestedClicks = 0
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableCard(onClick = { cardClicks++ }) {
+                        Button(attrs = { onClick { nestedClicks++ } }) {
+                            Span { Text("Nested action") }
+                        }
+                    }
+                }
+            }
+
+        try {
+            val card = root.querySelector(".d-card[role=button]") as HTMLElement
+            val spaceDown = keyboardEvent("keydown", " ")
+            card.dispatchEvent(spaceDown)
+            assertTrue(spaceDown.defaultPrevented)
+            assertEquals(0, cardClicks)
+            card.dispatchEvent(keyboardEvent("keyup", " "))
+            assertEquals(1, cardClicks)
+            card.dispatchEvent(keyboardEvent("keydown", "Enter"))
+            assertEquals(2, cardClicks)
+
+            val nestedButton = root.querySelector("button") as HTMLElement
+            val nestedSpan = nestedButton.querySelector("span") as HTMLElement
+            val svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+            val path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+            svg.appendChild(path)
+            nestedSpan.appendChild(svg)
+            path.dispatchEvent(mouseClick())
+            assertEquals(1, nestedClicks)
+            assertEquals(2, cardClicks)
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
     @Test
     fun explicitPaddingAndBorderDoNotChangeCardOuterWidth() {
         val root = document.createElement("div")
@@ -56,3 +103,13 @@ class HtmlCardAppearanceTest {
         }
     }
 }
+
+private fun keyboardEvent(
+    type: String,
+    key: String,
+): Event {
+    val createEvent = js("(type, key) => new KeyboardEvent(type, { key, bubbles: true, cancelable: true })")
+    return createEvent(type, key) as Event
+}
+
+private fun mouseClick(): Event = js("new MouseEvent('click', { bubbles: true, cancelable: true })") as Event

@@ -48,3 +48,9 @@ fun HtmlAttributesConsumer(text: String) {
             },
     )
 }
+
+@Composable
+fun WrappedHtmlConsumer(
+    modifier: DomposableModifier,
+    content: @Composable () -> Unit,
+) = DomposableHtmlModifiers(modifier, wrapSemantics = true, content = content)

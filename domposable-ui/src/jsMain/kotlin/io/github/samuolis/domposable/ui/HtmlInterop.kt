@@ -136,7 +136,12 @@ fun DomposableHtmlModifiers(
     modifier: DomposableModifier,
     operationRenderer: DomposableHtmlModifierElementRenderer? = null,
     content: @Composable () -> Unit,
-) = DomposableHtmlModifiers(modifier, operationRenderer, decorationRenderer = null, content)
+) = DomposableHtmlModifiers(
+    modifier,
+    wrapSemantics = false,
+    operationRenderer = operationRenderer,
+    content = content,
+)
 
 /** A matching decoration owns the element; returning null falls back to attribute handling. */
 @Composable
@@ -145,20 +150,42 @@ fun DomposableHtmlModifiers(
     operationRenderer: DomposableHtmlModifierElementRenderer? = null,
     decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
     content: @Composable () -> Unit,
+) = DomposableHtmlModifiers(
+    modifier,
+    wrapSemantics = false,
+    operationRenderer = operationRenderer,
+    decorationRenderer = decorationRenderer,
+    content = content,
+)
+
+/**
+ * Applies semantic attributes as ordered wrappers for raw content that has no semantic root.
+ * Existing overloads continue to leave these attributes for component roots.
+ */
+@Composable
+fun DomposableHtmlModifiers(
+    modifier: DomposableModifier,
+    wrapSemantics: Boolean,
+    operationRenderer: DomposableHtmlModifierElementRenderer? = null,
+    decorationRenderer: DomposableHtmlModifierDecorationRenderer? = null,
+    content: @Composable () -> Unit,
 ) {
     val renderer = operationRenderer ?: LocalDomposableHtmlModifierRenderer.current
     val decoration = decorationRenderer ?: LocalDomposableHtmlModifierDecorationRenderer.current
     val layout = modifier.elements.filter(::isChildLayoutOperation)
     val visual =
-        modifier.elements.filterNot(::isChildLayoutOperation).filterNot {
-            it is DomposableModifierOperation.Description ||
-                it is DomposableModifierOperation.TestId ||
-                it is HtmlAttributes
+        modifier.elements.filterNot(::isChildLayoutOperation).filterNot { element ->
+            !wrapSemantics &&
+                (
+                    element is DomposableModifierOperation.Description ||
+                        element is DomposableModifierOperation.TestId ||
+                        element is HtmlAttributes
+                )
         }
     val pointerPassthrough = visual.contains(DomposableModifierOperation.PointerPassthrough)
     val stackingOrder = layout.sumOf { if (it is DomposableModifierOperation.ZIndex) it.value.toDouble() else 0.0 }
     if (layout.isEmpty()) {
-        HtmlModifierBox(visual, 0, renderer, decoration, false, pointerPassthrough, content)
+        HtmlModifierBox(visual, 0, renderer, decoration, false, pointerPassthrough, wrapSemantics, content)
     } else {
         Div(attrs = {
             attr("data-domposable-layout-item", "true")
@@ -196,7 +223,7 @@ fun DomposableHtmlModifiers(
                     }
                 }
             }
-        }) { HtmlModifierBox(visual, 0, renderer, decoration, true, pointerPassthrough, content) }
+        }) { HtmlModifierBox(visual, 0, renderer, decoration, true, pointerPassthrough, wrapSemantics, content) }
     }
 }
 
@@ -208,6 +235,7 @@ private fun HtmlModifierBox(
     decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
     fillAvailableHeight: Boolean,
     pointerPassthrough: Boolean,
+    wrapSemantics: Boolean,
     content: @Composable () -> Unit,
 ) {
     if (index == elements.size) {
@@ -252,6 +280,7 @@ private fun HtmlModifierBox(
                     decorationRenderer,
                     fillAvailableHeight,
                     pointerPassthrough,
+                    wrapSemantics,
                     content,
                 )
             }
@@ -268,8 +297,18 @@ private fun HtmlModifierBox(
                 }
             }
             val attributes =
-                operationRenderer?.invoke(element)
-                    ?: error("No HTML renderer handled application modifier element ${element::class.simpleName}")
+                when (element) {
+                    is HtmlAttributes -> {
+                        element.attributes
+                    }
+
+                    else -> {
+                        operationRenderer?.invoke(element)
+                            ?: error(
+                                "No HTML renderer handled application modifier element " + element::class.simpleName,
+                            )
+                    }
+                }
             attributes()
         }) {
             HtmlModifierBox(
@@ -279,6 +318,7 @@ private fun HtmlModifierBox(
                 decorationRenderer,
                 fillAvailableHeight,
                 pointerPassthrough,
+                wrapSemantics,
                 content,
             )
         }
@@ -303,6 +343,13 @@ private fun HtmlModifierBox(
             (establishesHeight || (fillAvailableHeight && !wrapContentSize) || fillHeightAhead)
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
+        if (wrapSemantics) {
+            when (operation) {
+                is DomposableModifierOperation.Description -> attr("aria-label", operation.text)
+                is DomposableModifierOperation.TestId -> attr("data-testid", operation.value)
+                else -> Unit
+            }
+        }
         if (fillHeightAhead) attr("data-domposable-fill-height-ahead", "")
         if (pointerPassthrough) {
             attr("data-domposable-pointer-passthrough", "")
@@ -515,10 +562,26 @@ private fun HtmlModifierBox(
                 attr("role", "button")
                 attr("tabindex", "0")
                 attr("aria-label", operation.label)
-                onClick { operation.onClick() }
-                onKeyDown {
-                    if (it.key == "Enter" || it.key == " ") {
-                        it.preventDefault()
+                onClick { event ->
+                    if (event.nativeEvent.belongsToCurrentInteractiveControl()) operation.onClick()
+                }
+                onKeyDown { event ->
+                    if (event.nativeEvent.belongsToCurrentInteractiveControl()) {
+                        when (event.key) {
+                            "Enter" -> {
+                                event.preventDefault()
+                                operation.onClick()
+                            }
+
+                            " " -> {
+                                event.preventDefault()
+                            }
+                        }
+                    }
+                }
+                onKeyUp { event ->
+                    if (event.nativeEvent.belongsToCurrentInteractiveControl() && event.key == " ") {
+                        event.preventDefault()
                         operation.onClick()
                     }
                 }
@@ -529,16 +592,28 @@ private fun HtmlModifierBox(
                 if (operation.label != null) attr("aria-label", operation.label)
                 if (operation.enabled) {
                     attr("tabindex", "0")
-                    onClick { operation.onClick() }
-                    onKeyDown {
-                        val activate =
-                            if (operation.role == DomposableClickRole.Link) {
-                                it.key == "Enter"
-                            } else {
-                                it.key == "Enter" || it.key == " "
+                    onClick { event ->
+                        if (event.nativeEvent.belongsToCurrentInteractiveControl()) operation.onClick()
+                    }
+                    onKeyDown { event ->
+                        if (event.nativeEvent.belongsToCurrentInteractiveControl()) {
+                            when (event.key) {
+                                "Enter" -> {
+                                    event.preventDefault()
+                                    operation.onClick()
+                                }
+
+                                " " -> {
+                                    if (operation.role != DomposableClickRole.Link) event.preventDefault()
+                                }
                             }
-                        if (activate) {
-                            it.preventDefault()
+                        }
+                    }
+                    onKeyUp { event ->
+                        if (event.nativeEvent.belongsToCurrentInteractiveControl() &&
+                            operation.role != DomposableClickRole.Link && event.key == " "
+                        ) {
+                            event.preventDefault()
                             operation.onClick()
                         }
                     }
@@ -571,6 +646,7 @@ private fun HtmlModifierBox(
             decorationRenderer,
             childFillsHeight,
             pointerPassthrough,
+            wrapSemantics,
             content,
         )
     }
