@@ -404,6 +404,7 @@ private fun HtmlModifierBox(
             operation is DomposableModifierOperation.ViewportHeight ||
             operation is DomposableModifierOperation.MinHeight ||
             operation is DomposableModifierOperation.MaxHeight ||
+            operation is DomposableModifierOperation.AspectRatio ||
             operation == DomposableModifierOperation.FillHeight
     val establishesWidth =
         operation == DomposableModifierOperation.FillWidth ||
