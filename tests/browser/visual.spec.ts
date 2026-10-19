@@ -49,6 +49,8 @@ test('DOM visual dialog-phone', async ({ page }) => {
   await page.goto('/#/catalog');
   await page.getByRole('button', { name: 'Open dialog' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  const progress = page.locator('.d-progress.d-progress-standard[role="progressbar"]');
+  await expect.poll(() => progress.evaluate(element => element.getBoundingClientRect().height)).toBe(4);
   await stableCapture(page, 'dom', 'dialog-phone');
 });
 

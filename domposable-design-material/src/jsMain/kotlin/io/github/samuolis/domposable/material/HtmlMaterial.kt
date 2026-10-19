@@ -1403,7 +1403,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 property("position", "fixed")
                                 property("display", "inline-flex")
                                 property("width", "max-content")
-                                property("max-width", "calc(100vw - 32px)")
+                                property("max-width", "calc(100vw - ${HTML_MENU_VIEWPORT_MARGIN * 2}px)")
                                 property("pointer-events", "auto")
                             }
                         }) {

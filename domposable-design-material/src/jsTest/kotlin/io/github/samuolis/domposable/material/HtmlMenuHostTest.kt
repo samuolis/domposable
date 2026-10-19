@@ -87,6 +87,29 @@ class HtmlMenuHostTest {
         }
 
     @Test
+    fun wideMenuUsesTheSameViewportMarginsAsItsAnchorPlacement() =
+        withHost(content = {
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                anchor = { Button { Text("Open actions") } },
+                items = listOf(DomposableMenuItem("A long action ".repeat(100), {})),
+                modifier =
+                    DomposableModifier.htmlAttributes {
+                        style {
+                            property("width", "1000px")
+                            property("max-width", "calc(100vw - 16px)")
+                        }
+                    },
+            )
+        }) { root ->
+            val bounds = (root.querySelector(".d-menu-position") as HTMLElement).getBoundingClientRect()
+            assertEquals(window.innerWidth - 16.0, bounds.width, 1.0)
+            assertEquals(8.0, bounds.left, 1.0)
+            assertEquals(window.innerWidth - 8.0, bounds.right, 1.0)
+        }
+
+    @Test
     fun anchoredMenuUsesTriggerGeometryAndRendersRichAccessibleItemText() =
         withHost(content = {
             DomposableMenu(
