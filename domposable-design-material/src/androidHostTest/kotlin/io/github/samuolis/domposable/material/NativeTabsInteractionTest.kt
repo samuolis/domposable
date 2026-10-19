@@ -74,6 +74,7 @@ class NativeTabsInteractionTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun disabledSelectedTabKeepsItsLegacySelectedContainerWhenNoOverrideIsSet() {
         compose.setContent {
             DomposableMaterialTheme {
