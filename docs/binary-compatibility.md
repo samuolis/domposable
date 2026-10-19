@@ -45,7 +45,7 @@ python3 scripts/ci/binary_api.py --base origin/main
 - Release: minor; adds an optional public capability.
 ```
 
-Use `breaking` when an existing binary contract changes, and describe the required consumer migration or recompilation. Use `tooling-only` for a dump-format/compiler change only after inspecting the generated binaries. Before 1.0, intentional breaking changes require a **minor** release with migration notes; patch releases preserve the existing API. From 1.0 onward, breaking changes require a **major** release. Version changes use the existing `Bump and release` workflow under the standing authorization in [AGENTS.md](../AGENTS.md); no additional release approval is required after CI and visual review pass.
+Use `breaking` when an existing binary contract changes, and describe the required consumer migration or recompilation. Use `tooling-only` for a dump-format/compiler change only after inspecting the generated binaries. Before 1.0, intentional breaking changes require a **minor** release with migration notes; patch releases preserve the existing API. From 1.0 onward, breaking changes require a **major** release. Version changes use the existing `Bump and release` workflow under the standing authorization in [AGENTS.md](https://github.com/samuolis/domposable/blob/main/AGENTS.md); no additional release approval is required after CI and visual review pass.
 
 Updating the dump makes the compiler check pass; it does not make a change compatible. The PR explanation and maintainer review are required for that decision. This checks exposed signatures, not all source compatibility, runtime behavior, reflection, accessibility or Swift-exported interfaces. Published-consumer builds and platform behavior tests remain separate checks.
 
