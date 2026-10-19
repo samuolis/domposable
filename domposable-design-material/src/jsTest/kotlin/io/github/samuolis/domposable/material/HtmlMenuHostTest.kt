@@ -246,8 +246,8 @@ class HtmlMenuHostTest {
         }) { root ->
             val backdrop = root.querySelector(".d-menu-backdrop") as HTMLElement
             val popupPosition = root.querySelector(".d-menu-position") as HTMLElement
-            assertEquals("none", window.getComputedStyle(backdrop).pointerEvents)
-            assertEquals("auto", window.getComputedStyle(popupPosition).pointerEvents)
+            assertEquals("none", window.getComputedStyle(backdrop).getPropertyValue("pointer-events"))
+            assertEquals("auto", window.getComputedStyle(popupPosition).getPropertyValue("pointer-events"))
 
             val outside = root.querySelector("button:not([role=menuitem])") as HTMLElement
             outside.addEventListener("pointerdown", { pointerDowns++ })
