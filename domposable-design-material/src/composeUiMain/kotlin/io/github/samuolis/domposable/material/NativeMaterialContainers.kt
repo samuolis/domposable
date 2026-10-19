@@ -645,10 +645,11 @@ internal fun NativeNavigationDrawerItem(
     val formEnabled = domposableFormEnabled()
     val enabled = props.enabled && formEnabled
     val defaults = NavigationDrawerItemDefaults.colors()
+    val hasDisabledSelectedColors =
+        appearance.colors.disabledSelectedContainer != null ||
+            appearance.colors.disabledSelectedContent != null
     val colors =
-        if (props.selected && !enabled &&
-            (appearance.colors.disabledSelectedContainer != null || appearance.colors.disabledSelectedContent != null)
-        ) {
+        if (props.selected && !enabled && hasDisabledSelectedColors) {
             NavigationDrawerItemDefaults.colors(
                 selectedContainerColor =
                     appearance.colors.disabledSelectedContainer?.nativeColor()

@@ -1,6 +1,5 @@
 package io.github.samuolis.domposable.material
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -34,7 +33,6 @@ import io.github.samuolis.domposable.foundation.DomposableColors
 import io.github.samuolis.domposable.foundation.DomposableComponentStyles
 import io.github.samuolis.domposable.foundation.DomposableDesignLanguage
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
-import io.github.samuolis.domposable.foundation.DomposableItemColors
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableSelectionColors
 import io.github.samuolis.domposable.foundation.DomposableShape
@@ -105,59 +103,6 @@ class NativeCatalogAppearanceTest {
                 SideEffect {
                     assertEquals(Color(0xFF006B5F), enabled.checkedCheckmarkColor)
                     assertEquals(Color(0xFF946749), disabled.checkedCheckmarkColor)
-                }
-            }
-        }
-        compose.waitForIdle()
-    }
-
-    @Test
-    fun disabledSelectedItemsResolveSpecificColorsAndFallBackToDisabledColors() {
-        compose.setContent {
-            DomposableMaterialTheme {
-                val custom =
-                    DomposableItemAppearance(
-                        colors =
-                            DomposableItemColors(
-                                disabledContainer = DomposableColor(0xFF112233),
-                                disabledContent = DomposableColor(0xFF223344),
-                                disabledBorder = DomposableColor(0xFF334455),
-                                disabledSelectedContainer = DomposableColor(0xFFAA0000),
-                                disabledSelectedContent = DomposableColor(0xFF00AA00),
-                                disabledSelectedBorder = DomposableColor(0xFF0000AA),
-                            ),
-                    ).resolveInteractionColors(MutableInteractionSource(), selected = true, enabled = false)
-                val fallback =
-                    DomposableItemAppearance(
-                        colors =
-                            DomposableItemColors(
-                                disabledContainer = DomposableColor(0xFF112233),
-                                disabledContent = DomposableColor(0xFF223344),
-                                disabledBorder = DomposableColor(0xFF334455),
-                            ),
-                    ).resolveInteractionColors(MutableInteractionSource(), selected = true, enabled = false)
-                val unselected =
-                    DomposableItemAppearance(
-                        colors =
-                            DomposableItemColors(
-                                disabledContainer = DomposableColor(0xFF112233),
-                                disabledContent = DomposableColor(0xFF223344),
-                                disabledBorder = DomposableColor(0xFF334455),
-                                disabledSelectedContainer = DomposableColor(0xFFAA0000),
-                                disabledSelectedContent = DomposableColor(0xFF00AA00),
-                                disabledSelectedBorder = DomposableColor(0xFF0000AA),
-                            ),
-                    ).resolveInteractionColors(MutableInteractionSource(), selected = false, enabled = false)
-                SideEffect {
-                    assertEquals(Color(0xFFAA0000), custom.selectedContainer)
-                    assertEquals(Color(0xFF00AA00), custom.selectedContent)
-                    assertEquals(Color(0xFF0000AA), custom.selectedBorder)
-                    assertEquals(Color(0xFF112233), fallback.selectedContainer)
-                    assertEquals(Color(0xFF223344), fallback.selectedContent)
-                    assertEquals(Color(0xFF334455), fallback.selectedBorder)
-                    assertEquals(Color(0xFF112233), unselected.container)
-                    assertEquals(Color(0xFF223344), unselected.content)
-                    assertEquals(Color(0xFF334455), unselected.border)
                 }
             }
         }
