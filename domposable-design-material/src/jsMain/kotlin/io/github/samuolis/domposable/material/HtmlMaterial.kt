@@ -812,6 +812,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         domposableAttributes(modifier)
                         classes("d-card", "d-card-${props.variant.name.lowercase()}")
                         style {
+                            if (modifier.hasExplicitHtmlHeight()) property("height", "100%")
                             property("background-color", cardContainer.css())
                             property("--d-card-container", cardContainer.css())
                             property("--d-card-border-color", borderColor?.css() ?: "transparent")
@@ -937,6 +938,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         Div(attrs = {
                             id(cardContentId)
                             classes("d-card-content")
+                            if (modifier.hasExplicitHtmlHeight()) style { property("height", "100%") }
                             if (props.href == null && (props.onClick == null || props.actionLabel.isNullOrEmpty())) {
                                 style { property("pointer-events", "auto") }
                             }
@@ -1110,7 +1112,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         onClick { if (enabled) props.onClick() }
                     }) {
                         Span(attrs = { classes("d-chip-surface") }) {
-                            Span(attrs = { classes("d-chip-icon") }) { props.leadingIcon?.invoke() }
+                            props.leadingIcon?.let { icon ->
+                                Span(attrs = { classes("d-chip-icon") }) { icon() }
+                            }
                             Span(attrs = {
                                 classes("d-chip-label")
                                 style {
@@ -1120,7 +1124,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
                                 }
                             }) { Text(props.label) }
-                            Span(attrs = { classes("d-chip-icon") }) { props.trailingIcon?.invoke() }
+                            props.trailingIcon?.let { icon ->
+                                Span(attrs = { classes("d-chip-icon") }) { icon() }
+                            }
                         }
                     }
                 }
