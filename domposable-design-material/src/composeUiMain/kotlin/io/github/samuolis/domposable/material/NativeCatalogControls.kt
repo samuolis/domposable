@@ -2154,8 +2154,9 @@ internal fun NativeNavigationBar(
             contentColor = navigationRailContent,
         ) {
             props.items.forEachIndexed { index, itemData ->
+                val selected = props.selectedIndex == index
                 NavigationRailItem(
-                    selected = props.selectedIndex == index,
+                    selected = selected,
                     onClick = {
                         props.onSelect(index)
                         itemData.href?.let(::safeDomposableHref)?.let(uriHandler::openUri)
