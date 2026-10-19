@@ -36,13 +36,7 @@ kotlin {
                     api(project(":domposable-ui"))
                 }
             }
-        val commonTest =
-            getByName("commonTest") {
-                dependencies {
-                    implementation(kotlin("test"))
-                    implementation(libs.coroutines.test)
-                }
-            }
+        val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
         androidMain { dependencies { implementation(libs.compose.ui) } }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         getByName("iosArm64Main").dependsOn(iosMain)

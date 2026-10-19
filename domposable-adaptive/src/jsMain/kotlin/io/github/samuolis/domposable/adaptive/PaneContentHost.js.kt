@@ -2,7 +2,7 @@ package io.github.samuolis.domposable.adaptive
 
 import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableLength
-import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
+import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.fillMaxHeight
 import io.github.samuolis.domposable.ui.region
@@ -58,9 +58,8 @@ internal actual fun DomposablePaneContentHost(
             }
         }
     }) {
-        DomposableHtmlModifiers(
+        DomposableBox(
             modifier = DomposableModifier.fillMaxHeight().region(label).then(modifier),
-            wrapSemantics = true,
             content = content,
         )
     }
