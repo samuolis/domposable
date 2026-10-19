@@ -41,6 +41,24 @@ class ReviewEvidenceTest(unittest.TestCase):
         with patch.object(module, 'evidence_bucket', return_value=({'tag_name': 'visual-evidence', 'id': 1}, [asset])), patch.object(module, 'urlopen', return_value=BytesIO(b'wrong image')):
             with self.assertRaises(ValueError): module.publish_images([('ios', 'shop', data, 'iOS shop')], 9, 1234)
 
+    def test_fresh_upload_uses_expected_url_without_rescanning_inventory(self):
+        data = module.panel([Image.new('RGB', (1, 1), 'white')], ['PR'])
+        with patch.object(module, 'evidence_bucket', return_value=({'tag_name': 'visual-evidence', 'id': 1}, [])), \
+             patch.object(module, 'release_assets') as inventory, \
+             patch.object(module.subprocess, 'run') as upload, \
+             patch.object(module, 'urlopen', return_value=BytesIO(data)) as download:
+            markdown = module.publish_images([('ios', 'shop', data, 'iOS shop')], 9, 1234)
+
+        inventory.assert_not_called()
+        upload.assert_called_once()
+        self.assertNotIn('--clobber', upload.call_args.args[0])
+        download.assert_called_once_with(
+            f'https://github.com/{module.REPO}/releases/download/visual-evidence/'
+            f'{module.asset_name(9, 1234, "ios", "shop", data)}',
+            timeout=30,
+        )
+        self.assertIn(download.call_args.args[0], markdown)
+
     def test_rejects_non_png_and_excessive_pixel_dimensions(self):
         with self.assertRaises(ValueError):
             module.png(b'<html>artifact content</html>')
