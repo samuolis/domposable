@@ -1,7 +1,9 @@
 import hashlib
 from pathlib import Path
+import socket
 import sys
 import tempfile
+import urllib.error
 import unittest
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -41,5 +43,47 @@ class CentralRecoveryTest(unittest.TestCase):
             central.publish('publish')
         self.assertEqual(self.state['central_state'],'PUBLISHED')
         self.assertFalse(any('/upload?' in call.args[0] for call in request.call_args_list))
+    def test_status_recovers_from_dns_failure_with_bounded_timeout(self):
+        deployment_id = 'd5650f77-692f-4189-96ed-28b5f40607ca'
+        with patch.object(central,'request',side_effect=[urllib.error.URLError(socket.gaierror('DNS unavailable')), '{"deploymentState":"PUBLISHED"}']) as request:
+            result = central.request_status(deployment_id)
+        self.assertEqual(result, '{"deploymentState":"PUBLISHED"}')
+        self.assertEqual(request.call_count, 2)
+        self.assertTrue(all(call.kwargs['timeout'] == 30 for call in request.call_args_list))
+        self.assertEqual(central.time.sleep.call_args_list, [unittest.mock.call(2)])
+    def test_status_network_exhaustion_is_safe_and_resumable(self):
+        error = urllib.error.URLError(socket.gaierror('private network detail'))
+        with patch.object(central,'request',side_effect=error) as request:
+            with self.assertRaisesRegex(RuntimeError, 'after retries') as raised:
+                central.request_status('d5650f77-692f-4189-96ed-28b5f40607ca')
+        self.assertEqual(request.call_count, 3)
+        self.assertNotIn('private network detail', str(raised.exception))
+    def test_status_retries_server_error(self):
+        with patch.object(central,'request',side_effect=[central.CentralHttpError(503), '{"deploymentState":"VALIDATED"}']) as request:
+            result = central.request_status('d5650f77-692f-4189-96ed-28b5f40607ca')
+        self.assertEqual(result, '{"deploymentState":"VALIDATED"}')
+        self.assertEqual(request.call_count, 2)
+    def test_status_does_not_retry_authentication_error(self):
+        with patch.object(central,'request',side_effect=central.CentralHttpError(401)) as request:
+            with self.assertRaisesRegex(RuntimeError, '401') as raised:
+                central.request_status('d5650f77-692f-4189-96ed-28b5f40607ca')
+        request.assert_called_once()
+        self.assertNotIn('response body', str(raised.exception))
+    def test_malformed_status_json_is_not_retried(self):
+        self.state['deployment_id'] = 'd5650f77-692f-4189-96ed-28b5f40607ca'
+        with patch.object(central,'request',return_value='not json') as request:
+            with self.assertRaises(ValueError): central.publish('validate')
+        request.assert_called_once()
+    def test_upload_and_activation_posts_are_not_retried(self):
+        with patch.object(central,'request',side_effect=central.CentralHttpError(503)) as request:
+            with self.assertRaises(central.CentralHttpError): central.publish('validate')
+        request.assert_called_once()
+        self.assertIn('/upload?', request.call_args.args[0])
+
+        self.state.update(deployment_id='d5650f77-692f-4189-96ed-28b5f40607ca',phase='main-advanced')
+        with patch.object(central,'request',side_effect=['{"deploymentState":"VALIDATED"}', central.CentralHttpError(503)]) as request:
+            with self.assertRaises(central.CentralHttpError): central.publish('publish')
+        self.assertEqual(request.call_count, 2)
+        self.assertTrue(request.call_args_list[-1].args[0].startswith('/deployment/'))
 
 if __name__ == '__main__': unittest.main()
