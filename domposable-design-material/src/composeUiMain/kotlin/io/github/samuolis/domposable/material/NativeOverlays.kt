@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -170,7 +171,15 @@ internal fun NativeDialog(
                                 )
                             },
                     ) {
-                        Column(modifier = Modifier.padding(layoutPadding(props.layout))) {
+                        Column(
+                            modifier = Modifier.padding(layoutPadding(props.layout)),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    props.layout.sectionSpacing
+                                        ?.value
+                                        ?.dp ?: 0.dp,
+                                ),
+                        ) {
                             title()
                             body()
                             confirm()
@@ -196,7 +205,15 @@ internal fun NativeBottomSheet(
     val contentColor = appearance.content?.nativeColor() ?: contentColorFor(container)
     NativeWindow { featureRegistry ->
         val sheetContent: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
-            Column(modifier = Modifier.padding(layoutPadding(props.layout))) {
+            Column(
+                modifier = Modifier.padding(layoutPadding(props.layout)),
+                verticalArrangement =
+                    Arrangement.spacedBy(
+                        props.layout.sectionSpacing
+                            ?.value
+                            ?.dp ?: 0.dp,
+                    ),
+            ) {
                 if (props.headerContent == null) {
                     Text(
                         props.title,

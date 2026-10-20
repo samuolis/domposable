@@ -60,8 +60,12 @@ Recompile consumers and custom providers and include this pre-1.0 ABI change in 
 
 `DomposableModalLayout` adds explicit surface bounds, viewport insets, alignment and sheet swipe
 control to both renderers. Existing defaults retain the library's normal presentation; apps should
-set only the layout values required by their design. HTML modal dismissal now checks both pointer
-start and end positions, and its fallback path blocks background interaction and traps focus when
+set only the layout values required by their design. Its new optional `sectionSpacing` field keeps
+the HTML default when omitted and controls section gaps in HTML and native Basic/FullScreen dialogs
+and sheet content. Native sheet drag handles and Material alert/picker variants retain their
+platform-defined spacing. This data-class field is source-compatible through its default, but changes constructor and generated
+`copy` signatures; precompiled consumers must be rebuilt. Treat the API change as a minor release
+before 1.0. HTML modal dismissal now checks both pointer start and end positions, and its fallback path blocks background interaction and traps focus when
 native `showModal()` is unavailable.
 
 ## Layout arrangements
