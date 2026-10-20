@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composition
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableBottomSheet
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableModalAlignment
 import io.github.samuolis.domposable.ui.DomposableModalLayout
@@ -40,9 +41,19 @@ class HtmlModalWidthTest {
 
     @Test
     fun centeredDialogRetainsViewportInsets() {
-        withViewport(800, DomposableModalAlignment.Center) { root, _ ->
+        withViewport(800, DomposableModalAlignment.Center) { root, frameWindow ->
             val dialog = root.querySelector("dialog")!!.unsafeCast<HTMLElement>()
             assertEquals(768.0, dialog.getBoundingClientRect().width, 1.0)
+            assertEquals("16px", frameWindow.getComputedStyle(dialog).getPropertyValue("row-gap").trim())
+        }
+    }
+
+    @Test
+    fun explicitZeroSectionSpacingIncludesBottomSheetHandle() {
+        withViewport(320, sectionSpacing = 0.dp, sheet = true) { root, frameWindow ->
+            val dialog = root.querySelector("dialog")!!.unsafeCast<HTMLElement>()
+            assertEquals("0px", frameWindow.getComputedStyle(dialog).getPropertyValue("row-gap").trim())
+            assertEquals(1, dialog.querySelectorAll(".d-sheet-drag-handle").length)
         }
     }
 
@@ -58,6 +69,8 @@ class HtmlModalWidthTest {
         width: Int,
         alignment: DomposableModalAlignment = DomposableModalAlignment.BottomOnCompact,
         maxWidth: DomposableLength = 900.dp,
+        sectionSpacing: DomposableLength? = null,
+        sheet: Boolean = false,
         verify: (HTMLElement, Window) -> Unit,
     ) {
         val frame = document.createElement("iframe") as HTMLIFrameElement
@@ -71,17 +84,19 @@ class HtmlModalWidthTest {
         val composition: Composition =
             renderComposable(root) {
                 ProvideDomposableMaterialComponents(DomposableTokens()) {
-                    DomposableDialog(
-                        "Width test",
-                        {},
-                        layout =
-                            DomposableModalLayout(
-                                maxWidth = maxWidth,
-                                fillViewportWidth = true,
-                                viewportInset = 16.dp,
-                                alignment = alignment,
-                            ),
-                    ) { DomposableText("Body") }
+                    val layout =
+                        DomposableModalLayout(
+                            maxWidth = maxWidth,
+                            fillViewportWidth = true,
+                            viewportInset = 16.dp,
+                            alignment = alignment,
+                            sectionSpacing = sectionSpacing,
+                        )
+                    if (sheet) {
+                        DomposableBottomSheet("Width test", {}, layout = layout) { DomposableText("Body") }
+                    } else {
+                        DomposableDialog("Width test", {}, layout = layout) { DomposableText("Body") }
+                    }
                 }
             }
         val globalStyles = document.head!!.querySelectorAll("style")
