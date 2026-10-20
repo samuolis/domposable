@@ -141,6 +141,12 @@ class HtmlMenuHostTest {
             assertEquals("Rich action name", item.textContent?.trim())
             val position = root.querySelector(".d-menu-position") as HTMLElement
             assertEquals("fixed", position.style.position)
+            val positionStyle = window.getComputedStyle(position)
+            val menuStyle = window.getComputedStyle(menu)
+            assertEquals("visible", positionStyle.overflow, "Positioning must not clip the popup shadow")
+            assertEquals("auto", menuStyle.overflow, "The popup owns scrolling within the viewport")
+            assertTrue(menuStyle.boxShadow != "none", "The popup retains its elevation")
+            assertTrue(menu.getBoundingClientRect().bottom <= window.innerHeight)
             assertEquals("4px", menu.style.getPropertyValue("gap"))
             assertTrue(
                 position.style.left.isNotEmpty() && position.style.top.isNotEmpty(),
