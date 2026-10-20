@@ -500,7 +500,9 @@ data class DomposableMenuProps(
  * Bounds of the modal surface itself rather than its modifier wrapper. Native dialogs/sheets
  * retain platform placement; [alignment] adapts the HTML surface to the browser viewport.
  * [padding] controls Basic/FullScreen dialog and sheet content; Material picker/alert variants
- * retain their platform content spacing.
+ * retain their platform content spacing. [sectionSpacing] controls gaps between arranged sections
+ * in HTML modals and native Basic/FullScreen dialogs and sheet content. Native Material
+ * picker/alert variants retain their platform section spacing, as does the native sheet drag handle.
  */
 data class DomposableModalLayout(
     val maxWidth: DomposableLength? = null,
@@ -512,10 +514,12 @@ data class DomposableModalLayout(
     val viewportInset: DomposableLength = 16.dp,
     val alignment: DomposableModalAlignment = DomposableModalAlignment.Center,
     val swipeToDismiss: Boolean = true,
+    val sectionSpacing: DomposableLength? = null,
 ) {
     init {
         require(heightFraction == null || heightFraction in 0f..1f)
         require(maxViewportFraction == null || maxViewportFraction in 0f..1f)
+        require(sectionSpacing == null || sectionSpacing.value >= 0f)
     }
 }
 

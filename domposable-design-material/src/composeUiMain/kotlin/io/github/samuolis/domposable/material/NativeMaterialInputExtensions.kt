@@ -431,7 +431,10 @@ internal fun NativeDropdownMenuItem(
             selected = checked ?: selected ?: false,
             enabled = enabled,
         )
-    val borderColor = resolvedColors.border
+    val isSelected = checked ?: selected ?: false
+    val disabledContainer = if (isSelected) resolvedColors.selectedContainer else resolvedColors.container
+    val disabledContent = if (isSelected) resolvedColors.selectedContent else resolvedColors.content
+    val borderColor = if (isSelected) resolvedColors.selectedBorder else resolvedColors.border
     val textAppearance =
         if (selected ==
             true
@@ -484,10 +487,10 @@ internal fun NativeDropdownMenuItem(
             containerColor = resolvedColors.container,
             leadingIconColor = resolvedColors.content,
             trailingIconColor = resolvedColors.content,
-            disabledTextColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-            disabledContainerColor = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
-            disabledLeadingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-            disabledTrailingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            disabledTextColor = disabledContent,
+            disabledContainerColor = disabledContainer,
+            disabledLeadingIconColor = disabledContent,
+            disabledTrailingIconColor = disabledContent,
             selectedTextColor = resolvedColors.selectedContent,
             selectedContainerColor = resolvedColors.selectedContainer,
             selectedLeadingIconColor = resolvedColors.selectedContent,
@@ -498,11 +501,11 @@ internal fun NativeDropdownMenuItem(
             textColor = resolvedColors.content,
             leadingIconColor = resolvedColors.content,
             trailingIconColor = resolvedColors.content,
-            disabledTextColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-            disabledLeadingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-            disabledTrailingIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            disabledTextColor = disabledContent,
+            disabledLeadingIconColor = disabledContent,
+            disabledTrailingIconColor = disabledContent,
             containerColor = resolvedColors.container,
-            disabledContainerColor = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
+            disabledContainerColor = disabledContainer,
         )
     when {
         checked != null -> {

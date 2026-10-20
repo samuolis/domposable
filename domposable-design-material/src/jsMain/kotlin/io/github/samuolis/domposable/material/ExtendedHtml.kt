@@ -310,7 +310,10 @@ internal fun HtmlSegmentedButtons(
             if (props.equalWidth) classes("d-segments-equal")
             attr("role", "radiogroup")
             attr("aria-label", props.label)
-            style { itemAppearance(appearance) }
+            style {
+                itemAppearance(appearance)
+                constrainedControlWidth(modifier)
+            }
         }) {
             props.labels.forEachIndexed { index, label ->
                 val canSelect = formEnabled && props.enabled && props.optionEnabled[index]
