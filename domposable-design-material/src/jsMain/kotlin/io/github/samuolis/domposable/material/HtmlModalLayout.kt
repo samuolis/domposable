@@ -10,7 +10,7 @@ internal fun StyleScope.modalLayout(layout: DomposableModalLayout) {
     modalWidth(layout)
     val inset = layout.viewportInset.value
     layout.padding?.let { property("padding", it.cssPadding()) }
-    layout.sectionSpacing?.let { property("--d-dialog-gap", "${it.value}px") }
+    layout.sectionSpacing?.let { property("gap", "${it.value}px") }
     layout.heightFraction?.let {
         property("height", "calc(${it * HTML_MODAL_VIEWPORT_PERCENT}vh - ${inset * 2}px)")
         property("height", "calc(${it * HTML_MODAL_VIEWPORT_PERCENT}dvh - ${inset * 2}px)")
