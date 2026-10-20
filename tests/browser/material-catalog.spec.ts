@@ -52,3 +52,36 @@ test('segmented controls dispatch one action for selection and reselection', asy
   await period.locator('label').filter({ hasText: 'Month' }).click();
   await expect(actions).toHaveText('Period actions: 3');
 });
+
+for (const width of [390, 1440]) {
+  test(`segmented radio owns its complete pointer target at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto('/#/material/selection');
+    const period = page.getByRole('radiogroup', { name: 'Period', exact: true });
+    const week = period.getByRole('radio', { name: 'Week', exact: true });
+    const actions = page.getByTestId('period-actions');
+    await week.click();
+    await expect(week).toBeChecked();
+    await expect(actions).toHaveText('Period actions: 1');
+    const hitTarget = await week.evaluate(input => {
+      const bounds = input.getBoundingClientRect();
+      const label = input.closest('label')!.getBoundingClientRect();
+      return {
+        width: Math.abs(bounds.width - label.width),
+        height: Math.abs(bounds.height - label.height),
+        ownsCenter: document.elementFromPoint(
+          bounds.x + bounds.width / 2, bounds.y + bounds.height / 2,
+        ) === input,
+      };
+    });
+    expect(hitTarget.width).toBeLessThanOrEqual(0.5);
+    expect(hitTarget.height).toBeLessThanOrEqual(0.5);
+    expect(hitTarget.ownsCenter).toBe(true);
+    await week.click();
+    await expect(actions).toHaveText('Period actions: 2');
+    await week.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(period.getByRole('radio', { name: 'Month', exact: true })).toBeChecked();
+    await expect(actions).toHaveText('Period actions: 3');
+  });
+}

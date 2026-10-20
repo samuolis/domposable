@@ -210,7 +210,11 @@ if (confirming) {
     DomposableDialog(
         title = "Remove item?",
         onDismiss = { confirming = false },
-        layout = DomposableModalLayout(maxWidth = 480.dp, maxViewportFraction = 0.9f),
+        layout = DomposableModalLayout(
+            maxWidth = 480.dp,
+            maxViewportFraction = 0.9f,
+            sectionSpacing = 12.dp,
+        ),
         actions = {
             DomposableButton("Remove", { confirming = false; onRemove() })
         },
@@ -223,6 +227,7 @@ if (confirming) {
 The feature owns dismissal and application effects. HTML uses a modal dialog with focus restoration; native uses Material's dialog. BottomSheet follows the same controlled presentation pattern.
 
 Dialog and bottom-sheet `layout` options bound the surface itself on both renderers. HTML `alignment` adapts placement to the browser viewport; native dialogs and sheets retain their platform placement. `padding` configures Basic/FullScreen dialog and sheet content; native Material alert and picker variants retain Material content spacing. Set `maxWidth`, `fillViewportWidth`, `padding`, `heightFraction`, `maxHeight`, `maxViewportFraction`, `viewportInset`, or `alignment` to match the host layout. Bottom-sheet swipe dismissal is enabled by default and can be disabled with `swipeToDismiss = false`. On HTML, modal backdrops only dismiss when a pointer starts and ends outside the dialog; older browsers use a focus-contained fallback overlay. Supply `headerContent` when the app needs a localized close label or custom header; that slot owns the accessible title and dismiss control.
+`sectionSpacing` sets the gap between HTML modal sections, including a sheet drag handle, header, body, and close action. HTML keeps its 16 dp default when this value is null. Native Basic/FullScreen dialogs and sheet content apply the value between their arranged sections; native sheets keep Material's drag-handle spacing, and native alert and picker variants retain Material's built-in section spacing.
 
 ## Complete vocabulary
 
