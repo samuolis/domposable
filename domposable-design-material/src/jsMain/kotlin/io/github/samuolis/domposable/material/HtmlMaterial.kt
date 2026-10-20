@@ -173,11 +173,6 @@ private fun positionHtmlMenu(
     menu.style.setProperty("top", "${top}px")
     menu.style.setProperty("bottom", "auto")
     menu.style.setProperty("inset-block-end", "auto")
-    menu.style.setProperty(
-        "max-height",
-        "${(viewportHeight - 2 * HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(0.0)}px",
-    )
-    menu.style.setProperty("overflow-y", "auto")
 }
 
 internal fun DomposableFontWeight.css() = weight.toString()
@@ -2291,7 +2286,7 @@ private const val MATERIAL_CSS = """
 .d-dropdown-menu-item:disabled[aria-checked=true]{background:var(--d-item-disabled-selected-container,var(--d-item-disabled-container,var(--d-item-container,transparent)));color:var(--d-item-disabled-selected-content,var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface))));border-color:var(--d-item-disabled-selected-border,var(--d-item-disabled-border,var(--d-item-border,transparent)))}
 @media(prefers-reduced-motion:reduce){.d-dropdown-menu-item{transition:none}}
 @media(forced-colors:active){.d-dropdown-menu-item:focus-visible{outline:2px solid Highlight;outline-offset:-2px;box-shadow:none}.d-dropdown-menu-item[aria-checked=true]{background:Highlight;color:HighlightText;border-color:Highlight}}
-.d-menu-position{inset-block-start:16px;inset-inline-end:16px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow:auto}
+.d-menu-position{inset-block-start:16px;inset-inline-end:16px;max-width:calc(100vw - 32px);overflow:visible}
 .d-menu-popup{background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:112px;max-width:min(280px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));box-shadow:0 4px 12px rgb(0 0 0 / .2)}
 .d-chip.d-item-hittarget .d-chip-surface,.d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,0));border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,0));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,0));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,0))}
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
