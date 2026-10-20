@@ -193,6 +193,8 @@ fun DomposableHtmlModifiers(
             style {
                 childLayoutSizing(visual)
                 property("box-sizing", "border-box")
+                property("display", "grid")
+                property("grid-template-columns", "minmax(0, 1fr)")
                 layout.forEach { element ->
                     when (element) {
                         is DomposableModifierOperation.Weight -> {
@@ -344,6 +346,10 @@ private fun HtmlModifierBox(
         }
         Div(attrs = {
             if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
+            style {
+                property("display", "grid")
+                property("grid-template-columns", "minmax(0, 1fr)")
+            }
             if (fillAvailableHeight || fillHeightAhead || inheritedWidth) {
                 style {
                     property("box-sizing", "border-box")
@@ -433,6 +439,9 @@ private fun HtmlModifierBox(
         }
         style {
             property("box-sizing", "border-box")
+            // A modifier measures its child, not an anonymous browser line box around that child.
+            property("display", "grid")
+            property("grid-template-columns", "minmax(0, 1fr)")
             if (childFillsHeight || childFillsWidth) {
                 property(
                     "display",
