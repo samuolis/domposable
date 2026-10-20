@@ -38,6 +38,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.ModalWideNavigationRail
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.SegmentedButton
@@ -209,18 +210,12 @@ internal fun NativeMultiChoiceSegmentedButtons(
                             inactiveContainerColor = resolved.container,
                             inactiveContentColor = resolved.content,
                             inactiveBorderColor = resolved.border,
-                            disabledActiveContainerColor =
-                                appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                            disabledActiveContentColor =
-                                appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-                            disabledActiveBorderColor =
-                                appearance.colors.disabledBorder?.nativeColor() ?: Color.Unspecified,
-                            disabledInactiveContainerColor =
-                                appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                            disabledInactiveContentColor =
-                                appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-                            disabledInactiveBorderColor =
-                                appearance.colors.disabledBorder?.nativeColor() ?: Color.Unspecified,
+                            disabledActiveContainerColor = resolved.selectedContainer,
+                            disabledActiveContentColor = resolved.selectedContent,
+                            disabledActiveBorderColor = resolved.selectedBorder,
+                            disabledInactiveContainerColor = resolved.container,
+                            disabledInactiveContentColor = resolved.content,
+                            disabledInactiveBorderColor = resolved.border,
                         ),
                     border =
                         androidx.compose.foundation.BorderStroke(
@@ -290,6 +285,8 @@ internal fun NativeListItem(
                 .MutableInteractionSource()
         }
     val resolved = appearance.resolveInteractionColors(interaction, props.selected, enabled)
+    val disabledContainer = if (props.selected) resolved.selectedContainer else resolved.container
+    val disabledContent = if (props.selected) resolved.selectedContent else resolved.content
     val selectedBorderWidth =
         if (props.selected) {
             appearance.selectedBorderWidth?.value?.dp
@@ -297,8 +294,9 @@ internal fun NativeListItem(
         } else {
             appearance.borderWidth.value.dp
         }
+    val borderColor = if (props.selected) resolved.selectedBorder else resolved.border
     val border =
-        resolved.border
+        borderColor
             .takeUnless {
                 it == Color.Unspecified
             }?.let { androidx.compose.foundation.BorderStroke(selectedBorderWidth, it) }
@@ -354,8 +352,8 @@ internal fun NativeListItem(
         ListItemDefaults.colors(
             containerColor = resolved.container,
             contentColor = resolved.content,
-            disabledContainerColor = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
-            disabledContentColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            disabledContainerColor = disabledContainer,
+            disabledContentColor = disabledContent,
             selectedContainerColor = resolved.selectedContainer,
             selectedContentColor = resolved.selectedContent,
         )
@@ -363,8 +361,8 @@ internal fun NativeListItem(
         ListItemDefaults.segmentedColors(
             containerColor = resolved.container,
             contentColor = resolved.content,
-            disabledContainerColor = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified,
-            disabledContentColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+            disabledContainerColor = disabledContainer,
+            disabledContentColor = disabledContent,
             selectedContainerColor = resolved.selectedContainer,
             selectedContentColor = resolved.selectedContent,
         )
@@ -645,6 +643,31 @@ internal fun NativeNavigationDrawerItem(
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationDrawerItem
     val formEnabled = domposableFormEnabled()
+    val enabled = props.enabled && formEnabled
+    val defaults = NavigationDrawerItemDefaults.colors()
+    val hasDisabledSelectedColors =
+        appearance.colors.disabledSelectedContainer != null ||
+            appearance.colors.disabledSelectedContent != null
+    val colors =
+        if (props.selected && !enabled && hasDisabledSelectedColors) {
+            NavigationDrawerItemDefaults.colors(
+                selectedContainerColor =
+                    appearance.colors.disabledSelectedContainer?.nativeColor()
+                        ?: defaults.containerColor(true).value,
+                unselectedContainerColor = defaults.containerColor(false).value,
+                selectedIconColor =
+                    appearance.colors.disabledSelectedContent?.nativeColor() ?: defaults.iconColor(true).value,
+                unselectedIconColor = defaults.iconColor(false).value,
+                selectedTextColor =
+                    appearance.colors.disabledSelectedContent?.nativeColor() ?: defaults.textColor(true).value,
+                unselectedTextColor = defaults.textColor(false).value,
+                selectedBadgeColor =
+                    appearance.colors.disabledSelectedContent?.nativeColor() ?: defaults.badgeColor(true).value,
+                unselectedBadgeColor = defaults.badgeColor(false).value,
+            )
+        } else {
+            defaults
+        }
     NavigationDrawerItem(
         label = {
             Text(
@@ -657,6 +680,7 @@ internal fun NativeNavigationDrawerItem(
         modifier = modifier.toComposeModifier(),
         icon = props.icon,
         badge = props.badge,
+        colors = colors,
     )
 }
 
@@ -759,8 +783,8 @@ internal fun NativeWideNavigationRailItem(
                 selectedIndicatorColor = resolved.selectedContainer,
                 unselectedIconColor = resolved.content,
                 unselectedTextColor = resolved.content,
-                disabledIconColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
-                disabledTextColor = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified,
+                disabledIconColor = if (props.selected) resolved.selectedContent else resolved.content,
+                disabledTextColor = if (props.selected) resolved.selectedContent else resolved.content,
             ),
     )
 }

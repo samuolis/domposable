@@ -1,5 +1,13 @@
 # Migrating a Compose feature
 
+## Disabled selected item styling in 0.16
+
+`DomposableItemColors` adds optional `disabledSelectedContainer`, `disabledSelectedContent` and
+`disabledSelectedBorder` overrides. Leaving them null preserves existing component styling. Kotlin
+source calls keep their defaults, but the data-class constructor and `copy` binary signatures change:
+recompile consumers and custom providers when upgrading to 0.16. See the
+[component appearance example](material-catalog.md#component-defaults-and-local-overrides).
+
 ## Button indicator track in 0.14
 
 `DomposableButtonAppearance.indicatorTrackColor` optionally sets the loading ring's track on

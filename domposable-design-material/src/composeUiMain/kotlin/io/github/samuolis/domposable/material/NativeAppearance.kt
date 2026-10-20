@@ -53,16 +53,22 @@ internal fun DomposableItemAppearance.resolveInteractionColors(
         base: DomposableColor?,
     ): Color = (interactive ?: selectedValue ?: base)?.nativeColor() ?: Color.Unspecified
     if (!enabled) {
-        val disabledContainer = color(null, if (selected) colors.disabledContainer else colors.disabledContainer, null)
-        val disabledContent = color(null, if (selected) colors.disabledContent else colors.disabledContent, null)
-        val disabledBorder = color(null, if (selected) colors.disabledBorder else colors.disabledBorder, null)
+        val disabledContainer = color(null, colors.disabledContainer, null)
+        val disabledContent = color(null, colors.disabledContent, null)
+        val disabledBorder = color(null, colors.disabledBorder, null)
+        val disabledSelectedContainer =
+            color(null, colors.disabledSelectedContainer, colors.disabledContainer)
+        val disabledSelectedContent =
+            color(null, colors.disabledSelectedContent, colors.disabledContent)
+        val disabledSelectedBorder =
+            color(null, colors.disabledSelectedBorder, colors.disabledBorder)
         return NativeResolvedItemColors(
             disabledContainer,
             disabledContent,
             disabledBorder,
-            disabledContainer,
-            disabledContent,
-            disabledBorder,
+            disabledSelectedContainer,
+            disabledSelectedContent,
+            disabledSelectedBorder,
         )
     }
     val activeContainer =

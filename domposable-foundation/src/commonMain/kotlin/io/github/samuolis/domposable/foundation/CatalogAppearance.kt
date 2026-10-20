@@ -110,6 +110,12 @@ data class DomposableItemColors(
     val hoveredContainer: DomposableColor? = null,
     val hoveredContent: DomposableColor? = null,
     val hoveredBorder: DomposableColor? = null,
+    /** Disabled-selected container override; null preserves the control's existing disabled styling. */
+    val disabledSelectedContainer: DomposableColor? = null,
+    /** Disabled-selected content override; null preserves the control's existing disabled styling. */
+    val disabledSelectedContent: DomposableColor? = null,
+    /** Disabled-selected border override for controls with borders; null preserves existing styling. */
+    val disabledSelectedBorder: DomposableColor? = null,
 )
 
 /** Opacities for the control's content-color interaction layer. */

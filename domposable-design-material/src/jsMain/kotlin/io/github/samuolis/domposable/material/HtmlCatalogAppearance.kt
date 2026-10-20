@@ -129,6 +129,9 @@ internal fun StyleScope.itemColors(colors: DomposableItemColors) {
         "hovered-container" to colors.hoveredContainer,
         "hovered-content" to colors.hoveredContent,
         "hovered-border" to colors.hoveredBorder,
+        "disabled-selected-container" to colors.disabledSelectedContainer,
+        "disabled-selected-content" to colors.disabledSelectedContent,
+        "disabled-selected-border" to colors.disabledSelectedBorder,
     ).forEach { (role, color) -> color?.let { property("--d-item-$role", it.css()) } }
 }
 
