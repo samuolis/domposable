@@ -36,6 +36,7 @@ internal fun HtmlButton(
             domposableAttributes(modifier)
             attr("type", "button")
             classes("d-button", "d-button-${props.style.name.lowercase()}")
+            if (appearance.interaction != null) attr("data-d-button-interaction", "true")
             if (appearance.textAppearance?.maxLines == 1) classes("d-button-single-line")
             if (!props.enabled || !formEnabled || props.loading) attr("disabled", "")
             props.expanded?.let { attr("aria-expanded", it.toString()) }
@@ -44,6 +45,8 @@ internal fun HtmlButton(
                 props.loadingLabel?.let { attr("aria-label", it) }
             }
             style {
+                constrainedControlWidth(modifier)
+                buttonContentAlignment(appearance)
                 when (props.style) {
                     DomposableButtonStyle.Elevated -> {
                         if (appearance.container ==
@@ -142,10 +145,15 @@ internal fun HtmlButton(
                 }
                 appearance.indicatorSize?.let { property("--d-button-indicator-size", "${it.value}px") }
                 appearance.indicatorStrokeWidth?.let { property("--d-button-indicator-stroke", "${it.value}px") }
+                appearance.indicatorTrackColor?.let { property("--d-button-indicator-track", it.css()) }
                 property("--d-button-pressed-scale", appearance.pressedScale.toString())
                 property("--d-button-hovered-scale", appearance.hoveredScale.toString())
+                buttonInteractionAppearance(appearance)
                 if (customAppearance || props.loading || !useEnabledColors) {
                     property("opacity", "1")
+                }
+                if (!useEnabledColors && !props.loading) {
+                    appearance.disabledOpacity?.let { property("opacity", it.toString()) }
                 }
             }
             onClick {
@@ -191,7 +199,10 @@ internal fun MaterialButtonHitTarget(
                 it is DomposableModifierOperation.MaxHeight || it == DomposableModifierOperation.FillHeight
         }
     if (!heightConstrained && (minimumHeight ?: BUTTON_VISUAL_HEIGHT) < BUTTON_TARGET_HEIGHT) {
-        Span(attrs = { classes("d-button-hit-target") }) { content() }
+        Span(attrs = {
+            classes("d-button-hit-target")
+            style { constrainedControlWidth(modifier) }
+        }) { content() }
     } else {
         content()
     }

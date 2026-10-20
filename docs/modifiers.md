@@ -17,7 +17,7 @@ Modifiers are immutable, ordered operations on shared UI. Use the same chain in 
 | Transforms | `offset`, `scale`, `rotate`, `alpha`, `zIndex` | Visual transforms do not reserve new layout space; negative scale mirrors content |
 | Child layout | `weight`, `align`, `boxAlignment` | Use in the corresponding row, column or box scope; invalid native scopes fail explicitly |
 | Interaction | `clickable` | Enabled state, role and accessible action label; HTML also supports keyboard activation |
-| Semantics | `contentDescription`, `testId` | Semantic attributes attach to the control rather than only its layout wrapper |
+| Semantics | `contentDescription`, `testId` | Semantic attributes attach to the control rather than only its layout wrapper; the outermost `testId` wins when tags are chained |
 | Scroll | `verticalScroll`, `horizontalScroll`, optional shared scroll state | Ordered viewport wrappers on HTML; native scroll state on Compose UI |
 | Composition | `then` | Append another chain or an app-owned element without changing the original modifier |
 
@@ -40,6 +40,8 @@ Types and `.dp` live in `io.github.samuolis.domposable.foundation`; modifier fun
 On HTML, `weight` distributes available space when the parent bounds that axis. In a naturally sized document column, a weighted child keeps its intrinsic content height. Weight does not create a scroll viewport; provide a finite height when the content should scroll within a panel.
 
 `zIndex` orders the whole component, including backgrounds and decorations earlier in the chain. Use whole-number stacking levels when targeting HTML.
+
+HTML click modifiers activate with Enter on keydown and Space on release; link roles use Enter. Nested buttons, links and other controls own their interactions, so activating a child does not also invoke its clickable parent.
 
 ## Combine existing modifiers
 
@@ -121,6 +123,26 @@ DomposableText(
 This does not add a layout wrapper. It runs where the renderer attaches `testId` and `contentDescription`; it does not select or rewrite private descendants. Custom HTML renderers must call `domposableAttributes(modifier)` on their semantic element to support it. Prefer appearance parameters for shared colors, typography and geometry: a renderer can apply its own attributes/styles after this callback. Preserve accessible labels and native control behavior when adding attributes or events.
 
 `htmlAttributes` is available only to Kotlin/JS HTML code. Keep it inside `jsMain` adapters; use a typed app-owned modifier with native and HTML implementations when the feature itself needs a portable extension.
+
+## Wrap arbitrary HTML content
+
+A custom container can delegate its complete modifier chain, including ordered semantic wrappers, to the shared HTML engine:
+
+```kotlin
+@Composable
+fun AppFrame(
+    modifier: DomposableModifier = DomposableModifier,
+    content: @Composable () -> Unit,
+) {
+    DomposableHtmlModifiers(modifier, wrapSemantics = true) {
+        content()
+    }
+}
+```
+
+Use this Kotlin/JS overload for adapters around arbitrary content. It renders `testId`, `contentDescription` and `htmlAttributes` on wrapper nodes at their position in the chain, alongside shared sizing, scrolling and interaction behavior. App-owned modifier elements still use the existing renderer or decoration hooks; there is no need to copy the portable operation renderer.
+
+For a component with its own semantic control, keep the default overload and call `domposableAttributes(modifier)` on that control. This keeps labels and test IDs on the actual button, input or link. Do not apply those attributes again inside `wrapSemantics = true`, which already emits their wrappers. These are HTML renderer choices; shared feature code and native modifiers do not change.
 
 ## Render custom HTML and CSS
 
@@ -215,3 +237,40 @@ Use `pointerPassthrough()` for a decorative scrim or a full-size content overlay
 `region(label)` exposes a labelled section/traversal group. `DomposableVisibility(false)` keeps the content composed while excluding it from layout and accessibility. Use it when an adaptive layout should retain a pane's draft rather than recreating it after resizing. Prefer an ordinary `if` when the hidden content should be disposed.
 
 See the [CSS-free card and pane example](custom-components.md#image-cards-and-overlays-without-application-css).
+
+## Viewport bounds without CSS
+
+Use viewport bounds for document shells and scrollable modal bodies. `fillMaxHeight()` fills the
+parent's available height; these operations deliberately measure the host window instead:
+
+```kotlin
+import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableColumn
+import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableViewportUnit
+import io.github.samuolis.domposable.ui.maxViewportHeight
+import io.github.samuolis.domposable.ui.minViewportHeight
+import io.github.samuolis.domposable.ui.verticalScroll
+
+DomposableColumn(
+    modifier = DomposableModifier.minViewportHeight(
+        subtract = 64.dp,
+        unit = DomposableViewportUnit.Small,
+    ),
+) { DocumentContent() }
+
+DomposableColumn(
+    modifier = DomposableModifier.maxViewportHeight(subtract = 80.dp).verticalScroll(),
+) { ModalBody() }
+```
+
+`viewportHeight` requests a fixed height, `minViewportHeight` lets longer documents grow, and
+`maxViewportHeight` leaves shorter content at its natural height. All accept a fraction from more
+than zero through one and a nonnegative `subtract` value for app-owned chrome; results clamp at
+zero and native parent constraints still apply. These operations do not add safe-area padding.
+
+HTML uses small viewport units for `Small` and dynamic viewport units for `Dynamic`, with ordinary
+viewport units as a fallback. Small viewport height avoids resizing document shells when browser
+bars move. Native Compose uses the current host window size for both choices, because browser-bar
+states do not exist there. Keep a single scroll owner and use the scaffold's measured available
+content size when a parent region, rather than the whole window, owns the height.

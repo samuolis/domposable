@@ -355,6 +355,7 @@ val brandStyles = DomposableComponentStyles(
     button = DomposableButtonAppearance(
         shape = DomposableShape.Circle,
         minHeight = 48.dp,
+        indicatorTrackColor = DomposableColor(0x40FFFFFF),
         contentPadding = DomposableInsets(start = 20.dp, end = 20.dp),
     ),
     textField = DomposableTextFieldAppearance(
@@ -394,6 +395,9 @@ DomposableMaterialTheme(
 }
 ```
 
+`indicatorTrackColor` sets the ring track used while a button is loading in both renderers. Leave
+it unset to keep the platform renderer's default.
+
 The types above live in `io.github.samuolis.domposable.foundation`; component calls and the current `DomposableTheme` values live in `io.github.samuolis.domposable.ui`. Import `foundation.dp` for portable dimensions and `material.DomposableMaterialTheme` for the standard renderers.
 
 The ordinary theme API accepts `colors`, `typography`, `shapes`, `styles` and `designLanguage`, all optional. `DomposableTheme.colors`, `.typography`, `.shapes` and `.styles` expose the nearest theme. Tokens are the underlying design values; the `DomposableTokens` bundle remains available for custom provider and host integrations, rather than being required for ordinary branding.
@@ -422,3 +426,59 @@ These defaults style the standard Material renderers. A custom provider owns its
 
 
 The [Material catalog](material-catalog.md) lists the standard and expressive variants and provides examples for selection controls, queued messages, badge anchors and screen chrome.
+
+### Aligning custom control content
+
+Buttons and button-styled links support the same `DomposableButtonAppearance`. A wide drawer link
+can align its content to the logical start, while an ordinary action keeps the centered default:
+
+```kotlin
+val drawerAction = DomposableButtonAppearance(
+    contentAlignment = DomposableAlignment.Start,
+    minHeight = 48.dp,
+    contentPadding = DomposableInsets(start = 12.dp, end = 12.dp),
+    contentSpacing = 12.dp,
+)
+
+DomposableLink(
+    label = localizedSettings,
+    href = "/settings",
+    modifier = DomposableModifier.fillMaxWidth(),
+    buttonStyle = DomposableButtonStyle.Text,
+    buttonAppearance = drawerAction,
+) {
+    DomposableRow(gap = 12.dp, alignment = DomposableAlignment.Center) {
+        SettingsIcon()
+        DomposableText(localizedSettings)
+    }
+}
+```
+
+`Start` and `End` follow the layout direction on native and HTML. Custom button content can use a
+full-width row and weighted children when it needs a trailing counter or disclosure icon. Loading
+keeps the content's measured space and centers the progress indicator independently of content
+alignment. Set this appearance once in your app's design-system adapter; features need no CSS.
+
+## Table track spacing
+
+`DomposableTableAppearance.rowSpacing` and `columnSpacing` optionally set the gaps between table rows and columns.
+They default to `null`, preserving each renderer's existing size-preset layout. In Compact mode, `rowSpacing` sets
+the gap between visible row tracks (including a rendered header), card rows and fields within each card, while
+`columnSpacing` sets the label-to-value gap inside each card.
+
+```kotlin
+val tableAppearance = DomposableTableAppearance(
+    rowSpacing = 0.dp,
+    columnSpacing = 8.dp,
+    cellPadding = DomposableInsets(top = 4.dp, bottom = 4.dp),
+)
+
+DomposableDataTable(
+    columns = listOf(DomposableDataTableColumn("name", "Name")),
+    rows = listOf(DomposableDataTableRow("Ada Lovelace")),
+    rowHeaderColumnKey = "name",
+    appearance = tableAppearance,
+) { row, _ ->
+    DomposableText(row.key)
+}
+```

@@ -52,8 +52,6 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.events.MouseEvent
-import org.w3c.dom.events.MouseEventInit
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -107,6 +105,50 @@ class HtmlHostIntegrationTest {
                         // The CSS border occupies one pixel of Material's internal 4/8 dp padding.
                         assertEquals(if (leading) "7px" else "3px", style.paddingLeft)
                         assertEquals(if (trailing) "7px" else "3px", style.paddingRight)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun absentChipIconsDoNotReserveSlotsOrGaps() {
+        for (variant in DomposableChipVariant.entries) {
+            for (touchSize in listOf(0, 48)) {
+                for (leading in listOf(false, true)) {
+                    for (trailing in listOf(false, true)) {
+                        withHost(content = {
+                            DomposableChip(
+                                "Long enough label",
+                                {},
+                                variant = variant,
+                                appearance = DomposableItemAppearance(minimumInteractiveSize = touchSize.dp),
+                                leadingIcon = if (leading) ({ DomposableText("L") }) else null,
+                                trailingIcon = if (trailing) ({ DomposableText("R") }) else null,
+                            )
+                        }) { root ->
+                            val chip = root.querySelector(".d-chip") as HTMLElement
+                            val surface = chip.querySelector(".d-chip-surface") as HTMLElement
+                            val visual = if (touchSize == 0) chip else surface
+                            val style = window.getComputedStyle(visual)
+                            val icons = surface.querySelectorAll(".d-chip-icon")
+                            val iconCount = (if (leading) 1 else 0) + (if (trailing) 1 else 0)
+                            assertEquals(iconCount, icons.length)
+                            val label = surface.querySelector(".d-chip-label") as HTMLElement
+                            var expected = label.getBoundingClientRect().width
+                            for (index in 0 until icons.length) {
+                                expected += (icons.item(index) as HTMLElement).getBoundingClientRect().width
+                            }
+                            expected += iconCount * style.columnGap.removeSuffix("px").toDouble()
+                            expected +=
+                                listOf(
+                                    style.paddingLeft,
+                                    style.paddingRight,
+                                    style.borderLeftWidth,
+                                    style.borderRightWidth,
+                                ).sumOf { it.removeSuffix("px").toDouble() }
+                            assertTrue(abs(visual.getBoundingClientRect().width - expected) < 0.5)
+                        }
                     }
                 }
             }
@@ -241,11 +283,99 @@ class HtmlHostIntegrationTest {
                 }
             }) { root ->
                 val dialog = root.querySelector("dialog") as HTMLElement
-                (dialog.querySelector("h2") as HTMLElement).click()
-                assertEquals(0, dismissed, "Content clicks must leave the modal open")
-                dialog.dispatchEvent(MouseEvent("click", MouseEventInit(bubbles = true, clientX = 1, clientY = 1)))
-                assertEquals(1, dismissed, "The backdrop must dismiss the modal")
+                val bounds = dialog.getBoundingClientRect()
+                val insideX = (bounds.left + bounds.right) / 2
+                val insideY = (bounds.top + bounds.bottom) / 2
+                dialog.dispatchEvent(pointerEvent("pointerdown", 1, insideX, insideY))
+                dialog.dispatchEvent(pointerEvent("pointerup", 1, -1.0, -1.0))
+                assertEquals(0, dismissed, "A gesture starting inside must leave the modal open")
+                dialog.dispatchEvent(pointerEvent("pointerdown", 2, -1.0, -1.0))
+                dialog.dispatchEvent(pointerEvent("pointerup", 2, -1.0, -1.0))
+                assertEquals(1, dismissed, "A gesture starting and ending outside dismisses the modal")
             }
+        }
+    }
+
+    @Test
+    fun escapeCancelRestoresFocusToThePreviousElement() {
+        val opener = document.createElement("button") as HTMLElement
+        document.body!!.appendChild(opener)
+        opener.focus()
+        var dismissed = 0
+        try {
+            withHost(content = {
+                DomposableDialog("Accessible title", { dismissed++ }) { DomposableText("Dialog body") }
+            }) { root ->
+                val dialog = root.querySelector("dialog") as HTMLElement
+                val cancel = js("new Event('cancel', { cancelable: true })") as org.w3c.dom.events.Event
+                dialog.dispatchEvent(cancel)
+                assertTrue(cancel.defaultPrevented)
+                assertEquals(1, dismissed)
+            }
+            assertEquals(opener, document.activeElement)
+        } finally {
+            opener.parentNode?.removeChild(opener)
+        }
+    }
+
+    @Test
+    fun customModalHeadersOwnTheLocalizedDismissAction() {
+        for (sheet in listOf(false, true)) {
+            var dismissed = 0
+            withHost(content = {
+                val header: @Composable (dismiss: () -> Unit) -> Unit = { dismiss ->
+                    Div(attrs = { classes("app-modal-header") }) {
+                        Span { Text("Localized title") }
+                        Button(attrs = {
+                            attr("aria-label", "Localized dismiss")
+                            onClick { dismiss() }
+                        }) { Text("×") }
+                    }
+                }
+                if (sheet) {
+                    DomposableBottomSheet("Accessible title", { dismissed++ }, headerContent = header) {
+                        DomposableText("Sheet body")
+                    }
+                } else {
+                    DomposableDialog("Accessible title", { dismissed++ }, headerContent = header) {
+                        DomposableText("Dialog body")
+                    }
+                }
+            }) { root ->
+                val dialog = root.querySelector("dialog") as HTMLElement
+                assertEquals("Accessible title", dialog.getAttribute("aria-label"))
+                assertEquals(null, dialog.querySelector("h2"))
+                assertTrue("Close" !in dialog.textContent.orEmpty())
+                (dialog.querySelector("button[aria-label='Localized dismiss']") as HTMLElement).click()
+                assertEquals(1, dismissed)
+            }
+        }
+    }
+
+    @Test
+    fun nonmodalSheetCustomHeaderUsesItsDismissActionAndTitleLabel() {
+        var dismissed = 0
+        withHost(content = {
+            DomposableBottomSheet(
+                title = "Accessible title",
+                onDismiss = { dismissed++ },
+                modal = false,
+                headerContent = { dismiss ->
+                    Div {
+                        Span { Text("Localized sheet title") }
+                        Button(attrs = {
+                            attr("aria-label", "Localized dismiss")
+                            onClick { dismiss() }
+                        }) { Text("×") }
+                    }
+                },
+            ) { DomposableText("Sheet body") }
+        }) { root ->
+            val sheet = root.querySelector(".d-bottom-sheet-nonmodal") as HTMLElement
+            assertEquals("Accessible title", sheet.getAttribute("aria-label"))
+            assertTrue("Close" !in sheet.textContent.orEmpty())
+            (sheet.querySelector("button[aria-label='Localized dismiss']") as HTMLElement).click()
+            assertEquals(1, dismissed)
         }
     }
 
@@ -513,6 +643,20 @@ class HtmlHostIntegrationTest {
             assertEquals("14px", style.fontSize)
             assertEquals("20px", style.lineHeight)
         }
+}
+
+private fun pointerEvent(
+    type: String,
+    pointerId: Int,
+    x: Double,
+    y: Double,
+): org.w3c.dom.events.Event {
+    val options = js("({ bubbles: true, cancelable: true })")
+    options.pointerId = pointerId
+    options.clientX = x
+    options.clientY = y
+    val createEvent = js("(type, options) => new PointerEvent(type, options)")
+    return createEvent(type, options) as org.w3c.dom.events.Event
 }
 
 private data object HostScope : DomposableModifierElement

@@ -1,12 +1,10 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
-import io.github.samuolis.domposable.foundation.DomposableFontWeight
-import io.github.samuolis.domposable.foundation.DomposableTextAlignment
-import io.github.samuolis.domposable.foundation.DomposableTextAppearance
-import io.github.samuolis.domposable.foundation.DomposableTextDecoration
+import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.ui.DomposableDisclosureProps
 import io.github.samuolis.domposable.ui.DomposableFormProps
@@ -285,7 +283,7 @@ internal fun HtmlDomposableLink(
 ) {
     val currentOnClick by rememberUpdatedState(props.onClick)
     val tokens = LocalDomposableTokens.current
-    val appearance = props.appearance ?: tokens.components.link
+    val appearance = props.appearance ?: props.buttonAppearance?.textAppearance ?: tokens.components.link
     val fontSize =
         appearance?.fontSize ?: when (props.textStyle) {
             DomposableTextStyle.Body -> tokens.typography.bodySize
@@ -304,18 +302,17 @@ internal fun HtmlDomposableLink(
         A(href = props.href, attrs = {
             domposableAttributes(modifier)
             classes("d-link")
-            style {
-                property("display", "inline")
-                property("min-height", "0")
-                property("padding", "0")
-                property("align-items", "initial")
-            }
-            appearance?.maxLines?.let { maxLines ->
+            if (props.content != null) attr("aria-label", props.label)
+            props.buttonAppearance?.let { buttonAppearance ->
+                classes("d-button", "d-button-${props.buttonStyle.name.lowercase()}")
+                if (buttonAppearance.interaction != null) attr("data-d-button-interaction", "true")
+                style { styleAppearance(buttonAppearance) }
+            } ?: run {
                 style {
-                    property("display", "-webkit-box")
-                    property("-webkit-box-orient", "vertical")
-                    property("-webkit-line-clamp", maxLines.toString())
-                    property("overflow", "hidden")
+                    property("display", "inline")
+                    property("min-height", "0")
+                    property("padding", "0")
+                    property("align-items", "initial")
                 }
             }
             style {
@@ -324,21 +321,8 @@ internal fun HtmlDomposableLink(
                 }
                 fontSize?.let { property("font-size", "${it}px") }
                 lineHeight?.let { property("line-height", "${it}px") }
-                appearance?.fontWeight?.let { property("font-weight", it.cssValue()) }
-                when (appearance?.alignment) {
-                    DomposableTextAlignment.Start -> property("text-align", "start")
-                    DomposableTextAlignment.Center -> property("text-align", "center")
-                    DomposableTextAlignment.End -> property("text-align", "end")
-                    DomposableTextAlignment.Justify -> property("text-align", "justify")
-                    null -> Unit
-                }
-                when (appearance?.decoration) {
-                    DomposableTextDecoration.None -> property("text-decoration", "none")
-                    DomposableTextDecoration.Underline -> property("text-decoration", "underline")
-                    DomposableTextDecoration.LineThrough -> property("text-decoration", "line-through")
-                    null -> Unit
-                }
-                appearance?.selectable?.let { property("user-select", if (it) "text" else "none") }
+                appearance?.let { applyCatalogTextAppearance(it) }
+                constrainedControlWidth(modifier)
             }
             currentOnClick?.let { callback ->
                 onClick { event ->
@@ -353,19 +337,12 @@ internal fun HtmlDomposableLink(
                     }
                 }
             }
-        }) { Text(props.label) }
+        }) {
+            CompositionLocalProvider(
+                LocalMaterialButtonTextAppearance provides props.buttonAppearance?.textAppearance,
+            ) {
+                props.content?.invoke() ?: Text(props.label)
+            }
+        }
     }
 }
-
-private fun DomposableFontWeight.cssValue(): String =
-    when (this) {
-        DomposableFontWeight.Thin -> "100"
-        DomposableFontWeight.ExtraLight -> "200"
-        DomposableFontWeight.Light -> "300"
-        DomposableFontWeight.Normal -> "400"
-        DomposableFontWeight.Medium -> "500"
-        DomposableFontWeight.SemiBold -> "600"
-        DomposableFontWeight.Bold -> "700"
-        DomposableFontWeight.ExtraBold -> "800"
-        DomposableFontWeight.Black -> "900"
-    }

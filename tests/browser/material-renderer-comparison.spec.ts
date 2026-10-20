@@ -2,7 +2,7 @@ import { test, expect, Page, Locator } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const themes = ['light', 'dark', 'brand-light', 'brand-dark', 'overrides-light', 'overrides-dark', 'expressive-light', 'expressive-dark'];
-const families = ['states', 'actions', 'selection', 'inputs', 'surfaces', 'navigation', 'feedback', 'gestures', 'scaffold'];
+const families = ['states', 'integration', 'actions', 'selection', 'inputs', 'surfaces', 'navigation', 'feedback', 'gestures', 'scaffold'];
 const controls = [
   { key: 'checkbox', role: 'checkbox', name: 'Enabled unselected checkbox', tabs: 1 },
   { key: 'switch', role: 'switch', name: 'Enabled unselected switch', tabs: 2 },

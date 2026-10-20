@@ -12,6 +12,10 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class ReviewEvidenceTest(unittest.TestCase):
+    def test_review_requires_only_automatically_captured_platforms(self):
+        self.assertEqual(module.REVIEW_PLATFORMS, {'android', 'desktop', 'dom', 'wasm'})
+        self.assertEqual(module.REVIEW_ARTIFACTS, {'android-html-evidence'})
+
     def test_catalog_manifest_is_bounded_per_platform(self):
         manifest = {platform: [f'scenario-{i}' for i in range(24)] for platform in ('android', 'desktop', 'ios', 'dom', 'wasm')}
         module.validate_manifest(manifest)
@@ -36,6 +40,67 @@ class ReviewEvidenceTest(unittest.TestCase):
             upload.assert_not_called()
         with patch.object(module, 'evidence_bucket', return_value=({'tag_name': 'visual-evidence', 'id': 1}, [asset])), patch.object(module, 'urlopen', return_value=BytesIO(b'wrong image')):
             with self.assertRaises(ValueError): module.publish_images([('ios', 'shop', data, 'iOS shop')], 9, 1234)
+
+    def test_fresh_upload_uses_expected_url_without_rescanning_inventory(self):
+        data = module.panel([Image.new('RGB', (1, 1), 'white')], ['PR'])
+        with patch.object(module, 'evidence_bucket', return_value=({'tag_name': 'visual-evidence', 'id': 1}, [])), \
+             patch.object(module, 'release_assets') as inventory, \
+             patch.object(module.subprocess, 'run') as upload, \
+             patch.object(module, 'urlopen', return_value=BytesIO(data)) as download:
+            markdown = module.publish_images([('ios', 'shop', data, 'iOS shop')], 9, 1234)
+
+        inventory.assert_not_called()
+        upload.assert_called_once()
+        self.assertNotIn('--clobber', upload.call_args.args[0])
+        download.assert_called_once_with(
+            f'https://github.com/{module.REPO}/releases/download/visual-evidence/'
+            f'{module.asset_name(9, 1234, "ios", "shop", data)}',
+            timeout=30,
+        )
+        self.assertIn(download.call_args.args[0], markdown)
+
+    def test_published_asset_download_retries_not_found_then_succeeds(self):
+        url = 'https://example.test/review.png'
+        missing = module.HTTPError(url, 404, 'Not Found', None, None)
+        with patch.object(module, 'urlopen', side_effect=[missing, BytesIO(b'png')]) as download, \
+             patch.object(module.time, 'sleep') as sleep:
+            self.assertEqual(module.download_published_asset(url), b'png')
+
+        self.assertEqual(download.call_count, 2)
+        sleep.assert_called_once_with(1)
+
+    def test_published_asset_download_retries_transient_network_errors(self):
+        url = 'https://example.test/review.png'
+        errors = [module.HTTPError(url, 429, 'Rate limited', None, None),
+                  module.HTTPError(url, 503, 'Unavailable', None, None),
+                  module.URLError('temporary connection failure'), TimeoutError()]
+        for error in errors:
+            with self.subTest(error=type(error).__name__), \
+                 patch.object(module, 'urlopen', side_effect=[error, BytesIO(b'png')]) as download, \
+                 patch.object(module.time, 'sleep') as sleep:
+                self.assertEqual(module.download_published_asset(url), b'png')
+                self.assertEqual(download.call_count, 2)
+                sleep.assert_called_once_with(1)
+
+    def test_published_asset_download_raises_after_bounded_retries(self):
+        url = 'https://example.test/review.png'
+        missing = module.HTTPError(url, 404, 'Not Found', None, None)
+        with patch.object(module, 'urlopen', side_effect=[missing, missing, missing]) as download, \
+             patch.object(module.time, 'sleep') as sleep:
+            with self.assertRaises(module.HTTPError): module.download_published_asset(url)
+
+        self.assertEqual(download.call_count, 3)
+        self.assertEqual([call.args[0] for call in sleep.call_args_list], [1, 3])
+
+    def test_published_asset_download_does_not_retry_forbidden(self):
+        url = 'https://example.test/review.png'
+        forbidden = module.HTTPError(url, 403, 'Forbidden', None, None)
+        with patch.object(module, 'urlopen', side_effect=forbidden) as download, \
+             patch.object(module.time, 'sleep') as sleep:
+            with self.assertRaises(module.HTTPError): module.download_published_asset(url)
+
+        download.assert_called_once_with(url, timeout=30)
+        sleep.assert_not_called()
 
     def test_rejects_non_png_and_excessive_pixel_dimensions(self):
         with self.assertRaises(ValueError):

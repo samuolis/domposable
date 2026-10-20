@@ -158,12 +158,15 @@ DomposableChip(
         colors = defaults.chip.colors.copy(
             selectedContainer = DomposableColor(0xFFDCE2F9),
             selectedContent = DomposableColor(0xFF141B2C),
+            disabledSelectedContainer = DomposableColor(0xFFE8EAF0),
+            disabledSelectedContent = DomposableColor(0xFF4C5060),
+            disabledSelectedBorder = DomposableColor(0xFF707482),
         ),
     ),
 )
 ```
 
-`DomposableItemAppearance` separates the visual `minHeight` from `minimumInteractiveSize`, so a compact chip can retain a larger touch target. Its selected, disabled, focused, hovered and pressed colors belong to the actual control. Field colors distinguish unfocused, focused, error and disabled decoration; inner field padding and outline widths use the field appearance, while its outer modifier controls layout.
+`DomposableItemAppearance` separates the visual `minHeight` from `minimumInteractiveSize`, so a compact chip can retain a larger touch target. Its selected, disabled, focused, hovered and pressed colors belong to the actual control. `disabledSelectedContainer`, `disabledSelectedContent` and `disabledSelectedBorder` customize selected items while disabled. Omitting them preserves each component's existing disabled styling; controls using generic disabled colors fall back to those values. Border overrides apply to controls that draw borders or indicators, rather than adding a border to a native Material component that has none. Field colors distinguish unfocused, focused, error and disabled decoration; inner field padding and outline widths use the field appearance, while its outer modifier controls layout.
 
 The Material adapter uses the same stable AndroidX Graphics Shapes 1.1 morph engine as native Material for determinate loading indicators. Its portable circle-to-soft-burst geometry is checked against the installed Material implementation. This does not raise the stable Compose 1.12.2 baseline.
 
@@ -262,6 +265,8 @@ DomposableMenu(
 
 Menu content items leave dismissal to their `onClick` handler, matching Material. Set `expanded = false` explicitly when an action should close the menu. The `items` convenience list dismisses before invoking its action on both renderers.
 
+HTML menus use the browser top layer without blocking controls outside the visible popup. An outside pointer interaction requests `onDismiss` while still reaching the clicked control. Escape returns focus to the opener; moving focus or activating another control keeps the new focus. The app owns `expanded` and closes the menu in its dismissal callback.
+
 Date values are UTC milliseconds at the shared boundary. A range may have a start without an end while the user selects it; an end without a start or a reversed range is rejected. `yearRange` and `isDateSelectable` constrain selection. The caller owns picker mode, selected date and range; changing those values updates the mounted control.
 
 ```kotlin
@@ -290,6 +295,8 @@ DomposableScrollField(
 
 A slider uses `orientation = DomposableOrientation.Vertical` for vertical adjustment. `topToBottom` sets the vertical value direction. Time inputs support dial and typed modes; search supports full-screen, docked, contained and app-bar variants. These are component options, independent of the application's navigation approach.
 
+
+Modal bottom sheets request `onDismiss` for a backdrop click, Escape or a downward drag from the visible handle/header. Remove the sheet from composition in that callback. Controls inside the header keep their own interactions; horizontal, upward and cancelled drags keep the sheet open. Adaptive sheets hide the drag handle and disable header dragging in their expanded dialog presentation.
 
 A modal bottom sheet is the default. Use `modal = false` for a standard sheet inside the caller's layout; it does not make the background inert or trap focus. `DomposableScrim` is available for custom overlay hosts. Supply a label when it can be clicked to dismiss an overlay, and keep the modal's focus and dismissal policy in its host.
 

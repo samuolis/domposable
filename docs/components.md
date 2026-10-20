@@ -126,6 +126,20 @@ Tooltips provide supplemental descriptions. The control still needs its own acce
 
 Use `description = null` for a decorative Icon inside a labelled control. IconButton and FloatingActionButton take the control's accessible `label`; the decorative glyph does not become part of that name.
 
+For custom filled vector artwork, pass SVG path data rather than encoding it as a text glyph. The vector inherits the current content color, uses a 24-unit viewport by default, and follows the supplied modifier size on both renderers:
+
+```kotlin
+DomposableIcon(
+    vector = DomposableVectorIcon(
+        pathData = "M12 2 3 21h18L12 2z",
+    ),
+    description = "Warning",
+    modifier = DomposableModifier.size(24.dp),
+)
+```
+
+Set `evenOdd = true` for paths that use the even-odd fill rule, and provide a description for standalone meaningful icons. Decorative icons should use `description = null`.
+
 ## Content and collections
 
 Text layout can be configured without renderer-specific CSS:
@@ -196,6 +210,11 @@ if (confirming) {
     DomposableDialog(
         title = "Remove item?",
         onDismiss = { confirming = false },
+        layout = DomposableModalLayout(
+            maxWidth = 480.dp,
+            maxViewportFraction = 0.9f,
+            sectionSpacing = 12.dp,
+        ),
         actions = {
             DomposableButton("Remove", { confirming = false; onRemove() })
         },
@@ -206,6 +225,9 @@ if (confirming) {
 ```
 
 The feature owns dismissal and application effects. HTML uses a modal dialog with focus restoration; native uses Material's dialog. BottomSheet follows the same controlled presentation pattern.
+
+Dialog and bottom-sheet `layout` options bound the surface itself on both renderers. HTML `alignment` adapts placement to the browser viewport; native dialogs and sheets retain their platform placement. `padding` configures Basic/FullScreen dialog and sheet content; native Material alert and picker variants retain Material content spacing. Set `maxWidth`, `fillViewportWidth`, `padding`, `heightFraction`, `maxHeight`, `maxViewportFraction`, `viewportInset`, or `alignment` to match the host layout. Bottom-sheet swipe dismissal is enabled by default and can be disabled with `swipeToDismiss = false`. On HTML, modal backdrops only dismiss when a pointer starts and ends outside the dialog; older browsers use a focus-contained fallback overlay. Supply `headerContent` when the app needs a localized close label or custom header; that slot owns the accessible title and dismiss control.
+`sectionSpacing` sets the gap between HTML modal sections, including a sheet drag handle, header, body, and close action. HTML keeps its 16 dp default when this value is null. Native Basic/FullScreen dialogs and sheet content apply the value between their arranged sections; native sheets keep Material's drag-handle spacing, and native alert and picker variants retain Material's built-in section spacing.
 
 ## Complete vocabulary
 
@@ -292,3 +314,85 @@ data; a series uses either all explicit or all implicit indexes. The caller supp
 labels and formatters. HTML draws the line chart as SVG and the data table as a semantic table;
 native draws the chart with Canvas and supplies collection semantics. Pointer, touch and keyboard
 selection call the same feature callbacks. Cell actions take precedence over row activation.
+
+## Overlay alignment without CSS
+
+`DomposableBox` overlays its children on both renderers. `alignment` controls horizontal placement;
+`verticalAlignment` independently controls vertical placement and defaults to `alignment` for existing calls.
+For a bottom-centred overlay:
+
+```kotlin
+DomposableBox(
+    modifier = DomposableModifier.fillMaxSize().pointerPassthrough(),
+    alignment = DomposableAlignment.Center,
+    verticalAlignment = DomposableAlignment.End,
+) {
+    DomposableButton("Save", onClick = onSave)
+}
+```
+
+`pointerPassthrough()` allows clicks through the empty overlay while interactive descendants remain usable.
+Use `boxAlignment(horizontal, vertical)` on an individual child's modifier when children need different placements.
+These APIs replace application grid-area, child alignment and pointer-event CSS.
+
+## Control interaction styles
+
+Set shared interaction values through the theme rather than maintaining separate HTML selectors.
+Named font weights remain available; variable fonts can also use an exact weight such as
+`DomposableFontWeight(750)` on either renderer.
+
+```kotlin
+val defaults = LocalDomposableTokens.current.components
+DomposableMaterialTheme(
+    styles = defaults.copy(
+        iconButton = defaults.iconButton.copy(
+            disabledOpacity = 0.38f,
+            interaction = DomposableInteractionAppearance(
+                stateLayerOpacity = DomposableStateLayerOpacity(
+                    hovered = 0.09f,
+                    pressed = 0.16f,
+                    focused = 0f,
+                ),
+                focusRingColor = brandPrimary,
+                focusRingWidth = 3.dp,
+                focusRingOffset = 0.dp,
+            ),
+        ),
+    ),
+) {
+    DomposableIconButton(onClick = onClose, label = "Close") { CloseIcon() }
+}
+```
+
+`interaction = null` retains the renderer's Material defaults. A custom interaction owns feedback:
+its optional hovered/pressed container and content colors override the base appearance. An explicit
+state container replaces that state's content-color layer. `stateLayerOpacity` configures those
+layers when a state container is not supplied. Custom feedback replaces the default ripple or
+brightness treatment, so the two effects do not stack. Disabled controls do not react to hover or
+press; `disabledOpacity` affects the whole control. A loading button keeps its enabled colors and
+opacity while preventing another click.
+
+Focus width and offset are logical lengths on native and pixels on HTML. HTML retains a system
+focus outline in forced-colors mode and suppresses motion when reduced motion is requested.
+Button-styled links accept the same `DomposableButtonAppearance`; HTML retains an actual anchor,
+including modified-click behavior. Use `buttonStyle = DomposableButtonStyle.Outlined` to retain
+outlined-button defaults and feedback rather than implementing another hover rule.
+
+### Inline text without HTML or CSS
+
+Styled runs remain one wrapping text value on native and HTML. The surrounding typography role
+supplies the font family, size and line height; each run overrides only its own emphasis or color.
+Text is rendered literally, so a run containing `<strong>` does not insert markup.
+
+```kotlin
+DomposableText(
+    runs = listOf(
+        DomposableTextRun("Registration closes "),
+        DomposableTextRun("tomorrow", fontWeight = DomposableFontWeight.SemiBold),
+    ),
+    appearance = DomposableTextAppearance(role = DomposableTypographyRole.BodyMedium),
+)
+```
+
+Use `DomposableRichHtml` for already-authored formatted documents, rather than generating HTML
+strings for ordinary UI labels.

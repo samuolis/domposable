@@ -347,37 +347,91 @@ internal fun HtmlDataTable(
     modifier: DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
+    val hasExplicitSpacing = appearance.rowSpacing != null || appearance.columnSpacing != null
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-data-table-container", "d-data-table-${props.sizePreset.name.lowercase()}")
+            if (hasExplicitSpacing) classes("d-data-table-spaced")
+            if (appearance.rowSpacing != null) classes("d-data-table-row-spacing")
             style {
                 property("max-width", "100%")
+                property("min-width", "0")
                 property("overflow-x", if (props.allowHorizontalOverflow) "auto" else "hidden")
+            }
+            if (props.sizePreset == DomposableDataTableSize.Compact) {
+                ref { container ->
+                    val breakpoint = appearance.compactBreakpoint.value
+                    val update = {
+                        if (container.clientWidth <= breakpoint) {
+                            container.classList.add("d-data-table-compact-active")
+                        } else {
+                            container.classList.remove("d-data-table-compact-active")
+                        }
+                    }
+                    update()
+                    val observer =
+                        if (js("typeof ResizeObserver !== 'undefined'") as Boolean) {
+                            WindowResizeObserver { update() }
+                        } else {
+                            null
+                        }
+                    observer?.observe(container)
+                    onDispose { observer?.disconnect() }
+                }
             }
         }) {
             Table(attrs = {
+                classes("d-data-table")
+                if (hasExplicitSpacing) attr("role", "table")
                 attr("aria-rowcount", (props.rows.size + 1).toString())
                 attr("aria-colcount", props.columns.size.toString())
                 style {
-                    property("border-collapse", "collapse")
+                    property("border-collapse", if (hasExplicitSpacing) "separate" else "collapse")
                     property("table-layout", "fixed")
                     property("width", "100%")
+                    if (hasExplicitSpacing) {
+                        property(
+                            "--d-data-column-count",
+                            props.columns.size
+                                .coerceAtLeast(1)
+                                .toString(),
+                        )
+                        appearance.rowSpacing?.let { property("--d-data-row-spacing", "${it.value}px") }
+                        appearance.columnSpacing?.let { property("--d-data-column-spacing", "${it.value}px") }
+                    }
                     appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                     if (props.allowHorizontalOverflow) {
-                        property(
-                            "min-width",
-                            "${(props.columns.size * 160).coerceAtLeast(1)}px",
-                        )
+                        val minimumTableWidth =
+                            appearance.columnSpacing?.let { spacing ->
+                                "${(
+                                    props.columns.size * 160 + spacing.value *
+                                        (props.columns.size - 1).coerceAtLeast(
+                                            0,
+                                        )
+                                )
+                                    .coerceAtLeast(1f)}px"
+                            } ?: "${(props.columns.size * 160).coerceAtLeast(1)}px"
+                        property("min-width", minimumTableWidth)
                     }
                 }
             }) {
-                Thead {
-                    Tr {
+                Thead(attrs = { if (hasExplicitSpacing) attr("role", "rowgroup") }) {
+                    Tr(attrs = {
+                        if (hasExplicitSpacing) {
+                            attr("role", "row")
+                            attr("aria-rowindex", "1")
+                            style {
+                                appearance.headerContainer?.let { property("background-color", it.css()) }
+                                appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                            }
+                        }
+                    }) {
                         props.columns.forEach { column ->
                             key(column.key) {
                                 Th(attrs = {
                                     attr("scope", "col")
+                                    if (hasExplicitSpacing) attr("role", "columnheader")
                                     attr("aria-label", column.accessibleLabel)
                                     style {
                                         property("text-align", column.alignment.htmlTextAlign())
@@ -385,9 +439,20 @@ internal fun HtmlDataTable(
                                             "padding",
                                             appearance.cellPadding?.cssPadding() ?: props.sizePreset.htmlCellPadding(),
                                         )
-                                        appearance.headerContainer?.let { property("background-color", it.css()) }
+                                        if (!hasExplicitSpacing) {
+                                            appearance.headerContainer?.let {
+                                                property("background-color", it.css())
+                                            }
+                                        }
                                         appearance.headerContent?.let { property("color", it.css()) }
-                                        appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                        if (!hasExplicitSpacing) {
+                                            appearance.border?.let {
+                                                property(
+                                                    "border-bottom",
+                                                    "1px solid ${it.css()}",
+                                                )
+                                            }
+                                        }
                                         appearance.headerTextAppearance?.let { applyCatalogTextAppearance(it) }
                                     }
                                 }) { Text(column.label) }
@@ -395,7 +460,7 @@ internal fun HtmlDataTable(
                         }
                     }
                 }
-                Tbody {
+                Tbody(attrs = { if (hasExplicitSpacing) attr("role", "rowgroup") }) {
                     props.rows.forEachIndexed { index, row ->
                         key(row.key) {
                             val actions = props.columns.associate { it.key to props.cellAction(row.key, it.key) }
@@ -406,21 +471,94 @@ internal fun HtmlDataTable(
                                     }
                                 }
                             Tr(attrs = {
+                                classes("d-data-table-row")
+                                if (hasExplicitSpacing) attr("role", "row")
                                 attr("data-row-key", row.key)
                                 attr("aria-rowindex", (index + 2).toString())
                                 attr("aria-selected", row.selected.toString())
                                 row.accessibleLabel?.let { attr("aria-label", it) }
+                                val compactSurface =
+                                    appearance.compactRowAppearance?.takeIf {
+                                        props.sizePreset == DomposableDataTableSize.Compact
+                                    }
+                                if (rowAction != null) attr("tabindex", "0")
+                                if (rowAction != null && appearance.rowInteraction != null) {
+                                    attr("data-d-table-interaction", "true")
+                                }
                                 style {
-                                    (if (row.selected) appearance.selectedContainer else appearance.rowContainer)?.let {
-                                        property("background-color", it.css())
+                                    if (props.sizePreset == DomposableDataTableSize.Compact) {
+                                        property(
+                                            "--d-data-compact-label-width",
+                                            "${appearance.compactLabelMinWidth.value}px",
+                                        )
                                     }
-                                    (if (row.selected) appearance.selectedContent else appearance.rowContent)?.let {
-                                        property("color", it.css())
+                                    val rowContainer =
+                                        if (row.selected) {
+                                            appearance.selectedContainer ?: compactSurface?.container
+                                                ?: appearance.rowContainer
+                                        } else {
+                                            compactSurface?.container ?: appearance.rowContainer
+                                        }
+                                    val rowContent =
+                                        if (row.selected) {
+                                            appearance.selectedContent ?: compactSurface?.content
+                                                ?: appearance.rowContent
+                                        } else {
+                                            compactSurface?.content ?: appearance.rowContent
+                                        }
+                                    if (compactSurface == null || row.selected) {
+                                        rowContainer?.let { property("background-color", it.css()) }
+                                        rowContent?.let { property("color", it.css()) }
                                     }
-                                    appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                    if (props.sizePreset != DomposableDataTableSize.Compact) {
+                                        appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                    }
+                                    if (row.selected) {
+                                        appearance.selectedBorder?.let {
+                                            property(
+                                                "outline",
+                                                "${appearance.selectedBorderWidth?.value ?: 2f}px solid ${it.css()}",
+                                            )
+                                            property("outline-offset", "-2px")
+                                        }
+                                    }
+                                    compactSurface?.let { compact ->
+                                        compact.textAppearance?.let { applyCatalogTextAppearance(it) }
+                                        compact.container?.let { property("--d-data-compact-container", it.css()) }
+                                            ?: compact.tonalElevation?.let {
+                                                val tint =
+                                                    (4.5f * kotlin.math.ln(it.value + 1f) + 2f)
+                                                        .coerceAtMost(100f)
+                                                property(
+                                                    "--d-data-compact-container",
+                                                    "color-mix(in srgb,var(--d-surface-tint,var(--d-primary)) " +
+                                                        "$tint%,var(--d-surface))",
+                                                )
+                                            }
+                                        compact.content?.let { property("--d-data-compact-content", it.css()) }
+                                        compact.border?.let { property("--d-data-compact-border", it.css()) }
+                                        property("--d-data-compact-border-width", "${compact.borderWidth.value}px")
+                                        compact.shape?.let { property("--d-data-compact-radius", it.cssRadius()) }
+                                        compact.shadowElevation?.let {
+                                            property(
+                                                "--d-data-compact-shadow",
+                                                if (it.value ==
+                                                    0f
+                                                ) {
+                                                    "none"
+                                                } else {
+                                                    "0 ${it.value}px ${it.value * 2f}px rgb(0 0 0 / .12)"
+                                                },
+                                            )
+                                        }
+                                    }
+                                    if (rowAction !=
+                                        null
+                                    ) {
+                                        appearance.rowInteraction?.let { tableInteractionAppearance(it) }
+                                    }
                                 }
                                 if (rowAction != null) {
-                                    attr("tabindex", "0")
                                     onClick { rowAction(row.key) }
                                     onKeyDown { event ->
                                         if (event.key == "Enter" || event.key == " ") {
@@ -454,6 +592,7 @@ internal fun HtmlDataTable(
                                         if (column.key == props.rowHeaderColumnKey) {
                                             Th(attrs = {
                                                 attr("scope", "row")
+                                                if (hasExplicitSpacing) attr("role", "rowheader")
                                                 attr("data-column-label", column.accessibleLabel)
                                                 style {
                                                     property("text-align", column.alignment.htmlTextAlign())
@@ -462,25 +601,13 @@ internal fun HtmlDataTable(
                                                         appearance.cellPadding?.cssPadding()
                                                             ?: props.sizePreset.htmlCellPadding(),
                                                     )
-                                                    val rowContainer =
-                                                        if (row.selected) {
-                                                            appearance.selectedContainer
-                                                        } else {
-                                                            appearance.rowContainer
+                                                    if (!hasExplicitSpacing) {
+                                                        appearance.border?.let {
+                                                            property(
+                                                                "border-bottom",
+                                                                "1px solid ${it.css()}",
+                                                            )
                                                         }
-                                                    val rowContent =
-                                                        if (row.selected) {
-                                                            appearance.selectedContent
-                                                        } else {
-                                                            appearance.rowContent
-                                                        }
-                                                    rowContainer?.let { property("background-color", it.css()) }
-                                                    rowContent?.let { property("color", it.css()) }
-                                                    appearance.border?.let {
-                                                        property(
-                                                            "border-bottom",
-                                                            "1px solid ${it.css()}",
-                                                        )
                                                     }
                                                     if (!props.allowHorizontalOverflow) {
                                                         property(
@@ -493,6 +620,7 @@ internal fun HtmlDataTable(
                                         } else {
                                             Td(attrs = {
                                                 attr("data-column-label", column.accessibleLabel)
+                                                if (hasExplicitSpacing) attr("role", "cell")
                                                 style {
                                                     property("text-align", column.alignment.htmlTextAlign())
                                                     property(
@@ -500,25 +628,13 @@ internal fun HtmlDataTable(
                                                         appearance.cellPadding?.cssPadding()
                                                             ?: props.sizePreset.htmlCellPadding(),
                                                     )
-                                                    val rowContainer =
-                                                        if (row.selected) {
-                                                            appearance.selectedContainer
-                                                        } else {
-                                                            appearance.rowContainer
+                                                    if (!hasExplicitSpacing) {
+                                                        appearance.border?.let {
+                                                            property(
+                                                                "border-bottom",
+                                                                "1px solid ${it.css()}",
+                                                            )
                                                         }
-                                                    val rowContent =
-                                                        if (row.selected) {
-                                                            appearance.selectedContent
-                                                        } else {
-                                                            appearance.rowContent
-                                                        }
-                                                    rowContainer?.let { property("background-color", it.css()) }
-                                                    rowContent?.let { property("color", it.css()) }
-                                                    appearance.border?.let {
-                                                        property(
-                                                            "border-bottom",
-                                                            "1px solid ${it.css()}",
-                                                        )
                                                     }
                                                     if (!props.allowHorizontalOverflow) {
                                                         property(
@@ -607,13 +723,6 @@ private fun DomposableTextAlignment.htmlTextAlign() =
         DomposableTextAlignment.Center -> "center"
         DomposableTextAlignment.End -> "end"
         DomposableTextAlignment.Justify -> "justify"
-    }
-
-private fun DomposableDataTableSize.htmlCellPadding() =
-    when (this) {
-        DomposableDataTableSize.Compact -> "4px 6px"
-        DomposableDataTableSize.Standard -> "8px"
-        DomposableDataTableSize.Expanded -> "12px"
     }
 
 private fun drawHtmlChart(

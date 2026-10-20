@@ -89,6 +89,7 @@ import io.github.samuolis.domposable.ui.DomposableTabs
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.DomposableTheme
+import io.github.samuolis.domposable.ui.DomposableVectorIcon
 import io.github.samuolis.domposable.ui.LocalDomposableComponents
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.contentDescription
@@ -656,6 +657,11 @@ fun ComponentCatalogScreen(
             DomposableButton({}, style = DomposableButtonStyle.Outlined) { DomposableText("Outlined") }
             DomposableButton({}, enabled = false) { DomposableText("Disabled") }
             DomposableIconButton(onClick = {}, label = "Favorite") { DomposableIcon(symbol = "♡", description = null) }
+            DomposableIcon(
+                vector = DomposableVectorIcon("M12 2 3 21h18L12 2z"),
+                description = "Warning",
+                modifier = DomposableModifier.size(24.dp),
+            )
         }
         DomposableText("Forms and selection", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableTextField(text, { text = it }, "Example input", modifier = DomposableModifier.testId("catalog-input"))
@@ -741,6 +747,7 @@ fun ComponentCatalogScreen(
                             base.components.button.copy(
                                 container = DomposableColor(0xFF77503B),
                                 content = DomposableColor(0xFFFFFFFF),
+                                indicatorTrackColor = DomposableColor(0x40FFFFFF),
                                 shape = DomposableShape.Rounded(6.dp),
                                 minHeight = 48.dp,
                             ),

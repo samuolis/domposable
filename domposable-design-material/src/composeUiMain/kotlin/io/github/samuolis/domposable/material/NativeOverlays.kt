@@ -1,7 +1,15 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
@@ -25,11 +33,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.saveable.SaveableStateRegistry
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import io.github.samuolis.domposable.ui.DomposableBottomSheetProps
 import io.github.samuolis.domposable.ui.DomposableDialogProps
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
+import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.toComposeModifier
@@ -59,23 +70,36 @@ internal fun NativeDialog(
                 LocalSaveableStateRegistry provides featureRegistry,
             ) { content() }
         }
-        val close = @Composable { TextButton(props.onDismiss) { Text("Close") } }
+        val title = @Composable {
+            if (props.headerContent == null) {
+                Text(
+                    props.title,
+                    style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.headlineSmall),
+                )
+            } else {
+                CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) {
+                    props.headerContent?.invoke(props.onDismiss)
+                }
+            }
+        }
+        val close = @Composable {
+            if (props.headerContent == null) TextButton(props.onDismiss) { Text("Close") }
+        }
         when (props.variant) {
             DomposableDialogVariant.Alert -> {
                 AlertDialog(
                     onDismissRequest = props.onDismiss,
                     confirmButton = confirm,
                     dismissButton = close,
-                    title = {
-                        Text(
-                            props.title,
-                            style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.headlineSmall),
-                        )
-                    },
+                    title = title,
                     text = body,
                     modifier =
                         modifier.toComposeModifier().then(
-                            Modifier.nativeModifier(appearance, AlertDialogDefaults.shape),
+                            Modifier
+                                .nativeModifier(
+                                    appearance,
+                                    AlertDialogDefaults.shape,
+                                ).modalLayout(props.layout),
                         ),
                     shape = appearance.nativeShape(AlertDialogDefaults.shape),
                     containerColor = appearance.container?.nativeColor() ?: AlertDialogDefaults.containerColor,
@@ -87,7 +111,7 @@ internal fun NativeDialog(
                     onDismissRequest = props.onDismiss,
                     confirmButton = confirm,
                     dismissButton = close,
-                    modifier = modifier.toComposeModifier(),
+                    modifier = modifier.toComposeModifier().modalLayout(props.layout),
                     shape = appearance.nativeShape(DatePickerDefaults.shape),
                     tonalElevation = appearance.tonalElevation?.value?.dp ?: DatePickerDefaults.TonalElevation,
                     colors =
@@ -96,7 +120,7 @@ internal fun NativeDialog(
                                 appearance.container?.nativeColor() ?: androidx.compose.ui.graphics.Color.Unspecified,
                         ),
                 ) {
-                    Text(props.title)
+                    title()
                     body()
                 }
             }
@@ -106,8 +130,8 @@ internal fun NativeDialog(
                     onDismissRequest = props.onDismiss,
                     confirmButton = confirm,
                     dismissButton = close,
-                    title = { Text(props.title) },
-                    modifier = modifier.toComposeModifier(),
+                    title = title,
+                    modifier = modifier.toComposeModifier().modalLayout(props.layout),
                     shape = appearance.nativeShape(TimePickerDialogDefaults.shape),
                     containerColor = appearance.container?.nativeColor() ?: TimePickerDialogDefaults.containerColor,
                 ) { body() }
@@ -117,7 +141,7 @@ internal fun NativeDialog(
                 BasicAlertDialog(
                     onDismissRequest = props.onDismiss,
                     modifier =
-                        modifier.toComposeModifier().then(
+                        modifier.toComposeModifier().modalLayout(props.layout).then(
                             if (props.variant ==
                                 DomposableDialogVariant.FullScreen
                             ) {
@@ -147,14 +171,16 @@ internal fun NativeDialog(
                                 )
                             },
                     ) {
-                        Column {
-                            Text(
-                                props.title,
-                                style =
-                                    appearance.textAppearance.nativeTextStyle(
-                                        MaterialTheme.typography.headlineSmall,
-                                    ),
-                            )
+                        Column(
+                            modifier = Modifier.padding(layoutPadding(props.layout)),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    props.layout.sectionSpacing
+                                        ?.value
+                                        ?.dp ?: 0.dp,
+                                ),
+                        ) {
+                            title()
                             body()
                             confirm()
                             close()
@@ -179,14 +205,38 @@ internal fun NativeBottomSheet(
     val contentColor = appearance.content?.nativeColor() ?: contentColorFor(container)
     NativeWindow { featureRegistry ->
         val sheetContent: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
-            Text(props.title, style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.titleLarge))
-            CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) { content() }
-            TextButton(props.onDismiss) { Text("Close") }
+            Column(
+                modifier = Modifier.padding(layoutPadding(props.layout)),
+                verticalArrangement =
+                    Arrangement.spacedBy(
+                        props.layout.sectionSpacing
+                            ?.value
+                            ?.dp ?: 0.dp,
+                    ),
+            ) {
+                if (props.headerContent == null) {
+                    Text(
+                        props.title,
+                        style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.titleLarge),
+                    )
+                } else {
+                    CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) {
+                        props.headerContent?.invoke(props.onDismiss)
+                    }
+                }
+                CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) { content() }
+                if (props.headerContent == null) TextButton(props.onDismiss) { Text("Close") }
+            }
         }
         if (props.modal) {
             ModalBottomSheet(
                 onDismissRequest = props.onDismiss,
-                modifier = modifier.toComposeModifier().then(Modifier.nativeModifier(appearance, shape)),
+                sheetGesturesEnabled = props.layout.swipeToDismiss,
+                modifier =
+                    modifier
+                        .toComposeModifier()
+                        .then(Modifier.nativeModifier(appearance, shape))
+                        .modalLayout(props.layout),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,
@@ -197,7 +247,12 @@ internal fun NativeBottomSheet(
             BottomSheet(
                 state = state,
                 onDismissRequest = props.onDismiss,
-                modifier = modifier.toComposeModifier().then(Modifier.nativeModifier(appearance, shape)),
+                gesturesEnabled = props.layout.swipeToDismiss,
+                modifier =
+                    modifier
+                        .toComposeModifier()
+                        .then(Modifier.nativeModifier(appearance, shape))
+                        .modalLayout(props.layout),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,
@@ -206,4 +261,46 @@ internal fun NativeBottomSheet(
             ) { sheetContent() }
         }
     }
+}
+
+@Composable
+private fun Modifier.modalLayout(layout: DomposableModalLayout): Modifier {
+    val density = LocalDensity.current
+    val windowSize = LocalWindowInfo.current.containerSize
+    val viewportWidth = with(density) { windowSize.width.toDp() }
+    val viewportHeight = with(density) { windowSize.height.toDp() }
+    val inset = layout.viewportInset.value.dp
+    var result: Modifier = this
+    layout.maxWidth?.let { result = result.widthIn(max = it.value.dp) }
+    if (layout.fillViewportWidth) {
+        result = result.width((viewportWidth - inset * 2).coerceAtLeast(0.dp))
+    }
+    layout.heightFraction?.let {
+        result = result.height((viewportHeight * it - inset * 2).coerceAtLeast(0.dp))
+    }
+    val viewportMax =
+        layout.maxViewportFraction?.let {
+            minOf(viewportHeight * it, viewportHeight - inset * 2).coerceAtLeast(0.dp)
+        }
+    val explicitMax = layout.maxHeight?.value?.dp
+    val maximum =
+        when {
+            viewportMax != null && explicitMax != null -> minOf(viewportMax, explicitMax)
+            viewportMax != null -> viewportMax
+            else -> explicitMax
+        }
+    maximum?.let { result = result.heightIn(max = it) }
+    return result
+}
+
+private fun layoutPadding(layout: DomposableModalLayout): androidx.compose.foundation.layout.PaddingValues {
+    val insets =
+        layout.padding ?: return androidx.compose.foundation.layout
+            .PaddingValues(0.dp)
+    return androidx.compose.foundation.layout.PaddingValues(
+        start = insets.start.value.dp,
+        top = insets.top.value.dp,
+        end = insets.end.value.dp,
+        bottom = insets.bottom.value.dp,
+    )
 }

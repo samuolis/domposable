@@ -113,6 +113,12 @@ fun DomposableModifier.horizontalScroll(state: DomposableScrollState): Domposabl
 fun DomposableModifier.maxHeight(value: DomposableLength): DomposableModifier
 ```
 
+## maxViewportHeight
+
+```kotlin
+fun DomposableModifier.maxViewportHeight(fraction: Float = 1.0f, subtract: DomposableLength = 0.dp, unit: DomposableViewportUnit = DomposableViewportUnit.Dynamic): DomposableModifier
+```
+
 ## maxWidth
 
 ```kotlin
@@ -123,6 +129,12 @@ fun DomposableModifier.maxWidth(value: DomposableLength): DomposableModifier
 
 ```kotlin
 fun DomposableModifier.minHeight(value: DomposableLength): DomposableModifier
+```
+
+## minViewportHeight
+
+```kotlin
+fun DomposableModifier.minViewportHeight(fraction: Float = 1.0f, subtract: DomposableLength = 0.dp, unit: DomposableViewportUnit = DomposableViewportUnit.Dynamic): DomposableModifier
 ```
 
 ## minWidth
@@ -193,6 +205,12 @@ fun DomposableModifier.testId(value: String): DomposableModifier
 ```kotlin
 fun DomposableModifier.verticalScroll(): DomposableModifier
 fun DomposableModifier.verticalScroll(state: DomposableScrollState): DomposableModifier
+```
+
+## viewportHeight
+
+```kotlin
+fun DomposableModifier.viewportHeight(fraction: Float = 1.0f, subtract: DomposableLength = 0.dp, unit: DomposableViewportUnit = DomposableViewportUnit.Dynamic): DomposableModifier
 ```
 
 ## weight

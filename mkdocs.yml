@@ -22,6 +22,7 @@ nav:
       - Modifiers: modifiers.md
       - Adaptive layouts: adaptive.md
       - Large collections: performance.md
+      - Paged carousels: paged-carousel.md
       - Screens and navigation: screens.md
       - Navigation recipes and URLs: recipes.md
       - Integrations: integrations.md

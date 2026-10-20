@@ -4,8 +4,14 @@
 - Shared public APIs must compile for Android, iOS, JVM and semantic HTML (Kotlin/JS).
 - Keep platform rendering inside renderer source sets; never put Compose UI nodes under the DOM applier.
 - Verify public API changes, renderer behavior and packaged consumers before releasing.
-- Ordinary changes use branches and PRs. Only the approved release workflow may push a version-only commit directly to main.
+- Ordinary changes use branches and PRs. Version-only commits to main are owned by the existing release workflow.
 - Never commit signing credentials or reuse another application's release keys.
+
+## Standing merge and release authorization
+
+- Samuolis authorizes merging Domposable PRs once every required check passes and the current revision's visual evidence has been reviewed, then publishing the appropriate next SemVer release through `Bump and release` without asking for another approval.
+- This standing authorization includes the existing workflow's VERSION-only push to main, Maven Central publication, signed demo APK and website publication. It supersedes earlier Domposable merge or release holds.
+- Preserve all CI, API compatibility, visual-review and release-validation gates. This does not authorize arbitrary direct pushes to main, bypassing checks, changing credentials or releasing another repository.
 
 ## Pull request review
 

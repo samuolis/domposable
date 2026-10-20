@@ -1,13 +1,20 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,12 +23,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -32,10 +41,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -44,6 +56,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
@@ -53,6 +66,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableChartAppearance
+import io.github.samuolis.domposable.foundation.DomposableInteractionAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextAlignment
 import io.github.samuolis.domposable.ui.DomposableChartSeries
 import io.github.samuolis.domposable.ui.DomposableChartSize
@@ -385,14 +399,25 @@ internal fun NativeDataTable(
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
     val scroll = rememberScrollState()
     BoxWithConstraints(modifier.toComposeModifier().fillMaxWidth()) {
-        val naturalWidth = (props.columns.size.coerceAtLeast(1) * 160).dp
+        val columnCount = props.columns.size.coerceAtLeast(1)
+        val naturalWidth =
+            appearance.columnSpacing?.let { spacing ->
+                (columnCount * 160 + spacing.value * (props.columns.size - 1).coerceAtLeast(0)).dp
+            } ?: (columnCount * 160).dp
         val tableWidth = if (props.allowHorizontalOverflow) maxOf(maxWidth, naturalWidth) else maxWidth
-        Row(Modifier.fillMaxWidth().horizontalScroll(scroll)) {
+        val rowModifier =
+            if (props.allowHorizontalOverflow) {
+                Modifier.fillMaxWidth().horizontalScroll(scroll)
+            } else {
+                Modifier.fillMaxWidth()
+            }
+        Row(rowModifier) {
             Column(
                 Modifier.width(tableWidth).semantics {
                     collectionInfo = CollectionInfo(props.rows.size + 1, props.columns.size)
                 },
-                verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
+                verticalArrangement =
+                    Arrangement.spacedBy(appearance.rowSpacing?.value?.dp ?: props.sizePreset.nativeGap()),
             ) {
                 Row(
                     Modifier
@@ -403,6 +428,8 @@ internal fun NativeDataTable(
                             collectionItemInfo = CollectionItemInfo(0, 1, 0, props.columns.size)
                         },
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement =
+                        Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
                 ) {
                     props.columns.forEach { column ->
                         key(column.key) {
@@ -430,42 +457,243 @@ internal fun NativeDataTable(
                     key(row.key) {
                         val actions = props.columns.associate { it.key to props.cellAction(row.key, it.key) }
                         val rowAction = props.onRowActivate?.takeIf { actions.values.none { action -> action != null } }
+                        val compactSurface =
+                            props.sizePreset
+                                .takeIf { it == DomposableDataTableSize.Compact }
+                                ?.let { appearance.compactRowAppearance }
+                        val interaction = appearance.rowInteraction
+                        val interactionSource = remember(row.key) { MutableInteractionSource() }
+                        val pressed =
+                            rowAction != null && interaction != null &&
+                                interactionSource.collectIsPressedAsState().value
+                        val hovered =
+                            rowAction != null && interaction != null &&
+                                interactionSource.collectIsHoveredAsState().value
+                        val focused =
+                            rowAction != null && interaction != null &&
+                                interactionSource.collectIsFocusedAsState().value
+                        val rowShape = compactSurface?.shape?.nativeShape() ?: MaterialTheme.shapes.medium
+                        val enabled = rowAction != null
+                        val baseContainer =
+                            (if (row.selected) appearance.selectedContainer else appearance.rowContainer)?.nativeColor()
+                        val compactSurfaceContainer =
+                            compactSurface?.let { surface ->
+                                surface.container?.nativeColor()
+                                    ?: surface.tonalElevation?.let {
+                                        MaterialTheme.colorScheme.surfaceColorAtElevation(it.value.dp)
+                                    }
+                            }
+                        val compactContainer =
+                            if (row.selected) {
+                                appearance.selectedContainer?.nativeColor() ?: compactSurfaceContainer
+                            } else {
+                                compactSurfaceContainer
+                            }
+                        val rowContainer =
+                            when {
+                                !enabled -> {
+                                    compactContainer ?: baseContainer
+                                }
+
+                                pressed -> {
+                                    interaction?.pressedContainer?.nativeColor() ?: compactContainer
+                                        ?: baseContainer
+                                }
+
+                                hovered -> {
+                                    interaction?.hoveredContainer?.nativeColor() ?: compactContainer
+                                        ?: baseContainer
+                                }
+
+                                focused -> {
+                                    compactContainer ?: baseContainer
+                                }
+
+                                else -> {
+                                    compactContainer ?: baseContainer
+                                }
+                            }
+                        val baseContent =
+                            if (row.selected) {
+                                appearance.selectedContent ?: appearance.rowContent
+                            } else {
+                                appearance.rowContent
+                            }
+                        val rowContent =
+                            when {
+                                enabled && pressed -> {
+                                    interaction?.pressedContent ?: baseContent
+                                        ?: compactSurface?.content
+                                }
+
+                                enabled && hovered -> {
+                                    interaction?.hoveredContent ?: baseContent
+                                        ?: compactSurface?.content
+                                }
+
+                                else -> {
+                                    baseContent ?: compactSurface?.content
+                                }
+                            }
+                        val stateLayer = interaction?.stateLayerOpacity
+                        val resolvedContainer =
+                            when {
+                                !enabled || interaction == null -> {
+                                    rowContainer
+                                }
+
+                                pressed -> {
+                                    interaction.pressedContainer?.nativeColor()
+                                        ?: stateLayer?.let {
+                                            (rowContent?.nativeColor() ?: LocalContentColor.current)
+                                                .copy(alpha = it.pressed)
+                                                .compositeOver(rowContainer ?: Color.Transparent)
+                                        }
+                                        ?: rowContainer
+                                }
+
+                                hovered -> {
+                                    interaction.hoveredContainer?.nativeColor()
+                                        ?: stateLayer?.let {
+                                            (rowContent?.nativeColor() ?: LocalContentColor.current)
+                                                .copy(alpha = it.hovered)
+                                                .compositeOver(rowContainer ?: Color.Transparent)
+                                        }
+                                        ?: rowContainer
+                                }
+
+                                focused -> {
+                                    stateLayer?.let {
+                                        (rowContent?.nativeColor() ?: LocalContentColor.current)
+                                            .copy(alpha = it.focused)
+                                            .compositeOver(rowContainer ?: Color.Transparent)
+                                    } ?: rowContainer
+                                }
+
+                                else -> {
+                                    rowContainer
+                                }
+                            }
+                        val focusRing = interaction?.takeIf { enabled && focused }
                         Column(
                             Modifier
                                 .fillMaxWidth()
-                                .then(
-                                    (if (row.selected) appearance.selectedContainer else appearance.rowContainer)
-                                        ?.let { Modifier.background(it.nativeColor()) } ?: Modifier,
-                                ).drawBottomBorder(appearance.border?.nativeColor())
-                                .semantics {
+                                .drawButtonFocusRing(
+                                    focused && enabled,
+                                    focusRing?.focusRingColor?.nativeColor()
+                                        ?: if (focusRing != null) MaterialTheme.colorScheme.primary else null,
+                                    focusRing?.focusRingWidth?.value ?: if (focusRing != null) 3f else null,
+                                    focusRing?.focusRingOffset?.value ?: if (focusRing != null) 3f else null,
+                                    rowShape,
+                                ).then(
+                                    if (compactSurface != null) {
+                                        Modifier
+                                            .shadow(compactSurface.shadowElevation?.value?.dp ?: 0.dp, rowShape)
+                                            .background(resolvedContainer ?: Color.Transparent, rowShape)
+                                            .clip(rowShape)
+                                            .then(
+                                                (if (row.selected) appearance.selectedBorder else compactSurface.border)
+                                                    ?.let {
+                                                        Modifier.border(
+                                                            BorderStroke(
+                                                                (
+                                                                    if (row.selected) {
+                                                                        appearance.selectedBorderWidth
+                                                                    } else {
+                                                                        null
+                                                                    }
+                                                                )?.value?.dp
+                                                                    ?: compactSurface.borderWidth.value.dp,
+                                                                it.nativeColor(),
+                                                            ),
+                                                            rowShape,
+                                                        )
+                                                    } ?: Modifier,
+                                            )
+                                    } else {
+                                        resolvedContainer?.let { Modifier.background(it) } ?: Modifier
+                                    },
+                                ).then(
+                                    if (compactSurface == null) {
+                                        Modifier
+                                            .then(
+                                                appearance.selectedBorder
+                                                    ?.takeIf { row.selected }
+                                                    ?.let { selectedBorder ->
+                                                        Modifier.border(
+                                                            BorderStroke(
+                                                                appearance.selectedBorderWidth?.value?.dp ?: 2.dp,
+                                                                selectedBorder.nativeColor(),
+                                                            ),
+                                                            rowShape,
+                                                        )
+                                                    } ?: Modifier,
+                                            ).drawBottomBorder(appearance.border?.nativeColor())
+                                    } else {
+                                        Modifier
+                                    },
+                                ).semantics {
                                     collectionItemInfo =
                                         CollectionItemInfo(index + 1, 1, 0, props.columns.size.coerceAtLeast(1))
                                     row.accessibleLabel?.let { contentDescription = it }
                                     selected = row.selected
-                                }.then(if (rowAction != null) Modifier.clickable { rowAction(row.key) } else Modifier),
-                            verticalArrangement = Arrangement.spacedBy(props.sizePreset.nativeGap()),
+                                }.then(
+                                    if (rowAction == null) {
+                                        Modifier
+                                    } else if (interaction?.hasTableStateFeedback() != true) {
+                                        Modifier.clickable(
+                                            interactionSource = interactionSource,
+                                            role = Role.Button,
+                                        ) { rowAction(row.key) }
+                                    } else {
+                                        Modifier.clickable(
+                                            interactionSource = interactionSource,
+                                            indication = null,
+                                            role = Role.Button,
+                                        ) { rowAction(row.key) }
+                                    },
+                                ),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    appearance.rowSpacing?.value?.dp ?: props.sizePreset.nativeGap(),
+                                ),
                         ) {
                             CompositionLocalProvider(
                                 LocalTextStyle provides
-                                    appearance.textAppearance.nativeTextStyle(LocalTextStyle.current),
-                                LocalContentColor provides (
-                                    (if (row.selected) appearance.selectedContent else appearance.rowContent)
-                                        ?.nativeColor() ?: LocalContentColor.current
-                                ),
+                                    (compactSurface?.textAppearance ?: appearance.textAppearance)
+                                        .nativeTextStyle(LocalTextStyle.current),
+                                LocalContentColor provides (rowContent?.nativeColor() ?: LocalContentColor.current),
                             ) {
                                 if (props.sizePreset == DomposableDataTableSize.Compact) {
-                                    props.columns.forEach { column ->
-                                        NativeDataTableCell(
-                                            props,
-                                            row,
-                                            column,
-                                            actions[column.key],
-                                            Modifier.fillMaxWidth(),
-                                            compact = true,
-                                        )
+                                    val compactCells: @Composable () -> Unit = {
+                                        props.columns.forEach { column ->
+                                            NativeDataTableCell(
+                                                props,
+                                                row,
+                                                column,
+                                                actions[column.key],
+                                                Modifier.fillMaxWidth(),
+                                                compact = true,
+                                                compactCard = compactSurface != null,
+                                            )
+                                        }
+                                    }
+                                    if (compactSurface != null) {
+                                        Column(
+                                            Modifier.padding(16.dp),
+                                            verticalArrangement =
+                                                Arrangement.spacedBy(appearance.rowSpacing?.value?.dp ?: 0.dp),
+                                        ) { compactCells() }
+                                    } else {
+                                        compactCells()
                                     }
                                 } else {
-                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement =
+                                            Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
                                         props.columns.forEach { column ->
                                             NativeDataTableCell(
                                                 props,
@@ -474,6 +702,7 @@ internal fun NativeDataTable(
                                                 actions[column.key],
                                                 Modifier.weight(1f),
                                                 compact = false,
+                                                compactCard = false,
                                             )
                                         }
                                     }
@@ -487,6 +716,13 @@ internal fun NativeDataTable(
     }
 }
 
+private fun DomposableInteractionAppearance.hasTableStateFeedback(): Boolean =
+    stateLayerOpacity != null ||
+        hoveredContainer != null ||
+        hoveredContent != null ||
+        pressedContainer != null ||
+        pressedContent != null
+
 @Composable
 private fun NativeDataTableCell(
     props: DomposableDataTableProps,
@@ -495,27 +731,61 @@ private fun NativeDataTableCell(
     action: (() -> Unit)?,
     modifier: Modifier,
     compact: Boolean,
+    compactCard: Boolean,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
-    Column(
+    val cellPadding =
+        if (compact && compactCard) {
+            PaddingValues(0.dp)
+        } else {
+            appearance.cellPadding?.nativePadding() ?: PaddingValues(8.dp)
+        }
+    val compactTextAppearance =
+        if (compact && compactCard) appearance.compactRowAppearance?.textAppearance else null
+    val cellModifier =
         modifier
-            .padding(appearance.cellPadding?.nativePadding() ?: PaddingValues(8.dp))
+            .padding(cellPadding)
             .then(if (action != null) Modifier.clickable(onClick = action) else Modifier)
             .semantics {
                 if (column.key == props.rowHeaderColumnKey) heading()
                 contentDescription = column.accessibleLabel
-            },
-    ) {
-        if (compact) {
+            }
+    if (compact) {
+        Row(
+            cellModifier,
+            horizontalArrangement =
+                Arrangement.spacedBy(appearance.columnSpacing?.value?.dp ?: 0.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 column.label,
+                Modifier.weight(1f).widthIn(min = appearance.compactLabelMinWidth.value.dp),
                 color = appearance.headerContent?.nativeColor() ?: LocalContentColor.current,
-                style = appearance.headerTextAppearance.nativeTextStyle(MaterialTheme.typography.labelMedium),
+                style =
+                    appearance.headerTextAppearance.nativeTextStyle(
+                        compactTextAppearance.nativeTextStyle(MaterialTheme.typography.labelMedium),
+                    ),
             )
+            Box(
+                Modifier.weight(2f),
+                contentAlignment = column.alignment.nativeContentAlignment(),
+            ) {
+                props.cellContent(row, column)
+            }
         }
-        props.cellContent(row, column)
+    } else {
+        Box(cellModifier, contentAlignment = column.alignment.nativeContentAlignment()) {
+            props.cellContent(row, column)
+        }
     }
 }
+
+private fun DomposableTextAlignment.nativeContentAlignment() =
+    when (this) {
+        DomposableTextAlignment.Start, DomposableTextAlignment.Justify -> Alignment.CenterStart
+        DomposableTextAlignment.Center -> Alignment.Center
+        DomposableTextAlignment.End -> Alignment.CenterEnd
+    }
 
 private fun DomposableDataTableSize.nativeGap() =
     when (this) {

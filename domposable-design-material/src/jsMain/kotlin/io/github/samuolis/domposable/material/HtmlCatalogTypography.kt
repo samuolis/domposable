@@ -68,6 +68,7 @@ private fun StyleScope.applyMaxLines(appearance: DomposableTextAppearance) {
                 property("-webkit-line-clamp", lines.toString())
                 property("-webkit-box-orient", "vertical")
                 property("overflow", "hidden")
+                property("text-overflow", "ellipsis")
             }
 
             io.github.samuolis.domposable.foundation.DomposableTextOverflow.Visible -> {

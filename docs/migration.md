@@ -1,5 +1,20 @@
 # Migrating a Compose feature
 
+## Disabled selected item styling in 0.16
+
+`DomposableItemColors` adds optional `disabledSelectedContainer`, `disabledSelectedContent` and
+`disabledSelectedBorder` overrides. Leaving them null preserves existing component styling. Kotlin
+source calls keep their defaults, but the data-class constructor and `copy` binary signatures change:
+recompile consumers and custom providers when upgrading to 0.16. See the
+[component appearance example](material-catalog.md#component-defaults-and-local-overrides).
+
+## Button indicator track in 0.14
+
+`DomposableButtonAppearance.indicatorTrackColor` optionally sets the loading ring's track on
+native and HTML renderers. `null` keeps each renderer's existing default. Since this adds a field
+to a public data-class constructor and generated `copy`, previously compiled consumers must be
+rebuilt with 0.14; Kotlin source calls keep their defaults.
+
 Keep Compose runtime APIs (`remember`, effects, state, composition locals). Move shared UI to `Domposable*` components and `DomposableModifier`.
 
 Migration needs more than changing imports: props, units, layout constraints and renderer behavior are deliberately portable. Replace native `Modifier` chains with supported portable operations. Move unsupported platform widgets and native interop into provider implementations or platform slots.
@@ -12,11 +27,81 @@ Use Kotlin/JS with Compose HTML for the web host. Wasm is an optional separate C
 
 Migrate one feature first. Verify semantics, focus/keyboard behavior and measured content breakpoints on each target. Use the [coverage matrix](coverage.md) to identify controls needing a custom renderer.
 
+## Variable-font weights
+
+`DomposableFontWeight` is now a validated value type rather than an enum, so shared text and
+component appearances can use exact variable-font weights such as `DomposableFontWeight(750)`
+on native and HTML. The named `Thin` through `Black` values remain available. Recompile consumers;
+replace enum `entries`/`valueOf` usage with your app's explicit preset list and handle arbitrary
+weights in any previous exhaustive `when`. This is an intentional pre-1.0 breaking change requiring
+a minor release. Brand typography should configure weight through the theme rather than CSS.
+
+## Independent overlay alignment
+
+`DomposableBox` now accepts `verticalAlignment`, defaulting to `alignment`. Existing calls keep their
+previous top-start, centre or bottom-end placement. Specify the two axes for the other six combinations.
+The added `DomposableBoxProps` field changes constructor and `copy` binary signatures: recompile consumers
+and use a minor pre-1.0 release. The existing direct composable overload is retained, including positional content arguments.
+
+## Shared interaction appearance
+
+`DomposableButtonAppearance` adds optional `disabledOpacity` and `interaction` values. Null keeps
+previous rendering. The interaction model configures state colors, state-layer opacity and focus
+ring geometry for buttons, icon buttons and button-styled links. Its added data-class fields change
+constructor/copy signatures: recompile consumers as part of this pre-1.0 minor release.
+
+## Styled links and custom modal headers
+
+`DomposableLink` can opt into shared button geometry and select a `DomposableButtonStyle` while retaining
+anchor navigation on HTML. Dialog and bottom-sheet props can replace the default title/close pair with
+`headerContent`; apps that provide it own the heading semantics and localized dismiss label. The new
+optional fields preserve source calls after recompilation, but change props constructor/copy signatures.
+Recompile consumers and custom providers and include this pre-1.0 ABI change in a minor release.
+
+`DomposableModalLayout` adds explicit surface bounds, viewport insets, alignment and sheet swipe
+control to both renderers. Existing defaults retain the library's normal presentation; apps should
+set only the layout values required by their design. Its new optional `sectionSpacing` field keeps
+the HTML default when omitted and controls section gaps in HTML and native Basic/FullScreen dialogs
+and sheet content. Native sheet drag handles and Material alert/picker variants retain their
+platform-defined spacing. This data-class field is source-compatible through its default, but changes constructor and generated
+`copy` signatures; precompiled consumers must be rebuilt. Treat the API change as a minor release
+before 1.0. HTML modal dismissal now checks both pointer start and end positions, and its fallback path blocks background interaction and traps focus when
+native `showModal()` is unavailable.
+
 ## Layout arrangements
 
 `DomposableTextStyle.Inherit` is an optional addition for adapters that already own text styling. Existing presets are unchanged. Custom providers with an exhaustive text-style mapping must add the new enum case: inherit native ambient typography or HTML host typography, then apply explicit appearance overrides. Inherited HTML headings retain their heading semantics without forcing title typography.
 
 The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing Row/Column calls keep their layout defaults after recompilation. HTML FlowRow now defaults to top alignment rather than stretching, matching native; specify a different `alignment` when needed. The added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
+
+## Data-table track spacing
+
+`DomposableTableAppearance` adds optional `rowSpacing` and `columnSpacing` values for shared data-table renderers. Null values keep the existing size-preset layout. Set them to tune gaps between rows and columns; Compact mode also applies `rowSpacing` between fields within each card, while `columnSpacing` controls each card's label-to-value gap. `cellPadding` continues to control content insets.
+
+```kotlin
+val appearance = DomposableTableAppearance(
+    rowSpacing = 0.dp,
+    columnSpacing = 8.dp,
+    cellPadding = DomposableInsets(top = 4.dp, bottom = 4.dp),
+)
+
+DomposableDataTable(
+    columns = listOf(DomposableDataTableColumn("name", "Name")),
+    rows = listOf(DomposableDataTableRow("Ada Lovelace")),
+    rowHeaderColumnKey = "name",
+    appearance = appearance,
+) { row, _ ->
+    DomposableText(row.key)
+}
+```
+
+The new data-class fields preserve source calls after recompilation but change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this pre-1.0 binary break requires a minor release.
+
+## HTML navigation sizing and adaptive sheets
+
+HTML `DomposableNavDisplay` relays its host's allocated flex space through each entry while honoring explicit height modifiers. Entry content owns its scrolling; callers that relied on the display's previous implicit scroll area should add `verticalScroll()` to that content. This layout correction does not change the public API.
+
+`BottomOnCompact` sheets now center in expanded view and hide their drag handle there. Compact view retains bottom placement and swipe dismissal. Header dragging is disabled whenever the handle is hidden.
 
 ## Anchored and rich-text menus
 
@@ -128,3 +213,24 @@ Image cards can use the same `DomposableBox`, `DomposableImage`, gradient backgr
 An existing router can adopt the [caller-owned browser-history binding](caller-owned-browser-history.md) without adopting `DomposableNavigator`, the screen registry or KSP. Provide a snapshot codec and URL policy, then restore application state from its callback. The library handles physical history positions and retained branches; app-specific asynchronous scroll restoration stays with the app.
 
 Row, badge, avatar and segmented-button props gain optional layout/content fields. Ordinary source calls retain defaults after recompilation. Their constructor/copy signatures and affected convenience overloads change, so this is a pre-1.0 **breaking ABI change** requiring the 0.9 minor release. Recompile applications and custom providers together. Custom providers must honor supplied content slots, equal-width segments and stretched rows or inherit the Material defaults. New modifier operations require custom exhaustive renderer mappings to be updated; the stock native and HTML adapters already support them.
+
+Text with independently styled runs can use `DomposableText(runs = ...)`. Unspecified run values
+inherit the surrounding text style, and `contentAlpha` changes only that run's foreground. Direct
+`DomposableTextProps` construction must supply `text` equal to the concatenated run text, keeping
+renderer content and accessibility text consistent. Existing plain text calls remain unchanged.
+
+`DomposableTabs(labels = ...)` remains source-compatible. Migrate to `DomposableTabs(items = ...)`
+when tabs need stable keys, per-tab enabled state, accessible names, test tags, icons, badges, or
+individual text appearance. Supply a localized `label` for the tab list; keyboard navigation wraps
+among enabled tabs and supports Home and End.
+
+The next minor release adds optional paged carousel layout, keyed tab items, viewport-height
+modifiers and button content alignment. Constructors/copy methods and affected composable
+signatures change: recompile consumers and custom providers together. Existing label-only tabs,
+Material carousel variants and centered button defaults remain available. New modifier operations
+must be handled by custom exhaustive adapters; stock Compose UI and HTML adapters handle them.
+
+Use `contentAlignment = DomposableAlignment.Start` in shared button/link appearance instead of
+HTML `justify-content` overrides. Custom content slots inherit the button text appearance, and
+full-width rows can lay out weighted labels and trailing content on both renderers. See the
+[design-system example](design-systems.md#aligning-custom-control-content).

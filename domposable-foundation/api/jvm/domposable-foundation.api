@@ -23,8 +23,8 @@ public final class io/github/samuolis/domposable/foundation/DomposableAutocomple
 public final class io/github/samuolis/domposable/foundation/DomposableButtonAppearance {
 	public static final field $stable I
 	public fun <init> ()V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLjava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableAlignment;Lio/github/samuolis/domposable/foundation/DomposableColor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLjava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableAlignment;Lio/github/samuolis/domposable/foundation/DomposableColor;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component10-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun component11 ()Lio/github/samuolis/domposable/foundation/DomposableInsets;
@@ -34,7 +34,11 @@ public final class io/github/samuolis/domposable/foundation/DomposableButtonAppe
 	public final fun component15-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun component16 ()F
 	public final fun component17 ()F
+	public final fun component18 ()Ljava/lang/Float;
+	public final fun component19 ()Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;
 	public final fun component2-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component20 ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
+	public final fun component21-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component3-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component4-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component5-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
@@ -42,21 +46,25 @@ public final class io/github/samuolis/domposable/foundation/DomposableButtonAppe
 	public final fun component7-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun component8 ()Lio/github/samuolis/domposable/foundation/DomposableShape;
 	public final fun component9-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
-	public final fun copy-4_fCvtc (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FF)Lio/github/samuolis/domposable/foundation/DomposableButtonAppearance;
-	public static synthetic fun copy-4_fCvtc$default (Lio/github/samuolis/domposable/foundation/DomposableButtonAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FFILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableButtonAppearance;
+	public final fun copy-VWIuGoU (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLjava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableAlignment;Lio/github/samuolis/domposable/foundation/DomposableColor;)Lio/github/samuolis/domposable/foundation/DomposableButtonAppearance;
+	public static synthetic fun copy-VWIuGoU$default (Lio/github/samuolis/domposable/foundation/DomposableButtonAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableShape;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableInsets;FLio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLjava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableAlignment;Lio/github/samuolis/domposable/foundation/DomposableColor;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableButtonAppearance;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getBorderWidth-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun getContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getContentAlignment ()Lio/github/samuolis/domposable/foundation/DomposableAlignment;
 	public final fun getContentPadding ()Lio/github/samuolis/domposable/foundation/DomposableInsets;
 	public final fun getContentSpacing--zYZv-Q ()F
 	public final fun getDisabledBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getDisabledContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getDisabledContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getDisabledOpacity ()Ljava/lang/Float;
 	public final fun getHoveredScale ()F
 	public final fun getIndicatorSize-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun getIndicatorStrokeWidth-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun getIndicatorTrackColor-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getInteraction ()Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;
 	public final fun getMinHeight-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun getMinWidth-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun getPressedScale ()F
@@ -471,19 +479,31 @@ public final class io/github/samuolis/domposable/foundation/DomposableFabSize : 
 	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableFabSize;
 }
 
-public final class io/github/samuolis/domposable/foundation/DomposableFontWeight : java/lang/Enum {
-	public static final field Black Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field Bold Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field ExtraBold Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field ExtraLight Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field Light Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field Medium Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field Normal Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field SemiBold Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static final field Thin Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
-	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+public final class io/github/samuolis/domposable/foundation/DomposableFontWeight {
+	public static final field Companion Lio/github/samuolis/domposable/foundation/DomposableFontWeight$Companion;
+	public static final synthetic fun box-impl (I)Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public static fun constructor-impl (I)I
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (ILjava/lang/Object;)Z
+	public static final fun equals-impl0 (II)Z
+	public final fun getWeight ()I
+	public fun hashCode ()I
+	public static fun hashCode-impl (I)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (I)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()I
+}
+
+public final class io/github/samuolis/domposable/foundation/DomposableFontWeight$Companion {
+	public final fun getBlack-yudcKyk ()I
+	public final fun getBold-yudcKyk ()I
+	public final fun getExtraBold-yudcKyk ()I
+	public final fun getExtraLight-yudcKyk ()I
+	public final fun getLight-yudcKyk ()I
+	public final fun getMedium-yudcKyk ()I
+	public final fun getNormal-yudcKyk ()I
+	public final fun getSemiBold-yudcKyk ()I
+	public final fun getThin-yudcKyk ()I
 }
 
 public final class io/github/samuolis/domposable/foundation/DomposableGradientStop {
@@ -585,6 +605,34 @@ public final class io/github/samuolis/domposable/foundation/DomposableInsets {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/samuolis/domposable/foundation/DomposableInteractionAppearance {
+	public static final field $stable I
+	public fun <init> ()V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableStateLayerOpacity;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableStateLayerOpacity;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component2-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component3-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component4-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component5 ()Lio/github/samuolis/domposable/foundation/DomposableStateLayerOpacity;
+	public final fun component6-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component7-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun component8-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun copy-AuNN0pk (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableStateLayerOpacity;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;)Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;
+	public static synthetic fun copy-AuNN0pk$default (Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableStateLayerOpacity;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFocusRingColor-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getFocusRingOffset-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun getFocusRingWidth-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun getHoveredContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getHoveredContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getPressedContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getPressedContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getStateLayerOpacity ()Lio/github/samuolis/domposable/foundation/DomposableStateLayerOpacity;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableItemAppearance {
 	public static final field $stable I
 	public fun <init> ()V
@@ -624,8 +672,8 @@ public final class io/github/samuolis/domposable/foundation/DomposableItemAppear
 public final class io/github/samuolis/domposable/foundation/DomposableItemColors {
 	public static final field $stable I
 	public fun <init> ()V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component10-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component11-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
@@ -636,7 +684,10 @@ public final class io/github/samuolis/domposable/foundation/DomposableItemColors
 	public final fun component16-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component17-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component18-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component19-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component2-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component20-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component21-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component3-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component4-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component5-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
@@ -644,8 +695,8 @@ public final class io/github/samuolis/domposable/foundation/DomposableItemColors
 	public final fun component7-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component8-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component9-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
-	public final fun copy--wtWBfo (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;)Lio/github/samuolis/domposable/foundation/DomposableItemColors;
-	public static synthetic fun copy--wtWBfo$default (Lio/github/samuolis/domposable/foundation/DomposableItemColors;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableItemColors;
+	public final fun copy-AdOAHkk (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;)Lio/github/samuolis/domposable/foundation/DomposableItemColors;
+	public static synthetic fun copy-AdOAHkk$default (Lio/github/samuolis/domposable/foundation/DomposableItemColors;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableItemColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
@@ -653,6 +704,9 @@ public final class io/github/samuolis/domposable/foundation/DomposableItemColors
 	public final fun getDisabledBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getDisabledContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getDisabledContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getDisabledSelectedBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getDisabledSelectedContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getDisabledSelectedContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getFocusedBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getFocusedContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getFocusedContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
@@ -1151,10 +1205,18 @@ public final class io/github/samuolis/domposable/foundation/DomposableSwitchColo
 public final class io/github/samuolis/domposable/foundation/DomposableTableAppearance {
 	public static final field $stable I
 	public fun <init> ()V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component10 ()Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
+	public final fun component11 ()Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;
+	public final fun component12 ()Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;
+	public final fun component13-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun component14-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun component15--zYZv-Q ()F
+	public final fun component16--zYZv-Q ()F
+	public final fun component17-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun component18-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun component2-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component3-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component4-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
@@ -1163,16 +1225,24 @@ public final class io/github/samuolis/domposable/foundation/DomposableTableAppea
 	public final fun component7-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component8 ()Lio/github/samuolis/domposable/foundation/DomposableInsets;
 	public final fun component9 ()Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
-	public final fun copy-7gq8u7g (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;)Lio/github/samuolis/domposable/foundation/DomposableTableAppearance;
-	public static synthetic fun copy-7gq8u7g$default (Lio/github/samuolis/domposable/foundation/DomposableTableAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableTableAppearance;
+	public final fun copy-MvUs3JQ (Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;)Lio/github/samuolis/domposable/foundation/DomposableTableAppearance;
+	public static synthetic fun copy-MvUs3JQ$default (Lio/github/samuolis/domposable/foundation/DomposableTableAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;Lio/github/samuolis/domposable/foundation/DomposableColor;Lio/github/samuolis/domposable/foundation/DomposableLength;FFLio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;ILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableTableAppearance;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getCellPadding ()Lio/github/samuolis/domposable/foundation/DomposableInsets;
+	public final fun getColumnSpacing-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun getCompactBreakpoint--zYZv-Q ()F
+	public final fun getCompactLabelMinWidth--zYZv-Q ()F
+	public final fun getCompactRowAppearance ()Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;
 	public final fun getHeaderContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getHeaderContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getHeaderTextAppearance ()Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
 	public final fun getRowContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getRowContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getRowInteraction ()Lio/github/samuolis/domposable/foundation/DomposableInteractionAppearance;
+	public final fun getRowSpacing-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
+	public final fun getSelectedBorder-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
+	public final fun getSelectedBorderWidth-GJgBY8Y ()Lio/github/samuolis/domposable/foundation/DomposableLength;
 	public final fun getSelectedContainer-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getSelectedContent-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getTextAppearance ()Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
@@ -1210,22 +1280,22 @@ public final class io/github/samuolis/domposable/foundation/DomposableTextAppear
 	public final fun component13-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun component14 ()I
 	public final fun component2 ()Ljava/lang/Float;
-	public final fun component3 ()Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public final fun component3-WUPjbl4 ()Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
 	public final fun component4 ()Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
 	public final fun component5 ()Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
 	public final fun component6 ()Ljava/lang/Integer;
 	public final fun component7 ()Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;
 	public final fun component8 ()Ljava/lang/Boolean;
 	public final fun component9 ()Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
-	public final fun copy-sGmWYSM (Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableTypographyRole;ZLio/github/samuolis/domposable/foundation/DomposableColor;I)Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
-	public static synthetic fun copy-sGmWYSM$default (Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableTypographyRole;ZLio/github/samuolis/domposable/foundation/DomposableColor;IILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
+	public final fun copy-jMRsLeQ (Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableTypographyRole;ZLio/github/samuolis/domposable/foundation/DomposableColor;I)Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
+	public static synthetic fun copy-jMRsLeQ$default (Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;Ljava/lang/Float;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableFontWeight;Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;Ljava/lang/Integer;Lio/github/samuolis/domposable/foundation/DomposableTextOverflow;Ljava/lang/Boolean;Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;Ljava/lang/Float;Lio/github/samuolis/domposable/foundation/DomposableTypographyRole;ZLio/github/samuolis/domposable/foundation/DomposableColor;IILjava/lang/Object;)Lio/github/samuolis/domposable/foundation/DomposableTextAppearance;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAlignment ()Lio/github/samuolis/domposable/foundation/DomposableTextAlignment;
 	public final fun getColor-3Eq_BN4 ()Lio/github/samuolis/domposable/foundation/DomposableColor;
 	public final fun getDecoration ()Lio/github/samuolis/domposable/foundation/DomposableTextDecoration;
 	public final fun getEmphasized ()Z
 	public final fun getFontSize ()Ljava/lang/Float;
-	public final fun getFontWeight ()Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
+	public final fun getFontWeight-WUPjbl4 ()Lio/github/samuolis/domposable/foundation/DomposableFontWeight;
 	public final fun getLetterSpacing ()Ljava/lang/Float;
 	public final fun getLineHeight ()Ljava/lang/Float;
 	public final fun getLiveRegion ()Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;

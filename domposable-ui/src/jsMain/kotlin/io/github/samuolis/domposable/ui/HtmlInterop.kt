@@ -72,6 +72,9 @@ fun DomposableModifier.htmlAttributes(attributes: AttrsScope<*>.() -> Unit): Dom
 
 /** Semantic attributes attach to the control, not to its layout wrappers. */
 fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableModifier) {
+    modifier.elements.filterIsInstance<DomposableModifierOperation.TestId>().firstOrNull()?.let {
+        attr("data-testid", it.value)
+    }
     modifier.elements.forEach { element ->
         when (element) {
             is DomposableModifierOperation.Description -> {
@@ -79,7 +82,7 @@ fun <T : HTMLElement> AttrsScope<T>.domposableAttributes(modifier: DomposableMod
             }
 
             is DomposableModifierOperation.TestId -> {
-                attr("data-testid", element.value)
+                Unit
             }
 
             is HtmlAttributes -> {
@@ -133,7 +136,12 @@ fun DomposableHtmlModifiers(
     modifier: DomposableModifier,
     operationRenderer: DomposableHtmlModifierElementRenderer? = null,
     content: @Composable () -> Unit,
-) = DomposableHtmlModifiers(modifier, operationRenderer, decorationRenderer = null, content)
+) = DomposableHtmlModifiers(
+    modifier,
+    wrapSemantics = false,
+    operationRenderer = operationRenderer,
+    content = content,
+)
 
 /** A matching decoration owns the element; returning null falls back to attribute handling. */
 @Composable
@@ -142,20 +150,42 @@ fun DomposableHtmlModifiers(
     operationRenderer: DomposableHtmlModifierElementRenderer? = null,
     decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
     content: @Composable () -> Unit,
+) = DomposableHtmlModifiers(
+    modifier,
+    wrapSemantics = false,
+    operationRenderer = operationRenderer,
+    decorationRenderer = decorationRenderer,
+    content = content,
+)
+
+/**
+ * Applies semantic attributes as ordered wrappers for raw content that has no semantic root.
+ * Existing overloads continue to leave these attributes for component roots.
+ */
+@Composable
+fun DomposableHtmlModifiers(
+    modifier: DomposableModifier,
+    wrapSemantics: Boolean,
+    operationRenderer: DomposableHtmlModifierElementRenderer? = null,
+    decorationRenderer: DomposableHtmlModifierDecorationRenderer? = null,
+    content: @Composable () -> Unit,
 ) {
     val renderer = operationRenderer ?: LocalDomposableHtmlModifierRenderer.current
     val decoration = decorationRenderer ?: LocalDomposableHtmlModifierDecorationRenderer.current
     val layout = modifier.elements.filter(::isChildLayoutOperation)
     val visual =
-        modifier.elements.filterNot(::isChildLayoutOperation).filterNot {
-            it is DomposableModifierOperation.Description ||
-                it is DomposableModifierOperation.TestId ||
-                it is HtmlAttributes
+        modifier.elements.filterNot(::isChildLayoutOperation).filterNot { element ->
+            !wrapSemantics &&
+                (
+                    element is DomposableModifierOperation.Description ||
+                        element is DomposableModifierOperation.TestId ||
+                        element is HtmlAttributes
+                )
         }
     val pointerPassthrough = visual.contains(DomposableModifierOperation.PointerPassthrough)
     val stackingOrder = layout.sumOf { if (it is DomposableModifierOperation.ZIndex) it.value.toDouble() else 0.0 }
     if (layout.isEmpty()) {
-        HtmlModifierBox(visual, 0, renderer, decoration, false, pointerPassthrough, content)
+        HtmlModifierBox(visual, 0, renderer, decoration, false, false, pointerPassthrough, wrapSemantics, content)
     } else {
         Div(attrs = {
             attr("data-domposable-layout-item", "true")
@@ -193,7 +223,7 @@ fun DomposableHtmlModifiers(
                     }
                 }
             }
-        }) { HtmlModifierBox(visual, 0, renderer, decoration, true, pointerPassthrough, content) }
+        }) { HtmlModifierBox(visual, 0, renderer, decoration, true, false, pointerPassthrough, wrapSemantics, content) }
     }
 }
 
@@ -204,7 +234,9 @@ private fun HtmlModifierBox(
     operationRenderer: DomposableHtmlModifierElementRenderer?,
     decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
     fillAvailableHeight: Boolean,
+    fillAvailableWidth: Boolean,
     pointerPassthrough: Boolean,
+    wrapSemantics: Boolean,
     content: @Composable () -> Unit,
 ) {
     if (index == elements.size) {
@@ -238,35 +270,112 @@ private fun HtmlModifierBox(
                     }
                 }
             } == DomposableModifierOperation.FillHeight
+    val fillWidthAhead =
+        operation != DomposableModifierOperation.FillWidth &&
+            elements.asSequence().drop(index).firstOrNull { candidate ->
+                when (candidate) {
+                    DomposableModifierOperation.FillWidth,
+                    is DomposableModifierOperation.Width,
+                    is DomposableModifierOperation.FillWidthFraction,
+                    -> {
+                        true
+                    }
+
+                    is DomposableModifierOperation.Scroll -> {
+                        candidate.orientation == DomposableOrientation.Horizontal
+                    }
+
+                    is DomposableModifierOperation.StatefulScroll -> {
+                        candidate.orientation ==
+                            DomposableOrientation.Horizontal
+                    }
+
+                    else -> {
+                        false
+                    }
+                }
+            } == DomposableModifierOperation.FillWidth
+    val inheritedWidth = fillAvailableWidth || fillWidthAhead
     if (operation == null) {
         val decoration = decorationRenderer?.invoke(element)
         if (decoration != null) {
-            decoration {
-                HtmlModifierBox(
-                    elements,
-                    index + 1,
-                    operationRenderer,
-                    decorationRenderer,
-                    fillAvailableHeight,
-                    pointerPassthrough,
-                    content,
-                )
+            val decoratedContent: @Composable () -> Unit = {
+                decoration {
+                    HtmlModifierBox(
+                        elements,
+                        index + 1,
+                        operationRenderer,
+                        decorationRenderer,
+                        fillAvailableHeight,
+                        inheritedWidth,
+                        pointerPassthrough,
+                        wrapSemantics,
+                        content,
+                    )
+                }
+            }
+            if (inheritedWidth || fillAvailableHeight || fillHeightAhead) {
+                Div(attrs = {
+                    if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
+                    style {
+                        property("box-sizing", "border-box")
+                        property("display", "grid")
+                        property("grid-template-columns", "minmax(0, 1fr)")
+                        if (inheritedWidth && !fillAvailableHeight && !fillHeightAhead) {
+                            property("align-items", "start")
+                        }
+                        if (fillAvailableHeight || fillHeightAhead) {
+                            property("grid-template-rows", "minmax(0, 1fr)")
+                        }
+                        if (inheritedWidth) {
+                            property("width", "100%")
+                            property("min-width", "0")
+                        }
+                        if (fillAvailableHeight || fillHeightAhead) {
+                            property("height", "100%")
+                            property("min-height", "0")
+                        }
+                    }
+                }) { decoratedContent() }
+            } else {
+                decoratedContent()
             }
             return
         }
         Div(attrs = {
             if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
-            if (fillAvailableHeight || fillHeightAhead) {
+            if (fillAvailableHeight || fillHeightAhead || inheritedWidth) {
                 style {
+                    property("box-sizing", "border-box")
+                    if (inheritedWidth) {
+                        property("width", "100%")
+                        property("min-width", "0")
+                    }
                     property("display", "grid")
                     property("grid-template-columns", "minmax(0, 1fr)")
-                    property("grid-template-rows", "minmax(0, 1fr)")
+                    if (inheritedWidth && !fillAvailableHeight && !fillHeightAhead) {
+                        property("align-items", "start")
+                    }
+                    if (fillAvailableHeight || fillHeightAhead) {
+                        property("grid-template-rows", "minmax(0, 1fr)")
+                    }
                     if (fillHeightAhead) property("height", "100%")
+                    if (fillAvailableHeight || fillHeightAhead) property("min-height", "0")
                 }
             }
             val attributes =
-                operationRenderer?.invoke(element)
-                    ?: error("No HTML renderer handled application modifier element ${element::class.simpleName}")
+                when (element) {
+                    is HtmlAttributes -> {
+                        element.attributes
+                    }
+
+                    else -> {
+                        operationRenderer?.invoke(element)
+                            ?: error(
+                                "No HTML renderer handled application modifier element " + element::class.simpleName,
+                            )
+                    }
+                }
             attributes()
         }) {
             HtmlModifierBox(
@@ -275,7 +384,9 @@ private fun HtmlModifierBox(
                 operationRenderer,
                 decorationRenderer,
                 fillAvailableHeight,
+                inheritedWidth,
                 pointerPassthrough,
+                wrapSemantics,
                 content,
             )
         }
@@ -290,28 +401,58 @@ private fun HtmlModifierBox(
         }
     val establishesHeight =
         operation is DomposableModifierOperation.Height ||
+            operation is DomposableModifierOperation.ViewportHeight ||
             operation is DomposableModifierOperation.MinHeight ||
             operation is DomposableModifierOperation.MaxHeight ||
+            operation is DomposableModifierOperation.AspectRatio ||
             operation == DomposableModifierOperation.FillHeight
+    val establishesWidth =
+        operation == DomposableModifierOperation.FillWidth ||
+            operation is DomposableModifierOperation.Width ||
+            operation is DomposableModifierOperation.FillWidthFraction ||
+            operation is DomposableModifierOperation.MinWidth
+    val childFillsWidth = establishesWidth || (inheritedWidth && !wrapContentSize)
     // CSS block height stops at each nested wrapper; Compose passes these constraints through to its child.
     val childFillsHeight =
         !verticalScroll &&
             (establishesHeight || (fillAvailableHeight && !wrapContentSize) || fillHeightAhead)
+    val shrinkToAvailableHeight =
+        fillAvailableHeight || fillHeightAhead || operation == DomposableModifierOperation.FillHeight
     Div(attrs = {
         attr("data-domposable-modifier", operation::class.simpleName ?: "operation")
+        if (wrapSemantics) {
+            when (operation) {
+                is DomposableModifierOperation.Description -> attr("aria-label", operation.text)
+                is DomposableModifierOperation.TestId -> attr("data-testid", operation.value)
+                else -> Unit
+            }
+        }
         if (fillHeightAhead) attr("data-domposable-fill-height-ahead", "")
         if (pointerPassthrough) {
             attr("data-domposable-pointer-passthrough", "")
         }
         style {
             property("box-sizing", "border-box")
-            if (childFillsHeight) {
-                property("display", "grid")
+            if (childFillsHeight || childFillsWidth) {
+                property(
+                    "display",
+                    if (operation is DomposableModifierOperation.MinHeight && !childFillsWidth) {
+                        "inline-grid"
+                    } else {
+                        "grid"
+                    },
+                )
                 property("grid-template-columns", "minmax(0, 1fr)")
-                property("grid-template-rows", "minmax(0, 1fr)")
+                if (childFillsWidth && !childFillsHeight) property("align-items", "start")
+                if (childFillsHeight) property("grid-template-rows", "minmax(0, 1fr)")
+            }
+            if (inheritedWidth) {
+                property("width", "100%")
+                property("min-width", "0")
             }
             if (fillHeightAhead) property("height", "100%")
             if (fillAvailableHeight && wrapContentSize) property("height", "100%")
+            if (shrinkToAvailableHeight) property("min-height", "0")
             if (operation == DomposableModifierOperation.PointerPassthrough) property("pointer-events", "none")
             when (operation) {
                 is DomposableModifierOperation.Padding -> {
@@ -327,6 +468,24 @@ private fun HtmlModifierBox(
 
                 is DomposableModifierOperation.Height -> {
                     property("height", "${operation.length.value}px")
+                }
+
+                is DomposableModifierOperation.ViewportHeight -> {
+                    val propertyName =
+                        when (operation.mode) {
+                            DomposableViewportHeightMode.Fixed -> "height"
+                            DomposableViewportHeightMode.Minimum -> "min-height"
+                            DomposableViewportHeightMode.Maximum -> "max-height"
+                        }
+                    val viewportUnit = if (operation.unit == DomposableViewportUnit.Small) "svh" else "dvh"
+                    property(
+                        propertyName,
+                        "max(0px, calc(${operation.fraction * 100}vh - ${operation.subtract.value}px))",
+                    )
+                    property(
+                        propertyName,
+                        "max(0px, calc(${operation.fraction * 100}$viewportUnit - ${operation.subtract.value}px))",
+                    )
                 }
 
                 is DomposableModifierOperation.MaxWidth -> {
@@ -493,10 +652,26 @@ private fun HtmlModifierBox(
                 attr("role", "button")
                 attr("tabindex", "0")
                 attr("aria-label", operation.label)
-                onClick { operation.onClick() }
-                onKeyDown {
-                    if (it.key == "Enter" || it.key == " ") {
-                        it.preventDefault()
+                onClick { event ->
+                    if (event.nativeEvent.belongsToCurrentInteractiveControl()) operation.onClick()
+                }
+                onKeyDown { event ->
+                    if (event.nativeEvent.belongsToCurrentInteractiveControl()) {
+                        when (event.key) {
+                            "Enter" -> {
+                                event.preventDefault()
+                                operation.onClick()
+                            }
+
+                            " " -> {
+                                event.preventDefault()
+                            }
+                        }
+                    }
+                }
+                onKeyUp { event ->
+                    if (event.nativeEvent.belongsToCurrentInteractiveControl() && event.key == " ") {
+                        event.preventDefault()
                         operation.onClick()
                     }
                 }
@@ -507,16 +682,28 @@ private fun HtmlModifierBox(
                 if (operation.label != null) attr("aria-label", operation.label)
                 if (operation.enabled) {
                     attr("tabindex", "0")
-                    onClick { operation.onClick() }
-                    onKeyDown {
-                        val activate =
-                            if (operation.role == DomposableClickRole.Link) {
-                                it.key == "Enter"
-                            } else {
-                                it.key == "Enter" || it.key == " "
+                    onClick { event ->
+                        if (event.nativeEvent.belongsToCurrentInteractiveControl()) operation.onClick()
+                    }
+                    onKeyDown { event ->
+                        if (event.nativeEvent.belongsToCurrentInteractiveControl()) {
+                            when (event.key) {
+                                "Enter" -> {
+                                    event.preventDefault()
+                                    operation.onClick()
+                                }
+
+                                " " -> {
+                                    if (operation.role != DomposableClickRole.Link) event.preventDefault()
+                                }
                             }
-                        if (activate) {
-                            it.preventDefault()
+                        }
+                    }
+                    onKeyUp { event ->
+                        if (event.nativeEvent.belongsToCurrentInteractiveControl() &&
+                            operation.role != DomposableClickRole.Link && event.key == " "
+                        ) {
+                            event.preventDefault()
                             operation.onClick()
                         }
                     }
@@ -548,7 +735,9 @@ private fun HtmlModifierBox(
             operationRenderer,
             decorationRenderer,
             childFillsHeight,
+            childFillsWidth,
             pointerPassthrough,
+            wrapSemantics,
             content,
         )
     }

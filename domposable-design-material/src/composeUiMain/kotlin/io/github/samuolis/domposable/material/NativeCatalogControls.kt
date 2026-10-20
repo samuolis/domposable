@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.selection.triStateToggleable
@@ -45,12 +47,14 @@ import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.LocalTextStyle
@@ -94,15 +98,37 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -110,11 +136,13 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -125,6 +153,7 @@ import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableControlPlacement
 import io.github.samuolis.domposable.foundation.DomposableIconButtonVariant
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableOffset
 import io.github.samuolis.domposable.foundation.DomposableProgressVariant
 import io.github.samuolis.domposable.foundation.DomposableRadioButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
@@ -145,6 +174,8 @@ import io.github.samuolis.domposable.ui.DomposableRadioButtonProps
 import io.github.samuolis.domposable.ui.DomposableSegmentedButtonsProps
 import io.github.samuolis.domposable.ui.DomposableSurfaceProps
 import io.github.samuolis.domposable.ui.DomposableSwitchProps
+import io.github.samuolis.domposable.ui.DomposableTabItem
+import io.github.samuolis.domposable.ui.DomposableTabsActivation
 import io.github.samuolis.domposable.ui.DomposableTabsProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableFormEnabled
@@ -160,6 +191,10 @@ internal fun NativeIconButton(
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.iconButton
     val formEnabled = props.enabled && domposableFormEnabled()
     val checkedState = props.checked
+    if (appearance.interaction != null) {
+        NativeStyledIconButton(props, modifier, appearance, formEnabled, content)
+        return
+    }
     if (checkedState != null) {
         val shape =
             appearance.shape?.nativeShape() ?: when (props.variant) {
@@ -368,6 +403,194 @@ internal fun NativeIconButton(
                 verticalAlignment = Alignment.CenterVertically,
             ) { content() }
         }
+    }
+}
+
+@Composable
+private fun NativeStyledIconButton(
+    props: DomposableIconButtonProps,
+    modifier: io.github.samuolis.domposable.ui.DomposableModifier,
+    appearance: DomposableButtonAppearance,
+    enabled: Boolean,
+    content: @Composable () -> Unit,
+) {
+    val tokens = LocalDomposableTokens.current
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val hovered by interaction.collectIsHoveredAsState()
+    val focused by interaction.collectIsFocusedAsState()
+    val selected = props.checked == true
+    val defaultContainer =
+        when (props.variant) {
+            DomposableIconButtonVariant.Standard -> {
+                if (selected) {
+                    tokens.colors.secondaryContainer
+                        ?: tokens.colors.surfaceVariant
+                } else {
+                    tokens.colors.surface
+                }
+            }
+
+            DomposableIconButtonVariant.Filled -> {
+                if (selected) {
+                    tokens.colors.primary
+                } else {
+                    tokens.colors.surfaceContainerHighest
+                        ?: tokens.colors.surfaceVariant
+                }
+            }
+
+            DomposableIconButtonVariant.FilledTonal -> {
+                tokens.colors.secondaryContainer ?: tokens.colors.surfaceVariant
+            }
+
+            DomposableIconButtonVariant.Outlined -> {
+                tokens.colors.surface
+            }
+        }
+    val defaultContent =
+        when (props.variant) {
+            DomposableIconButtonVariant.Standard -> {
+                if (selected) {
+                    tokens.colors.onSecondaryContainer
+                        ?: tokens.colors.onSurface
+                } else {
+                    tokens.colors.onSurface
+                }
+            }
+
+            DomposableIconButtonVariant.Filled -> {
+                if (selected) {
+                    tokens.colors.onPrimary
+                } else {
+                    tokens.colors.onSurfaceVariant
+                        ?: tokens.colors.onSurface
+                }
+            }
+
+            DomposableIconButtonVariant.FilledTonal -> {
+                tokens.colors.onSecondaryContainer ?: tokens.colors.onSurface
+            }
+
+            DomposableIconButtonVariant.Outlined -> {
+                tokens.colors.onSurface
+            }
+        }
+    val container =
+        (appearance.container?.takeIf { enabled } ?: appearance.disabledContainer?.takeIf { !enabled })?.nativeColor()
+            ?: defaultContainer.nativeColor()
+    val contentColor =
+        (appearance.content?.takeIf { enabled } ?: appearance.disabledContent?.takeIf { !enabled })?.nativeColor()
+            ?: defaultContent.nativeColor()
+    val stateContainer =
+        when {
+            !enabled -> {
+                container
+            }
+
+            pressed -> {
+                appearance.interaction?.pressedContainer?.nativeColor()
+                    ?: appearance.interaction?.stateLayerOpacity?.let {
+                        contentColor
+                            .copy(
+                                alpha = it.pressed,
+                            ).compositeOver(container)
+                    }
+                    ?: container
+            }
+
+            hovered -> {
+                appearance.interaction?.hoveredContainer?.nativeColor()
+                    ?: appearance.interaction?.stateLayerOpacity?.let {
+                        contentColor
+                            .copy(
+                                alpha = it.hovered,
+                            ).compositeOver(container)
+                    }
+                    ?: container
+            }
+
+            focused -> {
+                appearance.interaction?.stateLayerOpacity?.let {
+                    contentColor
+                        .copy(
+                            alpha = it.focused,
+                        ).compositeOver(container)
+                }
+                    ?: container
+            }
+
+            else -> {
+                container
+            }
+        }
+    val stateContent =
+        when {
+            !enabled -> contentColor
+            pressed -> appearance.interaction?.pressedContent?.nativeColor() ?: contentColor
+            hovered -> appearance.interaction?.hoveredContent?.nativeColor() ?: contentColor
+            else -> contentColor
+        }
+    val shape =
+        appearance.shape?.nativeShape() ?: when (props.variant) {
+            DomposableIconButtonVariant.Standard -> IconButtonDefaults.standardShape
+            DomposableIconButtonVariant.Filled -> IconButtonDefaults.filledShape
+            DomposableIconButtonVariant.FilledTonal -> IconButtonDefaults.filledShape
+            DomposableIconButtonVariant.Outlined -> IconButtonDefaults.outlinedShape
+        }
+    val ring = appearance.interaction
+    val visual =
+        modifier
+            .toComposeModifier()
+            .alpha(if (!enabled) appearance.disabledOpacity ?: 1f else 1f)
+            .drawButtonFocusRing(
+                focused && enabled,
+                ring?.let { it.focusRingColor?.nativeColor() ?: MaterialTheme.colorScheme.primary },
+                ring?.focusRingWidth?.value ?: 3f,
+                ring?.focusRingOffset?.value ?: 3f,
+                shape,
+            ).scale(
+                when {
+                    enabled && pressed -> appearance.pressedScale
+                    enabled && hovered -> appearance.hoveredScale
+                    else -> 1f
+                },
+            ).minimumInteractiveComponentSize()
+            .defaultMinSize(
+                minWidth = (appearance.minWidth?.value ?: 0f).dp,
+                minHeight =
+                    (
+                        appearance.minHeight?.value
+                            ?: 0f
+                    ).dp,
+            ).clip(shape)
+            .background(stateContainer, shape)
+            .then(
+                appearance.border?.let {
+                    Modifier.border(BorderStroke(appearance.borderWidth?.value?.dp ?: 1.dp, it.nativeColor()), shape)
+                }
+                    ?: Modifier,
+            ).toggleable(
+                value = selected,
+                enabled = enabled,
+                role = Role.Button,
+                interactionSource = interaction,
+                indication = null,
+                onValueChange = { props.onClick() },
+            ).semantics {
+                contentDescription = props.label
+                props.checked?.let {
+                    this.selected = it
+                    stateDescription = if (it) "Selected" else "Not selected"
+                }
+            }.padding(
+                start = (appearance.contentPadding?.start?.value ?: 0f).dp,
+                top = (appearance.contentPadding?.top?.value ?: 0f).dp,
+                end = (appearance.contentPadding?.end?.value ?: 0f).dp,
+                bottom = (appearance.contentPadding?.bottom?.value ?: 0f).dp,
+            )
+    Box(visual, contentAlignment = Alignment.Center) {
+        CompositionLocalProvider(LocalContentColor provides stateContent) { content() }
     }
 }
 
@@ -741,6 +964,31 @@ internal fun NativeIcon(
     modifier: io.github.samuolis.domposable.ui.DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.icon
+    val vector = props.vector
+    if (vector != null) {
+        val imageVector =
+            remember(vector) {
+                ImageVector
+                    .Builder(
+                        name = "DomposableIcon",
+                        defaultWidth = vector.viewportWidth.dp,
+                        defaultHeight = vector.viewportHeight.dp,
+                        viewportWidth = vector.viewportWidth,
+                        viewportHeight = vector.viewportHeight,
+                    ).addPath(
+                        pathData = PathParser().parsePathString(vector.pathData).toNodes(),
+                        fill = SolidColor(Color.Black),
+                        pathFillType = if (vector.evenOdd) PathFillType.EvenOdd else PathFillType.NonZero,
+                    ).build()
+            }
+        Icon(
+            imageVector = imageVector,
+            contentDescription = props.description,
+            modifier = modifier.toComposeModifier().size(vector.viewportWidth.dp, vector.viewportHeight.dp),
+            tint = appearance.color?.nativeColor() ?: LocalContentColor.current,
+        )
+        return
+    }
     val style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.bodyLarge)
     Text(
         props.symbol,
@@ -836,8 +1084,9 @@ internal fun NativeChip(
     val enabled = props.enabled && domposableFormEnabled()
     val interaction = remember { MutableInteractionSource() }
     val resolved = appearance.resolveInteractionColors(interaction, props.selected, enabled)
-    val disabledContent = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified
-    val disabledContainer = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified
+    val disabledContent = if (props.selected) resolved.selectedContent else resolved.content
+    val disabledContainer = resolved.container
+    val disabledSelectedContainer = resolved.selectedContainer
     val minInteractive = appearance.minimumInteractiveSize?.value?.dp ?: 48.dp
     val horizontalArrangement = appearance.chipHorizontalArrangement(props.variant)
     val chipModifier =
@@ -856,7 +1105,7 @@ internal fun NativeChip(
                     Modifier
                 },
             ).minimumInteractiveComponentSize()
-    val borderColor = resolved.border
+    val borderColor = if (props.selected) resolved.selectedBorder else resolved.border
     val borderWidth =
         if (props.selected) {
             appearance.selectedBorderWidth?.value?.dp ?: appearance.borderWidth.value.dp
@@ -928,7 +1177,7 @@ internal fun NativeChip(
                                 disabledLeadingIconColor = disabledContent,
                                 disabledTrailingIconColor = disabledContent,
                                 selectedContainerColor = resolved.selectedContainer,
-                                disabledSelectedContainerColor = disabledContainer,
+                                disabledSelectedContainerColor = disabledSelectedContainer,
                                 selectedLabelColor = resolved.selectedContent,
                                 selectedLeadingIconColor = resolved.selectedContent,
                                 selectedTrailingIconColor = resolved.selectedContent,
@@ -962,7 +1211,7 @@ internal fun NativeChip(
                                 disabledLeadingIconColor = disabledContent,
                                 disabledTrailingIconColor = disabledContent,
                                 selectedContainerColor = resolved.selectedContainer,
-                                disabledSelectedContainerColor = disabledContainer,
+                                disabledSelectedContainerColor = disabledSelectedContainer,
                                 selectedLabelColor = resolved.selectedContent,
                                 selectedLeadingIconColor = resolved.selectedContent,
                                 selectedTrailingIconColor = resolved.selectedContent,
@@ -1113,7 +1362,7 @@ internal fun NativeChip(
                             disabledLeadingIconColor = disabledContent,
                             disabledTrailingIconColor = disabledContent,
                             selectedContainerColor = resolved.selectedContainer,
-                            disabledSelectedContainerColor = disabledContainer,
+                            disabledSelectedContainerColor = disabledSelectedContainer,
                             selectedLabelColor = resolved.selectedContent,
                             selectedLeadingIconColor = resolved.selectedContent,
                             selectedTrailingIconColor = resolved.selectedContent,
@@ -1379,75 +1628,194 @@ internal fun NativeTabs(
     props: DomposableTabsProps,
     modifier: io.github.samuolis.domposable.ui.DomposableModifier,
 ) {
-    if (props.labels.isEmpty()) return
+    val tabs = props.resolvedItems()
+    if (tabs.isEmpty()) return
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.tabs
+    val tabsAppearance = props.tabsAppearance
+    val formEnabled = domposableFormEnabled()
+    val layoutDirection = LocalLayoutDirection.current
+    val tabKeys = tabs.map { it.key }
+    val focusRequesters = remember(tabKeys) { tabs.map { FocusRequester() } }
+    var focusedTabKey by remember(tabKeys) { mutableStateOf(tabs.firstEnabledKey(props.selectedIndex)) }
     val item = appearance.colors
+    val selectedTab = tabs.getOrNull(props.selectedIndex)
+    val selectedTabDisabled = selectedTab != null && (!formEnabled || !selectedTab.enabled)
     val primaryContainer = item.container?.nativeColor() ?: TabRowDefaults.primaryContainerColor
     val primaryContent = item.content?.nativeColor() ?: TabRowDefaults.primaryContentColor
     val secondaryContainer = item.container?.nativeColor() ?: TabRowDefaults.secondaryContainerColor
     val secondaryContent = item.content?.nativeColor() ?: TabRowDefaults.secondaryContentColor
     val defaultTabContent = if (props.variant == DomposableTabsVariant.Secondary) secondaryContent else primaryContent
     val renderTabs: @Composable () -> Unit = {
-        props.labels.forEachIndexed { index, label ->
-            val selected = props.selectedIndex == index
-            val selectedTextAppearance =
-                if (selected) {
-                    appearance.selectedTextAppearance ?: appearance.textAppearance
-                } else {
-                    appearance.textAppearance
-                }
-            val background = if (selected) item.selectedContainer else item.container
-            val border = if (selected) item.selectedBorder ?: item.border else item.border
-            val tabModifier =
-                Modifier
-                    .then(appearance.minHeight?.let { Modifier.heightIn(min = it.value.dp) } ?: Modifier)
-                    .then(appearance.shape?.let { Modifier.clip(it.nativeShape()) } ?: Modifier)
-                    .then(background?.let { Modifier.background(it.nativeColor()) } ?: Modifier)
-                    .then(
-                        border?.let {
-                            Modifier.border(
-                                (
-                                    if (selected) {
-                                        appearance.selectedBorderWidth
-                                            ?: appearance.borderWidth
-                                    } else {
-                                        appearance.borderWidth
-                                    }
-                                ).value.dp,
-                                it.nativeColor(),
-                                appearance.shape?.nativeShape() ?: MaterialTheme.shapes.small,
-                            )
+        tabs.forEachIndexed { index, tab ->
+            androidx.compose.runtime.key(tab.key) {
+                val selected = props.selectedIndex == index
+                val enabled = formEnabled && tab.enabled
+                val selectedTextAppearance =
+                    (if (selected) tab.selectedTextAppearance else null) ?: tab.textAppearance ?: if (selected) {
+                        appearance.selectedTextAppearance ?: appearance.textAppearance
+                    } else {
+                        appearance.textAppearance
+                    }
+                val background =
+                    if (selected && !enabled) {
+                        item.disabledSelectedContainer ?: item.selectedContainer
+                    } else if (selected) {
+                        item.selectedContainer
+                    } else {
+                        item.container
+                    }
+                val border =
+                    if (selected && !enabled) {
+                        item.disabledSelectedBorder ?: item.selectedBorder ?: item.border
+                    } else if (selected) {
+                        item.selectedBorder ?: item.border
+                    } else {
+                        item.border
+                    }
+                val tabModifier =
+                    Modifier
+                        .focusRequester(focusRequesters[index])
+                        .onFocusChanged { if (it.isFocused) focusedTabKey = tab.key }
+                        .then(tab.testTag?.let { Modifier.testTag(it) } ?: Modifier)
+                        .then(
+                            if (tab.contentDescription.isNotBlank()) {
+                                Modifier.semantics { contentDescription = tab.contentDescription }
+                            } else {
+                                Modifier
+                            },
+                        ).then(
+                            (tabsAppearance?.contentPadding ?: appearance.contentPadding)?.let {
+                                Modifier.padding(
+                                    start = it.start.value.dp,
+                                    top = it.top.value.dp,
+                                    end = it.end.value.dp,
+                                    bottom = it.bottom.value.dp,
+                                )
+                            } ?: Modifier,
+                        ).then(
+                            (tabsAppearance?.minHeight ?: appearance.minHeight)?.let {
+                                Modifier.heightIn(min = it.value.dp)
+                            } ?: Modifier,
+                        ).then(
+                            if (props.scrollable) {
+                                tabsAppearance?.scrollableMinWidth?.let { Modifier.widthIn(min = it.value.dp) }
+                                    ?: Modifier
+                            } else {
+                                Modifier
+                            },
+                        ).then(
+                            if (!enabled) {
+                                Modifier.alpha(tabsAppearance?.disabledOpacity ?: appearance.disabledOpacity ?: .38f)
+                            } else {
+                                Modifier
+                            },
+                        ).then(appearance.shape?.let { Modifier.clip(it.nativeShape()) } ?: Modifier)
+                        .then(background?.let { Modifier.background(it.nativeColor()) } ?: Modifier)
+                        .then(
+                            border?.let {
+                                Modifier.border(
+                                    (
+                                        if (selected) {
+                                            appearance.selectedBorderWidth
+                                                ?: appearance.borderWidth
+                                        } else {
+                                            appearance.borderWidth
+                                        }
+                                    ).value.dp,
+                                    it.nativeColor(),
+                                    appearance.shape?.nativeShape() ?: MaterialTheme.shapes.small,
+                                )
+                            }
+                                ?: Modifier,
+                        )
+                val text: @Composable () -> Unit = {
+                    Box {
+                        Text(
+                            tab.label,
+                            modifier =
+                                if (tab.badgeContent != null) {
+                                    Modifier.padding(end = (tabsAppearance?.badgeClearance?.value ?: 16f).dp)
+                                } else {
+                                    Modifier
+                                },
+                            style = selectedTextAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
+                        )
+                        tab.badgeContent?.let { badge ->
+                            val offset = tabsAppearance?.badgeOffset ?: DomposableOffset(8f, -4f)
+                            Box(
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(
+                                        x = (offset?.x ?: 0f).dp,
+                                        y = (offset?.y ?: 0f).dp,
+                                    ),
+                            ) {
+                                badge()
+                            }
                         }
-                            ?: Modifier,
+                    }
+                }
+                val icon = tab.icon
+                if (props.leadingIcons && icon != null) {
+                    androidx.compose.material3.LeadingIconTab(
+                        selected = selected,
+                        onClick = { if (formEnabled && tab.enabled) props.onSelect(index) },
+                        text = text,
+                        icon = icon,
+                        modifier = tabModifier,
+                        enabled = enabled,
+                        selectedContentColor =
+                            (if (!enabled) item.disabledSelectedContent else null)?.nativeColor()
+                                ?: item.selectedContent?.nativeColor()
+                                ?: defaultTabContent,
+                        unselectedContentColor =
+                            item.content?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-            val text: @Composable () -> Unit = {
-                Text(label, style = selectedTextAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge))
-            }
-            val icon = props.icons[index]
-            if (props.leadingIcons && icon != null) {
-                androidx.compose.material3.LeadingIconTab(
-                    selected = selected,
-                    onClick = { props.onSelect(index) },
-                    text = text,
-                    icon = icon,
-                    modifier = tabModifier,
-                    selectedContentColor = item.selectedContent?.nativeColor() ?: defaultTabContent,
-                    unselectedContentColor = item.content?.nativeColor() ?: defaultTabContent,
-                )
-            } else {
-                Tab(
-                    selected = selected,
-                    onClick = { props.onSelect(index) },
-                    modifier = tabModifier,
-                    selectedContentColor = item.selectedContent?.nativeColor() ?: defaultTabContent,
-                    unselectedContentColor = item.content?.nativeColor() ?: defaultTabContent,
-                    text = text,
-                    icon = icon,
-                )
+                } else {
+                    Tab(
+                        selected = selected,
+                        onClick = { if (formEnabled && tab.enabled) props.onSelect(index) },
+                        modifier = tabModifier,
+                        enabled = enabled,
+                        selectedContentColor =
+                            (if (!enabled) item.disabledSelectedContent else null)?.nativeColor()
+                                ?: item.selectedContent?.nativeColor()
+                                ?: defaultTabContent,
+                        unselectedContentColor =
+                            item.content?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = text,
+                        icon = icon,
+                    )
+                }
             }
         }
     }
-    val baseModifier = modifier.toComposeModifier()
+    val baseModifier =
+        modifier
+            .toComposeModifier()
+            .semantics { contentDescription = props.label }
+            .onPreviewKeyEvent { event ->
+                if (formEnabled && event.isUnmodifiedKeyDown()) {
+                    val currentIndex = tabs.indexOfFirst { it.key == focusedTabKey }
+                    val targetIndex =
+                        tabs.nextEnabledIndex(
+                            currentIndex = currentIndex,
+                            key = event.key,
+                            rtl = layoutDirection == LayoutDirection.Rtl,
+                        )
+                    if (targetIndex != null) {
+                        focusRequesters[targetIndex].requestFocus()
+                        if (tabsAppearance?.activation != DomposableTabsActivation.Manual) {
+                            props.onSelect(targetIndex)
+                        }
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            }
     when {
         props.variant == DomposableTabsVariant.Primary && props.scrollable -> {
             PrimaryScrollableTabRow(
@@ -1455,6 +1823,24 @@ internal fun NativeTabs(
                 baseModifier,
                 containerColor = primaryContainer,
                 contentColor = primaryContent,
+                edgePadding =
+                    tabsAppearance?.scrollableEdgePadding?.value?.dp ?: TabRowDefaults.ScrollableTabRowEdgeStartPadding,
+                indicator = {
+                    TabRowDefaults.PrimaryIndicator(
+                        modifier =
+                            Modifier.tabIndicatorOffset(
+                                props.selectedIndex,
+                                matchContentSize =
+                                    tabsAppearance?.indicatorMatchContent
+                                        ?: (tabsAppearance?.indicatorThickness == null),
+                            ),
+                        height = tabsAppearance?.indicatorThickness?.value?.dp ?: 3.dp,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.primary,
+                    )
+                },
                 tabs = renderTabs,
             )
         }
@@ -1465,6 +1851,18 @@ internal fun NativeTabs(
                 baseModifier,
                 containerColor = secondaryContainer,
                 contentColor = secondaryContent,
+                edgePadding =
+                    tabsAppearance?.scrollableEdgePadding?.value?.dp ?: TabRowDefaults.ScrollableTabRowEdgeStartPadding,
+                indicator = {
+                    TabRowDefaults.SecondaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(props.selectedIndex),
+                        height = tabsAppearance?.indicatorThickness?.value?.dp ?: 2.dp,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
                 tabs = renderTabs,
             )
         }
@@ -1475,6 +1873,16 @@ internal fun NativeTabs(
                 baseModifier,
                 containerColor = secondaryContainer,
                 contentColor = secondaryContent,
+                indicator = {
+                    TabRowDefaults.SecondaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(props.selectedIndex),
+                        height = tabsAppearance?.indicatorThickness?.value?.dp ?: 2.dp,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
                 tabs = renderTabs,
             )
         }
@@ -1485,11 +1893,83 @@ internal fun NativeTabs(
                 baseModifier,
                 containerColor = primaryContainer,
                 contentColor = primaryContent,
+                indicator = {
+                    TabRowDefaults.PrimaryIndicator(
+                        modifier =
+                            Modifier.tabIndicatorOffset(
+                                props.selectedIndex,
+                                matchContentSize =
+                                    tabsAppearance?.indicatorMatchContent
+                                        ?: (tabsAppearance?.indicatorThickness == null),
+                            ),
+                        height = tabsAppearance?.indicatorThickness?.value?.dp ?: 3.dp,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.primary,
+                    )
+                },
                 tabs = renderTabs,
             )
         }
     }
 }
+
+private fun DomposableTabsProps.resolvedItems(): List<io.github.samuolis.domposable.ui.DomposableTabItem> =
+    items ?: labels.mapIndexed { index, label ->
+        io.github.samuolis.domposable.ui.DomposableTabItem(
+            key = index.toString(),
+            label = label,
+            icon = icons[index],
+        )
+    }
+
+private fun List<DomposableTabItem>.firstEnabledKey(selectedIndex: Int): String =
+    getOrNull(selectedIndex)?.takeIf { it.enabled }?.key ?: firstOrNull { it.enabled }?.key.orEmpty()
+
+private fun List<DomposableTabItem>.nextEnabledIndex(
+    currentIndex: Int,
+    key: Key,
+    rtl: Boolean,
+): Int? {
+    val enabledIndices = indices.filter { this[it].enabled }
+    val currentPosition = enabledIndices.indexOf(currentIndex)
+    if (currentPosition < 0 || enabledIndices.isEmpty()) return null
+    return when (key) {
+        Key.DirectionLeft -> {
+            enabledIndices[
+                (currentPosition + (if (rtl) 1 else -1) + enabledIndices.size) %
+                    enabledIndices.size,
+            ]
+        }
+
+        Key.DirectionRight -> {
+            enabledIndices[
+                (currentPosition + (if (rtl) -1 else 1) + enabledIndices.size) %
+                    enabledIndices.size,
+            ]
+        }
+
+        Key.MoveHome -> {
+            enabledIndices.first()
+        }
+
+        Key.MoveEnd -> {
+            enabledIndices.last()
+        }
+
+        else -> {
+            null
+        }
+    }
+}
+
+private fun KeyEvent.isUnmodifiedKeyDown(): Boolean =
+    type == KeyEventType.KeyDown &&
+        !isAltPressed &&
+        !isCtrlPressed &&
+        !isMetaPressed &&
+        !isShiftPressed
 
 @Composable
 internal fun NativeNavigationBar(
@@ -1534,11 +2014,44 @@ internal fun NativeNavigationBar(
                     NavigationBarItemDefaults.colors(
                         selectedIconColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
                         selectedTextColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                        indicatorColor = item.selectedContainer?.nativeColor() ?: Color.Unspecified,
+                        indicatorColor =
+                            (
+                                if (selected &&
+                                    !(itemData.enabled && domposableFormEnabled())
+                                ) {
+                                    item.disabledSelectedContainer
+                                } else {
+                                    null
+                                }
+                            )?.nativeColor()
+                                ?: item.selectedContainer?.nativeColor()
+                                ?: Color.Unspecified,
                         unselectedIconColor = item.content?.nativeColor() ?: Color.Unspecified,
                         unselectedTextColor = item.content?.nativeColor() ?: Color.Unspecified,
-                        disabledIconColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
-                        disabledTextColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
+                        disabledIconColor =
+                            (
+                                if (selected &&
+                                    !(itemData.enabled && domposableFormEnabled())
+                                ) {
+                                    item.disabledSelectedContent
+                                } else {
+                                    null
+                                }
+                            )?.nativeColor()
+                                ?: item.disabledContent?.nativeColor()
+                                ?: Color.Unspecified,
+                        disabledTextColor =
+                            (
+                                if (selected &&
+                                    !(itemData.enabled && domposableFormEnabled())
+                                ) {
+                                    item.disabledSelectedContent
+                                } else {
+                                    null
+                                }
+                            )?.nativeColor()
+                                ?: item.disabledContent?.nativeColor()
+                                ?: Color.Unspecified,
                     )
                 NavigationBarItem(
                     selected = selected,
@@ -1586,7 +2099,40 @@ internal fun NativeNavigationBar(
                                 selectedIconColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
                                 selectedTextColor =
                                     item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                                selectedIndicatorColor = item.selectedContainer?.nativeColor() ?: Color.Unspecified,
+                                selectedIndicatorColor =
+                                    (
+                                        if (selected &&
+                                            !(itemData.enabled && domposableFormEnabled())
+                                        ) {
+                                            item.disabledSelectedContainer
+                                        } else {
+                                            null
+                                        }
+                                    )?.nativeColor()
+                                        ?: item.selectedContainer?.nativeColor()
+                                        ?: Color.Unspecified,
+                                disabledIconColor =
+                                    (
+                                        if (selected &&
+                                            !(itemData.enabled && domposableFormEnabled())
+                                        ) {
+                                            item.disabledSelectedContent
+                                        } else {
+                                            null
+                                        }
+                                    )?.nativeColor()
+                                        ?: Color.Unspecified,
+                                disabledTextColor =
+                                    (
+                                        if (selected &&
+                                            !(itemData.enabled && domposableFormEnabled())
+                                        ) {
+                                            item.disabledSelectedContent
+                                        } else {
+                                            null
+                                        }
+                                    )?.nativeColor()
+                                        ?: Color.Unspecified,
                                 unselectedIconColor = item.content?.nativeColor() ?: Color.Unspecified,
                                 unselectedTextColor = item.content?.nativeColor() ?: Color.Unspecified,
                             ),
@@ -1608,8 +2154,9 @@ internal fun NativeNavigationBar(
             contentColor = navigationRailContent,
         ) {
             props.items.forEachIndexed { index, itemData ->
+                val selected = props.selectedIndex == index
                 NavigationRailItem(
-                    selected = props.selectedIndex == index,
+                    selected = selected,
                     onClick = {
                         props.onSelect(index)
                         itemData.href?.let(::safeDomposableHref)?.let(uriHandler::openUri)
@@ -1626,11 +2173,44 @@ internal fun NativeNavigationBar(
                         NavigationRailItemDefaults.colors(
                             selectedIconColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
                             selectedTextColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                            indicatorColor = item.selectedContainer?.nativeColor() ?: Color.Unspecified,
+                            indicatorColor =
+                                (
+                                    if (selected &&
+                                        !(itemData.enabled && domposableFormEnabled())
+                                    ) {
+                                        item.disabledSelectedContainer
+                                    } else {
+                                        null
+                                    }
+                                )?.nativeColor()
+                                    ?: item.selectedContainer?.nativeColor()
+                                    ?: Color.Unspecified,
                             unselectedIconColor = item.content?.nativeColor() ?: Color.Unspecified,
                             unselectedTextColor = item.content?.nativeColor() ?: Color.Unspecified,
-                            disabledIconColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
-                            disabledTextColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
+                            disabledIconColor =
+                                (
+                                    if (selected &&
+                                        !(itemData.enabled && domposableFormEnabled())
+                                    ) {
+                                        item.disabledSelectedContent
+                                    } else {
+                                        null
+                                    }
+                                )?.nativeColor()
+                                    ?: item.disabledContent?.nativeColor()
+                                    ?: Color.Unspecified,
+                            disabledTextColor =
+                                (
+                                    if (selected &&
+                                        !(itemData.enabled && domposableFormEnabled())
+                                    ) {
+                                        item.disabledSelectedContent
+                                    } else {
+                                        null
+                                    }
+                                )?.nativeColor()
+                                    ?: item.disabledContent?.nativeColor()
+                                    ?: Color.Unspecified,
                         ),
                 )
             }
@@ -1692,13 +2272,12 @@ internal fun NativeSegmentedButtons(
                                 inactiveContainerColor = resolved.container,
                                 inactiveContentColor = resolved.content,
                                 inactiveBorderColor = resolved.border,
-                                disabledActiveContainerColor = c.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                                disabledActiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
-                                disabledActiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
-                                disabledInactiveContainerColor =
-                                    c.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                                disabledInactiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
-                                disabledInactiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
+                                disabledActiveContainerColor = resolved.selectedContainer,
+                                disabledActiveContentColor = resolved.selectedContent,
+                                disabledActiveBorderColor = resolved.selectedBorder,
+                                disabledInactiveContainerColor = resolved.container,
+                                disabledInactiveContentColor = resolved.content,
+                                disabledInactiveBorderColor = resolved.border,
                             ),
                         border =
                             if (borderColor ==

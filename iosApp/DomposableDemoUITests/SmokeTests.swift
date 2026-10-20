@@ -203,15 +203,15 @@ final class SmokeTests: XCTestCase {
         let viewport = scroll.exists ? scroll.frame.intersection(app.frame) : app.frame
         return !viewport.isNull && viewport.insetBy(dx: 2, dy: 2).contains(element.frame)
     }
-    private func scrollToMaterialText(_ app: XCUIApplication, _ text: String) {
+    private func scrollToMaterialText(_ app: XCUIApplication, _ text: String, withoutMomentum: Bool = false) {
         let element = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", text)).firstMatch
         for _ in 0..<24 {
             if visibleInMaterialCatalog(app, element) { return }
-            swipeMaterialCatalog(app, upward: true)
+            swipeMaterialCatalog(app, upward: true, withoutMomentum: withoutMomentum)
         }
         XCTAssertTrue(visibleInMaterialCatalog(app, element), "Material catalog content is not visible: \(text)")
     }
-    private func swipeMaterialCatalog(_ app: XCUIApplication, upward: Bool) {
+    private func swipeMaterialCatalog(_ app: XCUIApplication, upward: Bool, withoutMomentum: Bool = false) {
         let scroll = app.descendants(matching: .any).matching(identifier: "material-catalog-scroll").firstMatch
         let target = scroll.exists ? scroll : app
         let x: CGFloat = scroll.exists ? 0.985 : 0.88
@@ -219,7 +219,12 @@ final class SmokeTests: XCTestCase {
         let endY: CGFloat = upward ? 0.25 : 0.82
         let start = target.coordinate(withNormalizedOffset: CGVector(dx: x, dy: startY))
         let end = target.coordinate(withNormalizedOffset: CGVector(dx: x, dy: endY))
-        start.press(forDuration: 0.05, thenDragTo: end)
+        if withoutMomentum {
+            // Hold before release so capture placement does not depend on a fling's deceleration.
+            start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.25)
+        } else {
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
     }
     func testCollectionLayoutsAndTableInput() {
         XCUIDevice.shared.orientation = .portrait
@@ -315,7 +320,7 @@ final class SmokeTests: XCTestCase {
             if section == "Actions" {
                 ready(app, section)
             }
-            scrollToMaterialText(app, content)
+            scrollToMaterialText(app, content, withoutMomentum: section == "Inputs")
             capture(app, name, renderedText: content)
         }
     }
