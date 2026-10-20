@@ -194,6 +194,8 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 | `headerContent` | <code>@Composable (onDismiss: () -&gt; Unit) -&gt; Unit?</code> | `null` |
 | `layout` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-modal-layout/index.html">DomposableModalLayout</a></code> | `DomposableModalLayout()` |
 
+`DomposableModalLayout.sectionSpacing` controls the gap between rendered modal sections. HTML defaults to 16 dp; native Basic/FullScreen dialogs and sheets use the configured spacing. Native alert and picker variants keep their Material-provided spacing.
+
 ## DomposableBottomSheetScaffold
 
 Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/NavigationComponents.kt#L162)
@@ -375,6 +377,8 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 | `variant` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-dialog-variant/index.html">DomposableDialogVariant</a></code> | `DomposableDialogVariant.Alert` |
 | `headerContent` | <code>@Composable (onDismiss: () -&gt; Unit) -&gt; Unit?</code> | `null` |
 | `layout` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-modal-layout/index.html">DomposableModalLayout</a></code> | `DomposableModalLayout()` |
+
+`DomposableModalLayout.sectionSpacing` controls the gap between rendered modal sections. HTML defaults to 16 dp; native Basic/FullScreen dialogs and sheets use the configured spacing. Native alert and picker variants keep their Material-provided spacing.
 
 ## DomposableDisclosure
 
