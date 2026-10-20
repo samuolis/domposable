@@ -144,6 +144,40 @@ class HtmlRawContentBoundsTest {
     }
 
     @Test
+    fun minimumHeightKeepsAdjacentControlsInlineAndExplicitFillWidthFullWidth() {
+        val root = document.createElement("div") as HTMLElement
+        root.style.setProperty("width", "400px")
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                listOf("first" to "One", "second" to "A longer action").forEach { (name, label) ->
+                    DomposableHtmlModifiers(DomposableModifier.minHeight(40.dp).testId(name), wrapSemantics = true) {
+                        Button { Text(label) }
+                    }
+                }
+                DomposableHtmlModifiers(
+                    DomposableModifier.fillMaxWidth().minHeight(40.dp).testId("full-width"),
+                    wrapSemantics = true,
+                ) {
+                    Button { Text("Full width") }
+                }
+            }
+        try {
+            val first = (root.querySelector("[data-testid='first']") as HTMLElement).getBoundingClientRect()
+            val second = (root.querySelector("[data-testid='second']") as HTMLElement).getBoundingClientRect()
+            val fullWidth = (root.querySelector("[data-testid='full-width']") as HTMLElement).getBoundingClientRect()
+            assertTrue(abs(first.top - second.top) < 1, "Minimum-height controls must stay on the same line")
+            assertTrue(first.width < 400 && second.width < 400, "Minimum-height controls must keep intrinsic widths")
+            assertTrue(first.height >= 40 && second.height >= 40, "Minimum height must still constrain both controls")
+            assertTrue(abs(fullWidth.width - 400) < 1, "An explicit fill-width constraint must remain full width")
+            assertTrue(fullWidth.height >= 40, "Minimum height must also reach a full-width control")
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
+    @Test
     fun wrapContentReleasesTheWidthConstraintAndCentersTheControl() {
         val root = document.createElement("div") as HTMLElement
         root.style.setProperty("width", "400px")

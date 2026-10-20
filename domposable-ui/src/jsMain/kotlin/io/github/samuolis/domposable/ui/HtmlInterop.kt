@@ -434,7 +434,14 @@ private fun HtmlModifierBox(
         style {
             property("box-sizing", "border-box")
             if (childFillsHeight || childFillsWidth) {
-                property("display", "grid")
+                property(
+                    "display",
+                    if (operation is DomposableModifierOperation.MinHeight && !childFillsWidth) {
+                        "inline-grid"
+                    } else {
+                        "grid"
+                    },
+                )
                 property("grid-template-columns", "minmax(0, 1fr)")
                 if (childFillsWidth && !childFillsHeight) property("align-items", "start")
                 if (childFillsHeight) property("grid-template-rows", "minmax(0, 1fr)")
