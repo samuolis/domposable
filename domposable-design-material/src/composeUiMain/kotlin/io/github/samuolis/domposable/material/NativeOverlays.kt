@@ -173,7 +173,12 @@ internal fun NativeDialog(
                     ) {
                         Column(
                             modifier = Modifier.padding(layoutPadding(props.layout)),
-                            verticalArrangement = Arrangement.spacedBy(props.layout.sectionSpacing?.value?.dp ?: 0.dp),
+                            verticalArrangement =
+                                Arrangement.spacedBy(
+                                    props.layout.sectionSpacing
+                                        ?.value
+                                        ?.dp ?: 0.dp,
+                                ),
                         ) {
                             title()
                             body()
@@ -202,7 +207,12 @@ internal fun NativeBottomSheet(
         val sheetContent: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
             Column(
                 modifier = Modifier.padding(layoutPadding(props.layout)),
-                verticalArrangement = Arrangement.spacedBy(props.layout.sectionSpacing?.value?.dp ?: 0.dp),
+                verticalArrangement =
+                    Arrangement.spacedBy(
+                        props.layout.sectionSpacing
+                            ?.value
+                            ?.dp ?: 0.dp,
+                    ),
             ) {
                 if (props.headerContent == null) {
                     Text(
