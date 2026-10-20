@@ -1,6 +1,9 @@
 package example.consumer
 
 import androidx.compose.runtime.Composable
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTypographyRole
+import io.github.samuolis.domposable.material.domposableTextAppearance
 import io.github.samuolis.domposable.ui.DomposableHtmlModifierDecoration
 import io.github.samuolis.domposable.ui.DomposableHtmlModifierDecorationRenderer
 import io.github.samuolis.domposable.ui.DomposableHtmlModifierElementRenderer
@@ -9,6 +12,15 @@ import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.htmlAttributes
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
+
+@Composable
+fun ThemedHtmlTextConsumer(text: String) {
+    Span(attrs = {
+        domposableTextAppearance(DomposableTextAppearance(role = DomposableTypographyRole.BodyMedium))
+    }) { Text(text) }
+}
 
 @Composable
 fun DecoratedHtmlConsumer(

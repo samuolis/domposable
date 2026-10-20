@@ -301,6 +301,27 @@ using the configured control type scale, dimensions and focus styling. Select co
 host typography too, instead of the browser's default form font. No `.d-theme` class is needed.
 Use `DomposableMaterialTheme` for a standalone application that wants the default full theme.
 
+Custom HTML text hosts can use the same typed appearance as `DomposableText`, including a host
+that mixes text with an inline expand/collapse button. No application stylesheet is required:
+
+```kotlin
+import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTypographyRole
+import io.github.samuolis.domposable.material.domposableTextAppearance
+
+Span(attrs = {
+    domposableTextAppearance(DomposableTextAppearance(role = DomposableTypographyRole.BodyMedium))
+}) {
+    Text(description)
+    Button(attrs = { onClick { expanded = !expanded } }) { Text("More") }
+}
+```
+
+The role reads the nearest theme's typography and follows theme variable updates. Explicit
+appearance values override that role. Apply the same appearance to any hidden measurement probe
+so wrapping and overflow detection use identical metrics. The helper styles the existing element;
+the custom component still owns its events, content, measurement and accessibility semantics.
+
 Matrix schemas are portable library models. A matrix may use a generic application icon value;
 the provider resolves it. Specialized diagrams and rich-text editors stay application-owned typed
 extension components. A basic read-only RichHtml control and shared sanitizer are reusable library
