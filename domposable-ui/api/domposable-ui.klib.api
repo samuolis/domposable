@@ -2986,7 +2986,7 @@ final class io.github.samuolis.domposable.ui/DomposableMenuProps { // io.github.
 }
 
 final class io.github.samuolis.domposable.ui/DomposableModalLayout { // io.github.samuolis.domposable.ui/DomposableModalLayout|null[0]
-    constructor <init>(io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Boolean = ..., io.github.samuolis.domposable.foundation/DomposableInsets? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.ui/DomposableModalAlignment = ..., kotlin/Boolean = ...) // io.github.samuolis.domposable.ui/DomposableModalLayout.<init>|<init>(io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Boolean;io.github.samuolis.domposable.foundation.DomposableInsets?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.ui.DomposableModalAlignment;kotlin.Boolean){}[0]
+    constructor <init>(io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Boolean = ..., io.github.samuolis.domposable.foundation/DomposableInsets? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.ui/DomposableModalAlignment = ..., kotlin/Boolean = ..., io.github.samuolis.domposable.foundation/DomposableLength? = ...) // io.github.samuolis.domposable.ui/DomposableModalLayout.<init>|<init>(io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Boolean;io.github.samuolis.domposable.foundation.DomposableInsets?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.ui.DomposableModalAlignment;kotlin.Boolean;io.github.samuolis.domposable.foundation.DomposableLength?){}[0]
 
     final val alignment // io.github.samuolis.domposable.ui/DomposableModalLayout.alignment|{}alignment[0]
         final fun <get-alignment>(): io.github.samuolis.domposable.ui/DomposableModalAlignment // io.github.samuolis.domposable.ui/DomposableModalLayout.alignment.<get-alignment>|<get-alignment>(){}[0]
@@ -3002,12 +3002,15 @@ final class io.github.samuolis.domposable.ui/DomposableModalLayout { // io.githu
         final fun <get-maxWidth>(): io.github.samuolis.domposable.foundation/DomposableLength? // io.github.samuolis.domposable.ui/DomposableModalLayout.maxWidth.<get-maxWidth>|<get-maxWidth>(){}[0]
     final val padding // io.github.samuolis.domposable.ui/DomposableModalLayout.padding|{}padding[0]
         final fun <get-padding>(): io.github.samuolis.domposable.foundation/DomposableInsets? // io.github.samuolis.domposable.ui/DomposableModalLayout.padding.<get-padding>|<get-padding>(){}[0]
+    final val sectionSpacing // io.github.samuolis.domposable.ui/DomposableModalLayout.sectionSpacing|{}sectionSpacing[0]
+        final fun <get-sectionSpacing>(): io.github.samuolis.domposable.foundation/DomposableLength? // io.github.samuolis.domposable.ui/DomposableModalLayout.sectionSpacing.<get-sectionSpacing>|<get-sectionSpacing>(){}[0]
     final val swipeToDismiss // io.github.samuolis.domposable.ui/DomposableModalLayout.swipeToDismiss|{}swipeToDismiss[0]
         final fun <get-swipeToDismiss>(): kotlin/Boolean // io.github.samuolis.domposable.ui/DomposableModalLayout.swipeToDismiss.<get-swipeToDismiss>|<get-swipeToDismiss>(){}[0]
     final val viewportInset // io.github.samuolis.domposable.ui/DomposableModalLayout.viewportInset|{}viewportInset[0]
         final fun <get-viewportInset>(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.ui/DomposableModalLayout.viewportInset.<get-viewportInset>|<get-viewportInset>(){}[0]
 
     final fun component1(): io.github.samuolis.domposable.foundation/DomposableLength? // io.github.samuolis.domposable.ui/DomposableModalLayout.component1|component1(){}[0]
+    final fun component10(): io.github.samuolis.domposable.foundation/DomposableLength? // io.github.samuolis.domposable.ui/DomposableModalLayout.component10|component10(){}[0]
     final fun component2(): kotlin/Boolean // io.github.samuolis.domposable.ui/DomposableModalLayout.component2|component2(){}[0]
     final fun component3(): io.github.samuolis.domposable.foundation/DomposableInsets? // io.github.samuolis.domposable.ui/DomposableModalLayout.component3|component3(){}[0]
     final fun component4(): kotlin/Float? // io.github.samuolis.domposable.ui/DomposableModalLayout.component4|component4(){}[0]
@@ -3016,7 +3019,7 @@ final class io.github.samuolis.domposable.ui/DomposableModalLayout { // io.githu
     final fun component7(): io.github.samuolis.domposable.foundation/DomposableLength // io.github.samuolis.domposable.ui/DomposableModalLayout.component7|component7(){}[0]
     final fun component8(): io.github.samuolis.domposable.ui/DomposableModalAlignment // io.github.samuolis.domposable.ui/DomposableModalLayout.component8|component8(){}[0]
     final fun component9(): kotlin/Boolean // io.github.samuolis.domposable.ui/DomposableModalLayout.component9|component9(){}[0]
-    final fun copy(io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Boolean = ..., io.github.samuolis.domposable.foundation/DomposableInsets? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.ui/DomposableModalAlignment = ..., kotlin/Boolean = ...): io.github.samuolis.domposable.ui/DomposableModalLayout // io.github.samuolis.domposable.ui/DomposableModalLayout.copy|copy(io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Boolean;io.github.samuolis.domposable.foundation.DomposableInsets?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.ui.DomposableModalAlignment;kotlin.Boolean){}[0]
+    final fun copy(io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Boolean = ..., io.github.samuolis.domposable.foundation/DomposableInsets? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength? = ..., kotlin/Float? = ..., io.github.samuolis.domposable.foundation/DomposableLength = ..., io.github.samuolis.domposable.ui/DomposableModalAlignment = ..., kotlin/Boolean = ..., io.github.samuolis.domposable.foundation/DomposableLength? = ...): io.github.samuolis.domposable.ui/DomposableModalLayout // io.github.samuolis.domposable.ui/DomposableModalLayout.copy|copy(io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Boolean;io.github.samuolis.domposable.foundation.DomposableInsets?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength?;kotlin.Float?;io.github.samuolis.domposable.foundation.DomposableLength;io.github.samuolis.domposable.ui.DomposableModalAlignment;kotlin.Boolean;io.github.samuolis.domposable.foundation.DomposableLength?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.ui/DomposableModalLayout.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.ui/DomposableModalLayout.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // io.github.samuolis.domposable.ui/DomposableModalLayout.toString|toString(){}[0]
@@ -5059,6 +5062,19 @@ final fun io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_Nati
 final fun io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_NativeModifierScope_Row$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_NativeModifierScope_Row$stableprop_getter|io_github_samuolis_domposable_ui_NativeModifierScope_Row$stableprop_getter(){}[0]
 
 // Targets: [js]
+final enum class io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement : kotlin/Enum<io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement> { // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement|null[0]
+    enum entry Above // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement.Above|null[0]
+    enum entry Auto // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement.Auto|null[0]
+    enum entry Below // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement.Below|null[0]
+
+    final val entries // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement> // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement> // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement.values|values#static(){}[0]
+}
+
+// Targets: [js]
 final class io.github.samuolis.domposable.ui/DomposableHtmlMenuAnchor : io.github.samuolis.domposable.ui/DomposableModifierElement { // io.github.samuolis.domposable.ui/DomposableHtmlMenuAnchor|null[0]
     constructor <init>(kotlin/Function1<org.w3c.dom/HTMLElement, org.w3c.dom/HTMLElement?>) // io.github.samuolis.domposable.ui/DomposableHtmlMenuAnchor.<init>|<init>(kotlin.Function1<org.w3c.dom.HTMLElement,org.w3c.dom.HTMLElement?>){}[0]
 
@@ -5073,6 +5089,20 @@ final class io.github.samuolis.domposable.ui/DomposableHtmlMenuAnchor : io.githu
 }
 
 // Targets: [js]
+final class io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint : io.github.samuolis.domposable.ui/DomposableModifierElement { // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint|null[0]
+    constructor <init>(kotlin/Function1<org.w3c.dom/HTMLElement, io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement>) // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.<init>|<init>(kotlin.Function1<org.w3c.dom.HTMLElement,io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement>){}[0]
+
+    final val resolve // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.resolve|{}resolve[0]
+        final fun <get-resolve>(): kotlin/Function1<org.w3c.dom/HTMLElement, io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement> // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.resolve.<get-resolve>|<get-resolve>(){}[0]
+
+    final fun component1(): kotlin/Function1<org.w3c.dom/HTMLElement, io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement> // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.component1|component1(){}[0]
+    final fun copy(kotlin/Function1<org.w3c.dom/HTMLElement, io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement> = ...): io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.copy|copy(kotlin.Function1<org.w3c.dom.HTMLElement,io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacementHint.toString|toString(){}[0]
+}
+
+// Targets: [js]
 final val io.github.samuolis.domposable.ui/LocalDomposableHtmlModifierDecorationRenderer // io.github.samuolis.domposable.ui/LocalDomposableHtmlModifierDecorationRenderer|{}LocalDomposableHtmlModifierDecorationRenderer[0]
     final fun <get-LocalDomposableHtmlModifierDecorationRenderer>(): androidx.compose.runtime/ProvidableCompositionLocal<kotlin/Function1<io.github.samuolis.domposable.ui/DomposableModifierElement, kotlin/Function3<kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>?>?> // io.github.samuolis.domposable.ui/LocalDomposableHtmlModifierDecorationRenderer.<get-LocalDomposableHtmlModifierDecorationRenderer>|<get-LocalDomposableHtmlModifierDecorationRenderer>(){}[0]
 
@@ -5084,16 +5114,28 @@ final val io.github.samuolis.domposable.ui/LocalDomposableHtmlModifierRenderer /
 final val io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuAnchor$stableprop // io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuAnchor$stableprop|#static{}io_github_samuolis_domposable_ui_DomposableHtmlMenuAnchor$stableprop[0]
 
 // Targets: [js]
+final val io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuPlacementHint$stableprop // io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuPlacementHint$stableprop|#static{}io_github_samuolis_domposable_ui_DomposableHtmlMenuPlacementHint$stableprop[0]
+
+// Targets: [js]
 final fun (io.github.samuolis.domposable.ui/DomposableModifier).io.github.samuolis.domposable.ui/htmlAttributes(kotlin/Function1<org.jetbrains.compose.web.attributes/AttrsScope<*>, kotlin/Unit>): io.github.samuolis.domposable.ui/DomposableModifier // io.github.samuolis.domposable.ui/htmlAttributes|htmlAttributes@io.github.samuolis.domposable.ui.DomposableModifier(kotlin.Function1<org.jetbrains.compose.web.attributes.AttrsScope<*>,kotlin.Unit>){}[0]
 
 // Targets: [js]
 final fun (io.github.samuolis.domposable.ui/DomposableModifier).io.github.samuolis.domposable.ui/htmlMenuAnchor(kotlin/Function1<org.w3c.dom/HTMLElement, org.w3c.dom/HTMLElement?>): io.github.samuolis.domposable.ui/DomposableModifier // io.github.samuolis.domposable.ui/htmlMenuAnchor|htmlMenuAnchor@io.github.samuolis.domposable.ui.DomposableModifier(kotlin.Function1<org.w3c.dom.HTMLElement,org.w3c.dom.HTMLElement?>){}[0]
 
 // Targets: [js]
+final fun (io.github.samuolis.domposable.ui/DomposableModifier).io.github.samuolis.domposable.ui/htmlMenuPlacement(io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement): io.github.samuolis.domposable.ui/DomposableModifier // io.github.samuolis.domposable.ui/htmlMenuPlacement|htmlMenuPlacement@io.github.samuolis.domposable.ui.DomposableModifier(io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement){}[0]
+
+// Targets: [js]
+final fun (io.github.samuolis.domposable.ui/DomposableModifier).io.github.samuolis.domposable.ui/htmlMenuPlacement(kotlin/Function1<org.w3c.dom/HTMLElement, io.github.samuolis.domposable.ui/DomposableHtmlMenuPlacement>): io.github.samuolis.domposable.ui/DomposableModifier // io.github.samuolis.domposable.ui/htmlMenuPlacement|htmlMenuPlacement@io.github.samuolis.domposable.ui.DomposableModifier(kotlin.Function1<org.w3c.dom.HTMLElement,io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement>){}[0]
+
+// Targets: [js]
 final fun (org.jetbrains.compose.web.attributes/AttrsScope<org.w3c.dom/HTMLElement>).io.github.samuolis.domposable.ui/domposableScrollState(io.github.samuolis.domposable.ui/DomposableScrollState, io.github.samuolis.domposable.foundation/DomposableOrientation) // io.github.samuolis.domposable.ui/domposableScrollState|domposableScrollState@org.jetbrains.compose.web.attributes.AttrsScope<org.w3c.dom.HTMLElement>(io.github.samuolis.domposable.ui.DomposableScrollState;io.github.samuolis.domposable.foundation.DomposableOrientation){}[0]
 
 // Targets: [js]
 final fun <#A: org.w3c.dom/HTMLElement> (org.jetbrains.compose.web.attributes/AttrsScope<#A>).io.github.samuolis.domposable.ui/domposableAttributes(io.github.samuolis.domposable.ui/DomposableModifier) // io.github.samuolis.domposable.ui/domposableAttributes|domposableAttributes@org.jetbrains.compose.web.attributes.AttrsScope<0:0>(io.github.samuolis.domposable.ui.DomposableModifier){0§<org.w3c.dom.HTMLElement>}[0]
+
+// Targets: [js]
+final fun io.github.samuolis.domposable.ui/DomposableHtmlModifiers(io.github.samuolis.domposable.ui/DomposableModifier, kotlin/Boolean, kotlin/Function1<io.github.samuolis.domposable.ui/DomposableModifierElement, kotlin/Function1<org.jetbrains.compose.web.attributes/AttrsScope<org.w3c.dom/HTMLElement>, kotlin/Unit>?>?, kotlin/Function1<io.github.samuolis.domposable.ui/DomposableModifierElement, kotlin/Function3<kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>?>?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.ui/DomposableHtmlModifiers|DomposableHtmlModifiers(io.github.samuolis.domposable.ui.DomposableModifier;kotlin.Boolean;kotlin.Function1<io.github.samuolis.domposable.ui.DomposableModifierElement,kotlin.Function1<org.jetbrains.compose.web.attributes.AttrsScope<org.w3c.dom.HTMLElement>,kotlin.Unit>?>?;kotlin.Function1<io.github.samuolis.domposable.ui.DomposableModifierElement,kotlin.Function3<kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>?>?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
 
 // Targets: [js]
 final fun io.github.samuolis.domposable.ui/DomposableHtmlModifiers(io.github.samuolis.domposable.ui/DomposableModifier, kotlin/Function1<io.github.samuolis.domposable.ui/DomposableModifierElement, kotlin/Function1<org.jetbrains.compose.web.attributes/AttrsScope<org.w3c.dom/HTMLElement>, kotlin/Unit>?>?, kotlin/Function1<io.github.samuolis.domposable.ui/DomposableModifierElement, kotlin/Function3<kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>?>?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.ui/DomposableHtmlModifiers|DomposableHtmlModifiers(io.github.samuolis.domposable.ui.DomposableModifier;kotlin.Function1<io.github.samuolis.domposable.ui.DomposableModifierElement,kotlin.Function1<org.jetbrains.compose.web.attributes.AttrsScope<org.w3c.dom.HTMLElement>,kotlin.Unit>?>?;kotlin.Function1<io.github.samuolis.domposable.ui.DomposableModifierElement,kotlin.Function3<kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>?>?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
@@ -5103,3 +5145,6 @@ final fun io.github.samuolis.domposable.ui/DomposableHtmlModifiers(io.github.sam
 
 // Targets: [js]
 final fun io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuAnchor$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuAnchor$stableprop_getter|io_github_samuolis_domposable_ui_DomposableHtmlMenuAnchor$stableprop_getter(){}[0]
+
+// Targets: [js]
+final fun io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuPlacementHint$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.ui/io_github_samuolis_domposable_ui_DomposableHtmlMenuPlacementHint$stableprop_getter|io_github_samuolis_domposable_ui_DomposableHtmlMenuPlacementHint$stableprop_getter(){}[0]

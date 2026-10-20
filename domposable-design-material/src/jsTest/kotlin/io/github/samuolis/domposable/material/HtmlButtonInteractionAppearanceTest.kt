@@ -21,6 +21,50 @@ import kotlin.test.assertTrue
 
 class HtmlButtonInteractionAppearanceTest {
     @Test
+    fun loadingButtonAppliesConfiguredIndicatorTrackAndLeavesDefaultUnset() {
+        val root = document.createElement("div")
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableButton(
+                        DomposableButtonProps(
+                            onClick = {},
+                            loading = true,
+                            loadingLabel = "Saving",
+                            appearance = DomposableButtonAppearance(indicatorTrackColor = DomposableColor(0x408A7755)),
+                        ),
+                        DomposableModifier.testId("configured-loading"),
+                    ) { }
+                    DomposableButton(
+                        DomposableButtonProps(onClick = {}, loading = true, loadingLabel = "Loading"),
+                        DomposableModifier.testId("default-loading"),
+                    ) { }
+                }
+            }
+        try {
+            val configured = root.querySelector("[data-testid=configured-loading]") as HTMLElement
+            val default = root.querySelector("[data-testid=default-loading]") as HTMLElement
+            assertEquals(
+                DomposableColor(0x408A7755).css(),
+                configured.style.getPropertyValue("--d-button-indicator-track"),
+            )
+            assertEquals("", default.style.getPropertyValue("--d-button-indicator-track"))
+            assertTrue(configured.querySelector(".d-button-spinner") != null)
+            assertTrue(default.querySelector(".d-button-spinner") != null)
+            val configuredSpinner = configured.querySelector(".d-button-spinner") as HTMLElement
+            val defaultSpinner = default.querySelector(".d-button-spinner") as HTMLElement
+            val configuredStyle = kotlinx.browser.window.getComputedStyle(configuredSpinner)
+            val defaultStyle = kotlinx.browser.window.getComputedStyle(defaultSpinner)
+            assertEquals(configuredStyle.borderLeftColor, configuredStyle.borderRightColor)
+            assertEquals("rgba(0, 0, 0, 0)", defaultStyle.borderRightColor)
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
+    @Test
     fun typedStatesReachButtonsAndButtonLikeLinksWithoutChangingDefaultTheme() {
         val root = document.createElement("div")
         document.body!!.appendChild(root)

@@ -42,6 +42,8 @@ import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableDataTableProps
 import io.github.samuolis.domposable.ui.DomposableHtmlMenuAnchor
+import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement
+import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacementHint
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableImageProps
 import io.github.samuolis.domposable.ui.DomposableLabelProps
@@ -89,6 +91,7 @@ import org.jetbrains.compose.web.dom.TagElement
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.jetbrains.compose.web.dom.Ul
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
@@ -117,6 +120,7 @@ private fun positionHtmlMenu(
     anchor: HTMLElement?,
     offset: DomposableOffset,
     alignToLogicalEnd: Boolean,
+    placement: DomposableHtmlMenuPlacement = DomposableHtmlMenuPlacement.Auto,
 ) {
     val menu = overlay.querySelector(".d-menu-position") as? HTMLElement ?: return
     if (anchor == null) return
@@ -143,9 +147,15 @@ private fun positionHtmlMenu(
         )
     val below = viewportHeight - anchorBounds.bottom - offset.y
     val above = anchorBounds.top - offset.y
-    val placeBelow =
+    val placeBelowAutomatically =
         below >= menuHeight + HTML_MENU_VIEWPORT_MARGIN ||
             above < menuHeight + HTML_MENU_VIEWPORT_MARGIN
+    val placeBelow =
+        when {
+            placement == DomposableHtmlMenuPlacement.Above && above >= menuHeight + HTML_MENU_VIEWPORT_MARGIN -> false
+            placement == DomposableHtmlMenuPlacement.Below && below >= menuHeight + HTML_MENU_VIEWPORT_MARGIN -> true
+            else -> placeBelowAutomatically
+        }
     val verticalOffset = if (placeBelow) offset.y else -offset.y
     val maxTop =
         (viewportHeight - menuHeight - HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(HTML_MENU_VIEWPORT_MARGIN)
@@ -163,11 +173,6 @@ private fun positionHtmlMenu(
     menu.style.setProperty("top", "${top}px")
     menu.style.setProperty("bottom", "auto")
     menu.style.setProperty("inset-block-end", "auto")
-    menu.style.setProperty(
-        "max-height",
-        "${(viewportHeight - 2 * HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(0.0)}px",
-    )
-    menu.style.setProperty("overflow-y", "auto")
 }
 
 internal fun DomposableFontWeight.css() = weight.toString()
@@ -802,6 +807,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         domposableAttributes(modifier)
                         classes("d-card", "d-card-${props.variant.name.lowercase()}")
                         style {
+                            if (modifier.hasExplicitHtmlHeight()) property("height", "100%")
                             property("background-color", cardContainer.css())
                             property("--d-card-container", cardContainer.css())
                             property("--d-card-border-color", borderColor?.css() ?: "transparent")
@@ -851,11 +857,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 if (enabled) attr("tabindex", "0") else attr("aria-disabled", "true")
                                 onClick { event ->
                                     if (enabled) {
-                                        val target = event.target as? HTMLElement
+                                        val target = event.target as? Element
                                         val interactive =
                                             target?.closest(
-                                                "a,button,input,select,textarea,label,[role=button],[role=link]",
-                                            ) as? HTMLElement
+                                                "a[href],button,input,select,textarea,label,summary," +
+                                                    "[contenteditable='true'],[role=button],[role=link]," +
+                                                    "[role=checkbox],[role=radio],[role=switch]," +
+                                                    "[role=menuitem],[role=tab]",
+                                            ) as? Element
                                         if (interactive == null ||
                                             interactive == event.currentTarget as? HTMLElement
                                         ) {
@@ -864,11 +873,22 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
                                 }
                                 onKeyDown {
-                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement) && (
-                                            it.key ==
-                                                "Enter" ||
-                                                it.key == " "
-                                        )
+                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement)) {
+                                        when (it.key) {
+                                            "Enter" -> {
+                                                it.preventDefault()
+                                                if (enabled) click()
+                                            }
+
+                                            " " -> {
+                                                it.preventDefault()
+                                            }
+                                        }
+                                    }
+                                }
+                                onKeyUp {
+                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement) &&
+                                        it.key == " "
                                     ) {
                                         it.preventDefault()
                                         if (enabled) click()
@@ -913,6 +933,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         Div(attrs = {
                             id(cardContentId)
                             classes("d-card-content")
+                            if (modifier.hasExplicitHtmlHeight()) style { property("height", "100%") }
                             if (props.href == null && (props.onClick == null || props.actionLabel.isNullOrEmpty())) {
                                 style { property("pointer-events", "auto") }
                             }
@@ -1086,7 +1107,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         onClick { if (enabled) props.onClick() }
                     }) {
                         Span(attrs = { classes("d-chip-surface") }) {
-                            Span(attrs = { classes("d-chip-icon") }) { props.leadingIcon?.invoke() }
+                            props.leadingIcon?.let { icon ->
+                                Span(attrs = { classes("d-chip-icon") }) { icon() }
+                            }
                             Span(attrs = {
                                 classes("d-chip-label")
                                 style {
@@ -1096,7 +1119,9 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
                                 }
                             }) { Text(props.label) }
-                            Span(attrs = { classes("d-chip-icon") }) { props.trailingIcon?.invoke() }
+                            props.trailingIcon?.let { icon ->
+                                Span(attrs = { classes("d-chip-icon") }) { icon() }
+                            }
                         }
                     }
                 }
@@ -1223,9 +1248,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         .filterIsInstance<DomposableHtmlMenuAnchor>()
                         .lastOrNull()
                         ?.resolve
+                val placementHint =
+                    modifier.elements
+                        .filterIsInstance<DomposableHtmlMenuPlacementHint>()
+                        .lastOrNull()
+                        ?.resolve
                 val menuModifier =
                     modifier.elements
-                        .filterNot { it is DomposableHtmlMenuAnchor }
+                        .filterNot { it is DomposableHtmlMenuAnchor || it is DomposableHtmlMenuPlacementHint }
                         .fold(DomposableModifier as DomposableModifier) { result, element -> result.then(element) }
                 var slotAnchor by remember { mutableStateOf<HTMLElement?>(null) }
                 val dismissMenu by rememberUpdatedState(props.onDismiss)
@@ -1252,6 +1282,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             request
                         }
                     val previousFocus = remember { document.activeElement as? HTMLElement }
+                    val opener =
+                        previousFocus?.takeUnless {
+                            it == document.body || it == document.documentElement
+                        }
+
+                    fun isMenuAnchor(target: Node?): Boolean =
+                        target != null &&
+                            (opener?.contains(target) == true || slotAnchor?.contains(target) == true)
                     TagElement<HTMLElement>("div", applyAttrs = {
                         classes("d-menu-backdrop")
                         attr("popover", "manual")
@@ -1270,6 +1308,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             property("max-height", "none")
                             property("background", "transparent")
                             property("color", "inherit")
+                            // The visible popup remains interactive; outside hits reach app controls.
+                            property("pointer-events", "none")
                         }
                         onClick { event ->
                             val target = event.target as? Node
@@ -1280,6 +1320,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             when (event.key) {
                                 "Escape" -> {
                                     event.preventDefault()
+                                    event.stopPropagation()
                                     requestDismiss()
                                 }
 
@@ -1316,12 +1357,14 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             // The browser top layer keeps menus above application stacking contexts.
                             element.asDynamic().showPopover()
                             val externalAnchorElement = externalAnchor?.invoke(element)
+                            val placement = placementHint?.invoke(element) ?: DomposableHtmlMenuPlacement.Auto
                             val resolveAnchor = { slotAnchor ?: externalAnchorElement }
                             positionHtmlMenu(
                                 element,
                                 resolveAnchor(),
                                 props.anchorOffset,
                                 alignToLogicalEnd = props.anchor == null,
+                                placement = placement,
                             )
                             val reposition: (Event) -> Unit = {
                                 positionHtmlMenu(
@@ -1329,6 +1372,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     resolveAnchor(),
                                     props.anchorOffset,
                                     alignToLogicalEnd = props.anchor == null,
+                                    placement = placement,
                                 )
                             }
                             window.addEventListener("resize", reposition)
@@ -1336,11 +1380,28 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             var restorePreviousFocus = true
                             val focusOut: (Event) -> Unit = { event ->
                                 val next = event.asDynamic().relatedTarget as? Node
-                                if (next == null || !element.contains(next)) {
-                                    if (next != null) restorePreviousFocus = false
+                                if (next == null || (!element.contains(next) && !isMenuAnchor(next))) {
+                                    if (next != null && next != document.body && next != document.documentElement) {
+                                        restorePreviousFocus = false
+                                    }
                                     requestDismiss()
                                 }
                             }
+                            val outsideClick: (Event) -> Unit = { event ->
+                                val target = event.target as? Node
+                                val popup = element.querySelector(".d-menu-position")
+                                val insidePopup = target?.let { popup?.contains(it) } == true
+                                if (!insidePopup && !isMenuAnchor(target)) {
+                                    val active = document.activeElement?.takeUnless { element.contains(it) }
+                                    if (active != null && active != document.body &&
+                                        active != document.documentElement
+                                    ) {
+                                        restorePreviousFocus = false
+                                    }
+                                    requestDismiss()
+                                }
+                            }
+                            document.addEventListener("click", outsideClick)
                             element.addEventListener("focusout", focusOut)
                             val focusTarget =
                                 element.querySelector("[role^=menuitem]:not(:disabled)") as? HTMLElement ?: element
@@ -1348,6 +1409,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             onDispose {
                                 window.removeEventListener("resize", reposition)
                                 window.removeEventListener("scroll", reposition, true)
+                                document.removeEventListener("click", outsideClick)
                                 element.removeEventListener("focusout", focusOut)
                                 if (element.matches(":popover-open")) element.asDynamic().hidePopover()
                                 if (restorePreviousFocus) previousFocus?.takeIf { it.isConnected }?.focus()
@@ -1360,7 +1422,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 property("position", "fixed")
                                 property("display", "inline-flex")
                                 property("width", "max-content")
-                                property("max-width", "calc(100vw - 32px)")
+                                property("max-width", "calc(100vw - ${HTML_MENU_VIEWPORT_MARGIN * 2}px)")
+                                property("pointer-events", "auto")
                             }
                         }) {
                             DomposableHtmlModifiers(menuModifier) {
@@ -2068,7 +2131,7 @@ internal fun InstallDomposableMaterialStyles() {
 
 private const val MATERIAL_CSS = """
 /* A stretched flex item needs auto height; its inner fill wrappers then resolve against that height. */
-.d-row-stretch>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-modifier=FillHeight],.d-row-stretch>[data-domposable-visibility]>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-visibility]>[data-domposable-modifier=FillHeight]{height:auto!important}
+.d-row-stretch>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-modifier=FillHeight],.d-row-stretch>[data-domposable-layout-item],.d-row-stretch>[data-domposable-visibility]>[data-domposable-fill-height-ahead],.d-row-stretch>[data-domposable-visibility]>[data-domposable-modifier=FillHeight],.d-row-stretch>[data-domposable-visibility]>[data-domposable-layout-item]{height:auto!important}
 .d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-field select{font:inherit}
 .d-box>*{grid-area:1/1;min-width:0;min-height:0}
 .d-theme *{box-sizing:border-box}.d-link{color:var(--d-primary);padding:8px;display:inline-flex;align-items:center;min-height:44px}.d-theme{color:var(--d-on-surface);background:var(--d-surface);font:var(--d-body)/var(--d-line-height) var(--d-font);min-height:100%;box-sizing:border-box}
@@ -2078,7 +2141,7 @@ private const val MATERIAL_CSS = """
 .d-skip-link{position:absolute;left:-999px}.d-skip-link:focus{left:12px;top:12px;z-index:10}
 .d-theme h1,.d-theme h2,.d-theme h3,.d-theme h4,.d-theme h5,.d-theme h6{margin:0}.d-title{font-size:var(--d-title)}.d-label{font-size:var(--d-label)}:where(.d-text-inherit){font:inherit}
 .d-button,.d-chip,.d-icon-button{border:1px solid transparent;padding:10px 20px;border-radius:9999px;min-height:44px;background:var(--d-primary);color:var(--d-on-primary);transition:background var(--d-motion)}
-.d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;flex:1;min-width:0;align-items:center;justify-content:inherit}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid currentColor;border-right-color:transparent;border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
+.d-button{cursor:pointer;transition:box-shadow 120ms ease,filter 120ms ease,transform 80ms ease;position:relative;display:inline-flex;align-items:center;justify-content:center}.d-button-single-line .d-button-copy{white-space:nowrap}.d-button-copy{display:inline-flex;flex:1;min-width:0;align-items:center;justify-content:inherit}.d-button:not(:disabled):hover{transform:scale(var(--d-button-hovered-scale,1))}.d-button:not(:disabled):active{transform:scale(var(--d-button-pressed-scale,1))}.d-button-spinner{position:absolute;width:var(--d-button-indicator-size,20px);height:var(--d-button-indicator-size,20px);border:var(--d-button-indicator-stroke,2px) solid var(--d-button-indicator-track,currentColor);border-top-color:currentColor;border-right-color:var(--d-button-indicator-track,transparent);border-radius:50%;animation:d-button-spin .8s linear infinite}@keyframes d-button-spin{to{transform:rotate(360deg)}}
 @media(hover:hover){.d-button:not(:disabled):hover{filter:brightness(.95)}.d-button-outlined:not(:disabled):hover,.d-button-text:not(:disabled):hover{--d-button-feedback:inset 0 0 0 999px color-mix(in srgb,currentColor 8%,transparent);box-shadow:var(--d-button-feedback)}}
 .d-button:not(:disabled):active{filter:brightness(.9)}.d-button:not(:disabled):focus-visible{outline:none;box-shadow:var(--d-button-feedback,0 0 0 0 transparent),0 0 0 3px var(--d-primary)}
 .d-button[data-d-button-interaction=true]:not(:disabled):hover,.d-button[data-d-button-interaction=true]:not(:disabled):active,.d-icon-button[data-d-button-interaction=true]:not(:disabled):hover,.d-icon-button[data-d-button-interaction=true]:not(:disabled):active{filter:none}
@@ -2091,10 +2154,11 @@ private const val MATERIAL_CSS = """
 .d-button[data-d-button-interaction=true]:not(:disabled):focus-visible,.d-icon-button[data-d-button-interaction=true]:not(:disabled):focus-visible{outline:var(--d-button-focus-ring-width,3px) solid var(--d-button-focus-ring-color,var(--d-primary));outline-offset:var(--d-button-focus-ring-offset,3px);box-shadow:var(--d-button-focus-feedback,none)}
 .d-button:disabled{cursor:default}
 .d-button-outlined{background:transparent;color:var(--d-primary);border-color:var(--d-outline)}.d-button-text{background:transparent;color:var(--d-primary)}.d-button-elevated{background:var(--d-surface-container-low,var(--d-surface));color:var(--d-primary);box-shadow:0 1px 3px rgb(0 0 0 / .24)}.d-button-filledtonal{background:var(--d-secondary-container,var(--d-variant));color:var(--d-on-secondary-container,var(--d-on-surface))}
-.d-icon-button{border-radius:50%;padding:10px}.d-chip{min-height:var(--d-item-min-height,32px);padding:var(--d-item-padding,6px 12px);border-radius:var(--d-item-radius,var(--d-shape-small,8px));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,var(--d-outline))}.d-chip[data-selected=true]{border-color:var(--d-primary)}
+.d-icon-button{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;padding:10px}.d-chip{min-height:var(--d-item-min-height,32px);padding:var(--d-item-padding,6px 12px);border-radius:var(--d-item-radius,var(--d-shape-small,8px));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));border-color:var(--d-item-border,var(--d-outline))}.d-chip[data-selected=true]{border-color:var(--d-primary)}
 .d-card{position:relative;min-width:0;padding:var(--d-spacing);border-radius:var(--d-radius);background:var(--d-variant);box-shadow:0 var(--d-elevation) 8px #0001}.d-card::after{content:"";position:absolute;z-index:3;inset:0;box-sizing:border-box;pointer-events:none;border:var(--d-card-border-width,0px) solid var(--d-card-border-color,transparent);border-radius:inherit}:root .d-card .d-field{--d-surface:var(--d-card-container,var(--d-variant))}
 .d-data-table-container{min-width:0;max-width:100%;overflow-x:auto;container-type:inline-size}.d-data-table{width:100%;border-collapse:collapse;table-layout:fixed}.d-data-table th,.d-data-table td{border-bottom:1px solid var(--d-outline);text-align:start}.d-data-table tbody tr:last-child>th,.d-data-table tbody tr:last-child>td{border-bottom:0}.d-data-table-row[tabindex="0"]{cursor:pointer}.d-data-table-row[data-d-table-interaction=true]:hover{background:var(--d-data-hovered-container,inherit)!important;color:var(--d-data-hovered-content,inherit)!important}.d-data-table-row[data-d-table-interaction=true]:hover>td,.d-data-table-row[data-d-table-interaction=true]:hover>th[scope=row]{background:var(--d-data-hovered-container,inherit)!important;color:var(--d-data-hovered-content,inherit)!important;box-shadow:var(--d-data-hover-feedback,none)}.d-data-table-row[data-d-table-interaction=true]:active{background:var(--d-data-pressed-container,inherit)!important;color:var(--d-data-pressed-content,inherit)!important}.d-data-table-row[data-d-table-interaction=true]:active>td,.d-data-table-row[data-d-table-interaction=true]:active>th[scope=row]{background:var(--d-data-pressed-container,inherit)!important;color:var(--d-data-pressed-content,inherit)!important;box-shadow:var(--d-data-pressed-feedback,none)}.d-data-table-row[data-d-table-interaction=true]:focus-visible{outline:var(--d-data-focus-ring-width,3px) solid var(--d-data-focus-ring-color,var(--d-primary))!important;outline-offset:var(--d-data-focus-ring-offset,3px)}.d-data-table-row[data-d-table-interaction=true]:focus-visible>td,.d-data-table-row[data-d-table-interaction=true]:focus-visible>th[scope=row]{box-shadow:var(--d-data-focus-feedback,none)}
 .d-data-table-container.d-data-table-compact-active table,.d-data-table-container.d-data-table-compact-active thead,.d-data-table-container.d-data-table-compact-active tbody,.d-data-table-container.d-data-table-compact-active tr,.d-data-table-container.d-data-table-compact-active td,.d-data-table-container.d-data-table-compact-active th[scope=row]{display:block;width:100%}.d-data-table-container.d-data-table-compact-active thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.d-data-table-container.d-data-table-compact-active .d-data-table-row{margin-block:8px;border:var(--d-data-compact-border-width,1px) solid var(--d-data-compact-border,var(--d-outline));border-radius:var(--d-data-compact-radius,12px);overflow:visible;background:var(--d-data-compact-container,transparent);color:var(--d-data-compact-content,inherit);box-shadow:var(--d-data-compact-shadow,none)}.d-data-table-container.d-data-table-compact-active .d-data-table-row>td,.d-data-table-container.d-data-table-compact-active .d-data-table-row>th[scope=row]{display:grid;grid-template-columns:minmax(var(--d-data-compact-label-width,6rem),1fr) 2fr;gap:8px;padding:8px;border-bottom:0!important}.d-data-table-container.d-data-table-compact-active .d-data-table-row>td::before,.d-data-table-container.d-data-table-compact-active .d-data-table-row>th[scope=row]::before{content:attr(data-column-label);color:var(--d-on-surface-variant)}
+.d-data-table-container.d-data-table-spaced:not(.d-data-table-compact-active) .d-data-table{display:grid;grid-template-columns:minmax(0,1fr);row-gap:var(--d-data-row-spacing,0px);border-collapse:separate}.d-data-table-container.d-data-table-spaced:not(.d-data-table-compact-active) .d-data-table>thead,.d-data-table-container.d-data-table-spaced:not(.d-data-table-compact-active) .d-data-table>tbody{display:contents}.d-data-table-container.d-data-table-spaced:not(.d-data-table-compact-active) .d-data-table tr{display:grid;grid-template-columns:repeat(var(--d-data-column-count),minmax(0,1fr));column-gap:var(--d-data-column-spacing,0px);min-width:0;border-bottom:1px solid var(--d-outline)}.d-data-table-container.d-data-table-spaced:not(.d-data-table-compact-active) .d-data-table th,.d-data-table-container.d-data-table-spaced:not(.d-data-table-compact-active) .d-data-table td{box-sizing:border-box;min-width:0;border-bottom:0!important}.d-data-table-container.d-data-table-spaced:not(.d-data-table-compact-active) .d-data-table tbody>tr:last-child{border-bottom:0}.d-data-table-container.d-data-table-spaced.d-data-table-compact-active table,.d-data-table-container.d-data-table-spaced.d-data-table-compact-active thead,.d-data-table-container.d-data-table-spaced.d-data-table-compact-active tbody,.d-data-table-container.d-data-table-spaced.d-data-table-compact-active tr{display:block;width:100%}.d-data-table-container.d-data-table-spaced.d-data-table-compact-active .d-data-table-row>td,.d-data-table-container.d-data-table-spaced.d-data-table-compact-active .d-data-table-row>th[scope=row]{gap:var(--d-data-column-spacing,8px)}.d-data-table-container.d-data-table-row-spacing.d-data-table-compact-active tbody{display:flex;flex-direction:column;gap:var(--d-data-row-spacing)}.d-data-table-container.d-data-table-row-spacing.d-data-table-compact-active .d-data-table-row{display:flex;flex-direction:column;gap:var(--d-data-row-spacing);margin-block:0}
 @media(forced-colors:active){.d-data-table-row[aria-selected=true]{outline:2px solid Highlight!important}.d-data-table-row[data-d-table-interaction=true]:focus-visible{outline:2px solid Highlight!important;outline-offset:3px;box-shadow:none}.d-data-table-row[data-d-table-interaction=true]:focus-visible>td,.d-data-table-row[data-d-table-interaction=true]:focus-visible>th[scope=row]{box-shadow:none!important}}
 .d-field{display:flex;flex-direction:column;gap:6px}.d-field input,.d-field textarea,.d-field select{box-sizing:border-box;min-height:56px;padding:16px;border:1px solid var(--d-outline);border-radius:4px;color:var(--d-on-surface);background:var(--d-surface);line-height:24px}.d-field input::placeholder,.d-field textarea::placeholder{color:var(--d-field-placeholder);font-size:var(--d-field-placeholder-size,inherit);line-height:var(--d-field-placeholder-line,inherit);font-weight:var(--d-field-placeholder-weight,inherit);letter-spacing:var(--d-field-placeholder-spacing,inherit)}
 .d-field input[type=search]{appearance:none;-webkit-appearance:none}
@@ -2106,13 +2170,13 @@ private const val MATERIAL_CSS = """
 .d-divider{margin:0;padding:0;flex:none;align-self:stretch;border:0;border-top:1px solid var(--d-outline-variant);width:100%}.d-banner{border-radius:var(--d-radius);background:transparent}
 .d-collection{list-style:none;margin:0;padding:0}.d-tabs,.d-navigation{display:flex;gap:8px}.d-tabs button,.d-navigation button,.d-navigation a{text-decoration:none;display:inline-flex;align-items:center;padding:12px;border:0;background:transparent;color:var(--d-on-surface);min-height:44px}
 .d-tabs [aria-selected=true],.d-navigation [aria-current=page]{color:var(--d-primary);border-bottom:3px solid var(--d-primary)}
-.d-dialog{box-sizing:border-box;max-width:min(600px,90vw);display:flex;flex-direction:column;gap:16px;overflow-y:auto;border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface)}.d-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:12px}.d-sheet .d-dialog-header{touch-action:none}
-.d-dialog::backdrop{background:color-mix(in srgb,var(--d-scrim,rgb(0 0 0)) 32%,transparent)}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw);overflow:hidden}.d-sheet-drag-handle{display:flex;align-items:center;justify-content:center;min-height:24px;touch-action:none}.d-sheet-drag-indicator{width:32px;height:4px;border-radius:999px;background:var(--d-on-surface-variant,var(--d-outline));opacity:.6}.d-sheet{transition:transform 180ms ease-out}.d-dialog-bottom{margin:auto auto 0}.d-dialog-fallback{position:fixed;inset:50% auto auto 50%;z-index:2147483647;transform:translate(-50%,-50%)}.d-dialog-fallback-scrim{position:fixed;inset:0;background:color-mix(in srgb,var(--d-scrim,rgb(0 0 0)) 32%,transparent)}
-@media(max-width:40rem){.d-dialog-bottom-on-compact{position:fixed;inset:auto 0 0;margin:0 auto;max-width:100%}}
+.d-dialog{box-sizing:border-box;max-width:min(600px,90vw);display:flex;flex-direction:column;gap:16px;overflow-y:auto;border:1px solid var(--d-outline);border-radius:var(--d-radius);padding:24px;color:var(--d-on-surface);background:var(--d-surface)}.d-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.d-dialog::backdrop{background:color-mix(in srgb,var(--d-scrim,rgb(0 0 0)) 32%,transparent)}.d-sheet{margin:auto auto 0;min-width:min(600px,90vw);overflow:hidden}.d-sheet .d-dialog-header{touch-action:none}.d-sheet-drag-handle{display:flex;align-items:center;justify-content:center;min-height:24px;touch-action:none}.d-sheet-drag-indicator{width:32px;height:4px;border-radius:999px;background:var(--d-on-surface-variant,var(--d-outline));opacity:.6}.d-sheet{transition:transform 180ms ease-out}.d-dialog-bottom{margin:auto auto 0}.d-dialog-bottom-on-compact{margin:auto}.d-dialog-bottom-on-compact.d-sheet .d-sheet-drag-handle{display:none}.d-dialog-bottom-on-compact.d-sheet .d-dialog-header{touch-action:auto}.d-dialog-fallback{position:fixed;inset:50% auto auto 50%;z-index:2147483647;transform:translate(-50%,-50%)}.d-dialog-fallback-scrim{position:fixed;inset:0;background:color-mix(in srgb,var(--d-scrim,rgb(0 0 0)) 32%,transparent)}
+@media(max-width:40rem){.d-dialog-bottom-on-compact{--d-modal-inline-inset:0px;position:fixed;inset:auto 0 0;margin:0 auto;max-width:100%}.d-dialog-bottom-on-compact.d-sheet .d-sheet-drag-handle{display:flex}.d-dialog-bottom-on-compact.d-sheet .d-dialog-header{touch-action:none}}
 .d-scaffold{display:flex;flex-direction:column;height:100dvh}.d-scaffold-constrained{height:100%;min-height:0;min-width:0;overflow:hidden}.d-scaffold-middle{display:flex;flex:1;min-height:0}.d-scaffold-constrained>.d-scaffold-middle{min-height:0;overflow:hidden}.d-scaffold-body{flex:1;min-width:0;min-height:0;position:relative;overflow:auto}.d-scaffold-constrained>.d-scaffold-middle>.d-scaffold-body{height:100%;min-height:0}.d-floating{position:absolute;bottom:16px;right:16px}.d-snackbar{position:absolute;bottom:16px;left:16px}
 .d-app-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;background:var(--d-surface)}.d-app-bar h2{font-size:var(--d-title);flex:1}.d-app-bar-actions{display:flex;gap:8px}.d-fab{min-width:56px;min-height:56px;border-radius:16px;box-shadow:0 3px 8px #0003}
 .d-snackbar-message{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:48px;padding:0 8px 0 16px;border-radius:4px;background:var(--d-inverse-surface);color:var(--d-inverse-on-surface)}.d-snackbar-message>span{flex:1;padding-block:14px;font-size:14px;line-height:20px;letter-spacing:.25px}.d-snackbar-message button{border:0;background:transparent;color:var(--d-inverse-primary);min-height:48px;padding:0 12px;font-size:14px;line-height:20px;font-weight:500;letter-spacing:.1px}
-.d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer;display:flex;align-items:center;min-width:var(--d-item-min-interactive,0px);min-height:var(--d-item-min-interactive,0px)}.d-segment input{position:absolute;opacity:0;width:1px;height:1px}.d-segment-surface{display:flex;align-items:center;gap:var(--d-item-gap,0px);min-height:var(--d-item-min-height,44px);padding:var(--d-item-padding,10px 16px);border:1px solid var(--d-outline)}.d-segment:first-child .d-segment-surface{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child .d-segment-surface{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+.d-segment-surface{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+.d-segment-surface{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+.d-segment-surface{opacity:.5;cursor:default}
+.d-segments{display:flex;flex-wrap:wrap;gap:0}.d-segment{position:relative;cursor:pointer;display:flex;align-items:center;min-width:var(--d-item-min-interactive,0px);min-height:var(--d-item-min-interactive,0px)}.d-segment input{position:absolute;inset:0;z-index:1;margin:0;opacity:0;width:100%;height:100%;cursor:inherit}.d-segment input:disabled{cursor:default}.d-segment-surface{display:flex;align-items:center;gap:var(--d-item-gap,0px);min-height:var(--d-item-min-height,44px);padding:var(--d-item-padding,10px 16px);border:1px solid var(--d-outline)}.d-segment:first-child .d-segment-surface{border-radius:var(--d-radius) 0 0 var(--d-radius)}.d-segment:last-child .d-segment-surface{border-radius:0 var(--d-radius) var(--d-radius) 0}.d-segment input:checked+.d-segment-surface{background:var(--d-variant);color:var(--d-primary)}.d-segment input:focus-visible+.d-segment-surface{outline:3px solid var(--d-primary);outline-offset:3px}.d-segment input:disabled+.d-segment-surface{opacity:.5;cursor:default}
 .d-range{position:relative;width:100%;height:48px;min-width:144px}.d-tooltip-anchor{display:inline-block;position:relative}.d-tooltip{position:absolute;z-index:5;bottom:100%;left:0;min-width:160px;max-width:280px;border-radius:4px;padding:8px 12px;background:var(--d-on-surface);color:var(--d-surface);font-size:var(--d-label)}
 @media(prefers-reduced-motion:reduce){.d-theme *{transition:none!important;animation:none!important}}
 .d-button,.d-chip,.d-icon-button,.d-field input,.d-field textarea,.d-navigation button,.d-navigation a{font:inherit;accent-color:var(--d-primary);box-sizing:border-box}
@@ -2204,10 +2268,13 @@ private const val MATERIAL_CSS = """
 .d-chip:not(.d-item-hittarget):active:not(:disabled)[data-selected=true],.d-chip.d-item-hittarget:active:not(:disabled)[data-selected=true] .d-chip-surface,.d-multi-segment:active:not(:disabled)[aria-pressed=true],.d-tabs button:active:not(:disabled)[aria-selected=true],.d-navigation [aria-current=page]:active:not(:disabled),.d-list-item:active:not(:disabled)[aria-current=true],.d-navigation-drawer-item:active:not(:disabled)[aria-current=page],.d-wide-navigation-rail-item:active:not(:disabled)[aria-current=page],.d-segment:active:has(input:checked) .d-segment-surface{background:var(--d-item-pressed-container,var(--d-item-hovered-container,var(--d-item-selected-container,var(--d-item-container,transparent))));color:var(--d-item-pressed-content,var(--d-item-hovered-content,var(--d-item-selected-content,var(--d-item-content,var(--d-on-surface)))));border-color:var(--d-item-pressed-border,var(--d-item-hovered-border,var(--d-item-selected-border,var(--d-item-border,var(--d-outline)))))}
 .d-chip:disabled,.d-multi-segment:disabled,.d-tabs button:disabled,.d-navigation button:disabled,.d-list-item:disabled,.d-navigation-drawer-item:disabled,.d-wide-navigation-rail-item:disabled,.d-segment input:disabled+.d-segment-surface{background:var(--d-item-disabled-container,var(--d-item-container,transparent));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-item-border,var(--d-outline)))}
 @media(forced-colors:active){.d-chip:hover,.d-chip:focus-visible,.d-chip:active,.d-multi-segment:hover,.d-multi-segment:focus-visible,.d-multi-segment:active,.d-tabs button:hover,.d-tabs button:focus-visible,.d-tabs button:active,.d-navigation button:hover,.d-navigation button:focus-visible,.d-navigation button:active,.d-list-item:hover,.d-list-item:focus-visible,.d-list-item:active,.d-navigation-drawer-item:hover,.d-navigation-drawer-item:focus-visible,.d-navigation-drawer-item:active,.d-wide-navigation-rail-item:hover,.d-wide-navigation-rail-item:focus-visible,.d-wide-navigation-rail-item:active{forced-color-adjust:auto}.d-chip:not(.d-item-hittarget)[data-selected=true],.d-chip.d-item-hittarget[data-selected=true] .d-chip-surface,.d-multi-segment[aria-pressed=true],.d-tabs [aria-selected=true],.d-navigation [aria-current=page],.d-list-item[aria-current=true],.d-navigation-drawer-item[aria-current=page],.d-wide-navigation-rail-item[aria-current=page]{background:Highlight!important;color:HighlightText!important;border-color:Highlight!important}.d-chip:disabled,.d-multi-segment:disabled,.d-tabs button:disabled,.d-navigation button:disabled,.d-list-item:disabled,.d-navigation-drawer-item:disabled,.d-wide-navigation-rail-item:disabled{color:GrayText!important;border-color:GrayText!important}.d-chip:focus-visible,.d-multi-segment:focus-visible,.d-tabs button:focus-visible,.d-navigation :focus-visible,.d-list-item:focus-visible,.d-navigation-drawer-item:focus-visible,.d-wide-navigation-rail-item:focus-visible{outline:2px solid Highlight!important;outline-offset:2px}}
+@media(forced-colors:active){.d-chip.d-item-hittarget:focus-visible{outline:none!important}.d-chip.d-item-hittarget:focus-visible .d-chip-surface{outline:2px solid Highlight!important;outline-offset:2px}}
 .d-chip.d-item-hittarget:disabled .d-chip-surface{background:var(--d-item-disabled-container,var(--d-item-container,var(--d-variant)));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-item-border,var(--d-outline)))}
+.d-chip:not(.d-item-hittarget):disabled[data-selected=true],.d-chip.d-item-hittarget:disabled[data-selected=true] .d-chip-surface,.d-multi-segment:disabled[aria-pressed=true],.d-tabs button:disabled[aria-selected=true],.d-navigation button:disabled[aria-current=page],.d-navigation a[aria-disabled=true][aria-current=page],.d-list-item:disabled[aria-current=true],.d-navigation-drawer-item:disabled[aria-current=page],.d-wide-navigation-rail-item:disabled[aria-current=page],.d-segment input:disabled:checked+.d-segment-surface{background:var(--d-item-disabled-selected-container,var(--d-item-disabled-container,var(--d-item-container,transparent)));color:var(--d-item-disabled-selected-content,var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface))));border-color:var(--d-item-disabled-selected-border,var(--d-item-disabled-border,var(--d-item-border,var(--d-outline))))}
 .d-chip:not(.d-item-hittarget)[data-selected=true],.d-chip[data-selected=true] .d-chip-surface,.d-multi-segment[aria-pressed=true],.d-tabs [aria-selected=true],.d-navigation [aria-current=page],.d-list-item[aria-current=true],.d-navigation-drawer-item[aria-current=page],.d-wide-navigation-rail-item[aria-current=page],.d-segment input:checked+.d-segment-surface{border-width:var(--d-item-selected-border-width,var(--d-item-border-width,1px))}
 .d-chip:not(.d-item-hittarget):hover:not(:disabled),.d-chip.d-item-hittarget:hover:not(:disabled) .d-chip-surface,.d-multi-segment:hover:not(:disabled),.d-tabs button:hover:not(:disabled),.d-navigation button:hover:not(:disabled),.d-navigation a:hover,.d-list-item:hover:not(:disabled),.d-navigation-drawer-item:hover:not(:disabled),.d-wide-navigation-rail-item:hover:not(:disabled),.d-segment:hover .d-segment-surface{box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-hover-opacity,8%),transparent)}
 .d-chip:not(.d-item-hittarget):focus-visible:not(:disabled),.d-chip.d-item-hittarget:focus-visible:not(:disabled) .d-chip-surface,.d-multi-segment:focus-visible:not(:disabled),.d-tabs button:focus-visible:not(:disabled),.d-navigation button:focus-visible:not(:disabled),.d-navigation a:focus-visible,.d-list-item:focus-visible:not(:disabled),.d-navigation-drawer-item:focus-visible:not(:disabled),.d-wide-navigation-rail-item:focus-visible:not(:disabled),.d-segment:has(input:focus-visible) .d-segment-surface{box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-focus-opacity,12%),transparent)}
+.d-chip.d-item-hittarget:focus-visible{outline:none}.d-chip.d-item-hittarget:focus-visible .d-chip-surface{outline:3px solid var(--d-primary);outline-offset:3px}
 .d-chip:not(.d-item-hittarget):active:not(:disabled),.d-chip.d-item-hittarget:active:not(:disabled) .d-chip-surface,.d-multi-segment:active:not(:disabled),.d-tabs button:active:not(:disabled),.d-navigation button:active:not(:disabled),.d-navigation a:active,.d-list-item:active:not(:disabled),.d-navigation-drawer-item:active:not(:disabled),.d-wide-navigation-rail-item:active:not(:disabled),.d-segment:active .d-segment-surface{box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-pressed-opacity,12%),transparent)}
 .d-chip:disabled,.d-multi-segment:disabled,.d-tabs button:disabled,.d-navigation button:disabled,.d-list-item:disabled,.d-navigation-drawer-item:disabled,.d-wide-navigation-rail-item:disabled,.d-segment input:disabled+.d-segment-surface{opacity:var(--d-item-disabled-opacity,1)}
 .d-search-full-screen[role=search]{position:fixed;z-index:40;inset:0;display:flex;flex-direction:column;padding:16px;background:var(--d-surface)}.d-search-contained-full-screen[role=search]{position:fixed;z-index:40;inset:16px;display:flex;flex-direction:column;padding:16px;border-radius:var(--d-shape-large,var(--d-radius));background:var(--d-surface);box-shadow:0 8px 28px rgb(0 0 0 / .22)} .d-search-full-screen[role=search] .d-search-results,
@@ -2216,9 +2283,10 @@ private const val MATERIAL_CSS = """
 .d-dropdown-menu-item{display:flex;align-items:center;gap:var(--d-item-gap,12px);width:100%;min-height:var(--d-item-min-height,48px);padding:var(--d-item-padding,8px 12px);border:var(--d-item-border-width,0) solid var(--d-item-border,transparent);border-radius:var(--d-item-radius,0);background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));text-align:start}.d-dropdown-menu-item[aria-checked=true]{background:var(--d-item-selected-container,var(--d-secondary-container));color:var(--d-item-selected-content,var(--d-on-secondary-container))}.d-dropdown-menu-item:disabled{opacity:var(--d-item-disabled-opacity,1)}.d-dropdown-menu-labels{display:flex;flex:1;flex-direction:column;gap:2px}.d-dropdown-menu-supporting{font-size:var(--d-label);opacity:.72}.d-dropdown-menu-leading,.d-dropdown-menu-trailing{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center}.d-menu-group{gap:2px;padding:8px;border-radius:var(--d-shape-small,var(--d-radius))}.d-component-label{display:block}.d-component-label-content{display:flex;flex-direction:column;gap:4px}.d-component-label-text{position:absolute;z-index:1;inset-inline-start:12px;inset-block-start:8px;max-width:calc(100% - 24px);padding:0 4px;overflow:hidden;background:var(--d-surface);color:var(--d-primary);font-size:var(--d-label);text-overflow:ellipsis;white-space:nowrap;opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity 120ms ease,transform 120ms ease}.d-component-label:hover .d-component-label-text,.d-component-label:focus-within .d-component-label-text,.d-component-label:active .d-component-label-text,.d-component-label-persistent .d-component-label-text{opacity:1;transform:translateY(0)}.d-component-label-persistent .d-component-label-text{position:static;display:block;max-width:none;padding:0;background:transparent;transform:none}.d-scroll-field{border:var(--d-item-border-width,1px) solid var(--d-item-border,var(--d-outline));border-radius:var(--d-item-radius,var(--d-shape-small,var(--d-radius)));background:var(--d-item-container,transparent);color:var(--d-item-content,var(--d-on-surface));padding:var(--d-item-padding,4px)}.d-scroll-field:focus-visible{outline:2px solid var(--d-primary);outline-offset:2px}.d-scroll-field[aria-disabled=true]{opacity:var(--d-item-disabled-opacity,1)}.d-scroll-field-viewport{width:min(160px,40vw);height:168px;overflow-y:auto;overscroll-behavior:contain;scroll-snap-type:y mandatory;scrollbar-width:none}.d-scroll-field-viewport::-webkit-scrollbar{display:none}.d-scroll-field-option{display:grid;min-height:44px;place-items:center;scroll-snap-align:center;cursor:pointer}.d-scroll-field-option-selected{font-weight:600}.d-app-bar-row,.d-app-bar-second-row{display:flex;align-items:center;gap:12px;width:100%}.d-app-bar-second-row{padding-inline-start:56px;font-size:var(--d-body)}.d-app-bar-heading{display:flex;flex:1;flex-direction:column;gap:2px}.d-app-bar-subtitle{font-size:var(--d-label);opacity:.8}.d-dialog-full-screen{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border-radius:0}.d-dialog-date-picker,.d-dialog-time-picker{max-width:min(560px,94vw)}
 .d-dropdown-menu-item{transition:background-color 120ms ease,color 120ms ease}.d-dropdown-menu-item:not(:disabled):hover{background:var(--d-item-hovered-container,var(--d-item-container,transparent));color:var(--d-item-hovered-content,var(--d-item-content,var(--d-on-surface)));box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-hover-opacity,8%),transparent)}.d-dropdown-menu-item:not(:disabled):focus-visible{background:var(--d-item-focused-container,var(--d-item-container,transparent));color:var(--d-item-focused-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-focused-border,var(--d-item-border,transparent));outline:2px solid var(--d-primary);outline-offset:-2px;box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-focus-opacity,12%),transparent)}.d-dropdown-menu-item:not(:disabled):active{background:var(--d-item-pressed-container,var(--d-item-container,transparent));color:var(--d-item-pressed-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-pressed-border,var(--d-item-border,transparent));box-shadow:inset 0 0 0 999px color-mix(in srgb,currentColor var(--d-item-pressed-opacity,16%),transparent)}.d-dropdown-menu-item:disabled{background:var(--d-item-disabled-container,var(--d-item-container,transparent));color:var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface)));border-color:var(--d-item-disabled-border,var(--d-item-border,transparent))}
 .d-dropdown-menu-item[aria-checked=true]:not(:disabled):hover{background:var(--d-item-hovered-container,var(--d-item-selected-container,var(--d-secondary-container)));color:var(--d-item-hovered-content,var(--d-item-selected-content,var(--d-on-secondary-container)))}.d-dropdown-menu-item[aria-checked=true]:not(:disabled):focus-visible{background:var(--d-item-focused-container,var(--d-item-selected-container,var(--d-secondary-container)));color:var(--d-item-focused-content,var(--d-item-selected-content,var(--d-on-secondary-container)))}.d-dropdown-menu-item[aria-checked=true]:not(:disabled):active{background:var(--d-item-pressed-container,var(--d-item-selected-container,var(--d-secondary-container)));color:var(--d-item-pressed-content,var(--d-item-selected-content,var(--d-on-secondary-container)))}
+.d-dropdown-menu-item:disabled[aria-checked=true]{background:var(--d-item-disabled-selected-container,var(--d-item-disabled-container,var(--d-item-container,transparent)));color:var(--d-item-disabled-selected-content,var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface))));border-color:var(--d-item-disabled-selected-border,var(--d-item-disabled-border,var(--d-item-border,transparent)))}
 @media(prefers-reduced-motion:reduce){.d-dropdown-menu-item{transition:none}}
 @media(forced-colors:active){.d-dropdown-menu-item:focus-visible{outline:2px solid Highlight;outline-offset:-2px;box-shadow:none}.d-dropdown-menu-item[aria-checked=true]{background:Highlight;color:HighlightText;border-color:Highlight}}
-.d-menu-position{inset-block-start:16px;inset-inline-end:16px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow:auto}
+.d-menu-position{inset-block-start:16px;inset-inline-end:16px;max-width:calc(100vw - 32px);overflow:visible}
 .d-menu-popup{background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:112px;max-width:min(280px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));box-shadow:0 4px 12px rgb(0 0 0 / .2)}
 .d-chip.d-item-hittarget .d-chip-surface,.d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,0));border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,0));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,0));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,0))}
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
@@ -2240,5 +2308,7 @@ private const val MATERIAL_CSS = """
 @media(forced-colors:active){:root .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page],:root .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]{outline:1px solid Highlight}:root .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page]>svg:first-child,:root .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]>svg:first-child,:root .d-navigation:not(.d-navigation-links):not([style*="column"])>button[aria-current=page]>span[aria-hidden=true]:first-child,:root .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-current=page]>span[aria-hidden=true]:first-child{background:Highlight;color:HighlightText}}
 :root .d-navigation.d-navigation-links{width:auto;min-height:0;padding:0;align-items:center;gap:8px;background:transparent}
 :root .d-navigation.d-navigation-links>a,:root .d-navigation.d-navigation-links>button{flex:0 0 auto;min-height:44px;padding:12px}
+:root .d-navigation:not(.d-navigation-links):not([style*="column"])>button:disabled[aria-current=page],:root .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-disabled=true][aria-current=page],:root .d-navigation[style*="column"]>button:disabled[aria-current=page],:root .d-navigation[style*="column"]>a[aria-disabled=true][aria-current=page]{background:var(--d-item-disabled-selected-container,var(--d-item-disabled-container,var(--d-item-container,transparent)));color:var(--d-item-disabled-selected-content,var(--d-item-disabled-content,var(--d-item-content,var(--d-on-surface))));border-color:var(--d-item-disabled-selected-border,var(--d-item-disabled-border,var(--d-item-border,var(--d-outline))))}
+:root .d-navigation:not(.d-navigation-links):not([style*="column"])>button:disabled[aria-current=page]>svg:first-child,:root .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-disabled=true][aria-current=page]>svg:first-child,:root .d-navigation:not(.d-navigation-links):not([style*="column"])>button:disabled[aria-current=page]>span[aria-hidden=true]:first-child,:root .d-navigation:not(.d-navigation-links):not([style*="column"])>a[aria-disabled=true][aria-current=page]>span[aria-hidden=true]:first-child{background:var(--d-item-disabled-selected-container,var(--d-item-disabled-container,var(--d-item-container,transparent)))}
 @media(forced-colors:active){:root .d-toggle input[type=checkbox],:root .d-toggle input[type=radio],:root .d-toggle input[role=switch]{appearance:auto;forced-color-adjust:auto;background-image:none;background-color:ButtonFace;border-color:ButtonText}:root .d-toggle input:checked{accent-color:Highlight}:root .d-toggle input:focus-visible{outline:2px solid Highlight;outline-offset:3px}}
 """

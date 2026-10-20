@@ -17,6 +17,8 @@ test('shared card layers overlap and adaptive panes retain the hidden directory'
   const directoryNode = await directory.elementHandle();
   const note = page.getByRole('textbox', { name: 'Directory note', exact: true });
   await note.fill('Retain this directory draft');
+  const noteNode = await note.elementHandle();
+  expect(noteNode).not.toBeNull();
   const hero = await page.getByTestId('shared-card-hero').boundingBox();
   for (const id of ['shared-card-image', 'shared-card-scrim']) {
     const layer = await page.getByTestId(id).boundingBox();
@@ -38,6 +40,8 @@ test('shared card layers overlap and adaptive panes retain the hidden directory'
   await page.getByRole('switch', { name: 'Use compact panes', exact: true }).uncheck();
   await expect(directory).toBeVisible();
   await expect(note).toHaveValue('Retain this directory draft');
+  expect(await noteNode!.evaluate(element => element.isConnected)).toBe(true);
+  expect(await note.evaluate((element, original) => element === original, noteNode)).toBe(true);
   expect(await directoryNode!.evaluate(element => element.isConnected && element === document.querySelector('[role=region][aria-label="Workshop directory"]'))).toBe(true);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });

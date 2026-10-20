@@ -29,6 +29,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -334,6 +335,9 @@ internal fun NativeButton(
                         ),
                     color = contentColor,
                     strokeWidth = (appearance.indicatorStrokeWidth?.value ?: 2f).dp,
+                    trackColor =
+                        appearance.indicatorTrackColor?.let { Color(it.argb) }
+                            ?: ProgressIndicatorDefaults.circularIndeterminateTrackColor,
                 )
             }
         }

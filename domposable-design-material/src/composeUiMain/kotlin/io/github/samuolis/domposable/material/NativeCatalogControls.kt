@@ -1084,8 +1084,9 @@ internal fun NativeChip(
     val enabled = props.enabled && domposableFormEnabled()
     val interaction = remember { MutableInteractionSource() }
     val resolved = appearance.resolveInteractionColors(interaction, props.selected, enabled)
-    val disabledContent = appearance.colors.disabledContent?.nativeColor() ?: Color.Unspecified
-    val disabledContainer = appearance.colors.disabledContainer?.nativeColor() ?: Color.Unspecified
+    val disabledContent = if (props.selected) resolved.selectedContent else resolved.content
+    val disabledContainer = resolved.container
+    val disabledSelectedContainer = resolved.selectedContainer
     val minInteractive = appearance.minimumInteractiveSize?.value?.dp ?: 48.dp
     val horizontalArrangement = appearance.chipHorizontalArrangement(props.variant)
     val chipModifier =
@@ -1104,7 +1105,7 @@ internal fun NativeChip(
                     Modifier
                 },
             ).minimumInteractiveComponentSize()
-    val borderColor = resolved.border
+    val borderColor = if (props.selected) resolved.selectedBorder else resolved.border
     val borderWidth =
         if (props.selected) {
             appearance.selectedBorderWidth?.value?.dp ?: appearance.borderWidth.value.dp
@@ -1176,7 +1177,7 @@ internal fun NativeChip(
                                 disabledLeadingIconColor = disabledContent,
                                 disabledTrailingIconColor = disabledContent,
                                 selectedContainerColor = resolved.selectedContainer,
-                                disabledSelectedContainerColor = disabledContainer,
+                                disabledSelectedContainerColor = disabledSelectedContainer,
                                 selectedLabelColor = resolved.selectedContent,
                                 selectedLeadingIconColor = resolved.selectedContent,
                                 selectedTrailingIconColor = resolved.selectedContent,
@@ -1210,7 +1211,7 @@ internal fun NativeChip(
                                 disabledLeadingIconColor = disabledContent,
                                 disabledTrailingIconColor = disabledContent,
                                 selectedContainerColor = resolved.selectedContainer,
-                                disabledSelectedContainerColor = disabledContainer,
+                                disabledSelectedContainerColor = disabledSelectedContainer,
                                 selectedLabelColor = resolved.selectedContent,
                                 selectedLeadingIconColor = resolved.selectedContent,
                                 selectedTrailingIconColor = resolved.selectedContent,
@@ -1361,7 +1362,7 @@ internal fun NativeChip(
                             disabledLeadingIconColor = disabledContent,
                             disabledTrailingIconColor = disabledContent,
                             selectedContainerColor = resolved.selectedContainer,
-                            disabledSelectedContainerColor = disabledContainer,
+                            disabledSelectedContainerColor = disabledSelectedContainer,
                             selectedLabelColor = resolved.selectedContent,
                             selectedLeadingIconColor = resolved.selectedContent,
                             selectedTrailingIconColor = resolved.selectedContent,
@@ -1637,6 +1638,8 @@ internal fun NativeTabs(
     val focusRequesters = remember(tabKeys) { tabs.map { FocusRequester() } }
     var focusedTabKey by remember(tabKeys) { mutableStateOf(tabs.firstEnabledKey(props.selectedIndex)) }
     val item = appearance.colors
+    val selectedTab = tabs.getOrNull(props.selectedIndex)
+    val selectedTabDisabled = selectedTab != null && (!formEnabled || !selectedTab.enabled)
     val primaryContainer = item.container?.nativeColor() ?: TabRowDefaults.primaryContainerColor
     val primaryContent = item.content?.nativeColor() ?: TabRowDefaults.primaryContentColor
     val secondaryContainer = item.container?.nativeColor() ?: TabRowDefaults.secondaryContainerColor
@@ -1646,14 +1649,29 @@ internal fun NativeTabs(
         tabs.forEachIndexed { index, tab ->
             androidx.compose.runtime.key(tab.key) {
                 val selected = props.selectedIndex == index
+                val enabled = formEnabled && tab.enabled
                 val selectedTextAppearance =
                     (if (selected) tab.selectedTextAppearance else null) ?: tab.textAppearance ?: if (selected) {
                         appearance.selectedTextAppearance ?: appearance.textAppearance
                     } else {
                         appearance.textAppearance
                     }
-                val background = if (selected) item.selectedContainer else item.container
-                val border = if (selected) item.selectedBorder ?: item.border else item.border
+                val background =
+                    if (selected && !enabled) {
+                        item.disabledSelectedContainer ?: item.selectedContainer
+                    } else if (selected) {
+                        item.selectedContainer
+                    } else {
+                        item.container
+                    }
+                val border =
+                    if (selected && !enabled) {
+                        item.disabledSelectedBorder ?: item.selectedBorder ?: item.border
+                    } else if (selected) {
+                        item.selectedBorder ?: item.border
+                    } else {
+                        item.border
+                    }
                 val tabModifier =
                     Modifier
                         .focusRequester(focusRequesters[index])
@@ -1686,7 +1704,7 @@ internal fun NativeTabs(
                                 Modifier
                             },
                         ).then(
-                            if (!formEnabled || !tab.enabled) {
+                            if (!enabled) {
                                 Modifier.alpha(tabsAppearance?.disabledOpacity ?: appearance.disabledOpacity ?: .38f)
                             } else {
                                 Modifier
@@ -1745,8 +1763,11 @@ internal fun NativeTabs(
                         text = text,
                         icon = icon,
                         modifier = tabModifier,
-                        enabled = formEnabled && tab.enabled,
-                        selectedContentColor = item.selectedContent?.nativeColor() ?: defaultTabContent,
+                        enabled = enabled,
+                        selectedContentColor =
+                            (if (!enabled) item.disabledSelectedContent else null)?.nativeColor()
+                                ?: item.selectedContent?.nativeColor()
+                                ?: defaultTabContent,
                         unselectedContentColor =
                             item.content?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -1755,8 +1776,11 @@ internal fun NativeTabs(
                         selected = selected,
                         onClick = { if (formEnabled && tab.enabled) props.onSelect(index) },
                         modifier = tabModifier,
-                        enabled = formEnabled && tab.enabled,
-                        selectedContentColor = item.selectedContent?.nativeColor() ?: defaultTabContent,
+                        enabled = enabled,
+                        selectedContentColor =
+                            (if (!enabled) item.disabledSelectedContent else null)?.nativeColor()
+                                ?: item.selectedContent?.nativeColor()
+                                ?: defaultTabContent,
                         unselectedContentColor =
                             item.content?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
                         text = text,
@@ -1811,7 +1835,10 @@ internal fun NativeTabs(
                                         ?: (tabsAppearance?.indicatorThickness == null),
                             ),
                         height = tabsAppearance?.indicatorThickness?.value?.dp ?: 3.dp,
-                        color = item.selectedBorder?.nativeColor() ?: MaterialTheme.colorScheme.primary,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.primary,
                     )
                 },
                 tabs = renderTabs,
@@ -1830,7 +1857,10 @@ internal fun NativeTabs(
                     TabRowDefaults.SecondaryIndicator(
                         modifier = Modifier.tabIndicatorOffset(props.selectedIndex),
                         height = tabsAppearance?.indicatorThickness?.value?.dp ?: 2.dp,
-                        color = item.selectedBorder?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
                 tabs = renderTabs,
@@ -1847,7 +1877,10 @@ internal fun NativeTabs(
                     TabRowDefaults.SecondaryIndicator(
                         modifier = Modifier.tabIndicatorOffset(props.selectedIndex),
                         height = tabsAppearance?.indicatorThickness?.value?.dp ?: 2.dp,
-                        color = item.selectedBorder?.nativeColor() ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
                 tabs = renderTabs,
@@ -1870,7 +1903,10 @@ internal fun NativeTabs(
                                         ?: (tabsAppearance?.indicatorThickness == null),
                             ),
                         height = tabsAppearance?.indicatorThickness?.value?.dp ?: 3.dp,
-                        color = item.selectedBorder?.nativeColor() ?: MaterialTheme.colorScheme.primary,
+                        color =
+                            (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
+                                ?: item.selectedBorder?.nativeColor()
+                                ?: MaterialTheme.colorScheme.primary,
                     )
                 },
                 tabs = renderTabs,
@@ -1978,11 +2014,44 @@ internal fun NativeNavigationBar(
                     NavigationBarItemDefaults.colors(
                         selectedIconColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
                         selectedTextColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                        indicatorColor = item.selectedContainer?.nativeColor() ?: Color.Unspecified,
+                        indicatorColor =
+                            (
+                                if (selected &&
+                                    !(itemData.enabled && domposableFormEnabled())
+                                ) {
+                                    item.disabledSelectedContainer
+                                } else {
+                                    null
+                                }
+                            )?.nativeColor()
+                                ?: item.selectedContainer?.nativeColor()
+                                ?: Color.Unspecified,
                         unselectedIconColor = item.content?.nativeColor() ?: Color.Unspecified,
                         unselectedTextColor = item.content?.nativeColor() ?: Color.Unspecified,
-                        disabledIconColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
-                        disabledTextColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
+                        disabledIconColor =
+                            (
+                                if (selected &&
+                                    !(itemData.enabled && domposableFormEnabled())
+                                ) {
+                                    item.disabledSelectedContent
+                                } else {
+                                    null
+                                }
+                            )?.nativeColor()
+                                ?: item.disabledContent?.nativeColor()
+                                ?: Color.Unspecified,
+                        disabledTextColor =
+                            (
+                                if (selected &&
+                                    !(itemData.enabled && domposableFormEnabled())
+                                ) {
+                                    item.disabledSelectedContent
+                                } else {
+                                    null
+                                }
+                            )?.nativeColor()
+                                ?: item.disabledContent?.nativeColor()
+                                ?: Color.Unspecified,
                     )
                 NavigationBarItem(
                     selected = selected,
@@ -2030,7 +2099,40 @@ internal fun NativeNavigationBar(
                                 selectedIconColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
                                 selectedTextColor =
                                     item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                                selectedIndicatorColor = item.selectedContainer?.nativeColor() ?: Color.Unspecified,
+                                selectedIndicatorColor =
+                                    (
+                                        if (selected &&
+                                            !(itemData.enabled && domposableFormEnabled())
+                                        ) {
+                                            item.disabledSelectedContainer
+                                        } else {
+                                            null
+                                        }
+                                    )?.nativeColor()
+                                        ?: item.selectedContainer?.nativeColor()
+                                        ?: Color.Unspecified,
+                                disabledIconColor =
+                                    (
+                                        if (selected &&
+                                            !(itemData.enabled && domposableFormEnabled())
+                                        ) {
+                                            item.disabledSelectedContent
+                                        } else {
+                                            null
+                                        }
+                                    )?.nativeColor()
+                                        ?: Color.Unspecified,
+                                disabledTextColor =
+                                    (
+                                        if (selected &&
+                                            !(itemData.enabled && domposableFormEnabled())
+                                        ) {
+                                            item.disabledSelectedContent
+                                        } else {
+                                            null
+                                        }
+                                    )?.nativeColor()
+                                        ?: Color.Unspecified,
                                 unselectedIconColor = item.content?.nativeColor() ?: Color.Unspecified,
                                 unselectedTextColor = item.content?.nativeColor() ?: Color.Unspecified,
                             ),
@@ -2052,8 +2154,9 @@ internal fun NativeNavigationBar(
             contentColor = navigationRailContent,
         ) {
             props.items.forEachIndexed { index, itemData ->
+                val selected = props.selectedIndex == index
                 NavigationRailItem(
-                    selected = props.selectedIndex == index,
+                    selected = selected,
                     onClick = {
                         props.onSelect(index)
                         itemData.href?.let(::safeDomposableHref)?.let(uriHandler::openUri)
@@ -2070,11 +2173,44 @@ internal fun NativeNavigationBar(
                         NavigationRailItemDefaults.colors(
                             selectedIconColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
                             selectedTextColor = item.selectedContent?.nativeColor() ?: Color.Unspecified,
-                            indicatorColor = item.selectedContainer?.nativeColor() ?: Color.Unspecified,
+                            indicatorColor =
+                                (
+                                    if (selected &&
+                                        !(itemData.enabled && domposableFormEnabled())
+                                    ) {
+                                        item.disabledSelectedContainer
+                                    } else {
+                                        null
+                                    }
+                                )?.nativeColor()
+                                    ?: item.selectedContainer?.nativeColor()
+                                    ?: Color.Unspecified,
                             unselectedIconColor = item.content?.nativeColor() ?: Color.Unspecified,
                             unselectedTextColor = item.content?.nativeColor() ?: Color.Unspecified,
-                            disabledIconColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
-                            disabledTextColor = item.disabledContent?.nativeColor() ?: Color.Unspecified,
+                            disabledIconColor =
+                                (
+                                    if (selected &&
+                                        !(itemData.enabled && domposableFormEnabled())
+                                    ) {
+                                        item.disabledSelectedContent
+                                    } else {
+                                        null
+                                    }
+                                )?.nativeColor()
+                                    ?: item.disabledContent?.nativeColor()
+                                    ?: Color.Unspecified,
+                            disabledTextColor =
+                                (
+                                    if (selected &&
+                                        !(itemData.enabled && domposableFormEnabled())
+                                    ) {
+                                        item.disabledSelectedContent
+                                    } else {
+                                        null
+                                    }
+                                )?.nativeColor()
+                                    ?: item.disabledContent?.nativeColor()
+                                    ?: Color.Unspecified,
                         ),
                 )
             }
@@ -2136,13 +2272,12 @@ internal fun NativeSegmentedButtons(
                                 inactiveContainerColor = resolved.container,
                                 inactiveContentColor = resolved.content,
                                 inactiveBorderColor = resolved.border,
-                                disabledActiveContainerColor = c.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                                disabledActiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
-                                disabledActiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
-                                disabledInactiveContainerColor =
-                                    c.disabledContainer?.nativeColor() ?: Color.Unspecified,
-                                disabledInactiveContentColor = c.disabledContent?.nativeColor() ?: Color.Unspecified,
-                                disabledInactiveBorderColor = c.disabledBorder?.nativeColor() ?: Color.Unspecified,
+                                disabledActiveContainerColor = resolved.selectedContainer,
+                                disabledActiveContentColor = resolved.selectedContent,
+                                disabledActiveBorderColor = resolved.selectedBorder,
+                                disabledInactiveContainerColor = resolved.container,
+                                disabledInactiveContentColor = resolved.content,
+                                disabledInactiveBorderColor = resolved.border,
                             ),
                         border =
                             if (borderColor ==

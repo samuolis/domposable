@@ -215,7 +215,10 @@ private fun fieldInput(
     if (props.multiline || !props.singleLine) {
         TextArea(value = props.value, attrs = {
             applyInputAttributes()
-            val initialRows = maxOf(2, props.minLines).coerceAtMost(props.maxLines)
+            // Auto-sized fields start at their requested line count; otherwise the browser's
+            // intrinsic rows height would prevent them shrinking below two rows after clearing.
+            val minimumRows = if (appearance.autoSize) props.minLines else maxOf(2, props.minLines)
+            val initialRows = minimumRows.coerceAtMost(props.maxLines)
             attr("rows", initialRows.toString())
             if (appearance.minHeight == null) style { property("min-height", "calc(${props.minLines}lh + 26px)") }
             if (!appearance.autoSize && props.maxLines != Int.MAX_VALUE) {

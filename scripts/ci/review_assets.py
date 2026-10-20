@@ -13,8 +13,9 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import time
 from urllib.request import urlopen
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from PIL import Image, ImageChops, ImageDraw
 
 REPO = 'samuolis/domposable'
@@ -71,6 +72,18 @@ def validate_manifest(manifest):
 
 REVIEW_PLATFORMS = {'android', 'desktop', 'dom', 'wasm'}
 REVIEW_ARTIFACTS = {'android-html-evidence'}
+PUBLISHED_ASSET_RETRY_DELAYS = (1, 3)
+
+def download_published_asset(url):
+    for attempt in range(len(PUBLISHED_ASSET_RETRY_DELAYS) + 1):
+        try:
+            with urlopen(url, timeout=30) as response: return response.read(MAX_IMAGE + 1)
+        except HTTPError as error:
+            if error.code != 404 and error.code != 429 and not 500 <= error.code <= 599: raise
+            if attempt == len(PUBLISHED_ASSET_RETRY_DELAYS): raise
+        except (URLError, TimeoutError):
+            if attempt == len(PUBLISHED_ASSET_RETRY_DELAYS): raise
+        time.sleep(PUBLISHED_ASSET_RETRY_DELAYS[attempt])
 
 def release_assets(release_id):
     assets = []
@@ -109,20 +122,20 @@ def publish_images(files, pr: int, run: int):
             png(data)
             name = asset_name(pr, run, platform, scenario, data)
             digest = 'sha256:' + hashlib.sha256(data).hexdigest()
+            expected = f'https://github.com/{REPO}/releases/download/{release["tag_name"]}/{name}'
             asset = by_name.get(name)
             if asset is None:
                 path = Path(directory) / name
                 path.write_bytes(data)
                 # No --clobber: a previously published image is never overwritten.
                 subprocess.run(['gh', 'release', 'upload', release['tag_name'], str(path), '--repo', REPO], check=True)
-                by_name = {asset['name']: asset for asset in release_assets(release['id'])}
-                asset = by_name[name]
-            if asset.get('digest') not in (None, digest):
-                raise ValueError('Published asset digest does not match its filename')
-            url = asset['browser_download_url']
-            expected = f'https://github.com/{REPO}/releases/download/{release["tag_name"]}/{name}'
-            if url != expected: raise ValueError('Unexpected release asset URL')
-            with urlopen(url, timeout=30) as response: downloaded = response.read(MAX_IMAGE + 1)
+                url = expected
+            else:
+                if asset.get('digest') not in (None, digest):
+                    raise ValueError('Published asset digest does not match its filename')
+                url = asset['browser_download_url']
+                if url != expected: raise ValueError('Unexpected release asset URL')
+            downloaded = download_published_asset(url)
             if downloaded != data: raise ValueError('Published image bytes differ from reviewed evidence')
             png(downloaded)
             lines.append(f'![{label}]({url})')

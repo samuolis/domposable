@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.material
 
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
+import io.github.samuolis.domposable.foundation.DomposableTextOverflow
 import io.github.samuolis.domposable.ui.DomposableText
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -11,6 +12,47 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HtmlTextMinLinesTest {
+    @Test
+    fun textOverflowAppearanceSetsEllipsisOnlyForEllipsisMode() {
+        val root = document.createElement("div")
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableText(
+                        "Ellipsized text",
+                        appearance = DomposableTextAppearance(maxLines = 2, overflow = DomposableTextOverflow.Ellipsis),
+                    )
+                    DomposableText(
+                        "Clipped text",
+                        appearance = DomposableTextAppearance(maxLines = 2, overflow = DomposableTextOverflow.Clip),
+                    )
+                    DomposableText(
+                        "Visible text",
+                        appearance = DomposableTextAppearance(maxLines = 2, overflow = DomposableTextOverflow.Visible),
+                    )
+                }
+            }
+
+        try {
+            val textNodes = root.querySelectorAll(".d-text")
+            val ellipsis = textNodes.item(0) as HTMLElement
+            val clip = textNodes.item(1) as HTMLElement
+            val visible = textNodes.item(2) as HTMLElement
+
+            assertEquals("ellipsis", window.getComputedStyle(ellipsis).getPropertyValue("text-overflow"))
+            assertEquals("2", window.getComputedStyle(ellipsis).getPropertyValue("-webkit-line-clamp"))
+            assertEquals("hidden", window.getComputedStyle(ellipsis).getPropertyValue("overflow"))
+            assertEquals("clip", window.getComputedStyle(clip).getPropertyValue("text-overflow"))
+            assertEquals("hidden", window.getComputedStyle(clip).getPropertyValue("overflow"))
+            assertEquals("clip", window.getComputedStyle(visible).getPropertyValue("text-overflow"))
+            assertEquals("visible", window.getComputedStyle(visible).getPropertyValue("overflow"))
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
     @Test
     fun appearanceReservesMinimumLinesWithoutChangingDefaultHeight() {
         val root = document.createElement("div")

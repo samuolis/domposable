@@ -347,10 +347,13 @@ internal fun HtmlDataTable(
     modifier: DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.dataTable
+    val hasExplicitSpacing = appearance.rowSpacing != null || appearance.columnSpacing != null
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-data-table-container", "d-data-table-${props.sizePreset.name.lowercase()}")
+            if (hasExplicitSpacing) classes("d-data-table-spaced")
+            if (appearance.rowSpacing != null) classes("d-data-table-row-spacing")
             style {
                 property("max-width", "100%")
                 property("min-width", "0")
@@ -380,27 +383,55 @@ internal fun HtmlDataTable(
         }) {
             Table(attrs = {
                 classes("d-data-table")
+                if (hasExplicitSpacing) attr("role", "table")
                 attr("aria-rowcount", (props.rows.size + 1).toString())
                 attr("aria-colcount", props.columns.size.toString())
                 style {
-                    property("border-collapse", "collapse")
+                    property("border-collapse", if (hasExplicitSpacing) "separate" else "collapse")
                     property("table-layout", "fixed")
                     property("width", "100%")
+                    if (hasExplicitSpacing) {
+                        property(
+                            "--d-data-column-count",
+                            props.columns.size
+                                .coerceAtLeast(1)
+                                .toString(),
+                        )
+                        appearance.rowSpacing?.let { property("--d-data-row-spacing", "${it.value}px") }
+                        appearance.columnSpacing?.let { property("--d-data-column-spacing", "${it.value}px") }
+                    }
                     appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
                     if (props.allowHorizontalOverflow) {
-                        property(
-                            "min-width",
-                            "${(props.columns.size * 160).coerceAtLeast(1)}px",
-                        )
+                        val minimumTableWidth =
+                            appearance.columnSpacing?.let { spacing ->
+                                "${(
+                                    props.columns.size * 160 + spacing.value *
+                                        (props.columns.size - 1).coerceAtLeast(
+                                            0,
+                                        )
+                                )
+                                    .coerceAtLeast(1f)}px"
+                            } ?: "${(props.columns.size * 160).coerceAtLeast(1)}px"
+                        property("min-width", minimumTableWidth)
                     }
                 }
             }) {
-                Thead {
-                    Tr {
+                Thead(attrs = { if (hasExplicitSpacing) attr("role", "rowgroup") }) {
+                    Tr(attrs = {
+                        if (hasExplicitSpacing) {
+                            attr("role", "row")
+                            attr("aria-rowindex", "1")
+                            style {
+                                appearance.headerContainer?.let { property("background-color", it.css()) }
+                                appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                            }
+                        }
+                    }) {
                         props.columns.forEach { column ->
                             key(column.key) {
                                 Th(attrs = {
                                     attr("scope", "col")
+                                    if (hasExplicitSpacing) attr("role", "columnheader")
                                     attr("aria-label", column.accessibleLabel)
                                     style {
                                         property("text-align", column.alignment.htmlTextAlign())
@@ -408,9 +439,20 @@ internal fun HtmlDataTable(
                                             "padding",
                                             appearance.cellPadding?.cssPadding() ?: props.sizePreset.htmlCellPadding(),
                                         )
-                                        appearance.headerContainer?.let { property("background-color", it.css()) }
+                                        if (!hasExplicitSpacing) {
+                                            appearance.headerContainer?.let {
+                                                property("background-color", it.css())
+                                            }
+                                        }
                                         appearance.headerContent?.let { property("color", it.css()) }
-                                        appearance.border?.let { property("border-bottom", "1px solid ${it.css()}") }
+                                        if (!hasExplicitSpacing) {
+                                            appearance.border?.let {
+                                                property(
+                                                    "border-bottom",
+                                                    "1px solid ${it.css()}",
+                                                )
+                                            }
+                                        }
                                         appearance.headerTextAppearance?.let { applyCatalogTextAppearance(it) }
                                     }
                                 }) { Text(column.label) }
@@ -418,7 +460,7 @@ internal fun HtmlDataTable(
                         }
                     }
                 }
-                Tbody {
+                Tbody(attrs = { if (hasExplicitSpacing) attr("role", "rowgroup") }) {
                     props.rows.forEachIndexed { index, row ->
                         key(row.key) {
                             val actions = props.columns.associate { it.key to props.cellAction(row.key, it.key) }
@@ -430,6 +472,7 @@ internal fun HtmlDataTable(
                                 }
                             Tr(attrs = {
                                 classes("d-data-table-row")
+                                if (hasExplicitSpacing) attr("role", "row")
                                 attr("data-row-key", row.key)
                                 attr("aria-rowindex", (index + 2).toString())
                                 attr("aria-selected", row.selected.toString())
@@ -549,6 +592,7 @@ internal fun HtmlDataTable(
                                         if (column.key == props.rowHeaderColumnKey) {
                                             Th(attrs = {
                                                 attr("scope", "row")
+                                                if (hasExplicitSpacing) attr("role", "rowheader")
                                                 attr("data-column-label", column.accessibleLabel)
                                                 style {
                                                     property("text-align", column.alignment.htmlTextAlign())
@@ -557,11 +601,13 @@ internal fun HtmlDataTable(
                                                         appearance.cellPadding?.cssPadding()
                                                             ?: props.sizePreset.htmlCellPadding(),
                                                     )
-                                                    appearance.border?.let {
-                                                        property(
-                                                            "border-bottom",
-                                                            "1px solid ${it.css()}",
-                                                        )
+                                                    if (!hasExplicitSpacing) {
+                                                        appearance.border?.let {
+                                                            property(
+                                                                "border-bottom",
+                                                                "1px solid ${it.css()}",
+                                                            )
+                                                        }
                                                     }
                                                     if (!props.allowHorizontalOverflow) {
                                                         property(
@@ -574,6 +620,7 @@ internal fun HtmlDataTable(
                                         } else {
                                             Td(attrs = {
                                                 attr("data-column-label", column.accessibleLabel)
+                                                if (hasExplicitSpacing) attr("role", "cell")
                                                 style {
                                                     property("text-align", column.alignment.htmlTextAlign())
                                                     property(
@@ -581,11 +628,13 @@ internal fun HtmlDataTable(
                                                         appearance.cellPadding?.cssPadding()
                                                             ?: props.sizePreset.htmlCellPadding(),
                                                     )
-                                                    appearance.border?.let {
-                                                        property(
-                                                            "border-bottom",
-                                                            "1px solid ${it.css()}",
-                                                        )
+                                                    if (!hasExplicitSpacing) {
+                                                        appearance.border?.let {
+                                                            property(
+                                                                "border-bottom",
+                                                                "1px solid ${it.css()}",
+                                                            )
+                                                        }
                                                     }
                                                     if (!props.allowHorizontalOverflow) {
                                                         property(

@@ -79,6 +79,21 @@ Its remembered drafts survive the resize. Hidden content occupies no layout spac
 from keyboard navigation and accessibility. `DomposableVisibility` exposes the same behavior for
 other application-owned adaptive compositions.
 
+HTML pane sizing updates the same host element across breakpoints, preserving descendant DOM
+identity and scroll offsets when a retained pane is shown again. For custom pane modifiers, vary
+operation values instead of adding or removing operations when browser focus or scroll must survive.
+For example, keep the padding operation in both layouts:
+
+```kotlin
+listModifier = DomposableModifier.padding(
+    DomposableInsets(end = if (wide) 20.dp else 0.dp),
+)
+```
+
+HTML modifier operations can create ordered wrapper elements. Adding or removing those operations
+can replace descendants; a stable `contentKey` preserves entry identity but does not make an arbitrary
+modifier wrapper change preserve browser state.
+
 Reduced motion follows browser media queries, Android animator duration settings and iOS accessibility notifications. Pointer precision follows browser media queries and Android connected mouse/touchpad devices. iOS defaults to touch and desktop to precise; applications may override either preference through the adaptive API when they have more precise input information. Preference information is advisory; providers/features choose animations and targets.
 
 ## Responsive dimensions and wrapping

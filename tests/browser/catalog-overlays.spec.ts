@@ -91,6 +91,24 @@ test('catalog menu has an opaque surface above the app header and restores focus
   await expect(trigger).toBeFocused();
 });
 
+test('clicking outside a menu activates the control and preserves dialog focus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/#/catalog');
+  await page.getByRole('button', { name: 'Open menu', exact: true }).click();
+  const menu = page.getByRole('menu');
+  await expect(menu).toBeVisible();
+
+  await page.getByRole('button', { name: 'Open menu', exact: true }).click();
+  await expect(menu).toBeVisible();
+
+  await page.getByRole('button', { name: 'Open dialog', exact: true }).click();
+
+  await expect(menu).toHaveCount(0);
+  const dialog = page.getByRole('dialog', { name: 'Example dialog', exact: true });
+  await expect(dialog).toBeVisible();
+  await expect.poll(() => dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
+});
+
 test('action chips remain actions while filter chips expose their controlled selection', async ({ page }) => {
   await page.goto('/#/material/compare/light/selection');
   for (const variant of ['assist', 'suggestion']) {
@@ -151,9 +169,12 @@ test('forced colors retain chip selection and a visible keyboard focus ring with
   await expect.poll(() => chip.evaluate(element => element.matches(':focus-visible'))).toBe(true);
   const paint = await chip.evaluate(element => {
     const style = getComputedStyle(element);
-    return { target: style.backgroundColor, surface: getComputedStyle(element.querySelector('.d-chip-surface')!).backgroundColor, outline: style.outlineStyle };
+    const surface = getComputedStyle(element.querySelector('.d-chip-surface')!);
+    return { target: style.backgroundColor, surface: surface.backgroundColor, targetOutline: style.outlineStyle, outline: surface.outlineStyle, outlineWidth: surface.outlineWidth };
   });
   expect(paint.target).toMatch(/^rgba\([\d.]+,\s*[\d.]+,\s*[\d.]+,\s*0\)$/);
   expect(paint.surface).not.toMatch(/^(transparent|rgba\(0, 0, 0, 0\))$/);
+  expect(paint.targetOutline).toBe('none');
   expect(paint.outline).toBe('solid');
+  expect(paint.outlineWidth).toBe('2px');
 });

@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.material
 
+import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
 import kotlin.math.abs
@@ -28,18 +29,24 @@ private fun findModalSwipeStart(
     event: Event,
     sheet: HTMLElement,
 ): ModalSwipeStart? {
+    if (!isSheetDragHandleVisible(sheet)) return null
     val pointer = event.asDynamic()
     val target = event.target as? HTMLElement
     val area = target?.closest(HTML_MODAL_SWIPE_SELECTOR) as? HTMLElement
     val control = target?.closest(HTML_MODAL_SWIPE_CONTROL_SELECTOR)
     val primaryPointer = pointer.isPrimary == true && pointer.button == 0
     val validArea = area != null && sheet.contains(area)
-    val startsOnContent = control == null
+    val startsOnContent = control == null || area?.contains(control) != true
     if (!primaryPointer || !validArea || !startsOnContent) return null
     val pointerId = (pointer.pointerId as? Number)?.toInt() ?: return null
     val x = (pointer.clientX as? Number)?.toDouble() ?: return null
     val y = (pointer.clientY as? Number)?.toDouble() ?: return null
     return ModalSwipeStart(pointerId, area!!, x, y, event.timeStamp.toDouble())
+}
+
+private fun isSheetDragHandleVisible(sheet: HTMLElement): Boolean {
+    val handle = sheet.querySelector(".d-sheet-drag-handle") as? HTMLElement ?: return false
+    return window.getComputedStyle(handle).display != "none"
 }
 
 internal fun installModalSheetSwipe(
@@ -94,6 +101,10 @@ private class ModalSheetSwipeController(
 
     private fun handleMove(event: Event) {
         if (!isActivePointer(event)) return
+        if (!isSheetDragHandleVisible(sheet)) {
+            reset()
+            return
+        }
         val pointer = event.asDynamic()
         val dx = (pointer.clientX as Number).toDouble() - startX
         val dy = (pointer.clientY as Number).toDouble() - startY
@@ -109,7 +120,23 @@ private class ModalSheetSwipeController(
 
     private fun handleUp(event: Event) {
         if (!isActivePointer(event)) return
+        if (!isSheetDragHandleVisible(sheet)) {
+            reset()
+            return
+        }
         val elapsed = max(1.0, event.timeStamp.toDouble() - startTime)
+        val pointer = event.asDynamic()
+        val endY = (pointer.clientY as? Number)?.toDouble()
+        if (endY != null) {
+            val endX = (pointer.clientX as? Number)?.toDouble()
+            val dx = endX?.minus(startX) ?: 0.0
+            val dy = endY - startY
+            if (endX != null && isHorizontalSwipe(dx, dy)) {
+                reset()
+                return
+            }
+            distance = max(0.0, dy)
+        }
         val shouldDismiss = shouldDismissSwipe(distance, elapsed)
         reset()
         if (shouldDismiss && isTopmostModal(sheet)) dismiss()

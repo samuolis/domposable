@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
 import io.github.samuolis.domposable.ui.DomposableModalLayout
@@ -72,5 +75,27 @@ class NativeModalHeaderTest {
         val bounds = compose.onNodeWithTag("bounded-dialog").getUnclippedBoundsInRoot()
         val height = (bounds.bottom - bounds.top).value
         assertTrue(height > 0f && height < 300f, "A viewport maximum must not force full-height content: $height")
+    }
+
+    @Test
+    fun basicDialogUsesConfiguredSpacingBetweenHeaderBodyAndActions() {
+        compose.setContent {
+            DomposableTheme(components = rememberDomposableMaterialComponents()) {
+                DomposableDialog(
+                    title = "Accessible title",
+                    onDismiss = {},
+                    actions = { Text("Spacing action", Modifier.testTag("spacing-action")) },
+                    variant = DomposableDialogVariant.Basic,
+                    layout = DomposableModalLayout(sectionSpacing = 12.dp),
+                    headerContent = { Text("Spacing header", Modifier.testTag("spacing-header")) },
+                ) { Text("Spacing body", Modifier.testTag("spacing-body")) }
+            }
+        }
+
+        val header = compose.onNodeWithTag("spacing-header").getUnclippedBoundsInRoot()
+        val body = compose.onNodeWithTag("spacing-body").getUnclippedBoundsInRoot()
+        val actions = compose.onNodeWithTag("spacing-action").getUnclippedBoundsInRoot()
+        assertEquals(12f, (body.top - header.bottom).value, 1f)
+        assertEquals(12f, (actions.top - body.bottom).value, 1f)
     }
 }

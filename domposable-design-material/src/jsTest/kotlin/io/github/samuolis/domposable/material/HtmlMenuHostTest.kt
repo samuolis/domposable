@@ -2,6 +2,9 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableChipVariant
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
@@ -18,6 +21,7 @@ import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableChip
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableDropdownMenuItem
+import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement
 import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableIconButtonProps
 import io.github.samuolis.domposable.ui.DomposableMenu
@@ -37,6 +41,7 @@ import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.htmlAttributes
 import io.github.samuolis.domposable.ui.htmlMenuAnchor
+import io.github.samuolis.domposable.ui.htmlMenuPlacement
 import io.github.samuolis.domposable.ui.minWidth
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.pointerPassthrough
@@ -46,14 +51,20 @@ import io.github.samuolis.domposable.ui.width
 import io.github.samuolis.domposable.ui.zIndex
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.promise
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.MouseEvent
 import org.w3c.dom.events.MouseEventInit
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -86,6 +97,29 @@ class HtmlMenuHostTest {
         }
 
     @Test
+    fun wideMenuUsesTheSameViewportMarginsAsItsAnchorPlacement() =
+        withHost(content = {
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                anchor = { Button { Text("Open actions") } },
+                items = listOf(DomposableMenuItem("A long action ".repeat(100), {})),
+                modifier =
+                    DomposableModifier.htmlAttributes {
+                        style {
+                            property("width", "1000px")
+                            property("max-width", "calc(100vw - 16px)")
+                        }
+                    },
+            )
+        }) { root ->
+            val bounds = (root.querySelector(".d-menu-position") as HTMLElement).getBoundingClientRect()
+            assertEquals(window.innerWidth - 16.0, bounds.width, 1.0)
+            assertEquals(8.0, bounds.left, 1.0)
+            assertEquals(window.innerWidth - 8.0, bounds.right, 1.0)
+        }
+
+    @Test
     fun anchoredMenuUsesTriggerGeometryAndRendersRichAccessibleItemText() =
         withHost(content = {
             DomposableMenu(
@@ -107,6 +141,20 @@ class HtmlMenuHostTest {
             assertEquals("Rich action name", item.textContent?.trim())
             val position = root.querySelector(".d-menu-position") as HTMLElement
             assertEquals("fixed", position.style.position)
+            val positionStyle = window.getComputedStyle(position)
+            val menuStyle = window.getComputedStyle(menu)
+            assertEquals(
+                "visible",
+                positionStyle.getPropertyValue("overflow"),
+                "Positioning must not clip the popup shadow",
+            )
+            assertEquals(
+                "auto",
+                menuStyle.getPropertyValue("overflow"),
+                "The popup owns scrolling within the viewport",
+            )
+            assertTrue(menuStyle.boxShadow != "none", "The popup retains its elevation")
+            assertTrue(menu.getBoundingClientRect().bottom <= window.innerHeight)
             assertEquals("4px", menu.style.getPropertyValue("gap"))
             assertTrue(
                 position.style.left.isNotEmpty() && position.style.top.isNotEmpty(),
@@ -188,6 +236,118 @@ class HtmlMenuHostTest {
     }
 
     @Test
+    fun htmlMenuPlacementPrefersAboveWhenBothSidesFit() =
+        withHost(content = {
+            Button(attrs = {
+                attr("data-testid", "placement-trigger")
+                style {
+                    property("position", "fixed")
+                    property("top", "300px")
+                    property("left", "100px")
+                }
+            }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement(DomposableHtmlMenuPlacement.Above),
+            )
+        }) { root ->
+            val trigger = root.querySelector("[data-testid=placement-trigger]") as HTMLElement
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            val bounds = position.getBoundingClientRect()
+            assertTrue(bounds.bottom <= trigger.getBoundingClientRect().top)
+        }
+
+    @Test
+    fun htmlMenuPlacementFallsBackBelowWhenPreferredAboveDoesNotFit() =
+        withHost(content = {
+            Button(attrs = {
+                attr("data-testid", "placement-trigger")
+                style {
+                    property("position", "fixed")
+                    property("top", "4px")
+                    property("left", "100px")
+                }
+            }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement(DomposableHtmlMenuPlacement.Above),
+            )
+        }) { root ->
+            val trigger = root.querySelector("[data-testid=placement-trigger]") as HTMLElement
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            assertTrue(position.getBoundingClientRect().top >= trigger.getBoundingClientRect().bottom)
+        }
+
+    @Test
+    fun autoPlacementStillUsesTheAvailableBelowSide() =
+        withHost(content = {
+            Button(attrs = {
+                attr("data-testid", "placement-trigger")
+                style {
+                    property("position", "fixed")
+                    property("top", "200px")
+                    property("left", "100px")
+                }
+            }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement(DomposableHtmlMenuPlacement.Auto),
+            )
+        }) { root ->
+            val trigger = root.querySelector("[data-testid=placement-trigger]") as HTMLElement
+            val position = root.querySelector(".d-menu-position") as HTMLElement
+            assertTrue(position.getBoundingClientRect().top >= trigger.getBoundingClientRect().bottom)
+        }
+
+    @Test
+    fun placementResolverRunsOnceAgainstMenuAncestry() {
+        var resolverCalls = 0
+        var resolvedTrigger: HTMLElement? = null
+        withHost(content = {
+            Button(attrs = { attr("data-testid", "placement-trigger") }) { Text("Open") }
+            DomposableMenu(
+                expanded = true,
+                onDismiss = {},
+                items = listOf(DomposableMenuItem("Action", {})),
+                modifier =
+                    DomposableModifier
+                        .htmlMenuAnchor { menuRoot ->
+                            menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                        }.htmlMenuPlacement { menuRoot ->
+                            resolverCalls++
+                            resolvedTrigger =
+                                menuRoot.parentElement?.querySelector("[data-testid=placement-trigger]") as? HTMLElement
+                            DomposableHtmlMenuPlacement.Above
+                        },
+            )
+        }) { root ->
+            assertEquals(root.querySelector("[data-testid=placement-trigger]"), resolvedTrigger)
+            assertEquals(1, resolverCalls)
+            window.dispatchEvent(js("new Event('resize')"))
+            window.dispatchEvent(js("new Event('scroll')"))
+            assertEquals(1, resolverCalls)
+        }
+    }
+
+    @Test
     fun menuPaddingModifierWrapsTheVisibleSurface() =
         withHost(content = {
             DomposableMenu(
@@ -213,7 +373,9 @@ class HtmlMenuHostTest {
                 DomposableDropdownMenuItem(label = "Action", onClick = { invoked++ })
             }
         }) { root ->
-            (root.querySelector("[role=menuitem]") as HTMLElement).click()
+            val item = root.querySelector("[role=menuitem]") as HTMLElement
+            item.dispatchEvent(js("new Event('pointerdown', { bubbles: true, cancelable: true })") as Event)
+            item.click()
             assertEquals(1, invoked)
             assertEquals(0, dismissed, "Content slots must retain Material's caller-owned dismissal")
         }
@@ -229,6 +391,35 @@ class HtmlMenuHostTest {
             backdrop.dispatchEvent(js("new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body })"))
             backdrop.click()
             assertEquals(1, dismissed, "A single outside interaction must not consume two dismissals")
+        }
+    }
+
+    @Test
+    fun outsideClickDismissesWithoutCancelingControlActivation() {
+        var dismissed = 0
+        var outsideClicks = 0
+        var clicks = 0
+        var activationEvent: Event? = null
+        withHost(content = {
+            DomposableMenu(true, { dismissed++ }, listOf(DomposableMenuItem("Action", {})))
+            Button(attrs = { onClick { clicks++ } }) { Text("Open dialog") }
+        }) { root ->
+            val backdrop = root.querySelector(".d-menu-backdrop") as HTMLElement
+            val popupPosition = root.querySelector(".d-menu-position") as HTMLElement
+            assertEquals("none", window.getComputedStyle(backdrop).getPropertyValue("pointer-events"))
+            assertEquals("auto", window.getComputedStyle(popupPosition).getPropertyValue("pointer-events"))
+
+            val outside = root.querySelector("button:not([role=menuitem])") as HTMLElement
+            outside.addEventListener("click", { event ->
+                outsideClicks++
+                activationEvent = event
+            })
+            outside.click()
+
+            assertEquals(1, dismissed)
+            assertEquals(1, outsideClicks)
+            assertEquals(1, clicks)
+            assertEquals(false, activationEvent?.defaultPrevented)
         }
     }
 
@@ -271,6 +462,70 @@ class HtmlMenuHostTest {
             assertEquals(items.item(0), document.activeElement)
             menu.dispatchEvent(js("new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body })"))
             assertEquals(1, dismissed)
+        }
+    }
+
+    @Test
+    fun escapeDismissesNestedMenuBeforeBubblingToItsParent() =
+        CoroutineScope(Dispatchers.Unconfined).promise {
+            var expanded by mutableStateOf(false)
+            var menuDismissals = 0
+            var parentEscapes = 0
+            val root = document.createElement("div") as HTMLElement
+            document.body!!.appendChild(root)
+            val composition =
+                renderComposable(root) {
+                    DomposableMaterialTheme {
+                        Div(attrs = {
+                            onKeyDown { if (it.key == "Escape") parentEscapes++ }
+                        }) {
+                            DomposableMenu(
+                                expanded = expanded,
+                                onDismiss = {
+                                    menuDismissals++
+                                    expanded = false
+                                },
+                                anchor = {
+                                    Button(attrs = {
+                                        attr("data-testid", "nested-menu-trigger")
+                                        onClick { expanded = true }
+                                    }) { Text("Open menu") }
+                                },
+                                items = listOf(DomposableMenuItem("Action", {})),
+                            )
+                        }
+                    }
+                }
+            try {
+                val trigger = root.querySelector("[data-testid=nested-menu-trigger]") as HTMLElement
+                trigger.focus()
+                trigger.click()
+                settleMenuComposition()
+                val menuItem = root.querySelector("[role=menuitem]") as HTMLElement
+                assertEquals(menuItem, document.activeElement)
+
+                val escape =
+                    js("new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })") as Event
+                menuItem.dispatchEvent(escape)
+
+                assertTrue(escape.defaultPrevented)
+                assertEquals(1, menuDismissals)
+                assertEquals(0, parentEscapes, "The first Escape should be consumed by the open menu")
+                settleMenuComposition()
+                assertEquals(null, root.querySelector(".d-menu-backdrop"))
+                assertEquals(trigger, document.activeElement, "Closing the menu should restore focus to its trigger")
+
+                trigger.dispatchEvent(js("new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })") as Event)
+                assertEquals(1, parentEscapes, "A later Escape should reach the parent after the menu closes")
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+            }
+        }
+
+    private suspend fun settleMenuComposition() {
+        repeat(2) {
+            suspendCoroutine<Unit> { continuation -> window.requestAnimationFrame { continuation.resume(Unit) } }
         }
     }
 }

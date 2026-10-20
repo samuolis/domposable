@@ -1,5 +1,20 @@
 # Migrating a Compose feature
 
+## Disabled selected item styling in 0.16
+
+`DomposableItemColors` adds optional `disabledSelectedContainer`, `disabledSelectedContent` and
+`disabledSelectedBorder` overrides. Leaving them null preserves existing component styling. Kotlin
+source calls keep their defaults, but the data-class constructor and `copy` binary signatures change:
+recompile consumers and custom providers when upgrading to 0.16. See the
+[component appearance example](material-catalog.md#component-defaults-and-local-overrides).
+
+## Button indicator track in 0.14
+
+`DomposableButtonAppearance.indicatorTrackColor` optionally sets the loading ring's track on
+native and HTML renderers. `null` keeps each renderer's existing default. Since this adds a field
+to a public data-class constructor and generated `copy`, previously compiled consumers must be
+rebuilt with 0.14; Kotlin source calls keep their defaults.
+
 Keep Compose runtime APIs (`remember`, effects, state, composition locals). Move shared UI to `Domposable*` components and `DomposableModifier`.
 
 Migration needs more than changing imports: props, units, layout constraints and renderer behavior are deliberately portable. Replace native `Modifier` chains with supported portable operations. Move unsupported platform widgets and native interop into provider implementations or platform slots.
@@ -45,8 +60,12 @@ Recompile consumers and custom providers and include this pre-1.0 ABI change in 
 
 `DomposableModalLayout` adds explicit surface bounds, viewport insets, alignment and sheet swipe
 control to both renderers. Existing defaults retain the library's normal presentation; apps should
-set only the layout values required by their design. HTML modal dismissal now checks both pointer
-start and end positions, and its fallback path blocks background interaction and traps focus when
+set only the layout values required by their design. Its new optional `sectionSpacing` field keeps
+the HTML default when omitted and controls section gaps in HTML and native Basic/FullScreen dialogs
+and sheet content. Native sheet drag handles and Material alert/picker variants retain their
+platform-defined spacing. This data-class field is source-compatible through its default, but changes constructor and generated
+`copy` signatures; precompiled consumers must be rebuilt. Treat the API change as a minor release
+before 1.0. HTML modal dismissal now checks both pointer start and end positions, and its fallback path blocks background interaction and traps focus when
 native `showModal()` is unavailable.
 
 ## Layout arrangements
@@ -54,6 +73,35 @@ native `showModal()` is unavailable.
 `DomposableTextStyle.Inherit` is an optional addition for adapters that already own text styling. Existing presets are unchanged. Custom providers with an exhaustive text-style mapping must add the new enum case: inherit native ambient typography or HTML host typography, then apply explicit appearance overrides. Inherited HTML headings retain their heading semantics without forcing title typography.
 
 The shared `DomposableColumnProps`, `DomposableRowProps` and `DomposableFlowRowProps` models now include arrangement options, and FlowRow adds line spacing and cross-axis alignment. Existing Row/Column calls keep their layout defaults after recompilation. HTML FlowRow now defaults to top alignment rather than stretching, matching native; specify a different `alignment` when needed. The added data-class fields change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this is an intentional pre-1.0 binary break and belongs in a minor release, not a patch. Direct composable overloads retain their prior positional parameters and trailing-lambda calls.
+
+## Data-table track spacing
+
+`DomposableTableAppearance` adds optional `rowSpacing` and `columnSpacing` values for shared data-table renderers. Null values keep the existing size-preset layout. Set them to tune gaps between rows and columns; Compact mode also applies `rowSpacing` between fields within each card, while `columnSpacing` controls each card's label-to-value gap. `cellPadding` continues to control content insets.
+
+```kotlin
+val appearance = DomposableTableAppearance(
+    rowSpacing = 0.dp,
+    columnSpacing = 8.dp,
+    cellPadding = DomposableInsets(top = 4.dp, bottom = 4.dp),
+)
+
+DomposableDataTable(
+    columns = listOf(DomposableDataTableColumn("name", "Name")),
+    rows = listOf(DomposableDataTableRow("Ada Lovelace")),
+    rowHeaderColumnKey = "name",
+    appearance = appearance,
+) { row, _ ->
+    DomposableText(row.key)
+}
+```
+
+The new data-class fields preserve source calls after recompilation but change constructor and generated `copy` signatures. Rebuild previously compiled consumers; this pre-1.0 binary break requires a minor release.
+
+## HTML navigation sizing and adaptive sheets
+
+HTML `DomposableNavDisplay` relays its host's allocated flex space through each entry while honoring explicit height modifiers. Entry content owns its scrolling; callers that relied on the display's previous implicit scroll area should add `verticalScroll()` to that content. This layout correction does not change the public API.
+
+`BottomOnCompact` sheets now center in expanded view and hide their drag handle there. Compact view retains bottom placement and swipe dismissal. Header dragging is disabled whenever the handle is hidden.
 
 ## Anchored and rich-text menus
 

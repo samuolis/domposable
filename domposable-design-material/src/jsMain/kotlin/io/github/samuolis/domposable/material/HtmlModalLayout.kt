@@ -10,6 +10,7 @@ internal fun StyleScope.modalLayout(layout: DomposableModalLayout) {
     modalWidth(layout)
     val inset = layout.viewportInset.value
     layout.padding?.let { property("padding", it.cssPadding()) }
+    layout.sectionSpacing?.let { property("gap", "${it.value}px") }
     layout.heightFraction?.let {
         property("height", "calc(${it * HTML_MODAL_VIEWPORT_PERCENT}vh - ${inset * 2}px)")
         property("height", "calc(${it * HTML_MODAL_VIEWPORT_PERCENT}dvh - ${inset * 2}px)")
@@ -37,23 +38,24 @@ internal fun StyleScope.modalLayout(layout: DomposableModalLayout) {
 
 private fun StyleScope.modalWidth(layout: DomposableModalLayout) {
     val inset = layout.viewportInset.value
+    val inlineInset = "var(--d-modal-inline-inset, ${inset * 2}px)"
     layout.maxWidth?.let {
         property(
             "max-width",
-            "min(${it.value}px, calc(100vw - ${inset * 2}px))",
+            "min(${it.value}px, calc(100vw - $inlineInset))",
         )
         property(
             "max-width",
-            "min(${it.value}px, calc(100dvw - ${inset * 2}px))",
+            "min(${it.value}px, calc(100dvw - $inlineInset))",
         )
     }
     if (layout.maxWidth == null && layout.fillViewportWidth) {
-        property("max-width", "calc(100vw - ${inset * 2}px)")
-        property("max-width", "calc(100dvw - ${inset * 2}px)")
+        property("max-width", "calc(100vw - $inlineInset)")
+        property("max-width", "calc(100dvw - $inlineInset)")
     }
     if (layout.fillViewportWidth) {
-        property("width", "calc(100vw - ${inset * 2}px)")
-        property("width", "calc(100dvw - ${inset * 2}px)")
+        property("width", "calc(100vw - $inlineInset)")
+        property("width", "calc(100dvw - $inlineInset)")
         property("box-sizing", "border-box")
     }
     if (layout.maxWidth != null || layout.fillViewportWidth) property("min-width", "0")
