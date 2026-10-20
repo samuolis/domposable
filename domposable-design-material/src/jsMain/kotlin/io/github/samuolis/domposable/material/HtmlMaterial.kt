@@ -173,11 +173,6 @@ private fun positionHtmlMenu(
     menu.style.setProperty("top", "${top}px")
     menu.style.setProperty("bottom", "auto")
     menu.style.setProperty("inset-block-end", "auto")
-    menu.style.setProperty(
-        "max-height",
-        "${(viewportHeight - 2 * HTML_MENU_VIEWPORT_MARGIN).coerceAtLeast(0.0)}px",
-    )
-    menu.style.setProperty("overflow-y", "auto")
 }
 
 internal fun DomposableFontWeight.css() = weight.toString()
