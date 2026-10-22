@@ -41,6 +41,9 @@ scope behavior even when an application supplies its own root element. Theme col
 card/menu shadows and breadcrumb widths remain configurable through tokens and component custom
 properties. Dynamic data coordinates and application navigation policy remain with their caller.
 
+Fields can opt into `d-mobile-body-input` for fixed 16px text on phones. Ordinary fields keep their
+configured typography. This opt-in belongs to the consumer's presentation configuration.
+
 A layout's `gap` is its minimum spacing, including `SpaceBetween`, `SpaceAround` and `SpaceEvenly`.
 The HTML renderer uses flex gaps; native arrangements preserve the same minimum in both layout
 directions. A flow row wraps when its children and the requested gap cannot fit on one line.

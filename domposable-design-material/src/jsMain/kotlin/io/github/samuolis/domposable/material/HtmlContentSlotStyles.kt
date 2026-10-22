@@ -14,7 +14,7 @@ internal const val HTML_CONTENT_SLOT_CSS = """
 @media(prefers-reduced-motion:reduce){.d-skeleton::after{display:none}}
 /* Compact inputs retain a mobile-safe font size to avoid focus zoom. */
 [data-domposable-theme] :is(.d-picker-calendar-controls,.d-picker-time) input{font-size:16px}
-@media(max-width:600px){.d-field-control>:is(input,textarea){font-size:16px!important}}
+@media(max-width:600px){.d-mobile-body-input .d-field-control>:is(input,textarea){font-size:16px!important}}
 
 .d-bottom-sheet-scroll{overscroll-behavior:contain}
 .d-bottom-sheet-list-item{flex:none;min-width:0;width:100%}
