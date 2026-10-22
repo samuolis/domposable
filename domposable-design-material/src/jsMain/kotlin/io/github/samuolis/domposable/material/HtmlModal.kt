@@ -96,7 +96,8 @@ internal fun HtmlModal(
                     val hasPoint = x != null && y != null
                     val endedOutside = hasPoint && isOutsideModal(element, x!!, y!!)
                     val isTopmost = isTopmostModal(element)
-                    if (fallback && isTopmost && endedOutside) {
+                    val targetsOutside = !element.contains(event.target as? Node)
+                    if (fallback && isTopmost && endedOutside && targetsOutside) {
                         event.preventDefault()
                         event.stopPropagation()
                     }
@@ -186,6 +187,7 @@ internal fun HtmlModal(
                     } else {
                         null
                     }
+
                 fun updatePartialAnchor() {
                     if (sheet) {
                         val canPartiallyExpand = !skipPartiallyExpanded && isSheetDragHandleVisible(element)

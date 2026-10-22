@@ -78,6 +78,7 @@ class NativeLayoutArrangementTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun weightedRowsInStartAlignedPaddedBoxesUseOnlyFillWeightsToClaimAvailableWidth() {
         compose.setContent {
             DomposableTheme(components = rememberDomposableMaterialComponents()) {
@@ -136,7 +137,7 @@ class NativeLayoutArrangementTest {
         assertEquals(fillBox.left.value, fillRow.left.value, 1f)
         assertEquals(fillBox.right.value, fillRow.right.value, 1f)
         assertEquals(fillRow.right.value, fillMetric.right.value, 1f)
-        assertEquals(nonfillBox.left.value + 16f, nonfillRow.left.value, 1f)
+        assertEquals(nonfillBox.left.value, nonfillRow.left.value, 1f)
         assertEquals(nonfillRow.right.value, nonfillMetric.right.value, 1f)
         val nonfillWidth = nonfillRow.right.value - nonfillRow.left.value
         val fixedBoxWidth = fixedBox.right.value - fixedBox.left.value

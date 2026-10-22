@@ -159,17 +159,9 @@ private class ModalSheetSwipeController(
             return
         }
         val elapsed = max(1.0, event.timeStamp.toDouble() - startTime)
-        val pointer = event.asDynamic()
-        val endY = (pointer.clientY as? Number)?.toDouble()
-        if (endY != null) {
-            val endX = (pointer.clientX as? Number)?.toDouble()
-            val dx = endX?.minus(startX) ?: 0.0
-            val dy = endY - startY
-            if (endX != null && isHorizontalSwipe(dx, dy)) {
-                reset()
-                return
-            }
-            distance = dy
+        if (!updateDistanceFromPointerUp(event)) {
+            reset()
+            return
         }
         val expanded = sheet.classList.contains("d-sheet-expanded")
         val hasPartialAnchor = hasPartialAnchor()
@@ -182,6 +174,17 @@ private class ModalSheetSwipeController(
             downward && expanded && hasPartialAnchor -> collapse()
             downward -> dismiss()
         }
+    }
+
+    private fun updateDistanceFromPointerUp(event: Event): Boolean {
+        val pointer = event.asDynamic()
+        val endY = (pointer.clientY as? Number)?.toDouble() ?: return true
+        val endX = (pointer.clientX as? Number)?.toDouble()
+        val dx = endX?.minus(startX) ?: 0.0
+        val dy = endY - startY
+        if (endX != null && isHorizontalSwipe(dx, dy)) return false
+        distance = dy
+        return true
     }
 
     private fun reset() {

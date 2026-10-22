@@ -21,14 +21,14 @@ import io.github.samuolis.domposable.ui.region
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.weight
 import io.github.samuolis.domposable.ui.width
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlinx.browser.document
 import org.jetbrains.compose.web.css.style
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class HtmlRowStretchTest {
     @Test
