@@ -99,7 +99,11 @@ class NativeLayoutArrangementTest {
                         DomposableRow(modifier = DomposableModifier.testId("nonfill-row")) {
                             DomposableText(
                                 "Player name",
-                                modifier = DomposableModifier.weight(1f, fill = false).padding(4.dp).testId("nonfill-label"),
+                                modifier =
+                                    DomposableModifier
+                                        .weight(1f, fill = false)
+                                        .padding(4.dp)
+                                        .testId("nonfill-label"),
                             )
                             DomposableText("League points", modifier = DomposableModifier.testId("nonfill-metric"))
                         }
@@ -128,12 +132,15 @@ class NativeLayoutArrangementTest {
 
         assertEquals(parentColumn.left.value + 16f, fillRow.left.value, 1f)
         assertEquals(parentColumn.right.value - 16f, fillRow.right.value, 1f)
-        assertEquals(parentColumn.width.value, fillBox.width.value, 1f)
+        assertEquals(parentColumn.right.value - parentColumn.left.value, fillBox.right.value - fillBox.left.value, 1f)
         assertEquals(fillRow.right.value, fillMetric.right.value, 1f)
         assertEquals(nonfillBox.left.value + 16f, nonfillRow.left.value, 1f)
         assertEquals(nonfillRow.right.value, nonfillMetric.right.value, 1f)
-        assertTrue(nonfillRow.width.value < parentColumn.width.value - 32f)
-        assertTrue(fixedBox.width.value < parentColumn.width.value - 32f)
+        val parentWidth = parentColumn.right.value - parentColumn.left.value
+        val nonfillWidth = nonfillRow.right.value - nonfillRow.left.value
+        val fixedBoxWidth = fixedBox.right.value - fixedBox.left.value
+        assertTrue(nonfillWidth < parentWidth - 32f)
+        assertTrue(fixedBoxWidth < parentWidth - 32f)
         assertEquals(fixedBox.left.value, fixedRow.left.value, 1f)
         assertEquals(fixedBox.right.value, fixedRow.right.value, 1f)
     }

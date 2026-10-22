@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.material
 
+import io.github.samuolis.domposable.ui.DomposableModalLayout
 import kotlinx.browser.window
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
@@ -16,6 +17,7 @@ private const val HTML_MODAL_MIN_SWIPE_VELOCITY = 0.6
 private const val HTML_MODAL_MIN_SWIPE_THRESHOLD = 72.0
 private const val HTML_MODAL_MAX_SWIPE_THRESHOLD = 120.0
 private const val HTML_MODAL_SWIPE_THRESHOLD_FRACTION = 0.2
+private const val HTML_MODAL_PARTIAL_ANCHOR_HEIGHT_FRACTION = 0.49
 private const val HTML_MODAL_SHEET_TRANSITION_MS = 180
 
 private data class ModalSwipeStart(
@@ -25,6 +27,31 @@ private data class ModalSwipeStart(
     val y: Double,
     val time: Double,
 )
+
+private fun isHorizontalSwipe(
+    dx: Double,
+    dy: Double,
+): Boolean = abs(dx) > max(HTML_MODAL_HORIZONTAL_SLOP, abs(dy))
+
+private fun isSignificantSwipe(
+    distance: Double,
+    elapsed: Double,
+    height: Double,
+): Boolean {
+    val threshold =
+        min(
+            HTML_MODAL_MAX_SWIPE_THRESHOLD,
+            max(
+                HTML_MODAL_MIN_SWIPE_THRESHOLD,
+                height * HTML_MODAL_SWIPE_THRESHOLD_FRACTION,
+            ),
+        )
+    val magnitude = abs(distance)
+    val sufficientDistance = magnitude >= threshold
+    val sufficientVelocity =
+        magnitude >= HTML_MODAL_MIN_SWIPE_DISTANCE && magnitude / elapsed >= HTML_MODAL_MIN_SWIPE_VELOCITY
+    return sufficientDistance || sufficientVelocity
+}
 
 private fun findModalSwipeStart(
     event: Event,
@@ -73,7 +100,9 @@ private class ModalSheetSwipeController(
     private val down: (Event) -> Unit = { event -> handleDown(event) }
     private val move: (Event) -> Unit = { event -> handleMove(event) }
     private val up: (Event) -> Unit = { event -> handleUp(event) }
-    private val cancel: (Event) -> Unit = { event -> handleCancel(event) }
+    private val cancel: (Event) -> Unit = { event ->
+        if (pointerId != null && event.asDynamic().pointerId == pointerId) reset()
+    }
 
     fun install(): () -> Unit {
         sheet.addEventListener("pointerdown", down)
@@ -105,7 +134,7 @@ private class ModalSheetSwipeController(
     }
 
     private fun handleMove(event: Event) {
-        if (!isActivePointer(event)) return
+        if (pointerId == null || event.asDynamic().pointerId != pointerId) return
         if (!isSheetDragHandleVisible(sheet)) {
             reset()
             return
@@ -124,7 +153,7 @@ private class ModalSheetSwipeController(
     }
 
     private fun handleUp(event: Event) {
-        if (!isActivePointer(event)) return
+        if (pointerId == null || event.asDynamic().pointerId != pointerId) return
         if (!isSheetDragHandleVisible(sheet)) {
             reset()
             return
@@ -144,7 +173,7 @@ private class ModalSheetSwipeController(
         }
         val expanded = sheet.classList.contains("d-sheet-expanded")
         val hasPartialAnchor = hasPartialAnchor()
-        val significant = isSignificantSwipe(distance, elapsed)
+        val significant = isSignificantSwipe(distance, elapsed, sheet.getBoundingClientRect().height)
         val downward = distance > 0.0
         reset()
         if (!significant || !isTopmostModal(sheet)) return
@@ -154,12 +183,6 @@ private class ModalSheetSwipeController(
             downward -> dismiss()
         }
     }
-
-    private fun handleCancel(event: Event) {
-        if (isActivePointer(event)) reset()
-    }
-
-    private fun isActivePointer(event: Event): Boolean = pointerId != null && event.asDynamic().pointerId == pointerId
 
     private fun reset() {
         val captured = pointerId
@@ -205,30 +228,7 @@ private class ModalSheetSwipeController(
     private fun hasPartialAnchor(): Boolean {
         if (skipPartiallyExpanded) return false
         val bounds = sheet.getBoundingClientRect()
-        return sheet.scrollHeight > sheet.clientHeight + 1 || bounds.height >= window.innerHeight * 0.49
-    }
-
-    private fun isHorizontalSwipe(
-        dx: Double,
-        dy: Double,
-    ): Boolean = abs(dx) > max(HTML_MODAL_HORIZONTAL_SLOP, abs(dy))
-
-    private fun isSignificantSwipe(
-        distance: Double,
-        elapsed: Double,
-    ): Boolean {
-        val threshold =
-            min(
-                HTML_MODAL_MAX_SWIPE_THRESHOLD,
-                max(
-                    HTML_MODAL_MIN_SWIPE_THRESHOLD,
-                    sheet.getBoundingClientRect().height * HTML_MODAL_SWIPE_THRESHOLD_FRACTION,
-                ),
-            )
-        val magnitude = abs(distance)
-        val sufficientDistance = magnitude >= threshold
-        val sufficientVelocity =
-            magnitude >= HTML_MODAL_MIN_SWIPE_DISTANCE && magnitude / elapsed >= HTML_MODAL_MIN_SWIPE_VELOCITY
-        return sufficientDistance || sufficientVelocity
+        return sheet.scrollHeight > sheet.clientHeight + 1 ||
+            bounds.height >= window.innerHeight * HTML_MODAL_PARTIAL_ANCHOR_HEIGHT_FRACTION
     }
 }

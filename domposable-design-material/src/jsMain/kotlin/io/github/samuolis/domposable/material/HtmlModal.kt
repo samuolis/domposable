@@ -13,6 +13,7 @@ import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.domposableAttributes
 import kotlinx.browser.document
+import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H2
 import org.jetbrains.compose.web.dom.TagElement
@@ -192,11 +193,15 @@ internal fun HtmlModal(
                             element.style.setProperty("max-height", layout.partialSheetMaxHeightCss())
                         } else {
                             val maxHeight = layout.modalMaxHeightCss()
-                            if (maxHeight == null) element.style.removeProperty("max-height")
-                            else element.style.setProperty("max-height", maxHeight)
+                            if (maxHeight == null) {
+                                element.style.removeProperty("max-height")
+                            } else {
+                                element.style.setProperty("max-height", maxHeight)
+                            }
                         }
                     }
                 }
+
                 val resizePartialAnchor: (Event) -> Unit = { updatePartialAnchor() }
                 updatePartialAnchor()
                 window.addEventListener("resize", resizePartialAnchor)

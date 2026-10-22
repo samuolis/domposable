@@ -97,6 +97,43 @@ test('DOM visual shop-cart-phone', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Your bag' })).toBeVisible();
   });
 });
+
+for (const [name, expanded] of [
+  ['long-sheet-partial-phone', false],
+  ['long-sheet-expanded-phone', true],
+] as const) {
+  test(`DOM visual ${name}`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/#/material/compare/light/integration');
+    await expect(page.getByTestId('shared-weighted-row-box')).toBeVisible();
+    const box = await page.getByTestId('shared-weighted-row-box').boundingBox();
+    const trailing = await page.getByTestId('shared-weighted-row-trailing').boundingBox();
+    expect(box).not.toBeNull();
+    expect(trailing).not.toBeNull();
+    expect(Math.abs(box!.x + box!.width - (trailing!.x + trailing!.width))).toBeLessThanOrEqual(3);
+
+    await page.getByTestId('shared-long-sheet-open').click();
+    const sheet = page.locator('dialog.d-sheet');
+    await expect(sheet).toBeVisible();
+    const sheetHeight = () => sheet.evaluate(element => element.getBoundingClientRect().height);
+    const partialHeight = await sheetHeight();
+    expect(partialHeight).toBeGreaterThan(0);
+    expect(partialHeight).toBeLessThanOrEqual(844 * 0.5 + 4);
+    if (expanded) {
+      const handle = sheet.locator('.d-sheet-drag-handle');
+      const bounds = await handle.boundingBox();
+      expect(bounds).not.toBeNull();
+      await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2 - 180, { steps: 4 });
+      await page.mouse.up();
+      await expect(sheet).toHaveClass(/d-sheet-expanded/);
+      await expect.poll(sheetHeight).toBeGreaterThan(partialHeight + 100);
+      await expect.poll(sheetHeight).toBeGreaterThan(844 - 40);
+    }
+    await stableCapture(page, 'dom', name);
+  });
+}
 for (const [name, width, height] of [['shop-phone',390,844],['shop-wide',1440,900]] as const) {
   test(`Wasm visual ${name}`, async ({ page }) => {
     const errors: string[] = [];

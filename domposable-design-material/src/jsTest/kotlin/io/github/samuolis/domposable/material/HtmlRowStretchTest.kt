@@ -13,25 +13,26 @@ import io.github.samuolis.domposable.ui.DomposableVisibility
 import io.github.samuolis.domposable.ui.border
 import io.github.samuolis.domposable.ui.fillMaxHeight
 import io.github.samuolis.domposable.ui.fillMaxWidth
-import io.github.samuolis.domposable.ui.horizontalScroll
 import io.github.samuolis.domposable.ui.height
+import io.github.samuolis.domposable.ui.horizontalScroll
 import io.github.samuolis.domposable.ui.htmlAttributes
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.region
 import io.github.samuolis.domposable.ui.testId
 import io.github.samuolis.domposable.ui.weight
 import io.github.samuolis.domposable.ui.width
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.browser.document
 import org.jetbrains.compose.web.css.style
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class HtmlRowStretchTest {
     @Test
+    @Suppress("LongMethod")
     fun weightedRowsFillStartAlignedPaddedBoxesOnlyWhenChildWeightFills() {
         val root = document.createElement("div")
         document.body!!.appendChild(root)
@@ -68,7 +69,10 @@ class HtmlRowStretchTest {
                                                 .padding(4.dp)
                                                 .testId("nonfill-label"),
                                     )
-                                    DomposableText("League points", modifier = DomposableModifier.testId("nonfill-metric"))
+                                    DomposableText(
+                                        "League points",
+                                        modifier = DomposableModifier.testId("nonfill-metric"),
+                                    )
                                 }
                             }
                             DomposableBox(modifier = DomposableModifier.padding(16.dp)) {
@@ -80,8 +84,13 @@ class HtmlRowStretchTest {
                                 }
                             }
                             DomposableBox(modifier = DomposableModifier.width(160.dp)) {
-                                DomposableRow(modifier = DomposableModifier.horizontalScroll().testId("scroll-row")) {
-                                    DomposableText("Scrollable weighted label", modifier = DomposableModifier.weight(1f))
+                                DomposableRow(
+                                    modifier = DomposableModifier.horizontalScroll().testId("scroll-row"),
+                                ) {
+                                    DomposableText(
+                                        "Scrollable weighted label",
+                                        modifier = DomposableModifier.weight(1f),
+                                    )
                                     DomposableText("Trailing content")
                                 }
                             }

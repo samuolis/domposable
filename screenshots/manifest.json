@@ -75,6 +75,8 @@
     "recipes-wide",
     "detail-wide",
     "dialog-phone",
+    "long-sheet-partial-phone",
+    "long-sheet-expanded-phone",
     "shop-phone",
     "shop-wide",
     "shop-collection-wide",

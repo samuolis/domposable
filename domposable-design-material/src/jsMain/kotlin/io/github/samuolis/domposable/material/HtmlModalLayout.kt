@@ -16,7 +16,7 @@ internal fun StyleScope.modalLayout(layout: DomposableModalLayout) {
         property("height", "calc(${it * HTML_MODAL_VIEWPORT_PERCENT}dvh - ${inset * 2}px)")
     }
     modalMaxHeightCss(layout, dynamicViewport = false)?.let { property("max-height", it) }
-    modalMaxHeightCss(layout)?.let { property("max-height", it) }
+    layout.modalMaxHeightCss()?.let { property("max-height", it) }
     when (layout.alignment) {
         DomposableModalAlignment.Center, DomposableModalAlignment.BottomOnCompact -> Unit
         DomposableModalAlignment.Bottom -> property("margin", "auto auto 0")
@@ -24,7 +24,7 @@ internal fun StyleScope.modalLayout(layout: DomposableModalLayout) {
 }
 
 internal fun DomposableModalLayout.partialSheetMaxHeightCss(): String =
-    modalMaxHeightCss(this)?.let { "min(50dvh, $it)" } ?: "50dvh"
+    modalMaxHeightCss()?.let { "min(50dvh, $it)" } ?: "50dvh"
 
 internal fun DomposableModalLayout.modalMaxHeightCss(): String? = modalMaxHeightCss(this, dynamicViewport = true)
 

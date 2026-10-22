@@ -233,7 +233,19 @@ class HtmlModalLifecycleTest {
                 val sheet = root.querySelector("dialog") as HTMLElement
                 val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
                 handle.style.display = "flex"
-                val setScrollMetrics: dynamic = js("(element) => { Object.defineProperty(element, 'scrollHeight', {configurable: true, get: () => 900}); Object.defineProperty(element, 'clientHeight', {configurable: true, get: () => 400}); }")
+                val setScrollMetrics: dynamic =
+                    js(
+                        """(element) => {
+                            Object.defineProperty(element, 'scrollHeight', {
+                                configurable: true,
+                                get: () => 900,
+                            });
+                            Object.defineProperty(element, 'clientHeight', {
+                                configurable: true,
+                                get: () => 400,
+                            });
+                        }""",
+                    )
                 setScrollMetrics(sheet)
                 handle.asDynamic().setPointerCapture = js("(pointerId) => {}")
                 handle.asDynamic().hasPointerCapture = js("(pointerId) => false")
