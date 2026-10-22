@@ -98,7 +98,7 @@ data class DomposableThemeProps(
     val tokens: DomposableTokens,
 )
 
-/** Main-axis placement for children in a row, column, or wrapping row. */
+/** Main-axis placement. The layout's gap remains the minimum spacing for every arrangement. */
 enum class DomposableArrangement { Start, Center, End, SpaceBetween, SpaceAround, SpaceEvenly }
 
 @DomposableComponent("Column")

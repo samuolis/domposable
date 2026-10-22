@@ -21,6 +21,26 @@ import kotlin.test.assertTrue
 
 class HtmlLayoutArrangementTest {
     @Test
+    fun distributedFlowWrapsInsteadOfRemovingTheRequestedGap() =
+        withLayoutHost(
+            content = {
+                DomposableFlowRow(
+                    modifier = DomposableModifier.width(125.dp),
+                    gap = 12.dp,
+                    arrangement = DomposableArrangement.SpaceBetween,
+                ) {
+                    repeat(2) { index ->
+                        DomposableBox(DomposableModifier.width(60.dp).height(20.dp).testId("minimum-$index")) {}
+                    }
+                }
+            },
+        ) { root ->
+            val first = root.querySelector("[data-testid='minimum-0']") as HTMLElement
+            val second = root.querySelector("[data-testid='minimum-1']") as HTMLElement
+            assertTrue(second.getBoundingClientRect().top >= first.getBoundingClientRect().bottom + 12)
+        }
+
+    @Test
     fun distributedRowFillsTheAvailableWidth() =
         withLayoutHost(
             content = {

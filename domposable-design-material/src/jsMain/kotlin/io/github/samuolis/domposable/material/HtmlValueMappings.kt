@@ -21,11 +21,6 @@ internal fun DomposableArrangement.css() =
         DomposableArrangement.SpaceEvenly -> "space-evenly"
     }
 
-internal fun DomposableArrangement.distributesSpace() =
-    this == DomposableArrangement.SpaceBetween ||
-        this == DomposableArrangement.SpaceAround ||
-        this == DomposableArrangement.SpaceEvenly
-
 internal fun DomposableAutocomplete.htmlValue() =
     when (this) {
         DomposableAutocomplete.Off -> "off"

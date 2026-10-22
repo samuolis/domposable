@@ -8,8 +8,9 @@ import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.StyleScope
 import org.w3c.dom.HTMLElement
 
-/** Applies only Domposable token custom properties to an existing HTML host element. */
+/** Marks a token scope and applies Domposable custom properties to an existing HTML host. */
 fun AttrsScope<HTMLElement>.domposableTokenVariables(tokens: DomposableTokens) {
+    attr("data-domposable-theme", "true")
     style { applyTokenVariables(tokens) }
 }
 
@@ -35,6 +36,7 @@ private fun StyleScope.applyCoreColorTokens(colors: io.github.samuolis.domposabl
             CssTokenColors("--d-surface", listOf(colors.surface)),
             CssTokenColors("--d-on-surface", listOf(colors.onSurface)),
             CssTokenColors("--d-variant", listOf(colors.surfaceVariant)),
+            CssTokenColors("--d-surface-variant", listOf(colors.surfaceVariant)),
             CssTokenColors("--d-outline", listOf(colors.outline)),
             CssTokenColors("--d-error", listOf(colors.error)),
             CssTokenColors("--d-on-error", listOf(colors.onError, colors.surface)),
