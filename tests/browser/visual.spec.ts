@@ -139,12 +139,12 @@ for (const [name, expanded] of [
       await expect.poll(sheetHeight).toBeGreaterThan(partialHeight + 100);
       await expect.poll(sheetHeight).toBeGreaterThan(844 - 40);
     }
-    await expect(sheet.getByRole('button', { name: 'Close', exact: true })).toBeVisible();
+    await expect(sheet.getByRole('button', { name: 'Close', exact: true })).toBeInViewport();
     await stableCapture(page, 'dom', name);
     const lastRow = sheet.getByText('Long sheet content row 24', { exact: true });
     await lastRow.scrollIntoViewIfNeeded();
-    await expect(lastRow).toBeVisible();
-    await expect(sheet.getByRole('button', { name: 'Close', exact: true })).toBeVisible();
+    await expect(lastRow).toBeInViewport();
+    await expect(sheet.getByRole('button', { name: 'Close', exact: true })).toBeInViewport();
   });
 }
 for (const [name, width, height] of [['shop-phone',390,844],['shop-wide',1440,900]] as const) {

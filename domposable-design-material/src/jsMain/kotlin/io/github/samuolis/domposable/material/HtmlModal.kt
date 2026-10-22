@@ -96,8 +96,8 @@ internal fun HtmlModal(
                     val hasPoint = x != null && y != null
                     val endedOutside = hasPoint && isOutsideModal(element, x!!, y!!)
                     val isTopmost = isTopmostModal(element)
-                    val targetsOutside = !element.contains(event.target as? Node)
-                    if (fallback && isTopmost && endedOutside && targetsOutside) {
+                    val outsideRelease = endedOutside && !element.contains(event.target as? Node)
+                    if (fallback && isTopmost && outsideRelease) {
                         event.preventDefault()
                         event.stopPropagation()
                     }
