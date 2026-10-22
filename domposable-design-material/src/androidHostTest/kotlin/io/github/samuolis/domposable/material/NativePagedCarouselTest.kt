@@ -153,7 +153,8 @@ class NativePagedCarouselTest {
         }
         compose.mainClock.autoAdvance = false
         compose.onNodeWithContentDescription("Next").performClick()
-        compose.mainClock.advanceTimeBy(32)
+        compose.mainClock.advanceTimeBy(128)
+        compose.onNodeWithContentDescription("Previous").assertExists()
         compose.runOnIdle { assertEquals(emptyList(), selections) }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
