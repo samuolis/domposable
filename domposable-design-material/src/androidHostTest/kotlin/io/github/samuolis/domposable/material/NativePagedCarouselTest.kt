@@ -15,6 +15,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.ui.DomposableCarousel
@@ -104,13 +106,66 @@ class NativePagedCarouselTest {
         compose.onNodeWithContentDescription("Previous").assertDoesNotExist()
     }
 
+    @Test
+    fun swipeReportsOneSettledSelectionAndAppendingKeepsItsPosition() {
+        var count by mutableStateOf(3)
+        val selections = mutableListOf<Int>()
+        compose.setContent {
+            DomposableMaterialTheme {
+                Box(Modifier.requiredWidth(320.dp)) {
+                    DomposableCarousel(
+                        items = pages().take(count),
+                        label = "Featured pages",
+                        modifier = DomposableModifier.fillMaxWidth(),
+                        onCurrentItemChange = { selections.add(it) },
+                        pagedLayout = layout(compactHeight = 100, wideHeight = 140),
+                    )
+                }
+            }
+        }
+        compose.onNodeWithTag("page-a").performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(listOf(1), selections) }
+        val before = compose.onNodeWithTag("page-b").getUnclippedBoundsInRoot()
+
+        compose.runOnIdle { count = 4 }
+        compose.waitForIdle()
+        assertEquals(before, compose.onNodeWithTag("page-b").getUnclippedBoundsInRoot())
+        compose.runOnIdle { assertEquals(listOf(1), selections) }
+    }
+
+    @Test
+    fun selectionIsNotReportedWhileTheControlAnimationIsRunning() {
+        val selections = mutableListOf<Int>()
+        compose.setContent {
+            DomposableMaterialTheme {
+                Box(Modifier.requiredWidth(720.dp)) {
+                    DomposableCarousel(
+                        items = pages(),
+                        label = "Featured pages",
+                        modifier = DomposableModifier.fillMaxWidth(),
+                        onCurrentItemChange = { selections.add(it) },
+                        pagedLayout = layout(compactHeight = 100, wideHeight = 140),
+                    )
+                }
+            }
+        }
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithContentDescription("Next").performClick()
+        compose.mainClock.advanceTimeBy(32)
+        compose.runOnIdle { assertEquals(emptyList(), selections) }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(listOf(1), selections) }
+    }
+
     private fun pageHeight(tag: String): Float {
         val bounds = compose.onNodeWithTag(tag).getUnclippedBoundsInRoot()
         return bounds.bottom.value - bounds.top.value
     }
 
     private fun pages() =
-        listOf("a", "b", "c").map { key ->
+        listOf("a", "b", "c", "d").map { key ->
             DomposableLazyItem(key) {
                 Box(Modifier.fillMaxSize().testTag("page-$key")) {
                     androidx.compose.material3.Text("Page $key")

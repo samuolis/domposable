@@ -2,7 +2,8 @@
 
 `DomposableCarousel` keeps its Material carousel variants by default. Set `pagedLayout` when the
 content should show one focused page at a time, with a compact next-page peek and full-width pages
-at the wide breakpoint. Native Compose uses Foundation Pager; semantic HTML uses a scroll-snap track.
+at the wide breakpoint. Native Compose uses Material 3’s uncontained carousel with single-item snapping; semantic HTML
+uses a scroll-snap track. Card widths stay stable while the next card peeks into view.
 
 ```kotlin
 val items = cards.map { card ->
@@ -44,7 +45,8 @@ trailing peek makes compact pages full width. `onApproachingEnd` fires when a ch
 selection reaches the final two items; empty carousels render nothing and do not invoke callbacks.
 
 Stable `DomposableLazyItem.key` values preserve page identity. `currentItem` synchronizes the visible
-page after external selection changes; `onCurrentItemChange` reports user changes. Navigation uses
+page after external selection changes; `onCurrentItemChange` reports settled selection changes. Selection callbacks do not run on
+every drag frame, and appending items does not recreate native scroll state. Navigation uses
 the supplied button appearance and may use consumer-provided icon slots, while indicator colors
 are separately configurable. HTML supports left/right keyboard navigation with RTL-aware direction,
 native swipe paging, and semantic slide-position labels.
