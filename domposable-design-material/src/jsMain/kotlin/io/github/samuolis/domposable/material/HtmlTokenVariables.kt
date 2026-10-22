@@ -8,9 +8,8 @@ import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.StyleScope
 import org.w3c.dom.HTMLElement
 
-/** Marks a token scope and applies Domposable custom properties to an existing HTML host. */
+/** Applies Domposable custom properties to an existing HTML host. */
 fun AttrsScope<HTMLElement>.domposableTokenVariables(tokens: DomposableTokens) {
-    attr("data-domposable-theme", "true")
     style { applyTokenVariables(tokens) }
 }
 

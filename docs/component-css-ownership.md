@@ -36,13 +36,12 @@ repairs the same components:
 | Sticky actions and navigation | `d-bottom-bar`, `d-bottom-bar-desktop-inline`, `d-contextual-navigation`, `d-floating-action-toolbar` |
 | Semantic shell slots | `d-app-header`, `d-web-footer`, `d-navigation-panel`, `d-breadcrumbs` |
 
-The token helper marks its host with `data-domposable-theme`, so custom HTML controls receive theme
-scope behavior even when an application supplies its own root element. Theme colors, typography,
-card/menu shadows and breadcrumb widths remain configurable through tokens and component custom
-properties. Dynamic data coordinates and application navigation policy remain with their caller.
+Theme colors, typography, card/menu shadows and breadcrumb widths remain configurable through
+tokens and component custom properties. Dynamic data coordinates and application navigation policy remain with their caller.
 
-Fields can opt into `d-mobile-body-input` for fixed 16px text on phones. Ordinary fields keep their
-configured typography. This opt-in belongs to the consumer's presentation configuration.
+Inputs can opt into `d-body-input` for default 16px body text, with fixed 16px control text on phones
+to avoid focus zoom. Ordinary fields keep their configured typography. This opt-in belongs to the
+consumer's presentation configuration.
 
 A layout's `gap` is its minimum spacing, including `SpaceBetween`, `SpaceAround` and `SpaceEvenly`.
 The HTML renderer uses flex gaps; native arrangements preserve the same minimum in both layout

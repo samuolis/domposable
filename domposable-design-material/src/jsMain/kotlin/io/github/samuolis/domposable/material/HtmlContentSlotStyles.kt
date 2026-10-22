@@ -12,9 +12,9 @@ internal const val HTML_CONTENT_SLOT_CSS = """
 .d-skeleton[data-animate=true]::after{position:absolute;inset:0 auto 0 calc(-1 * var(--d-shimmer-band,60%));width:var(--d-shimmer-band,60%);content:"";background:linear-gradient(90deg,var(--d-shimmer-base,var(--d-variant)),var(--d-shimmer-base,var(--d-variant)) 25%,var(--d-shimmer-highlight,var(--d-surface)) 50%,var(--d-shimmer-base,var(--d-variant)) 75%,var(--d-shimmer-base,var(--d-variant)));animation:d-skeleton-shimmer var(--d-shimmer-duration,1200ms) linear infinite}
 @keyframes d-skeleton-shimmer{to{left:100%}}
 @media(prefers-reduced-motion:reduce){.d-skeleton::after{display:none}}
-/* Compact inputs retain a mobile-safe font size to avoid focus zoom. */
-[data-domposable-theme] :is(.d-picker-calendar-controls,.d-picker-time) input{font-size:16px}
-@media(max-width:600px){.d-mobile-body-input .d-field-control>:is(input,textarea){font-size:16px!important}}
+/* Consumer-selected body input sizing. */
+:is(input,textarea).d-body-input{font-size:16px}
+@media(max-width:600px){.d-field-control>:is(input,textarea).d-body-input{font-size:16px!important}}
 
 .d-bottom-sheet-scroll{overscroll-behavior:contain}
 .d-bottom-sheet-list-item{flex:none;min-width:0;width:100%}
