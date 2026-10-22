@@ -18,9 +18,8 @@ internal const val HTML_CONTENT_SLOT_CSS = """
 
 .d-bottom-sheet-scroll{overscroll-behavior:contain}
 .d-bottom-sheet-list-item{flex:none;min-width:0;width:100%}
-.d-bottom-sheet-content{--d-surface:var(--d-background)}
-.d-bottom-sheet-content .d-dialog-heading .d-text{min-width:0;overflow-wrap:anywhere}
-.d-bottom-sheet-content .d-dialog-heading .d-icon-button{flex:none}
+.d-sheet-slot .d-dialog-heading .d-text{min-width:0;overflow-wrap:anywhere}
+.d-sheet-slot .d-dialog-heading .d-icon-button{flex:none}
 .d-agreement-row{display:flex;align-items:center;gap:8px;min-width:0}
 .d-agreement-row .d-link{text-underline-offset:2px}
 .d-image-upload-preview{position:relative}
