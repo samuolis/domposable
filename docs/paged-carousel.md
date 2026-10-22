@@ -45,8 +45,9 @@ trailing peek makes compact pages full width. `onApproachingEnd` fires when a ch
 selection reaches the final two items; empty carousels render nothing and do not invoke callbacks.
 
 Stable `DomposableLazyItem.key` values preserve page identity. `currentItem` synchronizes the visible
-page after external selection changes; `onCurrentItemChange` reports settled selection changes. Selection callbacks do not run on
-every drag frame, and appending items does not recreate native scroll state. Navigation uses
+page after external selection changes. Native selection callbacks wait for scrolling to settle; HTML
+reports settled swipes and explicit control or keyboard requests. Appending items does not recreate
+native scroll state. Navigation uses
 the supplied button appearance and may use consumer-provided icon slots, while indicator colors
 are separately configurable. HTML supports left/right keyboard navigation with RTL-aware direction,
 native swipe paging, and semantic slide-position labels.
@@ -57,5 +58,4 @@ centered on the page area, excluding indicators. `wideInactiveIndicator` optiona
 inactive dot color at the wide breakpoint; otherwise it inherits `inactiveIndicator`.
 
 Keyboard paging is handled when the HTML track itself has focus. Inputs and other interactive
-content inside a slide retain their own arrow-key behavior. Programmatic selection and responsive
-resizing preserve the selected page without reporting a new user selection.
+content inside a slide retain their own arrow-key behavior. External selection and responsive resizing preserve the selected page.
