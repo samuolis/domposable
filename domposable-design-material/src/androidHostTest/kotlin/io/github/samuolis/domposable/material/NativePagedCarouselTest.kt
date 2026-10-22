@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -157,6 +158,31 @@ class NativePagedCarouselTest {
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
         compose.runOnIdle { assertEquals(listOf(1), selections) }
+    }
+
+    @Test
+    fun firstAndLastCardsRespectTheConfiguredInset() {
+        var selected by mutableStateOf(0)
+        compose.setContent {
+            DomposableMaterialTheme {
+                Box(Modifier.requiredWidth(360.dp).testTag("viewport")) {
+                    DomposableCarousel(
+                        items = pages(),
+                        label = "Featured pages",
+                        modifier = DomposableModifier.fillMaxWidth(),
+                        currentItem = selected,
+                        pagedLayout = layout(compactHeight = 100, wideHeight = 140),
+                    )
+                }
+            }
+        }
+        val viewport = compose.onNodeWithTag("viewport").getBoundsInRoot()
+        val first = compose.onNodeWithTag("page-a").getBoundsInRoot()
+        assertEquals(16.dp, first.left - viewport.left)
+        compose.runOnIdle { selected = 3 }
+        compose.waitForIdle()
+        val last = compose.onNodeWithTag("page-d").getBoundsInRoot()
+        assertEquals(16.dp, viewport.right - last.right)
     }
 
     private fun pageHeight(tag: String): Float {

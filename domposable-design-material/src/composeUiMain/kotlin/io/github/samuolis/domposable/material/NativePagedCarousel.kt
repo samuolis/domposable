@@ -96,7 +96,7 @@ internal fun NativePagedCarousel(
                 if (wide || props.items.size == 1 || layout.compactTrailingPeek.value == 0f) {
                     maxWidth - inset * 2
                 } else {
-                    maxWidth - inset - spacing - layout.compactTrailingPeek.value.dp
+                    maxWidth - inset * 2 - spacing - layout.compactTrailingPeek.value.dp
                 }
             ).coerceAtLeast(1.dp)
         val textScale =
@@ -125,8 +125,9 @@ internal fun NativePagedCarousel(
                     modifier =
                         Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = inset)
                             .then(pageHeight?.let { Modifier.height(it + 16.dp) } ?: Modifier),
-                    contentPadding = PaddingValues(horizontal = inset, vertical = 8.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp),
                     itemSpacing = spacing,
                 ) { index ->
                     Box(

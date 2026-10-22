@@ -3,7 +3,7 @@
 `DomposableCarousel` keeps its Material carousel variants by default. Set `pagedLayout` when the
 content should show one focused page at a time, with a compact next-page peek and full-width pages
 at the wide breakpoint. Native Compose uses Material 3’s uncontained carousel with single-item snapping; semantic HTML
-uses a scroll-snap track. Card widths stay stable while the next card peeks into view.
+uses a scroll-snap track. Card widths stay stable while the next card peeks into view inside symmetric content insets.
 
 ```kotlin
 val items = cards.map { card ->

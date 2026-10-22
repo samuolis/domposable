@@ -132,6 +132,43 @@ class HtmlPagedCarouselTest {
             }
         }
 
+    @Test
+    fun compactCardsKeepTheirInsetsAndConfiguredNextCardPeek() =
+        CoroutineScope(Dispatchers.Unconfined).promise {
+            val root = document.createElement("div")
+            document.body!!.appendChild(root)
+            var selected by mutableStateOf(0)
+            val composition =
+                renderComposable(root) {
+                    DomposableMaterialTheme {
+                        DomposableCarousel(
+                            items = items(),
+                            label = "Featured cards",
+                            modifier = DomposableModifier.width(360.dp),
+                            currentItem = selected,
+                            pagedLayout = layout(compactHeight = 120, wideHeight = 180),
+                        )
+                    }
+                }
+            try {
+                settle()
+                val carousel = root.querySelector(".d-carousel-paged") as HTMLElement
+                val track = root.querySelector(".d-paged-carousel-track") as HTMLElement
+                track.style.setProperty("scroll-behavior", "auto")
+                val first = track.children.item(0) as HTMLElement
+                val last = track.children.item(2) as HTMLElement
+                val bounds = carousel.getBoundingClientRect()
+                assertEquals(16.0, first.getBoundingClientRect().left - bounds.left, 0.5)
+                assertEquals(302.0, first.getBoundingClientRect().width, 0.5)
+                selected = 2
+                settleUntil { kotlin.math.abs(bounds.right - last.getBoundingClientRect().right - 16.0) < 0.5 }
+                assertEquals(16.0, bounds.right - last.getBoundingClientRect().right, 0.5)
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+            }
+        }
+
     private fun indicator(
         root: org.w3c.dom.Element,
         index: Int,

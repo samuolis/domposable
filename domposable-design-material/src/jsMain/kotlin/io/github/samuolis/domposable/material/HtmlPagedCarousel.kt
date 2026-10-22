@@ -142,7 +142,7 @@ internal fun HtmlPagedCarousel(
                         window.setTimeout({
                             val selected =
                                 pendingTarget.takeIf { it in props.items.indices }
-                                    ?: closestPagedCarouselItem(element, layout.contentInset.value.toDouble())
+                                    ?: closestPagedCarouselItem(element)
                             pendingTarget = -1
                             updatePosition(selected)
                         }, 90)
@@ -296,13 +296,10 @@ private fun CarouselControl(
     )
 }
 
-private fun closestPagedCarouselItem(
-    track: HTMLElement,
-    inset: Double,
-): Int {
+private fun closestPagedCarouselItem(track: HTMLElement): Int {
     val rtl = window.getComputedStyle(track).direction == "rtl"
     val bounds = track.getBoundingClientRect()
-    val target = if (rtl) bounds.right - inset else bounds.left + inset
+    val target = if (rtl) bounds.right else bounds.left
     var closest = 0
     var distance = Double.POSITIVE_INFINITY
     for (index in 0 until track.children.length) {
@@ -367,9 +364,9 @@ private fun InstallPagedCarouselStyles() {
 
 private const val PAGED_CAROUSEL_CSS = """
 .d-carousel-paged{position:relative;min-width:0;width:100%}
-.d-paged-carousel-track{display:flex;min-width:0;width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;box-sizing:border-box;gap:var(--d-paged-carousel-gap,12px);scroll-padding-inline:var(--d-paged-carousel-inset,16px);padding:8px var(--d-paged-carousel-inset,16px)}
+.d-paged-carousel-track{display:flex;min-width:0;width:calc(100% - 2 * var(--d-paged-carousel-inset,16px));margin-inline:var(--d-paged-carousel-inset,16px);overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;box-sizing:border-box;gap:var(--d-paged-carousel-gap,12px);scroll-padding-inline:0;padding:8px 0}
 .d-paged-carousel-track::-webkit-scrollbar{display:none}.d-paged-carousel-track:focus-visible{outline:2px solid var(--d-primary);outline-offset:2px}
-.d-paged-carousel-slide{box-sizing:border-box;flex:0 0 calc(100% + var(--d-paged-carousel-inset,16px) - var(--d-paged-carousel-gap,12px) - var(--d-paged-carousel-peek,14px));min-width:0;min-height:0;height:var(--d-paged-carousel-height,auto);scroll-snap-align:start}
+.d-paged-carousel-slide{box-sizing:border-box;flex:0 0 calc(100% - var(--d-paged-carousel-gap,12px) - var(--d-paged-carousel-peek,14px));min-width:0;min-height:0;height:var(--d-paged-carousel-height,auto);scroll-snap-align:start}
 .d-carousel-paged-compact.d-carousel-paged-no-peek .d-paged-carousel-slide,.d-carousel-paged[data-single-item=true] .d-paged-carousel-slide{flex-basis:100%}
 .d-carousel-paged-wide .d-paged-carousel-slide{flex-basis:100%;height:var(--d-paged-carousel-wide-height,var(--d-paged-carousel-height,auto))}
 .d-paged-carousel-navigation{position:absolute;z-index:1;inset-inline:calc(var(--d-paged-carousel-inset,16px) + 16px);top:calc((100% - var(--d-paged-carousel-indicator-height,0px))/2);display:flex;align-items:center;justify-content:space-between;transform:translateY(-50%);pointer-events:none}
