@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.background
@@ -12,18 +14,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.CarouselDefaults
+import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
@@ -48,6 +49,7 @@ import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.toComposeModifier
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,24 +60,23 @@ internal fun NativePagedCarousel(
 ) {
     val layout = props.pagedLayout ?: return
     if (props.items.isEmpty()) return
-    val keys = props.items.map { it.key }
     val state =
-        key(keys) {
-            rememberPagerState(initialPage = props.currentItem.coerceIn(props.items.indices)) { props.items.size }
-        }
+        rememberCarouselState(initialItem = props.currentItem.coerceIn(props.items.indices)) { props.items.size }
     val currentItem by rememberUpdatedState(props.currentItem.coerceIn(props.items.indices))
     val onCurrentItemChange by rememberUpdatedState(props.onCurrentItemChange)
     val onApproachingEnd by rememberUpdatedState(props.onApproachingEnd)
+    val itemCount by rememberUpdatedState(props.items.size)
     LaunchedEffect(state, currentItem) {
-        if (state.currentPage != currentItem) state.animateScrollToPage(currentItem)
+        if (state.currentItem != currentItem) state.animateScrollToItem(currentItem)
     }
-    LaunchedEffect(state, props.items.size) {
-        snapshotFlow { state.currentPage }
+    LaunchedEffect(state) {
+        snapshotFlow { if (state.isScrollInProgress) null else state.currentItem }
+            .filterNotNull()
             .distinctUntilChanged()
             .drop(1)
             .collect { index ->
                 onCurrentItemChange?.invoke(index)
-                if (index >= props.items.lastIndex - 1) onApproachingEnd?.invoke(index)
+                if (index >= itemCount - 2) onApproachingEnd?.invoke(index)
             }
     }
     val scope = rememberCoroutineScope()
@@ -94,7 +95,7 @@ internal fun NativePagedCarousel(
                 if (wide || props.items.size == 1 || layout.compactTrailingPeek.value == 0f) {
                     maxWidth - inset * 2
                 } else {
-                    maxWidth - inset - spacing - layout.compactTrailingPeek.value.dp
+                    maxWidth - inset * 2 - spacing - layout.compactTrailingPeek.value.dp
                 }
             ).coerceAtLeast(1.dp)
         val textScale =
@@ -116,16 +117,17 @@ internal fun NativePagedCarousel(
                         .fillMaxWidth()
                         .then(pageHeight?.let { Modifier.height(it + 16.dp) } ?: Modifier),
             ) {
-                HorizontalPager(
+                HorizontalUncontainedCarousel(
                     state = state,
+                    itemWidth = pageWidth,
+                    flingBehavior = CarouselDefaults.singleAdvanceFlingBehavior(state),
                     modifier =
                         Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = inset)
                             .then(pageHeight?.let { Modifier.height(it + 16.dp) } ?: Modifier),
-                    pageSize = PageSize.Fixed(pageWidth),
-                    contentPadding = PaddingValues(horizontal = inset, vertical = 8.dp),
-                    pageSpacing = spacing,
-                    key = { props.items[it].key },
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    itemSpacing = spacing,
                 ) { index ->
                     Box(
                         modifier =
@@ -137,8 +139,10 @@ internal fun NativePagedCarousel(
                                     contentDescription = layout.labels.itemPosition(index + 1, props.items.size)
                                 },
                     ) {
-                        CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) {
-                            props.items[index].content()
+                        key(props.items[index].key) {
+                            CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) {
+                                props.items[index].content()
+                            }
                         }
                     }
                 }
@@ -149,29 +153,29 @@ internal fun NativePagedCarousel(
                     ) {
                         CarouselArrow(
                             label = layout.labels.previous,
-                            enabled = state.currentPage > 0,
+                            enabled = state.currentItem > 0,
                             fallback = "‹",
                             customIcon = layout.controls.previousIcon,
                             controls = layout.controls,
-                        ) { scope.launch { state.animateScrollToPage(state.currentPage - 1) } }
+                        ) { scope.launch { state.animateScrollToItem(state.currentItem - 1) } }
                         CarouselArrow(
                             label = layout.labels.next,
-                            enabled = state.currentPage < props.items.lastIndex,
+                            enabled = state.currentItem < props.items.lastIndex,
                             fallback = "›",
                             customIcon = layout.controls.nextIcon,
                             controls = layout.controls,
-                        ) { scope.launch { state.animateScrollToPage(state.currentPage + 1) } }
+                        ) { scope.launch { state.animateScrollToItem(state.currentItem + 1) } }
                     }
                 }
             }
             if (layout.showIndicators && props.items.size > 1) {
                 CarouselIndicators(
                     count = props.items.size,
-                    selected = state.currentPage,
+                    selected = state.currentItem,
                     wide = wide,
                     itemPositionLabel = layout.labels.itemPosition,
                     controls = layout.controls,
-                    onSelect = { scope.launch { state.animateScrollToPage(it) } },
+                    onSelect = { scope.launch { state.animateScrollToItem(it) } },
                 )
             }
         }
