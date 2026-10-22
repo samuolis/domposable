@@ -15,4 +15,9 @@ internal const val DOMPOSABLE_HTML_CHROME_SLOT_CSS = """
 .d-floating-action-toolbar{box-shadow:0 2px 6px color-mix(in srgb,var(--d-shadow,var(--d-scrim,#000)) 14%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .d-floating-action-toolbar-item{flex:none}
 .d-centered-content{text-align:center}
+@media(min-width:601px){.d-bottom-bar-desktop-inline:not(.d-contextual-navigation-host .d-bottom-bar-desktop-inline){bottom:0;width:100%;max-width:var(--d-bottom-bar-inline-max-width,1200px);margin:16px auto 0;padding:0 0 env(safe-area-inset-bottom);border:0;border-radius:0;background:var(--d-background);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.d-bottom-bar-anchor:not(.d-contextual-navigation-host):not(:has(.d-contextual-navigation-host)){bottom:0!important}
+.d-bottom-bar-desktop-inline:not(.d-contextual-navigation-host .d-bottom-bar-desktop-inline) .d-layout-column:not(.d-bottom-bar-desktop-inline .d-layout-column .d-layout-column)>.d-divider,.d-bottom-bar-desktop-inline:not(.d-contextual-navigation-host .d-bottom-bar-desktop-inline) .d-layout-column:not(.d-bottom-bar-desktop-inline .d-layout-column .d-layout-column)>div>.d-divider,.d-divider:has(+.d-bottom-bar-desktop-inline:not(.d-contextual-navigation-host .d-bottom-bar-desktop-inline)){display:none}
+.d-contextual-navigation-host .d-bottom-bar-desktop-inline{bottom:auto;width:100%;max-width:none;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.d-contextual-navigation-host.d-bottom-bar-anchor,.d-contextual-navigation-host .d-bottom-bar-anchor{bottom:0!important}}
 """

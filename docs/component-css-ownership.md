@@ -33,7 +33,7 @@ repairs the same components:
 | Image crop and upload | `d-image-crop-viewport`, `d-image-upload-preview` |
 | Calendar and time controls | `d-picker-calendar-controls`, `d-picker-time` |
 | Media and motion | `d-media-marquee`, `d-collapsible-layout`, `d-confetti`, `d-status-illustration` |
-| Sticky actions and navigation | `d-bottom-bar`, `d-contextual-navigation`, `d-floating-action-toolbar` |
+| Sticky actions and navigation | `d-bottom-bar`, `d-bottom-bar-desktop-inline`, `d-contextual-navigation`, `d-floating-action-toolbar` |
 | Semantic shell slots | `d-app-header`, `d-web-footer`, `d-navigation-panel`, `d-breadcrumbs` |
 
 The token helper marks its host with `data-domposable-theme`, so custom HTML controls receive theme

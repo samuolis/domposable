@@ -201,6 +201,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
+                        classes("d-layout-column")
                         style {
                             property("display", "flex")
                             property("flex-direction", "column")
