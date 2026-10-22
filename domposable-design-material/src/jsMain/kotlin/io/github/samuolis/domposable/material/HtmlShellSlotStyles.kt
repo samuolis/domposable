@@ -25,4 +25,14 @@ internal const val DOMPOSABLE_HTML_SHELL_SLOT_CSS = """
 .d-breadcrumbs a{display:inline-flex;align-items:center;min-height:24px;color:var(--d-primary);text-underline-offset:3px}
 .d-breadcrumbs [aria-current]{color:var(--d-on-surface-variant);overflow-wrap:anywhere}
 @media(max-width:600px){.d-breadcrumbs{padding:0 var(--d-breadcrumbs-gutter,16px) 8px;font-size:12px}.d-breadcrumbs ol{gap:4px 8px}.d-breadcrumbs li{gap:8px}}
+
+.d-navigation-drawer .d-dropdown-menu-item{min-height:48px!important;padding:0 14px!important;border-radius:12px!important;font:inherit}
+.d-page-heading .d-page-actions{flex:0 0 auto}
+.d-page-heading .d-page-actions>*{flex:0 0 auto;white-space:nowrap}
+.d-page-breadcrumbs{color:var(--d-on-surface-variant);font-size:13px;line-height:18px}
+.d-page-breadcrumbs>*{min-width:0}
+.d-action-menu{position:relative}
+.d-action-menu .d-dropdown-menu-item{min-height:44px;white-space:normal}
+@media(prefers-reduced-motion:reduce){.d-app-header{scroll-behavior:auto}}
+@media(forced-colors:active){.d-navigation-drawer :is(a,button):focus-visible{outline-color:Highlight}}
 """
