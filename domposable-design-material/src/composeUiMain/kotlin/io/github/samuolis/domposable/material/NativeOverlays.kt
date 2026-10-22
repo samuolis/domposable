@@ -28,6 +28,7 @@ import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.TimePickerDialogDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
@@ -229,7 +230,9 @@ internal fun NativeBottomSheet(
             }
         }
         if (props.modal) {
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = props.skipPartiallyExpanded)
             ModalBottomSheet(
+                sheetState = sheetState,
                 onDismissRequest = props.onDismiss,
                 sheetGesturesEnabled = props.layout.swipeToDismiss,
                 modifier =

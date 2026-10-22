@@ -13,6 +13,7 @@ import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBadge
+import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCarousel
 import io.github.samuolis.domposable.ui.DomposableCarouselLabels
@@ -68,6 +69,13 @@ internal fun SharedLayoutRecipe() {
         tabsAppearance = DomposableTabsAppearance(activation = DomposableTabsActivation.Manual),
     )
     DomposableText("Selected section: ${tab + 1}")
+    DomposableText("Weighted row in a start-aligned padded box")
+    DomposableBox(modifier = DomposableModifier.padding(12.dp)) {
+        DomposableRow(gap = 12.dp) {
+            DomposableText("Ranker club", modifier = DomposableModifier.weight(1f))
+            DomposableText("League points 1,250")
+        }
+    }
     SharedSlotButtons()
     DomposableCarousel(
         items =

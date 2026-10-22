@@ -1,5 +1,21 @@
 # Migrating a Compose feature
 
+## Bottom-sheet anchors in 0.19
+
+`DomposableBottomSheet` and `DomposableBottomSheetProps` now accept
+`skipPartiallyExpanded`, defaulting to `false` on native and HTML. Long compact sheets can
+expand from their partial anchor; pass `true` when the sheet should open expanded.
+Short sheets continue to size to their content, and desktop dialogs retain their bounds.
+
+Recompile consumers and custom providers when adopting 0.19: the added props field changes
+the data-class constructor and generated `copy` signatures, and the convenience composable
+has an additional parameter. Existing Kotlin source calls keep their defaults.
+
+HTML rows with a filling weighted child also claim the available width inside start-aligned
+boxes, matching native measurement. Remove caller-specific fill-width workarounds added only
+to compensate for that renderer difference. Explicit widths, non-filling weights and
+horizontal scrolling retain their existing sizing contracts.
+
 ## Disabled selected item styling in 0.16
 
 `DomposableItemColors` adds optional `disabledSelectedContainer`, `disabledSelectedContent` and

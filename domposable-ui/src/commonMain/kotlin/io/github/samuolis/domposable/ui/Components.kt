@@ -544,6 +544,8 @@ data class DomposableBottomSheetProps(
     val modal: Boolean = true,
     val headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
     val layout: DomposableModalLayout = DomposableModalLayout(),
+    /** Starts directly expanded instead of opening at the optional half-height anchor. */
+    val skipPartiallyExpanded: Boolean = false,
 )
 
 @DomposableComponent("Scaffold")

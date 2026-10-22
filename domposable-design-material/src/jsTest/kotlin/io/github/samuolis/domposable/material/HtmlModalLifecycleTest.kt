@@ -219,6 +219,76 @@ class HtmlModalLifecycleTest {
     }
 
     @Test
+    fun longSheetExpandsThenCollapsesBeforeDismissal() {
+        withFallbackDialogs {
+            var dismissals = 0
+            val layout = DomposableModalLayout(maxViewportFraction = 1f, viewportInset = 16.dp)
+            withHost(content = {
+                DomposableBottomSheet(
+                    "Long sheet",
+                    { dismissals++ },
+                    layout = layout,
+                ) { DomposableText("Long content") }
+            }) { root ->
+                val sheet = root.querySelector("dialog") as HTMLElement
+                val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
+                handle.style.display = "flex"
+                val setScrollMetrics: dynamic = js("(element) => { Object.defineProperty(element, 'scrollHeight', {configurable: true, get: () => 900}); Object.defineProperty(element, 'clientHeight', {configurable: true, get: () => 400}); }")
+                setScrollMetrics(sheet)
+                handle.asDynamic().setPointerCapture = js("(pointerId) => {}")
+                handle.asDynamic().hasPointerCapture = js("(pointerId) => false")
+                val bounds = handle.getBoundingClientRect()
+                val x = bounds.left + bounds.width / 2
+                val y = bounds.top + bounds.height / 2
+
+                handle.dispatchEvent(pointerEvent("pointerdown", 31, x, y))
+                handle.dispatchEvent(pointerEvent("pointerup", 31, x, y - 160))
+                assertTrue(sheet.classList.contains("d-sheet-expanded"))
+                assertEquals(layout.modalMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+                assertEquals(0, dismissals)
+
+                handle.dispatchEvent(pointerEvent("pointerdown", 32, x, y))
+                handle.dispatchEvent(pointerEvent("pointerup", 32, x, y + 160))
+                assertTrue(!sheet.classList.contains("d-sheet-expanded"))
+                assertEquals(layout.partialSheetMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+                assertEquals(0, dismissals)
+
+                handle.dispatchEvent(pointerEvent("pointerdown", 33, x, y))
+                handle.dispatchEvent(pointerEvent("pointerup", 33, x, y + 160))
+                assertEquals(1, dismissals)
+            }
+        }
+    }
+
+    @Test
+    fun fullHeightRespectsTheExplicitPartialExpansionOption() {
+        val layout = DomposableModalLayout(heightFraction = 1f, maxViewportFraction = 1f, viewportInset = 16.dp)
+        withHost(content = {
+            DomposableBottomSheet("Partial full-height", {}, layout = layout) { DomposableText("Body") }
+        }) { root ->
+            val sheet = root.querySelector("dialog") as HTMLElement
+            val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
+            handle.style.display = "flex"
+            window.dispatchEvent(js("new Event('resize')") as Event)
+            assertEquals(layout.partialSheetMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+        }
+        withHost(content = {
+            DomposableBottomSheet(
+                "Skip partial",
+                {},
+                layout = layout,
+                skipPartiallyExpanded = true,
+            ) { DomposableText("Body") }
+        }) { root ->
+            val sheet = root.querySelector("dialog") as HTMLElement
+            val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
+            handle.style.display = "flex"
+            window.dispatchEvent(js("new Event('resize')") as Event)
+            assertEquals(layout.modalMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+        }
+    }
+
+    @Test
     fun bottomSheetDragHandleFollowsCompactBreakpoint() {
         withHost(content = {
             DomposableBottomSheet(
