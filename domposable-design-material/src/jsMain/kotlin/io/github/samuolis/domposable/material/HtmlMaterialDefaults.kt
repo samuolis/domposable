@@ -23,7 +23,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-chip-elevated.d-item-hittarget:not([data-selected=true]) .d-chip-surface{background:var(--d-item-container,var(--d-surface-container-low));border-color:var(--d-item-border,transparent)}
 .d-card{padding:0}
 .d-row:has(> [data-domposable-weight-fill="true"]):not([data-domposable-horizontal-scroll="true"]){box-sizing:border-box;width:100%;align-self:stretch}
-.d-box:has(> .d-row:not([data-domposable-horizontal-scroll="true"]):has(> [data-domposable-weight-fill="true"])),[data-domposable-modifier="Padding"]:has(> .d-box:has(> .d-row:not([data-domposable-horizontal-scroll="true"]):has(> [data-domposable-weight-fill="true"]))){box-sizing:border-box;width:100%;align-self:stretch}
+.d-box:has(> .d-row:not([data-domposable-horizontal-scroll="true"]) > [data-domposable-weight-fill="true"]),[data-domposable-modifier="Padding"]:has(> .d-box > .d-row:not([data-domposable-horizontal-scroll="true"]) > [data-domposable-weight-fill="true"]){box-sizing:border-box;width:100%;align-self:stretch}
 .d-chip-label{gap:8px;min-width:0}.d-chip-icon{flex:none}
 .d-chip[data-input-padding]:not(.d-item-hittarget),.d-chip[data-input-padding].d-item-hittarget .d-chip-surface{padding-inline:var(--d-chip-padding-start) var(--d-chip-padding-end)}
 :root .d-segment-surface{border-radius:0;min-height:var(--d-item-min-height,40px);padding:var(--d-item-padding,9px 11px)}

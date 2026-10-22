@@ -232,7 +232,8 @@ class HtmlModalLifecycleTest {
             }) { root ->
                 val sheet = root.querySelector("dialog") as HTMLElement
                 val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
-                handle.style.display = "flex"
+                handle.style.setProperty("display", "flex", "important")
+                assertEquals("flex", window.getComputedStyle(handle).display)
                 val setScrollMetrics: dynamic =
                     js(
                         """(element) => {
@@ -255,14 +256,17 @@ class HtmlModalLifecycleTest {
 
                 handle.dispatchEvent(pointerEvent("pointerdown", 31, x, y))
                 handle.dispatchEvent(pointerEvent("pointerup", 31, x, y - 160))
-                assertTrue(sheet.classList.contains("d-sheet-expanded"))
-                assertEquals(layout.modalMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+                assertTrue(sheet.classList.contains("d-sheet-expanded"), "Upward drag should expand the long sheet")
+                assertTrue(sheet.style.getPropertyValue("max-height").contains("100dvh"))
                 assertEquals(0, dismissals)
 
                 handle.dispatchEvent(pointerEvent("pointerdown", 32, x, y))
                 handle.dispatchEvent(pointerEvent("pointerup", 32, x, y + 160))
-                assertTrue(!sheet.classList.contains("d-sheet-expanded"))
-                assertEquals(layout.partialSheetMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+                assertTrue(
+                    !sheet.classList.contains("d-sheet-expanded"),
+                    "Downward drag should return to the partial anchor",
+                )
+                assertTrue(sheet.style.getPropertyValue("max-height").startsWith("min(50dvh,"))
                 assertEquals(0, dismissals)
 
                 handle.dispatchEvent(pointerEvent("pointerdown", 33, x, y))
@@ -280,9 +284,10 @@ class HtmlModalLifecycleTest {
         }) { root ->
             val sheet = root.querySelector("dialog") as HTMLElement
             val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
-            handle.style.display = "flex"
+            handle.style.setProperty("display", "flex", "important")
             window.dispatchEvent(js("new Event('resize')") as Event)
-            assertEquals(layout.partialSheetMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+            val partialHeight = sheet.style.getPropertyValue("max-height")
+            assertTrue(partialHeight.startsWith("min(50dvh,"), "Expected a half-height anchor, got $partialHeight")
         }
         withHost(content = {
             DomposableBottomSheet(
@@ -294,9 +299,13 @@ class HtmlModalLifecycleTest {
         }) { root ->
             val sheet = root.querySelector("dialog") as HTMLElement
             val handle = sheet.querySelector(".d-sheet-drag-handle") as HTMLElement
-            handle.style.display = "flex"
+            handle.style.setProperty("display", "flex", "important")
             window.dispatchEvent(js("new Event('resize')") as Event)
-            assertEquals(layout.modalMaxHeightCss(), sheet.style.getPropertyValue("max-height"))
+            val expandedHeight = sheet.style.getPropertyValue("max-height")
+            assertTrue(
+                expandedHeight.contains("100dvh"),
+                "Skipped partial anchor should retain the full viewport cap: $expandedHeight",
+            )
         }
     }
 

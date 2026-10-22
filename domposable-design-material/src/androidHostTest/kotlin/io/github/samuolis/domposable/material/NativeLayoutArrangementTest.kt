@@ -130,13 +130,14 @@ class NativeLayoutArrangementTest {
         val fixedBox = compose.onNodeWithTag("fixed-box").getUnclippedBoundsInRoot()
         val fixedRow = compose.onNodeWithTag("fixed-row").getUnclippedBoundsInRoot()
 
-        assertEquals(parentColumn.left.value + 16f, fillRow.left.value, 1f)
-        assertEquals(parentColumn.right.value - 16f, fillRow.right.value, 1f)
-        assertEquals(parentColumn.right.value - parentColumn.left.value, fillBox.right.value - fillBox.left.value, 1f)
+        val parentWidth = parentColumn.right.value - parentColumn.left.value
+        assertEquals(parentColumn.left.value + 16f, fillBox.left.value, 1f)
+        assertEquals(parentColumn.right.value - 16f, fillBox.right.value, 1f)
+        assertEquals(fillBox.left.value, fillRow.left.value, 1f)
+        assertEquals(fillBox.right.value, fillRow.right.value, 1f)
         assertEquals(fillRow.right.value, fillMetric.right.value, 1f)
         assertEquals(nonfillBox.left.value + 16f, nonfillRow.left.value, 1f)
         assertEquals(nonfillRow.right.value, nonfillMetric.right.value, 1f)
-        val parentWidth = parentColumn.right.value - parentColumn.left.value
         val nonfillWidth = nonfillRow.right.value - nonfillRow.left.value
         val fixedBoxWidth = fixedBox.right.value - fixedBox.left.value
         assertTrue(nonfillWidth < parentWidth - 32f)

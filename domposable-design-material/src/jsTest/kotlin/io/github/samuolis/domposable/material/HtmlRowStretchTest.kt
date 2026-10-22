@@ -121,8 +121,10 @@ class HtmlRowStretchTest {
 
             assertEquals(parentColumnBounds.left + 16, fillRowBounds.left, 0.5)
             assertEquals(parentColumnBounds.right - 16, fillRowBounds.right, 0.5)
-            assertEquals(fillRowBounds.left, fillBoxBounds.left, 0.5)
-            assertEquals(fillRowBounds.right, fillBoxBounds.right, 0.5)
+            assertEquals(parentColumnBounds.left + 16, fillBoxBounds.left, 0.5)
+            assertEquals(parentColumnBounds.right - 16, fillBoxBounds.right, 0.5)
+            assertEquals(fillBoxBounds.left, fillRowBounds.left, 0.5)
+            assertEquals(fillBoxBounds.right, fillRowBounds.right, 0.5)
             assertEquals(fillRowBounds.right, fillMetric.getBoundingClientRect().right, 0.5)
             assertEquals(nonfillBoxBounds.left, nonfillRowBounds.left, 0.5)
             assertEquals(nonfillRowBounds.right, nonfillMetric.getBoundingClientRect().right, 0.5)
