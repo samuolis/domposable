@@ -48,6 +48,8 @@ class HtmlTimeInputTest {
             try {
                 val input = root.querySelector("input[aria-label=Hour]") as HTMLInputElement
                 assertEquals("12", input.value)
+                val typography = window.getComputedStyle(input)
+                assertEquals(typography.getPropertyValue("--d-type-display-large-size").trim(), typography.fontSize)
                 (root.querySelector(".d-time-period button:last-child") as HTMLElement).click()
                 settle()
                 assertEquals(12, hour)

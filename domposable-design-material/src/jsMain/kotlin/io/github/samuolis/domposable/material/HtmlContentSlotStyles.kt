@@ -13,7 +13,7 @@ internal const val HTML_CONTENT_SLOT_CSS = """
 @keyframes d-skeleton-shimmer{to{left:100%}}
 @media(prefers-reduced-motion:reduce){.d-skeleton::after{display:none}}
 /* Compact inputs retain a mobile-safe font size to avoid focus zoom. */
-[data-domposable-theme] input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=button]):not([type=submit]):not([type=reset]){font-size:16px}
+[data-domposable-theme] :is(.d-picker-calendar-controls,.d-picker-time) input{font-size:16px}
 @media(max-width:600px){.d-field-control>:is(input,textarea){font-size:16px!important}}
 
 .d-bottom-sheet-scroll{overscroll-behavior:contain}
