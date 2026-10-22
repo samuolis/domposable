@@ -39,7 +39,7 @@ internal fun HtmlPagedCarousel(
     if (props.items.isEmpty()) return
     InstallPagedCarouselStyles()
     val id = remember { "d-paged-carousel-${nextPagedCarouselId++}" }
-    var position by remember(props.items.size) {
+    var position by remember {
         mutableIntStateOf(props.currentItem.coerceIn(props.items.indices))
     }
     var wide by remember { mutableStateOf(false) }
@@ -61,7 +61,7 @@ internal fun HtmlPagedCarousel(
             }
         }
     }
-    LaunchedEffect(currentItem, props.items.size) {
+    LaunchedEffect(currentItem) {
         position = currentItem
         pendingTarget = currentItem
         scrollPagedCarouselItem(id, currentItem)
@@ -69,9 +69,11 @@ internal fun HtmlPagedCarousel(
     LaunchedEffect(rootWidth, layout.breakpoint.value) {
         wide = rootWidth >= layout.breakpoint.value.toDouble()
     }
-    LaunchedEffect(wide, position) {
-        pendingTarget = position
-        scrollPagedCarouselItem(id, position)
+    val boundedPosition = position.coerceIn(props.items.indices)
+    LaunchedEffect(wide, boundedPosition) {
+        if (position != boundedPosition) updatePosition(boundedPosition)
+        pendingTarget = boundedPosition
+        scrollPagedCarouselItem(id, boundedPosition)
     }
 
     Div(attrs = {

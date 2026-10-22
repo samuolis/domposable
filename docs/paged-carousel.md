@@ -46,8 +46,8 @@ selection reaches the final two items; empty carousels render nothing and do not
 
 Stable `DomposableLazyItem.key` values preserve page identity. `currentItem` synchronizes the visible
 page after external selection changes. Native selection callbacks wait for scrolling to settle; HTML
-reports settled swipes and explicit control or keyboard requests. Appending items does not recreate
-native scroll state. Navigation uses
+reports settled swipes and explicit control or keyboard requests. Appending items preserves the
+focused card on both renderers. Navigation uses
 the supplied button appearance and may use consumer-provided icon slots, while indicator colors
 are separately configurable. HTML supports left/right keyboard navigation with RTL-aware direction,
 native swipe paging, and semantic slide-position labels.
