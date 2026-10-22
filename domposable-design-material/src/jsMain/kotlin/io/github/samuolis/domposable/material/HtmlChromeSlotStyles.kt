@@ -12,7 +12,7 @@ internal const val DOMPOSABLE_HTML_CHROME_SLOT_CSS = """
 .d-contextual-navigation{scrollbar-width:none}
 .d-contextual-navigation:not([data-presentation="underline-tabs"]){width:fit-content;max-width:100%;overflow-x:auto}
 .d-contextual-navigation::-webkit-scrollbar{display:none}
-.d-floating-action-toolbar{box-shadow:0 2px 6px color-mix(in srgb,var(--d-on-surface) 14%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.d-floating-action-toolbar{box-shadow:0 2px 6px color-mix(in srgb,var(--d-shadow,var(--d-scrim,#000)) 14%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .d-floating-action-toolbar-item{flex:none}
 .d-centered-content{text-align:center}
 """
