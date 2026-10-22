@@ -34,7 +34,7 @@ repairs the same components:
 | Calendar and time controls | `d-picker-calendar-controls`, `d-picker-time` |
 | Media and motion | `d-media-marquee`, `d-collapsible-layout`, `d-confetti`, `d-status-illustration` |
 | Sticky actions and navigation | `d-bottom-bar`, `d-contextual-navigation`, `d-floating-action-toolbar` |
-| Semantic shell slots | `d-app-header`, `d-web-footer`, `d-navigation-drawer`, `d-breadcrumbs` |
+| Semantic shell slots | `d-app-header`, `d-web-footer`, `d-navigation-panel`, `d-breadcrumbs` |
 
 The token helper marks its host with `data-domposable-theme`, so custom HTML controls receive theme
 scope behavior even when an application supplies its own root element. Theme colors, typography,
