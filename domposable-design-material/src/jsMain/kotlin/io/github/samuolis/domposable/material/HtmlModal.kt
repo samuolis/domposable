@@ -13,6 +13,7 @@ import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.domposableAttributes
 import kotlinx.browser.document
+import kotlinx.browser.window
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H2
 import org.jetbrains.compose.web.dom.TagElement
@@ -41,6 +42,7 @@ internal fun HtmlModal(
     variant: DomposableDialogVariant = DomposableDialogVariant.Basic,
     headerContent: (@Composable () -> Unit)? = null,
     layout: DomposableModalLayout = DomposableModalLayout(),
+    skipPartiallyExpanded: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val dismiss by rememberUpdatedState(onDismiss)
@@ -94,7 +96,8 @@ internal fun HtmlModal(
                     val hasPoint = x != null && y != null
                     val endedOutside = hasPoint && isOutsideModal(element, x!!, y!!)
                     val isTopmost = isTopmostModal(element)
-                    if (fallback && isTopmost && endedOutside) {
+                    val outsideRelease = endedOutside && !element.contains(event.target as? Node)
+                    if (fallback && isTopmost && outsideRelease) {
                         event.preventDefault()
                         event.stopPropagation()
                     }
@@ -179,7 +182,31 @@ internal fun HtmlModal(
                     focusModal(element)
                 }
                 val removeSwipe =
-                    if (sheet && layout.swipeToDismiss) installModalSheetSwipe(element) { dismiss() } else null
+                    if (sheet && layout.swipeToDismiss) {
+                        installModalSheetSwipe(element, layout, skipPartiallyExpanded) { dismiss() }
+                    } else {
+                        null
+                    }
+
+                fun updatePartialAnchor() {
+                    if (sheet) {
+                        val canPartiallyExpand = !skipPartiallyExpanded && isSheetDragHandleVisible(element)
+                        if (canPartiallyExpand && !element.classList.contains("d-sheet-expanded")) {
+                            element.style.setProperty("max-height", layout.partialSheetMaxHeightCss())
+                        } else {
+                            val maxHeight = layout.modalMaxHeightCss()
+                            if (maxHeight == null) {
+                                element.style.removeProperty("max-height")
+                            } else {
+                                element.style.setProperty("max-height", maxHeight)
+                            }
+                        }
+                    }
+                }
+
+                val resizePartialAnchor: (Event) -> Unit = { updatePartialAnchor() }
+                updatePartialAnchor()
+                window.addEventListener("resize", resizePartialAnchor)
                 onDispose {
                     element.removeEventListener("cancel", cancel)
                     removeCapture("pointerdown", pointerDown)
@@ -189,6 +216,7 @@ internal fun HtmlModal(
                     removeCapture("click", click)
                     removeCapture("focusin", focusIn)
                     removeSwipe?.invoke()
+                    window.removeEventListener("resize", resizePartialAnchor)
                     val wasTopmost = isTopmostModal(element)
                     openHtmlModalOrder.remove(element)
                     if (element.open && jsTypeOf(element.asDynamic().close) == "function") {

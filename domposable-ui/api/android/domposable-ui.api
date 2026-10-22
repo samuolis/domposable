@@ -24,7 +24,7 @@ public final class io/github/samuolis/domposable/ui/ComponentCallsKt {
 	public static final fun DomposableAvatar (Ljava/lang/String;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableBadge-Ul2PVFY (Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableInsets;Lio/github/samuolis/domposable/foundation/DomposableLength;Lio/github/samuolis/domposable/foundation/DomposableLength;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableBanner (Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Landroidx/compose/runtime/Composer;II)V
-	public static final fun DomposableBottomSheet (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposableBottomSheet (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableButton (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableButtonStyle;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLandroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableChip (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;ZZLio/github/samuolis/domposable/foundation/DomposableItemAppearance;Lio/github/samuolis/domposable/foundation/DomposableChipVariant;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ZLandroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableDialog (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lio/github/samuolis/domposable/ui/DomposableDialogVariant;Lkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
@@ -547,22 +547,24 @@ public final class io/github/samuolis/domposable/ui/DomposableBottomAppBarVarian
 
 public final class io/github/samuolis/domposable/ui/DomposableBottomSheetProps {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;)V
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;
 	public final fun component4 ()Z
 	public final fun component5 ()Lkotlin/jvm/functions/Function3;
 	public final fun component6 ()Lio/github/samuolis/domposable/ui/DomposableModalLayout;
-	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;)Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;
-	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;
+	public final fun component7 ()Z
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;Z)Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;ZLkotlin/jvm/functions/Function3;Lio/github/samuolis/domposable/ui/DomposableModalLayout;ZILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableBottomSheetProps;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppearance ()Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;
 	public final fun getHeaderContent ()Lkotlin/jvm/functions/Function3;
 	public final fun getLayout ()Lio/github/samuolis/domposable/ui/DomposableModalLayout;
 	public final fun getModal ()Z
 	public final fun getOnDismiss ()Lkotlin/jvm/functions/Function0;
+	public final fun getSkipPartiallyExpanded ()Z
 	public final fun getTitle ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

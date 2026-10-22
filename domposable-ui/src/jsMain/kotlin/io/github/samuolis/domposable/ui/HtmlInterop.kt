@@ -189,6 +189,9 @@ fun DomposableHtmlModifiers(
     } else {
         Div(attrs = {
             attr("data-domposable-layout-item", "true")
+            if (layout.any { it is DomposableModifierOperation.Weight && it.fill }) {
+                attr("data-domposable-weight-fill", "true")
+            }
             if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
             style {
                 childLayoutSizing(visual)

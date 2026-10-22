@@ -240,6 +240,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     Div(attrs = {
                         domposableAttributes(modifier)
                         classes("d-row")
+                        if (horizontalScroll) attr("data-domposable-horizontal-scroll", "true")
                         if (props.stretch) classes("d-row-stretch")
                         style {
                             property("display", "flex")
@@ -1488,6 +1489,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         appearance = appearance,
                         headerContent = props.headerContent?.let { header -> { header(props.onDismiss) } },
                         layout = props.layout,
+                        skipPartiallyExpanded = props.skipPartiallyExpanded,
                         content = content,
                     )
                 } else {

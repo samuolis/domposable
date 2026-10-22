@@ -25,7 +25,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableBadgedBox](#domposablebadgedbox) | Core / additional controls | 1 |
 | [DomposableBanner](#domposablebanner) | Core / additional controls | 3 |
 | [DomposableBottomAppBar](#domposablebottomappbar) | Navigation | 3 |
-| [DomposableBottomSheet](#domposablebottomsheet) | Containment | 6 |
+| [DomposableBottomSheet](#domposablebottomsheet) | Containment | 7 |
 | [DomposableBottomSheetScaffold](#domposablebottomsheetscaffold) | Containment | 6 |
 | [DomposableBox](#domposablebox) | Core / additional controls | 2 |
 | [DomposableButton](#domposablebutton) | Actions | 7 |
@@ -193,6 +193,7 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 | `modal` | <code>Boolean</code> | `true` |
 | `headerContent` | <code>@Composable (onDismiss: () -&gt; Unit) -&gt; Unit?</code> | `null` |
 | `layout` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-modal-layout/index.html">DomposableModalLayout</a></code> | `DomposableModalLayout()` |
+| `skipPartiallyExpanded` | <code>Boolean</code> | `false` |
 
 ## DomposableBottomSheetScaffold
 
@@ -786,7 +787,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableScaffold
 
-Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L549)
+Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L551)
 
 | Parameter | Type | Default |
 | --- | --- | --- |

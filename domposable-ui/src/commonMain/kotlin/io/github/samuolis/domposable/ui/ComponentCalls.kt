@@ -532,6 +532,7 @@ fun DomposableBottomSheet(
     modal: Boolean = true,
     headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
     layout: DomposableModalLayout = DomposableModalLayout(),
+    skipPartiallyExpanded: Boolean = false,
     content: @Composable () -> Unit,
 ) = DomposableBottomSheet(
     DomposableBottomSheetProps(
@@ -539,6 +540,7 @@ fun DomposableBottomSheet(
         onDismiss,
         appearance = appearance,
         modal = modal,
+        skipPartiallyExpanded = skipPartiallyExpanded,
         headerContent = headerContent,
         layout = layout,
     ),

@@ -97,6 +97,56 @@ test('DOM visual shop-cart-phone', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Your bag' })).toBeVisible();
   });
 });
+
+for (const [name, expanded] of [
+  ['long-sheet-partial-phone', false],
+  ['long-sheet-expanded-phone', true],
+] as const) {
+  test(`DOM visual ${name}`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/#/material/compare/light/integration');
+    await expect(page.getByTestId('shared-weighted-row-box')).toBeVisible();
+    const box = await page.getByTestId('shared-weighted-row-box').boundingBox();
+    const trailing = await page.getByTestId('shared-weighted-row-trailing').boundingBox();
+    const comparison = await page.getByTestId('material-comparison').boundingBox();
+    const paddingRight = await page.getByTestId('shared-weighted-row-box').evaluate(element => {
+      const wrapper = element.parentElement;
+      return wrapper ? Number.parseFloat(getComputedStyle(wrapper).paddingRight) : Number.NaN;
+    });
+    expect(box).not.toBeNull();
+    expect(trailing).not.toBeNull();
+    expect(comparison).not.toBeNull();
+    const availableRight = comparison!.x + comparison!.width - paddingRight;
+    expect(Math.abs(box!.x + box!.width - availableRight)).toBeLessThanOrEqual(3);
+    expect(Math.abs(trailing!.x + trailing!.width - availableRight)).toBeLessThanOrEqual(3);
+
+    await page.getByTestId('shared-long-sheet-open').click();
+    const sheet = page.locator('dialog.d-sheet');
+    await expect(sheet).toBeVisible();
+    const sheetHeight = () => sheet.evaluate(element => element.getBoundingClientRect().height);
+    const partialHeight = await sheetHeight();
+    expect(partialHeight).toBeGreaterThan(0);
+    expect(partialHeight).toBeLessThanOrEqual(844 * 0.5 + 4);
+    if (expanded) {
+      const handle = sheet.locator('.d-sheet-drag-handle');
+      const bounds = await handle.boundingBox();
+      expect(bounds).not.toBeNull();
+      await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2 - 180, { steps: 4 });
+      await page.mouse.up();
+      await expect(sheet).toHaveClass(/d-sheet-expanded/);
+      await expect.poll(sheetHeight).toBeGreaterThan(partialHeight + 100);
+      await expect.poll(sheetHeight).toBeGreaterThan(844 - 40);
+    }
+    await expect(sheet.getByRole('button', { name: 'Close', exact: true })).toBeInViewport();
+    await stableCapture(page, 'dom', name);
+    const lastRow = sheet.getByText('Long sheet content row 24', { exact: true });
+    await lastRow.scrollIntoViewIfNeeded();
+    await expect(lastRow).toBeInViewport();
+    await expect(sheet.getByRole('button', { name: 'Close', exact: true })).toBeInViewport();
+  });
+}
 for (const [name, width, height] of [['shop-phone',390,844],['shop-wide',1440,900]] as const) {
   test(`Wasm visual ${name}`, async ({ page }) => {
     const errors: string[] = [];

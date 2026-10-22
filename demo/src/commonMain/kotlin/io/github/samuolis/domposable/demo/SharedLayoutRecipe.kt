@@ -13,12 +13,16 @@ import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBadge
+import io.github.samuolis.domposable.ui.DomposableBottomSheet
+import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableCarousel
 import io.github.samuolis.domposable.ui.DomposableCarouselLabels
 import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableLazyItem
+import io.github.samuolis.domposable.ui.DomposableModalAlignment
+import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposablePagedCarouselLayout
 import io.github.samuolis.domposable.ui.DomposableRow
@@ -31,9 +35,11 @@ import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableVectorIcon
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.fillMaxWidth
+import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.verticalScroll
 import io.github.samuolis.domposable.ui.weight
 
 /** Shared custom control slots and responsive pages; no renderer-specific code or application CSS. */
@@ -41,6 +47,7 @@ import io.github.samuolis.domposable.ui.weight
 internal fun SharedLayoutRecipe() {
     var tab by rememberSaveable { mutableStateOf(0) }
     var page by rememberSaveable { mutableStateOf(0) }
+    var longSheetOpen by rememberSaveable { mutableStateOf(false) }
     DomposableTabs(
         items =
             listOf(
@@ -68,6 +75,17 @@ internal fun SharedLayoutRecipe() {
         tabsAppearance = DomposableTabsAppearance(activation = DomposableTabsActivation.Manual),
     )
     DomposableText("Selected section: ${tab + 1}")
+    DomposableText("Weighted row in a start-aligned padded box")
+    DomposableBox(modifier = DomposableModifier.padding(12.dp).testId("shared-weighted-row-box")) {
+        DomposableRow(gap = 12.dp) {
+            DomposableText("Ranker club", modifier = DomposableModifier.weight(1f))
+            DomposableText("League points 1,250", modifier = DomposableModifier.testId("shared-weighted-row-trailing"))
+        }
+    }
+    DomposableButton(
+        onClick = { longSheetOpen = true },
+        modifier = DomposableModifier.testId("shared-long-sheet-open"),
+    ) { DomposableText("Open long sheet") }
     SharedSlotButtons()
     DomposableCarousel(
         items =
@@ -96,6 +114,23 @@ internal fun SharedLayoutRecipe() {
                     ) { position, total -> "Page $position of $total" },
             ),
     )
+    if (longSheetOpen) {
+        DomposableBottomSheet(
+            title = "Long shared sheet",
+            onDismiss = { longSheetOpen = false },
+            layout =
+                DomposableModalLayout(
+                    maxViewportFraction = 1f,
+                    alignment = DomposableModalAlignment.BottomOnCompact,
+                ),
+        ) {
+            DomposableColumn(modifier = DomposableModifier.verticalScroll(), gap = 12.dp) {
+                repeat(24) { index ->
+                    DomposableText("Long sheet content row ${index + 1}", modifier = DomposableModifier.height(32.dp))
+                }
+            }
+        }
+    }
 }
 
 @Composable

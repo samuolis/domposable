@@ -15,24 +15,36 @@ internal fun StyleScope.modalLayout(layout: DomposableModalLayout) {
         property("height", "calc(${it * HTML_MODAL_VIEWPORT_PERCENT}vh - ${inset * 2}px)")
         property("height", "calc(${it * HTML_MODAL_VIEWPORT_PERCENT}dvh - ${inset * 2}px)")
     }
-    val viewportMax =
-        layout.maxViewportFraction?.let {
-            property(
-                "max-height",
-                "min(${it * HTML_MODAL_VIEWPORT_PERCENT}vh, calc(${HTML_MODAL_VIEWPORT_PERCENT}vh - ${inset * 2}px))",
-            )
-            "min(${it * HTML_MODAL_VIEWPORT_PERCENT}dvh, " +
-                "calc(${HTML_MODAL_VIEWPORT_PERCENT}dvh - ${inset * 2}px))"
-        }
-    val maxHeight = layout.maxHeight?.let { "${it.value}px" }
-    when {
-        viewportMax != null && maxHeight != null -> property("max-height", "min($viewportMax, $maxHeight)")
-        viewportMax != null -> property("max-height", viewportMax)
-        maxHeight != null -> property("max-height", maxHeight)
-    }
+    modalMaxHeightCss(layout, dynamicViewport = false)?.let { property("max-height", it) }
+    layout.modalMaxHeightCss()?.let { property("max-height", it) }
     when (layout.alignment) {
         DomposableModalAlignment.Center, DomposableModalAlignment.BottomOnCompact -> Unit
         DomposableModalAlignment.Bottom -> property("margin", "auto auto 0")
+    }
+}
+
+internal fun DomposableModalLayout.partialSheetMaxHeightCss(): String =
+    modalMaxHeightCss()?.let { "min(50dvh, $it)" } ?: "50dvh"
+
+internal fun DomposableModalLayout.modalMaxHeightCss(): String? = modalMaxHeightCss(this, dynamicViewport = true)
+
+private fun modalMaxHeightCss(
+    layout: DomposableModalLayout,
+    dynamicViewport: Boolean,
+): String? {
+    val inset = layout.viewportInset.value
+    val unit = if (dynamicViewport) "dvh" else "vh"
+    val viewportMax =
+        layout.maxViewportFraction?.let {
+            "min(${it * HTML_MODAL_VIEWPORT_PERCENT}$unit, " +
+                "calc(${HTML_MODAL_VIEWPORT_PERCENT}$unit - ${inset * 2}px))"
+        }
+    val maxHeight = layout.maxHeight?.let { "${it.value}px" }
+    return when {
+        viewportMax != null && maxHeight != null -> "min($viewportMax, $maxHeight)"
+        viewportMax != null -> viewportMax
+        maxHeight != null -> maxHeight
+        else -> null
     }
 }
 
