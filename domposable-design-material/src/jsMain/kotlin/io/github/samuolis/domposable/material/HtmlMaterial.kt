@@ -201,12 +201,13 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 DomposableHtmlModifiers(modifier) {
                     Div(attrs = {
                         domposableAttributes(modifier)
+                        classes("d-layout-column")
                         style {
                             property("display", "flex")
                             property("flex-direction", "column")
                             property(
                                 "row-gap",
-                                if (props.arrangement.distributesSpace()) "0px" else "${props.gap.value}px",
+                                "${props.gap.value}px",
                             )
                             property("align-items", props.alignment.css())
                             property("justify-content", props.arrangement.css())
@@ -251,7 +252,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             }
                             property(
                                 "column-gap",
-                                if (props.arrangement.distributesSpace()) "0px" else "${props.gap.value}px",
+                                "${props.gap.value}px",
                             )
                             property("align-items", if (props.stretch) "stretch" else props.alignment.css())
                             property("justify-content", props.arrangement.css())
@@ -274,7 +275,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             property("flex-wrap", "wrap")
                             property(
                                 "column-gap",
-                                if (props.arrangement.distributesSpace()) "0px" else "${props.gap.value}px",
+                                "${props.gap.value}px",
                             )
                             property("row-gap", "${props.rowGap.value}px")
                             property("justify-content", props.arrangement.css())
@@ -841,7 +842,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     ) {
                                         "none"
                                     } else {
-                                        "0 ${it.value}px ${it.value * 2f}px rgb(0 0 0 / .12)"
+                                        "var(--d-card-shadow,0 ${it.value}px ${it.value * 2f}px rgb(0 0 0 / .12))"
                                     },
                                 )
                             }
@@ -2125,7 +2126,10 @@ private fun HtmlTheme(
 internal fun InstallDomposableMaterialStyles() {
     DisposableEffect(Unit) {
         val style = document.createElement("style")
-        style.textContent = MATERIAL_CSS + MATERIAL_DEFAULTS_CSS
+        style.textContent = MATERIAL_CSS + MATERIAL_DEFAULTS_CSS +
+            HTML_RICH_CONTENT_CSS + HTML_CONTROL_SLOT_CSS + DOMPOSABLE_HTML_GEOMETRY_CSS +
+            htmlAdaptiveMediaStylesCss() + DOMPOSABLE_HTML_CHROME_SLOT_CSS + HTML_CONTENT_SLOT_CSS +
+            DOMPOSABLE_HTML_SHELL_SLOT_CSS
         document.head!!.appendChild(style)
         onDispose { style.remove() }
     }
@@ -2289,7 +2293,7 @@ private const val MATERIAL_CSS = """
 @media(prefers-reduced-motion:reduce){.d-dropdown-menu-item{transition:none}}
 @media(forced-colors:active){.d-dropdown-menu-item:focus-visible{outline:2px solid Highlight;outline-offset:-2px;box-shadow:none}.d-dropdown-menu-item[aria-checked=true]{background:Highlight;color:HighlightText;border-color:Highlight}}
 .d-menu-position{inset-block-start:16px;inset-inline-end:16px;max-width:calc(100vw - 32px);overflow:visible}
-.d-menu-popup{background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:112px;max-width:min(280px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));box-shadow:0 4px 12px rgb(0 0 0 / .2)}
+.d-menu-popup{background:var(--d-surface-container,var(--d-surface));color:var(--d-on-surface);display:flex;flex-direction:column;box-sizing:border-box;width:100%;min-width:112px;max-width:var(--d-menu-max-width,min(280px,calc(100vw - 32px)));max-height:calc(100vh - 32px);overflow:auto;padding:8px;border-radius:var(--d-shape-small,var(--d-radius));box-shadow:var(--d-menu-shadow,0 4px 12px rgb(0 0 0 / .2))}
 .d-chip.d-item-hittarget .d-chip-surface,.d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,0));border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,0));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,0));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,0))}
 .d-segment:first-child .d-segment-surface{border-start-start-radius:var(--d-item-radius-start-start,var(--d-item-radius,var(--d-radius)));border-end-start-radius:var(--d-item-radius-end-start,var(--d-item-radius,var(--d-radius)))}.d-segment:last-child .d-segment-surface{border-start-end-radius:var(--d-item-radius-start-end,var(--d-item-radius,var(--d-radius)));border-end-end-radius:var(--d-item-radius-end-end,var(--d-item-radius,var(--d-radius)))}
 .d-snackbar-host>.d-snackbar-message{max-width:min(720px,100%);min-height:48px;box-shadow:0 3px 8px rgb(0 0 0 / .24);pointer-events:auto}

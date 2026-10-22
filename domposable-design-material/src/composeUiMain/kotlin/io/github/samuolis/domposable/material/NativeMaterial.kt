@@ -158,26 +158,6 @@ private fun DomposableAlignment.vertical() =
         DomposableAlignment.End -> Alignment.Bottom
     }
 
-private fun DomposableArrangement.horizontal(gap: Dp): Arrangement.Horizontal =
-    when (this) {
-        DomposableArrangement.Start -> Arrangement.spacedBy(gap)
-        DomposableArrangement.Center -> Arrangement.spacedBy(gap, Alignment.CenterHorizontally)
-        DomposableArrangement.End -> Arrangement.spacedBy(gap, Alignment.End)
-        DomposableArrangement.SpaceBetween -> Arrangement.SpaceBetween
-        DomposableArrangement.SpaceAround -> Arrangement.SpaceAround
-        DomposableArrangement.SpaceEvenly -> Arrangement.SpaceEvenly
-    }
-
-private fun DomposableArrangement.vertical(gap: Dp): Arrangement.Vertical =
-    when (this) {
-        DomposableArrangement.Start -> Arrangement.spacedBy(gap)
-        DomposableArrangement.Center -> Arrangement.spacedBy(gap, Alignment.CenterVertically)
-        DomposableArrangement.End -> Arrangement.spacedBy(gap, Alignment.Bottom)
-        DomposableArrangement.SpaceBetween -> Arrangement.SpaceBetween
-        DomposableArrangement.SpaceAround -> Arrangement.SpaceAround
-        DomposableArrangement.SpaceEvenly -> Arrangement.SpaceEvenly
-    }
-
 private fun DomposableAlignment.box(vertical: DomposableAlignment): Alignment =
     when (vertical) {
         DomposableAlignment.Start -> {
