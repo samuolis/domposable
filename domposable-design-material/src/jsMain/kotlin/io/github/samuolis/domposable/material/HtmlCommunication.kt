@@ -100,6 +100,7 @@ internal fun HtmlSnackbarHost(
 ) {
     val data = props.state.currentSnackbarData
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.snackbar
+    val snackbarContent = props.snackbarContent
     val timeout =
         when (data?.duration) {
             DomposableSnackbarDuration.Short -> 4_000L
@@ -151,16 +152,20 @@ internal fun HtmlSnackbarHost(
             onMouseLeave { hovered = false }
         }) {
             if (data != null) {
-                HtmlSnackbar(
-                    DomposableSnackbarProps(
-                        message = data.message,
-                        actionLabel = data.actionLabel,
-                        onAction = data.actionLabel?.let { { data.performAction() } },
-                        onDismiss = if (data.withDismissAction) ({ data.dismiss() }) else null,
-                        appearance = appearance,
-                    ),
-                    DomposableModifier,
-                )
+                if (snackbarContent != null) {
+                    snackbarContent(data)
+                } else {
+                    HtmlSnackbar(
+                        DomposableSnackbarProps(
+                            message = data.message,
+                            actionLabel = data.actionLabel,
+                            onAction = data.actionLabel?.let { { data.performAction() } },
+                            onDismiss = if (data.withDismissAction) ({ data.dismiss() }) else null,
+                            appearance = appearance,
+                        ),
+                        DomposableModifier,
+                    )
+                }
             }
         }
     }

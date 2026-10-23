@@ -90,6 +90,7 @@ internal fun NativeDialog(
             DomposableDialogVariant.Alert -> {
                 AlertDialog(
                     onDismissRequest = props.onDismiss,
+                    properties = dialogProperties(props),
                     confirmButton = confirm,
                     dismissButton = close,
                     title = title,
@@ -110,6 +111,7 @@ internal fun NativeDialog(
             DomposableDialogVariant.DatePicker -> {
                 DatePickerDialog(
                     onDismissRequest = props.onDismiss,
+                    properties = dialogProperties(props),
                     confirmButton = confirm,
                     dismissButton = close,
                     modifier = modifier.toComposeModifier().modalLayout(props.layout),
@@ -129,6 +131,7 @@ internal fun NativeDialog(
             DomposableDialogVariant.TimePicker -> {
                 TimePickerDialog(
                     onDismissRequest = props.onDismiss,
+                    properties = dialogProperties(props),
                     confirmButton = confirm,
                     dismissButton = close,
                     title = title,
@@ -152,7 +155,8 @@ internal fun NativeDialog(
                             },
                         ),
                     properties =
-                        DialogProperties(
+                        dialogProperties(
+                            props,
                             usePlatformDefaultWidth =
                                 props.variant != DomposableDialogVariant.FullScreen,
                         ),
@@ -192,6 +196,15 @@ internal fun NativeDialog(
         }
     }
 }
+
+private fun dialogProperties(
+    props: DomposableDialogProps,
+    usePlatformDefaultWidth: Boolean = true,
+) = DialogProperties(
+    usePlatformDefaultWidth = usePlatformDefaultWidth,
+    dismissOnBackPress = props.dismissOnBackPress,
+    dismissOnClickOutside = props.dismissOnClickOutside,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

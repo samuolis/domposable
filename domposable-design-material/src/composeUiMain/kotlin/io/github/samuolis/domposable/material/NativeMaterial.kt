@@ -237,7 +237,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val colors = props.tokens.colors
                 val type = props.tokens.typography
                 val colorScheme = colors.nativeMaterialColorScheme()
-                val typography = type.nativeTypography(MaterialTheme.typography)
+                val typography =
+                    type.nativeTypography(LocalDomposableNativeTypography.current ?: MaterialTheme.typography)
                 val shapes = props.tokens.shapes.nativeShapes(MaterialTheme.shapes)
                 if (props.tokens.designLanguage ==
                     io.github.samuolis.domposable.foundation.DomposableDesignLanguage.Expressive
@@ -397,37 +398,21 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                         DomposableTextStyle.Inherit -> LocalTextStyle.current
                     }
                 val style = appearance.nativeTextStyle(baseStyle)
-                val textModifier =
-                    modifier.toComposeModifier().semantics {
-                        if (props.headingLevel !=
-                            null ||
-                            props.style == DomposableTextStyle.Title
-                        ) {
-                            heading()
-                        }
-                        appearance.liveRegion?.let { liveRegion = it.native() }
-                    }
-
-                val renderText: @Composable () -> Unit = {
-                    Text(
+                DomposableText(
+                    text =
                         props.annotatedText(
-                            if (style.color ==
-                                Color.Unspecified
-                            ) {
+                            if (style.color == Color.Unspecified) {
                                 androidx.compose.material3.LocalContentColor.current
                             } else {
                                 style.color
                             },
                         ),
-                        textModifier,
-                        color = props.color?.let { Color(it.argb) } ?: Color.Unspecified,
-                        style = style,
-                        minLines = appearance.minLines,
-                        maxLines = appearance.maxLines ?: Int.MAX_VALUE,
-                        overflow = appearance.overflow.nativeOverflow(),
-                    )
-                }
-                if (appearance.selectable == true) SelectionContainer { renderText() } else renderText()
+                    modifier = modifier,
+                    style = props.style,
+                    color = props.color,
+                    headingLevel = props.headingLevel,
+                    appearance = appearance,
+                )
             },
             button = { props, modifier, content -> NativeButton(props, modifier, content) },
             iconButton = { props, modifier, content ->
@@ -453,8 +438,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 val appearance = props.colors ?: LocalDomposableTokens.current.components.slider
                 val sliderModifier =
                     modifier.toComposeModifier().materialKeyboardFocusRing().semantics {
-                        contentDescription =
-                            props.label
+                        if (props.label.isNotBlank()) contentDescription = props.label
                     }
                 if (props.orientation == DomposableOrientation.Vertical) {
                     val state =

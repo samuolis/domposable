@@ -178,8 +178,8 @@ fun DomposableLazyGrid(
 @Composable
 fun DomposableSwitch(
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    label: String,
+    onCheckedChange: ((Boolean) -> Unit)?,
+    label: String = "",
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
     appearance: DomposableSwitchAppearance? = null,
@@ -203,8 +203,8 @@ fun DomposableSwitch(
 @Composable
 fun DomposableRadioButton(
     selected: Boolean,
-    onClick: () -> Unit,
-    label: String,
+    onClick: (() -> Unit)?,
+    label: String = "",
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
     appearance: DomposableRadioButtonAppearance? = null,
@@ -508,6 +508,8 @@ fun DomposableDialog(
     variant: DomposableDialogVariant = DomposableDialogVariant.Alert,
     headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
     layout: DomposableModalLayout = DomposableModalLayout(),
+    dismissOnBackPress: Boolean = true,
+    dismissOnClickOutside: Boolean = true,
     content: @Composable () -> Unit,
 ) = DomposableDialog(
     DomposableDialogProps(
@@ -518,6 +520,8 @@ fun DomposableDialog(
         variant = variant,
         headerContent = headerContent,
         layout = layout,
+        dismissOnBackPress = dismissOnBackPress,
+        dismissOnClickOutside = dismissOnClickOutside,
     ),
     modifier,
     content,
@@ -557,6 +561,9 @@ fun DomposableTopAppBar(
     appearance: DomposableSurfaceAppearance? = null,
     variant: DomposableTopAppBarVariant = DomposableTopAppBarVariant.Small,
     subtitle: String? = null,
+    titleContent: (@Composable () -> Unit)? = null,
+    expandedHeight: io.github.samuolis.domposable.foundation.DomposableLength? = null,
+    windowInsets: io.github.samuolis.domposable.foundation.DomposableInsets? = null,
 ) = DomposableTopAppBar(
     DomposableTopAppBarProps(
         title,
@@ -565,6 +572,9 @@ fun DomposableTopAppBar(
         appearance = appearance,
         variant = variant,
         subtitle = subtitle,
+        titleContent = titleContent,
+        expandedHeight = expandedHeight,
+        windowInsets = windowInsets,
     ),
     modifier,
 )

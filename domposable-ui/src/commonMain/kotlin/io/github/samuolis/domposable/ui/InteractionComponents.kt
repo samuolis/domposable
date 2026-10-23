@@ -123,9 +123,21 @@ data class DomposablePullToRefreshProps(
     val label: String = "Refresh",
     val threshold: DomposableLength = 80.dp,
     val appearance: DomposableProgressAppearance? = null,
+    val indicatorContent: (@Composable (DomposablePullToRefreshState) -> Unit)? = null,
 ) {
     init {
         require(threshold.value > 0f)
+    }
+}
+
+/** Shared pull progress for custom indicators; progress is clamped to 0..1. */
+@Immutable
+data class DomposablePullToRefreshState(
+    val progress: Float,
+    val refreshing: Boolean,
+) {
+    init {
+        require(progress.isFinite() && progress in 0f..1f)
     }
 }
 
@@ -139,9 +151,10 @@ fun DomposablePullToRefresh(
     threshold: DomposableLength = 80.dp,
     appearance: DomposableProgressAppearance? = null,
     modifier: DomposableModifier = DomposableModifier,
+    indicatorContent: (@Composable (DomposablePullToRefreshState) -> Unit)? = null,
     content: @Composable () -> Unit,
 ) = DomposablePullToRefresh(
-    DomposablePullToRefreshProps(refreshing, onRefresh, enabled, label, threshold, appearance),
+    DomposablePullToRefreshProps(refreshing, onRefresh, enabled, label, threshold, appearance, indicatorContent),
     modifier,
     content,
 )

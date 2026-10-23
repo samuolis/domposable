@@ -68,6 +68,7 @@ import kotlinx.coroutines.flow.drop
 internal fun NativeTextField(
     props: DomposableTextFieldProps,
     modifier: DomposableModifier,
+    nativeOptions: DomposableNativeTextFieldOptions? = null,
 ) {
     if (props.purpose == DomposableInputPurpose.Password) {
         DisposableEffect(Unit) { onDispose(protectPasswordBackingInput()) }
@@ -182,40 +183,43 @@ internal fun NativeTextField(
             }
         }
     val keyboardOptions =
-        KeyboardOptions(
-            keyboardType =
-                when (props.purpose) {
-                    DomposableInputPurpose.Email -> KeyboardType.Email
-                    DomposableInputPurpose.Password -> KeyboardType.Password
-                    DomposableInputPurpose.Number, DomposableInputPurpose.OneTimeCode -> KeyboardType.Number
-                    DomposableInputPurpose.Phone -> KeyboardType.Phone
-                    DomposableInputPurpose.Decimal -> KeyboardType.Decimal
-                    else -> KeyboardType.Text
-                },
-            imeAction = props.imeAction.native(),
-        )
-    val keyboardActions =
-        if (submit == null) {
-            KeyboardActions.Default
-        } else {
-            KeyboardActions(
-                onDone = { submit() },
-                onGo = { submit() },
-                onSearch = { submit() },
-                onSend = { submit() },
+        nativeOptions?.keyboardOptions
+            ?: KeyboardOptions(
+                keyboardType =
+                    when (props.purpose) {
+                        DomposableInputPurpose.Email -> KeyboardType.Email
+                        DomposableInputPurpose.Password -> KeyboardType.Password
+                        DomposableInputPurpose.Number, DomposableInputPurpose.OneTimeCode -> KeyboardType.Number
+                        DomposableInputPurpose.Phone -> KeyboardType.Phone
+                        DomposableInputPurpose.Decimal -> KeyboardType.Decimal
+                        else -> KeyboardType.Text
+                    },
+                imeAction = props.imeAction.native(),
             )
-        }
+    val keyboardActions =
+        nativeOptions?.keyboardActions
+            ?: if (submit == null) {
+                KeyboardActions.Default
+            } else {
+                KeyboardActions(
+                    onDone = { submit() },
+                    onGo = { submit() },
+                    onSearch = { submit() },
+                    onSend = { submit() },
+                )
+            }
     val visualTransformation =
-        if (props.purpose == DomposableInputPurpose.Password && !props.passwordVisible) {
-            PasswordVisualTransformation()
-        } else {
-            VisualTransformation.None
-        }
+        nativeOptions?.visualTransformation
+            ?: if (props.purpose == DomposableInputPurpose.Password && !props.passwordVisible) {
+                PasswordVisualTransformation()
+            } else {
+                VisualTransformation.None
+            }
     val customNativeDecoration =
         appearance.contentPadding != null || appearance.outlineWidth != null || appearance.focusedOutlineWidth != null
     val securePassword =
         props.purpose == DomposableInputPurpose.Password && props.singleLine && !props.readOnly &&
-            !customNativeDecoration
+            !customNativeDecoration && nativeOptions == null
     if (securePassword) {
         val secureState = remember { TextFieldState(props.value) }
         val currentValue by rememberUpdatedState(props.value)

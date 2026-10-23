@@ -1,5 +1,6 @@
 // Klib ABI Dump
 // Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Alias: ios => [iosArm64, iosSimulatorArm64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -9,6 +10,47 @@
 final fun io.github.samuolis.domposable.material/DomposableMaterialTheme(io.github.samuolis.domposable.foundation/DomposableTokens?, io.github.samuolis.domposable.foundation/DomposableColors?, io.github.samuolis.domposable.foundation/DomposableTypography?, io.github.samuolis.domposable.foundation/DomposableShapes?, io.github.samuolis.domposable.foundation/DomposableComponentStyles?, io.github.samuolis.domposable.foundation/DomposableDesignLanguage?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.material/DomposableMaterialTheme|DomposableMaterialTheme(io.github.samuolis.domposable.foundation.DomposableTokens?;io.github.samuolis.domposable.foundation.DomposableColors?;io.github.samuolis.domposable.foundation.DomposableTypography?;io.github.samuolis.domposable.foundation.DomposableShapes?;io.github.samuolis.domposable.foundation.DomposableComponentStyles?;io.github.samuolis.domposable.foundation.DomposableDesignLanguage?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
 final fun io.github.samuolis.domposable.material/ProvideDomposableMaterialComponents(io.github.samuolis.domposable.foundation/DomposableTokens, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.samuolis.domposable.material/ProvideDomposableMaterialComponents|ProvideDomposableMaterialComponents(io.github.samuolis.domposable.foundation.DomposableTokens;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int){}[0]
 final fun io.github.samuolis.domposable.material/rememberDomposableMaterialComponents(androidx.compose.runtime/Composer?, kotlin/Int): io.github.samuolis.domposable.ui/DomposableComponents // io.github.samuolis.domposable.material/rememberDomposableMaterialComponents|rememberDomposableMaterialComponents(androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+
+// Targets: [ios, wasmJs]
+final class io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions { // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions|null[0]
+    constructor <init>(androidx.compose.foundation.text/KeyboardOptions? = ..., androidx.compose.foundation.text/KeyboardActions? = ..., androidx.compose.ui.text.input/VisualTransformation? = ...) // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.<init>|<init>(androidx.compose.foundation.text.KeyboardOptions?;androidx.compose.foundation.text.KeyboardActions?;androidx.compose.ui.text.input.VisualTransformation?){}[0]
+
+    final val keyboardActions // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.keyboardActions|{}keyboardActions[0]
+        final fun <get-keyboardActions>(): androidx.compose.foundation.text/KeyboardActions? // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.keyboardActions.<get-keyboardActions>|<get-keyboardActions>(){}[0]
+    final val keyboardOptions // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.keyboardOptions|{}keyboardOptions[0]
+        final fun <get-keyboardOptions>(): androidx.compose.foundation.text/KeyboardOptions? // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.keyboardOptions.<get-keyboardOptions>|<get-keyboardOptions>(){}[0]
+    final val visualTransformation // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.visualTransformation|{}visualTransformation[0]
+        final fun <get-visualTransformation>(): androidx.compose.ui.text.input/VisualTransformation? // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.visualTransformation.<get-visualTransformation>|<get-visualTransformation>(){}[0]
+
+    final fun component1(): androidx.compose.foundation.text/KeyboardOptions? // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.component1|component1(){}[0]
+    final fun component2(): androidx.compose.foundation.text/KeyboardActions? // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.component2|component2(){}[0]
+    final fun component3(): androidx.compose.ui.text.input/VisualTransformation? // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.component3|component3(){}[0]
+    final fun copy(androidx.compose.foundation.text/KeyboardOptions? = ..., androidx.compose.foundation.text/KeyboardActions? = ..., androidx.compose.ui.text.input/VisualTransformation? = ...): io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.copy|copy(androidx.compose.foundation.text.KeyboardOptions?;androidx.compose.foundation.text.KeyboardActions?;androidx.compose.ui.text.input.VisualTransformation?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions.toString|toString(){}[0]
+}
+
+// Targets: [ios, wasmJs]
+final val io.github.samuolis.domposable.material/io_github_samuolis_domposable_material_DomposableNativeTextFieldOptions$stableprop // io.github.samuolis.domposable.material/io_github_samuolis_domposable_material_DomposableNativeTextFieldOptions$stableprop|#static{}io_github_samuolis_domposable_material_DomposableNativeTextFieldOptions$stableprop[0]
+
+// Targets: [ios, wasmJs]
+final fun io.github.samuolis.domposable.material/DomposableIcon(androidx.compose.ui.graphics.painter/Painter, kotlin/String?, io.github.samuolis.domposable.ui/DomposableModifier?, io.github.samuolis.domposable.foundation/DomposableIconAppearance?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.material/DomposableIcon|DomposableIcon(androidx.compose.ui.graphics.painter.Painter;kotlin.String?;io.github.samuolis.domposable.ui.DomposableModifier?;io.github.samuolis.domposable.foundation.DomposableIconAppearance?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [ios, wasmJs]
+final fun io.github.samuolis.domposable.material/DomposableIcon(androidx.compose.ui.graphics.vector/ImageVector, kotlin/String?, io.github.samuolis.domposable.ui/DomposableModifier?, io.github.samuolis.domposable.foundation/DomposableIconAppearance?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.material/DomposableIcon|DomposableIcon(androidx.compose.ui.graphics.vector.ImageVector;kotlin.String?;io.github.samuolis.domposable.ui.DomposableModifier?;io.github.samuolis.domposable.foundation.DomposableIconAppearance?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [ios, wasmJs]
+final fun io.github.samuolis.domposable.material/DomposableMaterialTheme(androidx.compose.material3/Typography, io.github.samuolis.domposable.foundation/DomposableTokens?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.material/DomposableMaterialTheme|DomposableMaterialTheme(androidx.compose.material3.Typography;io.github.samuolis.domposable.foundation.DomposableTokens?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [ios, wasmJs]
+final fun io.github.samuolis.domposable.material/DomposableText(androidx.compose.ui.text/AnnotatedString, io.github.samuolis.domposable.ui/DomposableModifier?, io.github.samuolis.domposable.foundation/DomposableTextStyle?, io.github.samuolis.domposable.foundation/DomposableColor?, kotlin/Int?, io.github.samuolis.domposable.foundation/DomposableTextAppearance?, kotlin/Function1<androidx.compose.ui.text/TextLayoutResult, kotlin/Unit>?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.material/DomposableText|DomposableText(androidx.compose.ui.text.AnnotatedString;io.github.samuolis.domposable.ui.DomposableModifier?;io.github.samuolis.domposable.foundation.DomposableTextStyle?;io.github.samuolis.domposable.foundation.DomposableColor?;kotlin.Int?;io.github.samuolis.domposable.foundation.DomposableTextAppearance?;kotlin.Function1<androidx.compose.ui.text.TextLayoutResult,kotlin.Unit>?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [ios, wasmJs]
+final fun io.github.samuolis.domposable.material/DomposableTextField(io.github.samuolis.domposable.ui/DomposableTextFieldProps, io.github.samuolis.domposable.material/DomposableNativeTextFieldOptions, io.github.samuolis.domposable.ui/DomposableModifier?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.material/DomposableTextField|DomposableTextField(io.github.samuolis.domposable.ui.DomposableTextFieldProps;io.github.samuolis.domposable.material.DomposableNativeTextFieldOptions;io.github.samuolis.domposable.ui.DomposableModifier?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+
+// Targets: [ios, wasmJs]
+final fun io.github.samuolis.domposable.material/io_github_samuolis_domposable_material_DomposableNativeTextFieldOptions$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.material/io_github_samuolis_domposable_material_DomposableNativeTextFieldOptions$stableprop_getter|io_github_samuolis_domposable_material_DomposableNativeTextFieldOptions$stableprop_getter(){}[0]
 
 // Targets: [js]
 final fun (org.jetbrains.compose.web.attributes/AttrsScope<*>).io.github.samuolis.domposable.material/domposableTextAppearance(io.github.samuolis.domposable.foundation/DomposableTextAppearance) // io.github.samuolis.domposable.material/domposableTextAppearance|domposableTextAppearance@org.jetbrains.compose.web.attributes.AttrsScope<*>(io.github.samuolis.domposable.foundation.DomposableTextAppearance){}[0]

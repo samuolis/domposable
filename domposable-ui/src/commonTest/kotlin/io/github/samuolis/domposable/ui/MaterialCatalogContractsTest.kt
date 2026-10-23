@@ -63,6 +63,26 @@ class MaterialCatalogContractsTest {
     }
 
     @Test
+    fun appBarCustomSlotsMustMatchUniqueActionKeys() {
+        val action = DomposableActionItem("save", "Save", {})
+        val content = DomposableAppBarItemContent("save", {})
+        assertEquals(
+            listOf(content),
+            DomposableAppBarProps(listOf(action), "Actions", customItems = listOf(content)).customItems,
+        )
+        assertFailsWith<IllegalArgumentException> {
+            DomposableAppBarProps(listOf(action), "Actions", customItems = listOf(content, content))
+        }
+        assertFailsWith<IllegalArgumentException> {
+            DomposableAppBarProps(
+                listOf(action),
+                "Actions",
+                customItems = listOf(DomposableAppBarItemContent("missing", {})),
+            )
+        }
+    }
+
+    @Test
     fun multiSelectionRejectsMissingIndicesAndMalformedInventory() {
         assertFailsWith<IllegalArgumentException> {
             DomposableMultiChoiceSegmentedButtonsProps(listOf("A"), setOf(1), {}, "Choices")

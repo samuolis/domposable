@@ -5,6 +5,7 @@ import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableComponent
+import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableOrientation
@@ -150,7 +151,12 @@ data class DomposableFloatingToolbarProps(
     val trailingContent: @Composable () -> Unit = {},
     val floatingAction: @Composable () -> Unit = {},
     val appearance: DomposableSurfaceAppearance? = null,
+    val variant: DomposableFloatingToolbarVariant = DomposableFloatingToolbarVariant.Standard,
+    val contentPadding: DomposableInsets = DomposableInsets(8.dp),
 )
+
+/** Standard Material toolbar colors or the high-emphasis expressive treatment. */
+enum class DomposableFloatingToolbarVariant { Standard, Vibrant }
 
 @Composable
 @Suppress("LongParameterList")
@@ -162,9 +168,20 @@ fun DomposableFloatingToolbar(
     floatingAction: @Composable () -> Unit = {},
     appearance: DomposableSurfaceAppearance? = null,
     modifier: DomposableModifier = DomposableModifier,
+    variant: DomposableFloatingToolbarVariant = DomposableFloatingToolbarVariant.Standard,
+    contentPadding: DomposableInsets = DomposableInsets(8.dp),
     content: @Composable () -> Unit,
 ) = DomposableFloatingToolbar(
-    DomposableFloatingToolbarProps(expanded, orientation, leadingContent, trailingContent, floatingAction, appearance),
+    DomposableFloatingToolbarProps(
+        expanded,
+        orientation,
+        leadingContent,
+        trailingContent,
+        floatingAction,
+        appearance,
+        variant,
+        contentPadding,
+    ),
     modifier,
     content,
 )

@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import io.github.samuolis.domposable.foundation.DomposableButtonAppearance
 import io.github.samuolis.domposable.foundation.DomposableComponent
 import io.github.samuolis.domposable.foundation.DomposableFabSize
+import io.github.samuolis.domposable.foundation.DomposableInsets
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
+import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.foundation.DomposableSliderColors
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant
@@ -24,6 +26,9 @@ data class DomposableTopAppBarProps(
     val appearance: DomposableSurfaceAppearance? = null,
     val variant: DomposableTopAppBarVariant = DomposableTopAppBarVariant.Small,
     val subtitle: String? = null,
+    val titleContent: (@Composable () -> Unit)? = null,
+    val expandedHeight: DomposableLength? = null,
+    val windowInsets: DomposableInsets? = null,
 )
 
 @DomposableComponent("FloatingActionButton")

@@ -79,6 +79,7 @@ fun rememberDomposableSnackbarHostState(): DomposableSnackbarHostState = remembe
 data class DomposableSnackbarHostProps(
     val state: DomposableSnackbarHostState,
     val appearance: DomposableSurfaceAppearance? = null,
+    val snackbarContent: (@Composable (DomposableSnackbarData) -> Unit)? = null,
 )
 
 @Composable
@@ -86,7 +87,8 @@ fun DomposableSnackbarHost(
     state: DomposableSnackbarHostState,
     modifier: DomposableModifier = DomposableModifier,
     appearance: DomposableSurfaceAppearance? = null,
-) = DomposableSnackbarHost(DomposableSnackbarHostProps(state, appearance), modifier)
+    snackbarContent: (@Composable (DomposableSnackbarData) -> Unit)? = null,
+) = DomposableSnackbarHost(DomposableSnackbarHostProps(state, appearance, snackbarContent), modifier)
 
 @DomposableComponent("BadgedBox")
 data class DomposableBadgedBoxProps(
