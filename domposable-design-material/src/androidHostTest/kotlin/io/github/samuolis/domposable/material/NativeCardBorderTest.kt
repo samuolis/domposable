@@ -14,11 +14,14 @@ import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableCard
+import io.github.samuolis.domposable.ui.DomposableColumn
 import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.DomposableRow
 import io.github.samuolis.domposable.ui.DomposableSurface
 import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.size
 import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.width
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +35,40 @@ import kotlin.test.assertEquals
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeCardBorderTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun paddedCardsWrapTheirChildrenAndStackThemWithoutOverlappingRowSiblings() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableColumn {
+                    DomposableCardVariant.entries.forEach { variant ->
+                        DomposableRow(modifier = DomposableModifier.width(300.dp)) {
+                            DomposableCard(
+                                modifier = DomposableModifier.testId("card-$variant"),
+                                variant = variant,
+                                contentPadding = DomposableInsets(8.dp),
+                            ) {
+                                DomposableBox(DomposableModifier.size(40.dp).testId("first-$variant")) {}
+                                DomposableBox(DomposableModifier.size(40.dp).testId("second-$variant")) {}
+                            }
+                            DomposableBox(DomposableModifier.size(40.dp).testId("sibling-$variant")) {}
+                        }
+                    }
+                }
+            }
+        }
+        DomposableCardVariant.entries.forEach { variant ->
+            val card = compose.onNodeWithTag("card-$variant").fetchSemanticsNode().boundsInRoot
+            val first = compose.onNodeWithTag("first-$variant").fetchSemanticsNode().boundsInRoot
+            val second = compose.onNodeWithTag("second-$variant").fetchSemanticsNode().boundsInRoot
+            val sibling = compose.onNodeWithTag("sibling-$variant").fetchSemanticsNode().boundsInRoot
+            assertEquals(56f, card.width, absoluteTolerance = 0.5f)
+            assertEquals(96f, card.height, absoluteTolerance = 0.5f)
+            assertEquals(first.bottom, second.top, absoluteTolerance = 0.5f)
+            assertEquals(card.right, sibling.left, absoluteTolerance = 0.5f)
+            assertEquals(40f, sibling.width, absoluteTolerance = 0.5f)
+        }
+    }
 
     @Test
     @SdkSuppress(minSdkVersion = 26)

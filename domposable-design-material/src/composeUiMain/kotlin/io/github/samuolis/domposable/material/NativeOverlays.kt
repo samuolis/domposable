@@ -242,6 +242,8 @@ internal fun NativeBottomSheet(
                 if (props.headerContent == null) TextButton(props.onDismiss) { Text("Close") }
             }
         }
+        // Material positions and clips its own Surface. Clipping the caller modifier
+        // would clip the translated sheet against its original, unshifted bounds.
         if (props.modal) {
             val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = props.skipPartiallyExpanded)
             ModalBottomSheet(
@@ -249,10 +251,7 @@ internal fun NativeBottomSheet(
                 onDismissRequest = props.onDismiss,
                 sheetGesturesEnabled = props.layout.swipeToDismiss,
                 modifier =
-                    modifier
-                        .toComposeModifier()
-                        .then(Modifier.nativeModifier(appearance, shape))
-                        .modalLayout(props.layout),
+                    modifier.toComposeModifier().modalLayout(props.layout),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,
@@ -265,10 +264,7 @@ internal fun NativeBottomSheet(
                 onDismissRequest = props.onDismiss,
                 gesturesEnabled = props.layout.swipeToDismiss,
                 modifier =
-                    modifier
-                        .toComposeModifier()
-                        .then(Modifier.nativeModifier(appearance, shape))
-                        .modalLayout(props.layout),
+                    modifier.toComposeModifier().modalLayout(props.layout),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,

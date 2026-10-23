@@ -12,18 +12,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.window.DialogWindowProvider
+import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableBottomSheet
+import io.github.samuolis.domposable.ui.DomposableBox
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
 import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTheme
+import io.github.samuolis.domposable.ui.fillMaxSize
 import io.github.samuolis.domposable.ui.testId
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +45,34 @@ import kotlin.test.assertTrue
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeModalHeaderTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun modalSheetContentRemainsVisibleAfterMaterialPositionsIt() = assertPositionedSheet(modal = true)
+
+    @Test
+    fun persistentSheetContentRemainsVisibleAfterMaterialPositionsIt() = assertPositionedSheet(modal = false)
+
+    private fun assertPositionedSheet(modal: Boolean) {
+        val clicks = mutableIntStateOf(0)
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableBox(DomposableModifier.fillMaxSize()) {
+                    DomposableBottomSheet(
+                        title = "Sheet heading",
+                        onDismiss = {},
+                        modal = modal,
+                        skipPartiallyExpanded = true,
+                        appearance = DomposableSurfaceAppearance(border = DomposableColor(0), borderWidth = 0.dp),
+                    ) {
+                        TextButton(onClick = { clicks.intValue++ }) { Text("Sheet action") }
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("Sheet heading").assertIsDisplayed()
+        compose.onNodeWithText("Sheet action").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals(1, clicks.intValue) }
+    }
 
     @Test
     fun customDialogHeaderReplacesDefaultTitleAndCloseControl() {
