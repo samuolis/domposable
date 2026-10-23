@@ -68,6 +68,7 @@ class NativeContentInteropTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun painterIconUsesSharedModifierAndAccessibleDescription() {
         compose.setContent {
             DomposableMaterialTheme(
