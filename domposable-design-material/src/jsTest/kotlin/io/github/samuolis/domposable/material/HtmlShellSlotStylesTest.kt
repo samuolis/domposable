@@ -23,7 +23,10 @@ class HtmlShellSlotStylesTest {
             link.focus()
             val bounds = link.getBoundingClientRect()
             assertTrue(bounds.top >= 0)
-            assertEquals(link, document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2))
+            assertEquals(
+                link,
+                document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2),
+            )
         } finally {
             composition.dispose()
             root.parentNode?.removeChild(root)
