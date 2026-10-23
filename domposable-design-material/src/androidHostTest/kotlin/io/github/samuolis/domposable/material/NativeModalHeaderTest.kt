@@ -1,5 +1,8 @@
 package io.github.samuolis.domposable.material
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
@@ -20,6 +23,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.window.DialogWindowProvider
 import io.github.samuolis.domposable.foundation.DomposableColor
+import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableBottomSheet
@@ -54,6 +58,7 @@ class NativeModalHeaderTest {
 
     private fun assertPositionedSheet(modal: Boolean) {
         val clicks = mutableIntStateOf(0)
+        lateinit var sheetView: View
         compose.setContent {
             DomposableMaterialTheme {
                 DomposableBox(DomposableModifier.fillMaxSize()) {
@@ -61,9 +66,18 @@ class NativeModalHeaderTest {
                         title = "Sheet heading",
                         onDismiss = {},
                         modal = modal,
+                        modifier = DomposableModifier.testId("styled-sheet"),
                         skipPartiallyExpanded = true,
-                        appearance = DomposableSurfaceAppearance(border = DomposableColor(0), borderWidth = 0.dp),
+                        appearance =
+                            DomposableSurfaceAppearance(
+                                border = DomposableColor(0xFFFF0000),
+                                borderWidth = 4.dp,
+                                shape = DomposableShape.Rectangle,
+                                shadowElevation = 8.dp,
+                            ),
                     ) {
+                        val view = LocalView.current
+                        SideEffect { sheetView = view.rootView }
                         TextButton(onClick = { clicks.intValue++ }) { Text("Sheet action") }
                     }
                 }
@@ -72,6 +86,17 @@ class NativeModalHeaderTest {
         compose.onNodeWithText("Sheet heading").assertIsDisplayed()
         compose.onNodeWithText("Sheet action").assertIsDisplayed().performClick()
         compose.runOnIdle { assertEquals(1, clicks.intValue) }
+        val heading = compose.onNodeWithText("Sheet heading").fetchSemanticsNode().boundsInRoot
+        compose.runOnIdle {
+            val pixels = Bitmap.createBitmap(sheetView.width, sheetView.height, Bitmap.Config.ARGB_8888)
+            sheetView.draw(Canvas(pixels))
+            val redRows =
+                (0 until pixels.height).filter { y ->
+                    (0 until pixels.width).any { x -> pixels.getPixel(x, y) == 0xFFFF0000.toInt() }
+                }
+            assertTrue(heading.center.y.toInt() in redRows, "The border must follow the visible sheet content")
+            assertTrue(redRows.first() > pixels.height / 2, "The border must not stay at the unshifted origin")
+        }
     }
 
     @Test
