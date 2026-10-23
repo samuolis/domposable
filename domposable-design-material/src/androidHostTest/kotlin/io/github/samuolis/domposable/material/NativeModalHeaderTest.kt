@@ -1,6 +1,5 @@
 package io.github.samuolis.domposable.material
 
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -22,6 +21,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.get
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
@@ -88,11 +89,11 @@ class NativeModalHeaderTest {
         compose.runOnIdle { assertEquals(1, clicks.intValue) }
         val heading = compose.onNodeWithText("Sheet heading").fetchSemanticsNode().boundsInRoot
         compose.runOnIdle {
-            val pixels = Bitmap.createBitmap(sheetView.width, sheetView.height, Bitmap.Config.ARGB_8888)
+            val pixels = createBitmap(sheetView.width, sheetView.height)
             sheetView.draw(Canvas(pixels))
             val redRows =
                 (0 until pixels.height).filter { y ->
-                    (0 until pixels.width).any { x -> pixels.getPixel(x, y) == 0xFFFF0000.toInt() }
+                    (0 until pixels.width).any { x -> pixels[x, y] == 0xFFFF0000.toInt() }
                 }
             assertTrue(heading.center.y.toInt() in redRows, "The border must follow the visible sheet content")
             assertTrue(redRows.first() > pixels.height / 2, "The border must not stay at the unshifted origin")
