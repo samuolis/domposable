@@ -104,12 +104,14 @@ internal fun NativeAppBar(
         Box(Modifier.semantics { contentDescription = props.overflowLabel }) { AppBarOverflowIndicator(it) }
     }
     val addItems: AppBarScope.() -> Unit = {
-        props.items.forEach { item ->
+        props.items.forEachIndexed { index, item ->
             val custom = customItems[item.key]
             customItem(
                 appbarContent = {
                     val spacing =
-                        if (props.orientation ==
+                        if (index == props.items.lastIndex) {
+                            Modifier
+                        } else if (props.orientation ==
                             DomposableOrientation.Horizontal
                         ) {
                             Modifier.padding(end = props.spacing.value.dp)
