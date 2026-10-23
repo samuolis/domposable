@@ -619,23 +619,23 @@ internal fun NativeCheckbox(
                         state = ToggleableState.Indeterminate,
                         enabled = formEnabled,
                         role = Role.Checkbox,
-                        onClick = { onCheckedChange(true) },
+                        onClick = { if (formEnabled) onCheckedChange(true) },
                     )
                 } else if (!props.indeterminate && onCheckedChange != null) {
                     modifier.toComposeModifier().toggleable(
                         props.checked,
                         enabled = formEnabled,
                         role = Role.Checkbox,
-                        onValueChange = onCheckedChange,
+                        onValueChange = { if (formEnabled) onCheckedChange(it) },
                     )
                 } else {
-                    modifier.toComposeModifier().semantics(mergeDescendants = true) {
+                    modifier.toComposeModifier().semantics {
                         role = Role.Checkbox
                         toggleableState =
                             if (props.indeterminate) ToggleableState.Indeterminate else ToggleableState(props.checked)
                     }
                 }
-            ).semantics(mergeDescendants = true) {
+            ).semantics(mergeDescendants = props.showLabel || props.description != null) {
                 if (!props.showLabel && props.label.isNotBlank()) contentDescription = props.label
             },
         control = {
@@ -687,15 +687,15 @@ internal fun NativeSwitch(
                             indication = LocalIndication.current,
                             enabled = formEnabled,
                             role = Role.Switch,
-                            onValueChange = onCheckedChange,
+                            onValueChange = { if (formEnabled) onCheckedChange(it) },
                         )
                     } else {
-                        rowModifier.semantics(mergeDescendants = true) {
+                        rowModifier.semantics {
                             role = Role.Switch
                             toggleableState = ToggleableState(props.checked)
                         }
                     }
-                }.semantics(mergeDescendants = true) {
+                }.semantics(mergeDescendants = props.showLabel || props.description != null) {
                     if (!props.showLabel && props.label.isNotBlank()) contentDescription = props.label
                 },
         control = {
@@ -739,15 +739,15 @@ internal fun NativeRadioButton(
                             selected = props.selected,
                             enabled = formEnabled,
                             role = Role.RadioButton,
-                            onClick = onClick,
+                            onClick = { if (formEnabled) onClick() },
                         )
                     } else {
-                        rowModifier.semantics(mergeDescendants = true) {
+                        rowModifier.semantics {
                             role = Role.RadioButton
                             selected = props.selected
                         }
                     }
-                }.semantics(mergeDescendants = true) {
+                }.semantics(mergeDescendants = props.showLabel || props.description != null) {
                     if (!props.showLabel && props.label.isNotBlank()) contentDescription = props.label
                 },
         control = {

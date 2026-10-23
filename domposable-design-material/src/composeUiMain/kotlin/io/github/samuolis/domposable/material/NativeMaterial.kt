@@ -436,6 +436,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
             radioButton = { props, modifier, _ -> NativeRadioButton(props, modifier) },
             slider = { props, modifier, _ ->
                 val appearance = props.colors ?: LocalDomposableTokens.current.components.slider
+                val enabled = props.enabled && domposableFormEnabled()
+                val changeValue: (Float) -> Unit = { if (enabled) props.onValueChange(it) }
                 val sliderModifier =
                     modifier.toComposeModifier().materialKeyboardFocusRing().semantics {
                         if (props.label.isNotBlank()) contentDescription = props.label
@@ -446,21 +448,21 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             props.range,
                             props.steps,
                         ) { androidx.compose.material3.SliderState(props.value, props.steps, valueRange = props.range) }
-                    state.onValueChange = props.onValueChange
+                    state.onValueChange = changeValue
                     LaunchedEffect(props.value, state) { if (state.value != props.value) state.value = props.value }
                     androidx.compose.material3.VerticalSlider(
                         state = state,
                         modifier = sliderModifier,
-                        enabled = props.enabled && domposableFormEnabled(),
+                        enabled = enabled,
                         reverseDirection = !props.topToBottom,
                         colors = appearance.nativeSliderColors(),
                     )
                 } else {
                     Slider(
                         props.value,
-                        props.onValueChange,
+                        changeValue,
                         sliderModifier,
-                        enabled = props.enabled && domposableFormEnabled(),
+                        enabled = enabled,
                         valueRange = props.range,
                         steps = props.steps,
                         colors = appearance.nativeSliderColors(),
