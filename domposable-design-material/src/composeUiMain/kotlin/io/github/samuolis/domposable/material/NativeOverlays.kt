@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -20,6 +21,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,10 +36,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.saveable.SaveableStateRegistry
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.ui.DomposableBottomSheetProps
 import io.github.samuolis.domposable.ui.DomposableDialogProps
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
@@ -201,7 +206,7 @@ private fun dialogProperties(
     props: DomposableDialogProps,
     usePlatformDefaultWidth: Boolean = true,
 ) = DialogProperties(
-    usePlatformDefaultWidth = usePlatformDefaultWidth,
+    usePlatformDefaultWidth = usePlatformDefaultWidth && !props.layout.fillViewportWidth,
     dismissOnBackPress = props.dismissOnBackPress,
     dismissOnClickOutside = props.dismissOnClickOutside,
 )
@@ -242,6 +247,8 @@ internal fun NativeBottomSheet(
                 if (props.headerContent == null) TextButton(props.onDismiss) { Text("Close") }
             }
         }
+        // Material positions and clips its own Surface. Clipping the caller modifier
+        // would clip the translated sheet against its original, unshifted bounds.
         if (props.modal) {
             val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = props.skipPartiallyExpanded)
             ModalBottomSheet(
@@ -251,8 +258,8 @@ internal fun NativeBottomSheet(
                 modifier =
                     modifier
                         .toComposeModifier()
-                        .then(Modifier.nativeModifier(appearance, shape))
-                        .modalLayout(props.layout),
+                        .modalLayout(props.layout)
+                        .sheetDecoration(sheetState, appearance, shape, includeShadow = true),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,
@@ -267,8 +274,8 @@ internal fun NativeBottomSheet(
                 modifier =
                     modifier
                         .toComposeModifier()
-                        .then(Modifier.nativeModifier(appearance, shape))
-                        .modalLayout(props.layout),
+                        .modalLayout(props.layout)
+                        .sheetDecoration(state, appearance, shape, includeShadow = false),
                 shape = shape,
                 containerColor = container,
                 contentColor = contentColor,
@@ -277,6 +284,36 @@ internal fun NativeBottomSheet(
             ) { sheetContent() }
         }
     }
+}
+
+/** Decorate Material's translated surface without clipping its unshifted caller bounds. */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun Modifier.sheetDecoration(
+    state: SheetState,
+    appearance: DomposableSurfaceAppearance,
+    shape: Shape,
+    includeShadow: Boolean,
+): Modifier {
+    val border = appearance.border?.takeIf { appearance.borderWidth.value > 0f }
+    val elevation = if (includeShadow) appearance.shadowElevation?.value ?: 0f else 0f
+    if (border == null && elevation <= 0f) return this
+
+    fun offset(): Float =
+        try {
+            state.requireOffset()
+        } catch (_: IllegalStateException) {
+            // Material initializes the offset during the first measurement.
+            0f
+        }
+    return this
+        .graphicsLayer {
+            translationY = offset()
+            this.shape = shape
+            shadowElevation = elevation.dp.toPx()
+            clip = false
+        }.then(
+            border?.let { Modifier.border(appearance.borderWidth.value.dp, it.nativeColor(), shape) } ?: Modifier,
+        ).graphicsLayer { translationY = -offset() }
 }
 
 @Composable

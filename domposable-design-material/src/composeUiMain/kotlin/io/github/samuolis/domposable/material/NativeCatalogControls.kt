@@ -901,7 +901,7 @@ internal fun NativeCard(
     val styleContent: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
         val cardContent: @Composable () -> Unit = { StyledContent(appearance.textAppearance, content) }
         props.contentPadding?.let { contentPadding ->
-            Box(Modifier.fillMaxWidth().padding(contentPadding.nativePadding())) {
+            Column(Modifier.padding(contentPadding.nativePadding())) {
                 cardContent()
             }
         } ?: cardContent()

@@ -3,6 +3,15 @@ description: Pinned public-library toolchain
 runs:
   using: composite
   steps:
+    - name: Use the primary Ubuntu package archive
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        for apt_source in /etc/apt/apt-mirrors.txt /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+          if [[ -f "$apt_source" ]]; then
+            sudo sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g' "$apt_source"
+          fi
+        done
     - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
       with:
         distribution: temurin
