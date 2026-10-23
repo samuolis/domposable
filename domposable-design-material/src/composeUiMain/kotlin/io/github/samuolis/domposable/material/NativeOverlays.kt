@@ -201,7 +201,7 @@ private fun dialogProperties(
     props: DomposableDialogProps,
     usePlatformDefaultWidth: Boolean = true,
 ) = DialogProperties(
-    usePlatformDefaultWidth = usePlatformDefaultWidth,
+    usePlatformDefaultWidth = usePlatformDefaultWidth && !props.layout.fillViewportWidth,
     dismissOnBackPress = props.dismissOnBackPress,
     dismissOnClickOutside = props.dismissOnClickOutside,
 )

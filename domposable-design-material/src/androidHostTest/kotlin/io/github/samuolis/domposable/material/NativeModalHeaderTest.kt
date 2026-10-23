@@ -1,16 +1,23 @@
 package io.github.samuolis.domposable.material
 
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.Window
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.window.DialogWindowProvider
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableDialog
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
@@ -75,6 +82,39 @@ class NativeModalHeaderTest {
         val bounds = compose.onNodeWithTag("bounded-dialog").getUnclippedBoundsInRoot()
         val height = (bounds.bottom - bounds.top).value
         assertTrue(height > 0f && height < 300f, "A viewport maximum must not force full-height content: $height")
+    }
+
+    @Test
+    fun viewportWidthUsesTheFullWindowWhileKeepingTheConfiguredContentMaximum() {
+        val fillViewport = mutableStateOf(false)
+        var dialogWindow: Window? = null
+        compose.setContent {
+            DomposableTheme(components = rememberDomposableMaterialComponents()) {
+                DomposableDialog(
+                    title = "Viewport dialog",
+                    onDismiss = {},
+                    modifier = DomposableModifier.testId("viewport-dialog"),
+                    variant = DomposableDialogVariant.Basic,
+                    layout = DomposableModalLayout(maxWidth = 360.dp, fillViewportWidth = fillViewport.value),
+                    headerContent = {},
+                ) {
+                    val view = LocalView.current
+                    SideEffect { dialogWindow = (view.parent as DialogWindowProvider).window }
+                    Text("Viewport body")
+                }
+            }
+        }
+
+        compose.onNodeWithText("Viewport body").assertExists()
+        compose.runOnIdle {
+            assertEquals(WRAP_CONTENT, requireNotNull(dialogWindow).attributes.width)
+            fillViewport.value = true
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(MATCH_PARENT, requireNotNull(dialogWindow).attributes.width) }
+        val bounds = compose.onNodeWithTag("viewport-dialog").getUnclippedBoundsInRoot()
+        assertTrue((bounds.right - bounds.left).value <= 361f, "The content must retain its configured maximum")
+        assertTrue((bounds.bottom - bounds.top).value < 300f, "A full-width window must not force full-height content")
     }
 
     @Test
