@@ -139,6 +139,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -600,6 +601,7 @@ internal fun NativeCheckbox(
     modifier: io.github.samuolis.domposable.ui.DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.checkbox
+    val onCheckedChange = props.onCheckedChange
     val formEnabled = props.enabled && domposableFormEnabled()
     ChoiceRow(
         label = props.label,
@@ -612,20 +614,26 @@ internal fun NativeCheckbox(
         descriptionSpacing = appearance.descriptionSpacing.value.dp,
         modifier =
             (
-                if (props.indeterminate) {
+                if (props.indeterminate && onCheckedChange != null) {
                     modifier.toComposeModifier().triStateToggleable(
                         state = ToggleableState.Indeterminate,
                         enabled = formEnabled,
                         role = Role.Checkbox,
-                        onClick = { props.onCheckedChange(true) },
+                        onClick = { onCheckedChange(true) },
                     )
-                } else {
+                } else if (!props.indeterminate && onCheckedChange != null) {
                     modifier.toComposeModifier().toggleable(
                         props.checked,
                         enabled = formEnabled,
                         role = Role.Checkbox,
-                        onValueChange = props.onCheckedChange,
+                        onValueChange = onCheckedChange,
                     )
+                } else {
+                    modifier.toComposeModifier().semantics(mergeDescendants = true) {
+                        role = Role.Checkbox
+                        toggleableState =
+                            if (props.indeterminate) ToggleableState.Indeterminate else ToggleableState(props.checked)
+                    }
                 }
             ).semantics(mergeDescendants = true) {
                 if (!props.showLabel && props.label.isNotBlank()) contentDescription = props.label
@@ -656,6 +664,7 @@ internal fun NativeSwitch(
     modifier: io.github.samuolis.domposable.ui.DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.switch
+    val onCheckedChange = props.onCheckedChange
     val formEnabled = props.enabled && domposableFormEnabled()
     val interaction = remember { MutableInteractionSource() }
     ChoiceRow(
@@ -670,14 +679,23 @@ internal fun NativeSwitch(
         modifier =
             modifier
                 .toComposeModifier()
-                .toggleable(
-                    props.checked,
-                    interactionSource = interaction,
-                    indication = LocalIndication.current,
-                    enabled = formEnabled,
-                    role = Role.Switch,
-                    onValueChange = props.onCheckedChange,
-                ).semantics(mergeDescendants = true) {
+                .let { rowModifier ->
+                    if (onCheckedChange != null) {
+                        rowModifier.toggleable(
+                            props.checked,
+                            interactionSource = interaction,
+                            indication = LocalIndication.current,
+                            enabled = formEnabled,
+                            role = Role.Switch,
+                            onValueChange = onCheckedChange,
+                        )
+                    } else {
+                        rowModifier.semantics(mergeDescendants = true) {
+                            role = Role.Switch
+                            toggleableState = ToggleableState(props.checked)
+                        }
+                    }
+                }.semantics(mergeDescendants = true) {
                     if (!props.showLabel && props.label.isNotBlank()) contentDescription = props.label
                 },
         control = {
@@ -701,6 +719,7 @@ internal fun NativeRadioButton(
     modifier: io.github.samuolis.domposable.ui.DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.radioButton
+    val onClick = props.onClick
     val formEnabled = props.enabled && domposableFormEnabled()
     ChoiceRow(
         label = props.label,
@@ -714,12 +733,21 @@ internal fun NativeRadioButton(
         modifier =
             modifier
                 .toComposeModifier()
-                .selectable(
-                    selected = props.selected,
-                    enabled = formEnabled,
-                    role = Role.RadioButton,
-                    onClick = props.onClick,
-                ).semantics(mergeDescendants = true) {
+                .let { rowModifier ->
+                    if (onClick != null) {
+                        rowModifier.selectable(
+                            selected = props.selected,
+                            enabled = formEnabled,
+                            role = Role.RadioButton,
+                            onClick = onClick,
+                        )
+                    } else {
+                        rowModifier.semantics(mergeDescendants = true) {
+                            role = Role.RadioButton
+                            selected = props.selected
+                        }
+                    }
+                }.semantics(mergeDescendants = true) {
                     if (!props.showLabel && props.label.isNotBlank()) contentDescription = props.label
                 },
         control = {
@@ -1650,6 +1678,7 @@ internal fun NativeTabs(
             androidx.compose.runtime.key(tab.key) {
                 val selected = props.selectedIndex == index
                 val enabled = formEnabled && tab.enabled
+                val labelContent = tab.labelContent
                 val selectedTextAppearance =
                     (if (selected) tab.selectedTextAppearance else null) ?: tab.textAppearance ?: if (selected) {
                         appearance.selectedTextAppearance ?: appearance.textAppearance
@@ -1709,7 +1738,8 @@ internal fun NativeTabs(
                             } else {
                                 Modifier
                             },
-                        ).then(appearance.shape?.let { Modifier.clip(it.nativeShape()) } ?: Modifier)
+                        ).then(tab.modifier.toComposeModifier())
+                        .then(appearance.shape?.let { Modifier.clip(it.nativeShape()) } ?: Modifier)
                         .then(background?.let { Modifier.background(it.nativeColor()) } ?: Modifier)
                         .then(
                             border?.let {
@@ -1729,17 +1759,22 @@ internal fun NativeTabs(
                                 ?: Modifier,
                         )
                 val text: @Composable () -> Unit = {
-                    Box {
-                        Text(
-                            tab.label,
-                            modifier =
-                                if (tab.badgeContent != null) {
-                                    Modifier.padding(end = (tabsAppearance?.badgeClearance?.value ?: 16f).dp)
-                                } else {
-                                    Modifier
-                                },
-                            style = selectedTextAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
-                        )
+                    Box(
+                        modifier =
+                            if (tab.badgeContent != null) {
+                                Modifier.padding(end = (tabsAppearance?.badgeClearance?.value ?: 16f).dp)
+                            } else {
+                                Modifier
+                            },
+                    ) {
+                        if (labelContent != null) {
+                            labelContent()
+                        } else {
+                            Text(
+                                tab.label,
+                                style = selectedTextAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
+                            )
+                        }
                         tab.badgeContent?.let { badge ->
                             val offset = tabsAppearance?.badgeOffset ?: DomposableOffset(8f, -4f)
                             Box(
@@ -2229,7 +2264,11 @@ internal fun NativeSegmentedButtons(
         androidx.compose.material3.LocalMinimumInteractiveComponentSize provides
             (appearance.minimumInteractiveSize?.value?.dp ?: 48.dp),
     ) {
-        SingleChoiceSegmentedButtonRow(modifier.toComposeModifier().semantics { contentDescription = props.label }) {
+        SingleChoiceSegmentedButtonRow(
+            modifier.toComposeModifier().semantics {
+                if (props.label.isNotBlank()) contentDescription = props.label
+            },
+        ) {
             props.labels.forEachIndexed { index, label ->
                 val selected = index == props.selectedIndex
                 val interaction = remember { MutableInteractionSource() }

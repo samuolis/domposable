@@ -114,7 +114,9 @@ internal fun HtmlTabs(
                         } else {
                             appearance.textAppearance
                         }
+                    val labelContent = tab.labelContent
                     Button(attrs = {
+                        domposableAttributes(tab.modifier)
                         attr("type", "button")
                         classes("d-tab")
                         attr("role", "tab")
@@ -207,7 +209,13 @@ internal fun HtmlTabs(
                                     property("text-overflow", "ellipsis")
                                     textAppearance?.let { applyCatalogTextAppearance(it) }
                                 }
-                            }) { Text(tab.label) }
+                            }) {
+                                if (labelContent != null) {
+                                    labelContent()
+                                } else {
+                                    Text(tab.label)
+                                }
+                            }
                             tab.badgeContent?.let { badge ->
                                 Span(attrs = {
                                     classes("d-tab-badge")

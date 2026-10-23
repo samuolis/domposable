@@ -252,8 +252,8 @@ data class DomposableTextFieldProps(
 @DomposableComponent("Checkbox")
 data class DomposableCheckboxProps(
     val checked: Boolean,
-    val onCheckedChange: (Boolean) -> Unit,
-    val label: String,
+    val onCheckedChange: ((Boolean) -> Unit)?,
+    val label: String = "",
     val enabled: Boolean = true,
     val appearance: DomposableCheckboxAppearance? = null,
     val showLabel: Boolean = true,
@@ -265,8 +265,8 @@ data class DomposableCheckboxProps(
 @DomposableComponent("Switch")
 data class DomposableSwitchProps(
     val checked: Boolean,
-    val onCheckedChange: (Boolean) -> Unit,
-    val label: String,
+    val onCheckedChange: ((Boolean) -> Unit)?,
+    val label: String = "",
     val enabled: Boolean = true,
     val appearance: DomposableSwitchAppearance? = null,
     val showLabel: Boolean = true,
@@ -277,8 +277,8 @@ data class DomposableSwitchProps(
 @DomposableComponent("RadioButton")
 data class DomposableRadioButtonProps(
     val selected: Boolean,
-    val onClick: () -> Unit,
-    val label: String,
+    val onClick: (() -> Unit)?,
+    val label: String = "",
     val enabled: Boolean = true,
     val appearance: DomposableRadioButtonAppearance? = null,
     val showLabel: Boolean = true,
@@ -464,6 +464,10 @@ data class DomposableTabItem(
     val badgeContent: (@Composable () -> Unit)? = null,
     val textAppearance: DomposableTextAppearance? = null,
     val selectedTextAppearance: DomposableTextAppearance? = null,
+    /** Optional custom content for the visible label; contentDescription remains the accessible name. */
+    val labelContent: (@Composable () -> Unit)? = null,
+    /** Optional per-tab modifier applied by each renderer to its interactive tab. */
+    val modifier: DomposableModifier = DomposableModifier,
 ) {
     init {
         require(key.isNotBlank()) { "Tab item keys must not be blank" }
@@ -534,6 +538,8 @@ data class DomposableDialogProps(
     val variant: DomposableDialogVariant = DomposableDialogVariant.Alert,
     val headerContent: (@Composable (onDismiss: () -> Unit) -> Unit)? = null,
     val layout: DomposableModalLayout = DomposableModalLayout(),
+    val dismissOnBackPress: Boolean = true,
+    val dismissOnClickOutside: Boolean = true,
 )
 
 @DomposableComponent("BottomSheet")
@@ -832,8 +838,8 @@ internal fun buttonLabelTextAppearance(): DomposableTextAppearance {
 
 @Composable fun DomposableCheckbox(
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    label: String,
+    onCheckedChange: ((Boolean) -> Unit)?,
+    label: String = "",
     modifier: DomposableModifier = DomposableModifier,
     enabled: Boolean = true,
     appearance: DomposableCheckboxAppearance? = null,

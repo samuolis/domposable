@@ -58,9 +58,25 @@ data class DomposableAppBarProps(
     val overflowLabel: String = "More actions",
     val spacing: DomposableLength = 4.dp,
     val appearance: DomposableButtonAppearance? = null,
+    val customItems: List<DomposableAppBarItemContent> = emptyList(),
 ) {
     init {
         require(items.map { it.key }.distinct().size == items.size)
+        require(customItems.map { it.key }.distinct().size == customItems.size)
+        require(customItems.all { custom -> items.any { it.key == custom.key } }) {
+            "Custom app-bar content must refer to an existing action key"
+        }
+    }
+}
+
+/** Optional custom visible and overflow slots for one [DomposableAppBarProps] action. */
+data class DomposableAppBarItemContent(
+    val key: String,
+    val content: @Composable () -> Unit,
+    val overflowContent: (@Composable (dismiss: () -> Unit) -> Unit)? = null,
+) {
+    init {
+        require(key.isNotBlank())
     }
 }
 
@@ -73,7 +89,11 @@ fun DomposableAppBar(
     overflowLabel: String = "More actions",
     spacing: DomposableLength = 4.dp,
     appearance: DomposableButtonAppearance? = null,
-) = DomposableAppBar(DomposableAppBarProps(items, label, orientation, overflowLabel, spacing, appearance), modifier)
+    customItems: List<DomposableAppBarItemContent> = emptyList(),
+) = DomposableAppBar(
+    DomposableAppBarProps(items, label, orientation, overflowLabel, spacing, appearance, customItems),
+    modifier,
+)
 
 @DomposableComponent("WideNavigationRailItem")
 data class DomposableWideNavigationRailItemProps(

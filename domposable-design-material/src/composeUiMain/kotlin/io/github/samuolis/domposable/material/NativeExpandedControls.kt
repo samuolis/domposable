@@ -12,6 +12,7 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -70,6 +71,8 @@ import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberContainedSearchBarState
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -106,10 +109,12 @@ import io.github.samuolis.domposable.ui.DomposableCarouselVariant
 import io.github.samuolis.domposable.ui.DomposableDragHandleProps
 import io.github.samuolis.domposable.ui.DomposableFloatingActionButtonMenuProps
 import io.github.samuolis.domposable.ui.DomposableFloatingToolbarProps
+import io.github.samuolis.domposable.ui.DomposableFloatingToolbarVariant
 import io.github.samuolis.domposable.ui.DomposableLoadingIndicatorProps
 import io.github.samuolis.domposable.ui.DomposableMenuProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposablePullToRefreshProps
+import io.github.samuolis.domposable.ui.DomposablePullToRefreshState
 import io.github.samuolis.domposable.ui.DomposableSearchBarProps
 import io.github.samuolis.domposable.ui.DomposableSearchBarVariant
 import io.github.samuolis.domposable.ui.DomposableSplitButtonProps
@@ -505,12 +510,30 @@ internal fun NativePullToRefresh(
     modifier: DomposableModifier,
     content: @Composable () -> Unit,
 ) {
+    val state = rememberPullToRefreshState()
     PullToRefreshBox(
+        state = state,
         isRefreshing = props.refreshing,
         onRefresh = props.onRefresh,
         modifier = modifier.toComposeModifier().semantics { contentDescription = props.label },
         enabled = props.enabled && domposableFormEnabled(),
         threshold = props.threshold.value.dp,
+        indicator = {
+            val customIndicator = props.indicatorContent
+            if (customIndicator == null) {
+                PullToRefreshDefaults.Indicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    state = state,
+                    isRefreshing = props.refreshing,
+                )
+            } else {
+                Box(Modifier.align(Alignment.TopCenter)) {
+                    customIndicator(
+                        DomposablePullToRefreshState(state.distanceFraction.coerceIn(0f, 1f), props.refreshing),
+                    )
+                }
+            }
+        },
     ) { content() }
 }
 
@@ -995,7 +1018,13 @@ internal fun NativeFloatingToolbar(
     val container = appearance.container?.nativeColor() ?: Color.Unspecified
     val foreground = appearance.content?.nativeColor() ?: Color.Unspecified
     val colors =
-        FloatingToolbarDefaults.standardFloatingToolbarColors(
+        (
+            if (props.variant == DomposableFloatingToolbarVariant.Vibrant) {
+                FloatingToolbarDefaults.vibrantFloatingToolbarColors()
+            } else {
+                FloatingToolbarDefaults.standardFloatingToolbarColors()
+            }
+        ).copy(
             toolbarContainerColor = container,
             toolbarContentColor = foreground,
             fabContainerColor = container,
@@ -1010,6 +1039,13 @@ internal fun NativeFloatingToolbar(
             content()
         }
     }
+    val contentPadding =
+        PaddingValues(
+            start = props.contentPadding.start.value.dp,
+            top = props.contentPadding.top.value.dp,
+            end = props.contentPadding.end.value.dp,
+            bottom = props.contentPadding.bottom.value.dp,
+        )
     if (props.orientation == DomposableOrientation.Horizontal) {
         HorizontalFloatingToolbar(
             props.expanded,
@@ -1025,6 +1061,7 @@ internal fun NativeFloatingToolbar(
                 props.trailingContent()
                 props.floatingAction()
             },
+            contentPadding = contentPadding,
             content = toolbarContent,
         )
     } else {
@@ -1042,6 +1079,7 @@ internal fun NativeFloatingToolbar(
                 props.trailingContent()
                 props.floatingAction()
             },
+            contentPadding = contentPadding,
             content = {
                 CompositionLocalProvider(
                     LocalTextStyle provides

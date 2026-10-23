@@ -46,3 +46,19 @@ consumer's presentation configuration.
 A layout's `gap` is its minimum spacing, including `SpaceBetween`, `SpaceAround` and `SpaceEvenly`.
 The HTML renderer uses flex gaps; native arrangements preserve the same minimum in both layout
 directions. A flow row wraps when its children and the requested gap cannot fit on one line.
+
+## One contract for native and HTML
+
+Applications use the same typed component variants, appearance values and modifiers on each target.
+A missing generic option belongs in that contract and both renderers. Do not implement it as an
+application-only CSS repair. For example, card shadows belong to `DomposableSurfaceAppearance`,
+and icon/label spacing belongs to `DomposableButtonAppearance.contentSpacing`.
+
+Custom tab labels, top-app-bar titles, app-bar actions and snackbar content are component slots;
+the library still owns their container, interaction and accessibility behavior. Passive selection
+controls accept a null callback and retain their state without inventing a click action.
+
+Native interoperability overloads in `domposable-design-material` support annotated text/layout
+measurements, resource-backed typography, painter artwork and keyboard/transformation options.
+Keep these calls in the consumer's native source set. Shared feature declarations continue using
+the portable component APIs; native types must not leak into a second HTML implementation.

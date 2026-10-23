@@ -42,10 +42,14 @@ internal fun HtmlModal(
     variant: DomposableDialogVariant = DomposableDialogVariant.Basic,
     headerContent: (@Composable () -> Unit)? = null,
     layout: DomposableModalLayout = DomposableModalLayout(),
+    dismissOnBackPress: Boolean = true,
+    dismissOnClickOutside: Boolean = true,
     skipPartiallyExpanded: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val dismiss by rememberUpdatedState(onDismiss)
+    val allowBackDismiss by rememberUpdatedState(dismissOnBackPress)
+    val allowOutsideDismiss by rememberUpdatedState(dismissOnClickOutside)
     val titleId = remember { "d-dialog-${nextHtmlModalId++}" }
     DomposableHtmlModifiers(modifier) {
         TagElement<HTMLDialogElement>("dialog", applyAttrs = {
@@ -71,7 +75,7 @@ internal fun HtmlModal(
                 openHtmlModalOrder.add(element)
                 val cancel: (org.w3c.dom.events.Event) -> Unit = {
                     it.preventDefault()
-                    if (isTopmostModal(element)) dismiss()
+                    if (allowBackDismiss && isTopmostModal(element)) dismiss()
                 }
                 val pointerDown: (org.w3c.dom.events.Event) -> Unit = { event ->
                     val pointer = event.asDynamic()
@@ -101,7 +105,8 @@ internal fun HtmlModal(
                         event.preventDefault()
                         event.stopPropagation()
                     }
-                    val dismissOutsideGesture = startedOutside && endedOutside && isTopmost
+                    val dismissOutsideGesture =
+                        allowOutsideDismiss && startedOutside && endedOutside && isTopmost
                     if (dismissOutsideGesture) dismiss()
                 }
                 val pointerCancel: (org.w3c.dom.events.Event) -> Unit = { event ->
@@ -113,7 +118,7 @@ internal fun HtmlModal(
                         val keyboard = event
                         if (keyboard.asDynamic().key == "Escape") {
                             keyboard.preventDefault()
-                            dismiss()
+                            if (allowBackDismiss) dismiss()
                         } else if (keyboard.asDynamic().key == "Tab") {
                             trapModalTab(element, keyboard)
                         }

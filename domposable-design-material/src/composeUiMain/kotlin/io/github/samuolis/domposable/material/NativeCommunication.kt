@@ -81,22 +81,28 @@ internal fun NativeSnackbarHost(
         }
     }
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.snackbar
+    val snackbarContent = props.snackbarContent
     SnackbarHost(
         hostState = state,
         modifier = modifier.toComposeModifier(),
         snackbar = { snackbarData ->
-            val shape = appearance.nativeShape(SnackbarDefaults.shape)
-            Snackbar(
-                snackbarData = snackbarData,
-                modifier = Modifier.then(Modifier.nativeModifier(appearance, shape)),
-                shape = shape,
-                containerColor = appearance.container?.nativeColor() ?: SnackbarDefaults.color,
-                contentColor = appearance.content?.nativeColor() ?: SnackbarDefaults.contentColor,
-                actionColor = appearance.content?.nativeColor() ?: SnackbarDefaults.actionColor,
-                actionContentColor = appearance.content?.nativeColor() ?: SnackbarDefaults.actionContentColor,
-                dismissActionContentColor =
-                    appearance.content?.nativeColor() ?: SnackbarDefaults.dismissActionContentColor,
-            )
+            val current = props.state.currentSnackbarData
+            if (current != null && snackbarContent != null) {
+                snackbarContent(current)
+            } else {
+                val shape = appearance.nativeShape(SnackbarDefaults.shape)
+                Snackbar(
+                    snackbarData = snackbarData,
+                    modifier = Modifier.then(Modifier.nativeModifier(appearance, shape)),
+                    shape = shape,
+                    containerColor = appearance.container?.nativeColor() ?: SnackbarDefaults.color,
+                    contentColor = appearance.content?.nativeColor() ?: SnackbarDefaults.contentColor,
+                    actionColor = appearance.content?.nativeColor() ?: SnackbarDefaults.actionColor,
+                    actionContentColor = appearance.content?.nativeColor() ?: SnackbarDefaults.actionContentColor,
+                    dismissActionContentColor =
+                        appearance.content?.nativeColor() ?: SnackbarDefaults.dismissActionContentColor,
+                )
+            }
         },
     )
 }

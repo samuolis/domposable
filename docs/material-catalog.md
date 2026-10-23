@@ -369,3 +369,35 @@ DomposableBadge(
 ```
 
 A supplied `content` slot replaces the default text or dot. Avatar content works the same way: the library retains the avatar surface and description while the app can provide an image with its own loading and fallback policy.
+
+## Custom content and native integration
+
+`DomposableTabItem.labelContent`, `DomposableTopAppBarProps.titleContent`, keyed
+`DomposableAppBarItemContent`, and `DomposableSnackbarHostProps.snackbarContent` provide custom
+content inside library-owned components on native and HTML. Continue supplying localized labels
+for accessibility when a custom slot replaces visible text.
+
+```kotlin
+DomposableTabs(
+    items = listOf(
+        DomposableTabItem(
+            key = "groups",
+            label = "Groups",
+            labelContent = {
+                DomposableRow(gap = 4.dp) {
+                    DomposableText("Groups")
+                    DomposableBadge("4")
+                }
+            },
+        ),
+    ),
+    selectedIndex = 0,
+    onSelect = {},
+)
+```
+
+Native hosts can import the `material.DomposableText` overload for `AnnotatedString` and native
+layout callbacks, `material.DomposableIcon` for a painter/vector, and
+`DomposableNativeTextFieldOptions` for platform keyboard actions and transformations. These reuse
+the same appearance/theme contract. `DomposableMaterialTheme(nativeTypography = ...)` preserves
+resource-backed fonts while the library owns Material theme installation and component defaults.

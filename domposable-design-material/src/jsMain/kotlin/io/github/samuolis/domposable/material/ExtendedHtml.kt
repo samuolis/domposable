@@ -99,8 +99,15 @@ internal fun HtmlTopAppBar(
             }
             style {
                 surfaceAppearance(appearance)
-                property("min-height", height)
-                property("--d-app-bar-height", height)
+                val resolvedHeight = props.expandedHeight?.let { "${it.value}px" } ?: height
+                property("min-height", resolvedHeight)
+                property("--d-app-bar-height", resolvedHeight)
+                props.windowInsets?.let { insets ->
+                    property("padding-top", "${insets.top.value}px")
+                    property("padding-right", "${insets.end.value}px")
+                    property("padding-bottom", "${insets.bottom.value}px")
+                    property("padding-left", "${insets.start.value}px")
+                }
             }
         }) {
             Div(attrs = { classes("d-app-bar-navigation") }) { props.navigationIcon() }
@@ -119,7 +126,7 @@ internal fun HtmlTopAppBar(
                                     ?: DomposableTextAppearance(role = titleRole),
                             )
                         }
-                    }) { Text(props.title) }
+                    }) { props.titleContent?.invoke() ?: Text(props.title) }
                     props.subtitle?.let { subtitle ->
                         Span(attrs = {
                             classes("d-app-bar-subtitle")
@@ -309,7 +316,7 @@ internal fun HtmlSegmentedButtons(
             classes("d-segments")
             if (props.equalWidth) classes("d-segments-equal")
             attr("role", "radiogroup")
-            attr("aria-label", props.label)
+            if (props.label.isNotBlank()) attr("aria-label", props.label)
             style {
                 itemAppearance(appearance)
                 constrainedControlWidth(modifier)

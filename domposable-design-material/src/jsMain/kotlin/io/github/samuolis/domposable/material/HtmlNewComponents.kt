@@ -26,6 +26,7 @@ import io.github.samuolis.domposable.ui.DomposableDragHandleProps
 import io.github.samuolis.domposable.ui.DomposableDrawerVariant
 import io.github.samuolis.domposable.ui.DomposableFloatingActionButtonMenuProps
 import io.github.samuolis.domposable.ui.DomposableFloatingToolbarProps
+import io.github.samuolis.domposable.ui.DomposableFloatingToolbarVariant
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableListItemProps
 import io.github.samuolis.domposable.ui.DomposableModifier
@@ -34,6 +35,7 @@ import io.github.samuolis.domposable.ui.DomposableMultiChoiceSegmentedButtonsPro
 import io.github.samuolis.domposable.ui.DomposableNavigationDrawerItemProps
 import io.github.samuolis.domposable.ui.DomposableNavigationDrawerProps
 import io.github.samuolis.domposable.ui.DomposablePullToRefreshProps
+import io.github.samuolis.domposable.ui.DomposablePullToRefreshState
 import io.github.samuolis.domposable.ui.DomposableSearchBarProps
 import io.github.samuolis.domposable.ui.DomposableSearchBarVariant
 import io.github.samuolis.domposable.ui.DomposableSplitButtonProps
@@ -132,6 +134,7 @@ internal fun HtmlAppBar(
         val formEnabled = domposableFormEnabled()
         var visibleCount by remember(props.items.size) { mutableStateOf(props.items.size) }
         val appearance = props.appearance ?: LocalDomposableTokens.current.components.appBar
+        val customItems = props.customItems.associateBy { it.key }
         Div(attrs = {
             domposableAttributes(modifier)
             attr("role", "toolbar")
@@ -209,24 +212,44 @@ internal fun HtmlAppBar(
             }
         }) {
             props.items.forEachIndexed { index, item ->
-                Button(attrs = {
-                    attr("type", "button")
-                    attr("aria-label", item.label)
-                    attr("data-appbar-action", "")
-                    classes("d-icon-button", "d-icon-button-standard")
-                    if (index >=
-                        visibleCount
-                    ) {
+                val custom = customItems[item.key]
+                if (custom != null) {
+                    TagElement<HTMLElement>("div", applyAttrs = {
+                        attr("aria-label", item.label)
+                        attr("data-appbar-action", "")
+                        classes("d-app-bar-custom-action")
                         style {
-                            property("position", "absolute")
-                            property("visibility", "hidden")
-                            property("pointer-events", "none")
+                            property("display", "inline-flex")
+                            property("flex", "0 0 auto")
                         }
-                    }
-                    if (!item.enabled || !formEnabled) disabled()
-                    style { styleAppearance(appearance, item.enabled) }
-                    onClick { if (item.enabled && formEnabled) item.onClick() }
-                }) { item.icon?.invoke() ?: Text(item.label.take(1)) }
+                        if (index >= visibleCount) {
+                            style {
+                                property("position", "absolute")
+                                property("visibility", "hidden")
+                                property("pointer-events", "none")
+                            }
+                        }
+                    }) { custom.content() }
+                } else {
+                    Button(attrs = {
+                        attr("type", "button")
+                        attr("aria-label", item.label)
+                        attr("data-appbar-action", "")
+                        classes("d-icon-button", "d-icon-button-standard")
+                        if (index >=
+                            visibleCount
+                        ) {
+                            style {
+                                property("position", "absolute")
+                                property("visibility", "hidden")
+                                property("pointer-events", "none")
+                            }
+                        }
+                        if (!item.enabled || !formEnabled) disabled()
+                        style { styleAppearance(appearance, item.enabled) }
+                        onClick { if (item.enabled && formEnabled) item.onClick() }
+                    }) { item.icon?.invoke() ?: Text(item.label.take(1)) }
+                }
             }
             Button(attrs = {
                 attr("type", "button")
@@ -257,24 +280,30 @@ internal fun HtmlAppBar(
                         classes("d-app-bar-overflow")
                     }) {
                         props.items.drop(visibleCount).forEach { item ->
-                            Button(attrs = {
-                                attr("type", "button")
-                                if (!item.enabled ||
-                                    !formEnabled
-                                ) {
-                                    disabled()
-                                }
-                                onClick {
-                                    if (item.enabled &&
-                                        formEnabled
+                            val custom = customItems[item.key]
+                            val customOverflowContent = custom?.overflowContent
+                            if (customOverflowContent != null) {
+                                customOverflowContent { expanded = false }
+                            } else {
+                                Button(attrs = {
+                                    attr("type", "button")
+                                    if (!item.enabled ||
+                                        !formEnabled
                                     ) {
-                                        item.onClick()
-                                        expanded = false
+                                        disabled()
                                     }
+                                    onClick {
+                                        if (item.enabled &&
+                                            formEnabled
+                                        ) {
+                                            item.onClick()
+                                            expanded = false
+                                        }
+                                    }
+                                }) {
+                                    item.icon?.invoke()
+                                    Text(item.label)
                                 }
-                            }) {
-                                item.icon?.invoke()
-                                Text(item.label)
                             }
                         }
                     }
@@ -374,13 +403,34 @@ internal fun HtmlFloatingToolbar(
     content: @Composable () -> Unit,
 ) {
     DomposableHtmlModifiers(modifier) {
-        val appearance = props.appearance ?: LocalDomposableTokens.current.components.floatingToolbar
+        val tokens = LocalDomposableTokens.current
+        val appearance = props.appearance ?: tokens.components.floatingToolbar
+        val vibrantContainer = appearance.container ?: tokens.colors.primaryContainer ?: tokens.colors.primary
+        val vibrantContent = appearance.content ?: tokens.colors.onPrimaryContainer ?: tokens.colors.onPrimary
         Div(attrs = {
             domposableAttributes(modifier)
             classes("d-floating-toolbar")
+            if (props.variant == DomposableFloatingToolbarVariant.Vibrant) {
+                classes("d-floating-toolbar-vibrant")
+            }
             attr("data-expanded", props.expanded.toString())
             style {
                 surfaceAppearance(appearance)
+                if (props.variant == DomposableFloatingToolbarVariant.Vibrant) {
+                    property(
+                        "background-color",
+                        vibrantContainer.css(),
+                    )
+                    property(
+                        "color",
+                        vibrantContent.css(),
+                    )
+                }
+                property(
+                    "padding",
+                    "${props.contentPadding.top.value}px ${props.contentPadding.end.value}px " +
+                        "${props.contentPadding.bottom.value}px ${props.contentPadding.start.value}px",
+                )
                 property(
                     "flex-direction",
                     if (props.orientation ==
@@ -1575,7 +1625,11 @@ internal fun HtmlPullToRefresh(
                     appearance.color?.let { property("color", it.css()) }
                     property("transform", "translateY(var(--d-pull-distance,0px))")
                 }
-            }) { if (props.refreshing) Text("◌ ${props.label}") else Text(props.label) }
+            }) {
+                val progress = (distance / props.threshold.value).coerceIn(0f, 1f)
+                props.indicatorContent?.invoke(DomposablePullToRefreshState(progress, props.refreshing))
+                    ?: if (props.refreshing) Text("◌ ${props.label}") else Text(props.label)
+            }
             content()
         }
     }

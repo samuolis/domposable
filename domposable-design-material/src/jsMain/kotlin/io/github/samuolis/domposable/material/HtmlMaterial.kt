@@ -599,6 +599,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 _,
                 ->
                 val appearance = props.appearance ?: LocalDomposableTokens.current.components.radioButton
+                val onClick = props.onClick
                 val descriptionId = remember { "d-radio-description-${nextInputId++}" }
                 val labelId = remember { "d-radio-label-${nextInputId++}" }
                 val enabled = props.enabled && domposableFormEnabled()
@@ -660,8 +661,15 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                     }
                                 }
                                 if (appearance.colors != DomposableSelectionColors()) attr("data-custom-colors", "true")
-                                onChange { if (enabled) props.onClick() }
-                                onClick { if (enabled && props.selected) props.onClick() }
+                                if (onClick == null) attr("tabindex", "-1")
+                                onChange { if (enabled) onClick?.invoke() }
+                                onClick {
+                                    if (onClick == null) {
+                                        it.preventDefault()
+                                    } else if (enabled && props.selected) {
+                                        onClick()
+                                    }
+                                }
                             })
                         }
 
@@ -743,7 +751,7 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 attr("aria-orientation", "horizontal")
                             }
                             value(props.value.toString())
-                            attr("aria-label", props.label)
+                            if (props.label.isNotBlank()) attr("aria-label", props.label)
                             attr("min", props.range.start.toString())
                             attr("max", props.range.endInclusive.toString())
                             attr(
@@ -1470,6 +1478,8 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                     variant = props.variant,
                     headerContent = props.headerContent?.let { header -> { header(props.onDismiss) } },
                     layout = props.layout,
+                    dismissOnBackPress = props.dismissOnBackPress,
+                    dismissOnClickOutside = props.dismissOnClickOutside,
                 ) {
                     content()
                     props.actions()
@@ -1871,7 +1881,7 @@ private fun AttrsScope<HTMLElement>.selectionContainerClick() {
 @Composable
 private fun HtmlToggle(
     checkedValue: Boolean,
-    onChange: (Boolean) -> Unit,
+    onChange: ((Boolean) -> Unit)?,
     label: String,
     enabled: Boolean,
     modifier: DomposableModifier,
@@ -1918,6 +1928,11 @@ private fun HtmlToggle(
                     }
                     if (switch) attr("role", "switch")
                     if (!effectiveEnabled) disabled()
+                    if (onChange == null) {
+                        attr("tabindex", "-1")
+                        attr("aria-readonly", "true")
+                        onClick { it.preventDefault() }
+                    }
                     if (label.isNotEmpty()) attr("aria-labelledby", labelId)
                     description?.let { attr("aria-describedby", descriptionId) }
                     if (customColors) attr("data-custom-colors", "true")
@@ -2011,7 +2026,7 @@ private fun HtmlToggle(
                     onChange {
                         // Restore before the callback so synchronous recomposition can commit a new mixed state.
                         it.target.asDynamic().indeterminate = indeterminate
-                        if (effectiveEnabled) onChange(indeterminate || it.value)
+                        if (effectiveEnabled) onChange?.invoke(indeterminate || it.value)
                     }
                 })
             }

@@ -7,6 +7,7 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,6 +52,8 @@ import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -58,6 +61,7 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.samuolis.domposable.foundation.DomposableFabSize
 import io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant
@@ -93,8 +97,25 @@ internal fun NativeTopAppBar(
         modifier.toComposeModifier().then(
             Modifier.nativeModifier(appearance, androidx.compose.ui.graphics.RectangleShape),
         )
+    val direction = LocalLayoutDirection.current
+    val insets =
+        props.windowInsets?.let { value ->
+            with(LocalDensity.current) {
+                WindowInsets(
+                    left = (if (direction == LayoutDirection.Ltr) value.start else value.end).value.dp.roundToPx(),
+                    top =
+                        value.top.value.dp
+                            .roundToPx(),
+                    right = (if (direction == LayoutDirection.Ltr) value.end else value.start).value.dp.roundToPx(),
+                    bottom =
+                        value.bottom.value.dp
+                            .roundToPx(),
+                )
+            }
+        } ?: TopAppBarDefaults.windowInsets
+    val height = props.expandedHeight?.value?.dp ?: androidx.compose.ui.unit.Dp.Unspecified
     val title: @Composable () -> Unit = {
-        Text(
+        props.titleContent?.invoke() ?: Text(
             props.title,
             modifier = Modifier.semantics { heading() },
             style = appearance.textAppearance.nativeTextStyle(androidx.compose.material3.LocalTextStyle.current),
@@ -125,6 +146,8 @@ internal fun NativeTopAppBar(
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
                 colors = colors,
+                expandedHeight = height,
+                windowInsets = insets,
             )
         }
 
@@ -135,6 +158,8 @@ internal fun NativeTopAppBar(
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
                 colors = colors,
+                expandedHeight = height,
+                windowInsets = insets,
             )
         }
 
@@ -145,6 +170,8 @@ internal fun NativeTopAppBar(
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
                 colors = colors,
+                expandedHeight = height,
+                windowInsets = insets,
             )
         }
 
@@ -155,6 +182,8 @@ internal fun NativeTopAppBar(
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
                 colors = colors,
+                expandedHeight = height,
+                windowInsets = insets,
             )
         }
 
@@ -166,6 +195,8 @@ internal fun NativeTopAppBar(
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
                 colors = colors,
+                expandedHeight = height,
+                windowInsets = insets,
             )
         }
 
@@ -177,6 +208,8 @@ internal fun NativeTopAppBar(
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
                 colors = colors,
+                expandedHeight = height,
+                windowInsets = insets,
             )
         }
 
@@ -188,6 +221,8 @@ internal fun NativeTopAppBar(
                 navigationIcon = props.navigationIcon,
                 actions = { props.actions() },
                 colors = colors,
+                expandedHeight = height,
+                windowInsets = insets,
             )
         }
     }

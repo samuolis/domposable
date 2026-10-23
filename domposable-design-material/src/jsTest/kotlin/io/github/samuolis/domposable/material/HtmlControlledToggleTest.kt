@@ -104,6 +104,34 @@ class HtmlControlledToggleTest {
                 root.parentNode?.removeChild(root)
             }
         }
+
+    @Test
+    fun passiveControlsKeepTheirDeclaredStateWithoutKeyboardStops() {
+        val root = document.createElement("div")
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableCheckbox(true, null, "Passive checkbox", showLabel = false)
+                    DomposableSwitch(true, null, "Passive switch", showLabel = false)
+                    DomposableRadioButton(true, null, "Passive radio", showLabel = false)
+                }
+            }
+        try {
+            val inputs = root.querySelectorAll("input")
+            assertEquals(3, inputs.length)
+            for (index in 0 until inputs.length) {
+                val input = inputs.item(index) as HTMLInputElement
+                assertTrue(input.checked)
+                assertEquals("-1", input.getAttribute("tabindex"))
+                input.click()
+                assertTrue(input.checked)
+            }
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
 }
 
 private suspend fun settleControls() {

@@ -99,11 +99,13 @@ internal fun NativeAppBar(
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.appBar
     val formEnabled = domposableFormEnabled()
+    val customItems = props.customItems.associateBy { it.key }
     val overflow: @Composable (AppBarMenuState) -> Unit = {
         Box(Modifier.semantics { contentDescription = props.overflowLabel }) { AppBarOverflowIndicator(it) }
     }
     val addItems: AppBarScope.() -> Unit = {
         props.items.forEach { item ->
+            val custom = customItems[item.key]
             customItem(
                 appbarContent = {
                     val spacing =
@@ -115,32 +117,44 @@ internal fun NativeAppBar(
                             Modifier.padding(bottom = props.spacing.value.dp)
                         }
                     Box(spacing) {
-                        NativeIconButton(
-                            DomposableIconButtonProps(
-                                item.onClick,
-                                item.label,
-                                item.enabled && formEnabled,
-                                appearance,
-                            ),
-                            DomposableModifier,
-                        ) { item.icon?.invoke() ?: Text(item.label.take(1)) }
+                        if (custom != null) {
+                            custom.content()
+                        } else {
+                            NativeIconButton(
+                                DomposableIconButtonProps(
+                                    item.onClick,
+                                    item.label,
+                                    item.enabled && formEnabled,
+                                    appearance,
+                                ),
+                                DomposableModifier,
+                            ) { item.icon?.invoke() ?: Text(item.label.take(1)) }
+                        }
                     }
                 },
                 menuContent = { menuState ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                item.label,
-                                style = appearance.textAppearance.nativeTextStyle(MaterialTheme.typography.labelLarge),
-                            )
-                        },
-                        onClick = {
-                            menuState.dismiss()
-                            item.onClick()
-                        },
-                        enabled = item.enabled && formEnabled,
-                        leadingIcon = item.icon,
-                    )
+                    val customOverflowContent = custom?.overflowContent
+                    if (customOverflowContent != null) {
+                        customOverflowContent { menuState.dismiss() }
+                    } else {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    item.label,
+                                    style =
+                                        appearance.textAppearance.nativeTextStyle(
+                                            MaterialTheme.typography.labelLarge,
+                                        ),
+                                )
+                            },
+                            onClick = {
+                                menuState.dismiss()
+                                item.onClick()
+                            },
+                            enabled = item.enabled && formEnabled,
+                            leadingIcon = item.icon,
+                        )
+                    }
                 },
             )
         }
