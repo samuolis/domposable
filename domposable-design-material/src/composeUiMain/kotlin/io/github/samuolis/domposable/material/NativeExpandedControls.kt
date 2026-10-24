@@ -87,7 +87,10 @@ import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
@@ -527,7 +530,24 @@ internal fun NativePullToRefresh(
                     isRefreshing = props.refreshing,
                 )
             } else {
-                Box(Modifier.align(Alignment.TopCenter)) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .drawWithContent {
+                            clipRect(
+                                left = -Float.MAX_VALUE,
+                                top = 0f,
+                                right = Float.MAX_VALUE,
+                                bottom = Float.MAX_VALUE,
+                            ) {
+                                this@drawWithContent.drawContent()
+                            }
+                        }.graphicsLayer {
+                            translationY = state.distanceFraction *
+                                props.threshold.value.dp
+                                    .toPx() - size.height
+                        },
+                ) {
                     customIndicator(
                         DomposablePullToRefreshState(state.distanceFraction.coerceIn(0f, 1f), props.refreshing),
                     )

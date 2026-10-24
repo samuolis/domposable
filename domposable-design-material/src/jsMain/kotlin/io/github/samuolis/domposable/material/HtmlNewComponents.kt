@@ -1577,6 +1577,9 @@ internal fun HtmlPullToRefresh(
     DomposableHtmlModifiers(modifier) {
         var originY by remember { mutableStateOf<Double?>(null) }
         var distance by remember { mutableStateOf(0f) }
+        LaunchedEffect(props.refreshing) {
+            if (!props.refreshing) distance = 0f
+        }
         val appearance = props.appearance ?: LocalDomposableTokens.current.components.pullToRefresh
         val enabled = props.enabled && domposableFormEnabled()
         Div(attrs = {
@@ -1599,9 +1602,14 @@ internal fun HtmlPullToRefresh(
                     }
                 }
                 val pointerEnd: (org.w3c.dom.events.Event) -> Unit = {
-                    if (enabled && distance >= props.threshold.value && !props.refreshing) props.onRefresh()
+                    val refresh = enabled && distance >= props.threshold.value && !props.refreshing
+                    if (refresh) {
+                        distance = props.threshold.value
+                        props.onRefresh()
+                    } else {
+                        distance = 0f
+                    }
                     originY = null
-                    distance = 0f
                 }
                 element.addEventListener("pointerdown", pointerDown)
                 element.addEventListener("pointermove", pointerMove)
@@ -1623,7 +1631,6 @@ internal fun HtmlPullToRefresh(
                 if (props.refreshing) attr("aria-busy", "true")
                 style {
                     appearance.color?.let { property("color", it.css()) }
-                    property("transform", "translateY(var(--d-pull-distance,0px))")
                 }
             }) {
                 val progress = (distance / props.threshold.value).coerceIn(0f, 1f)
