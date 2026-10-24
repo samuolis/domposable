@@ -28,6 +28,7 @@ import io.github.samuolis.domposable.ui.DomposableFloatingActionButtonMenuProps
 import io.github.samuolis.domposable.ui.DomposableFloatingToolbarProps
 import io.github.samuolis.domposable.ui.DomposableFloatingToolbarVariant
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
+import io.github.samuolis.domposable.ui.DomposableHtmlWidthDemandContainer
 import io.github.samuolis.domposable.ui.DomposableListItemProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableModifierOperation
@@ -283,7 +284,9 @@ internal fun HtmlAppBar(
                             val custom = customItems[item.key]
                             val customOverflowContent = custom?.overflowContent
                             if (customOverflowContent != null) {
-                                customOverflowContent { expanded = false }
+                                DomposableHtmlWidthDemandContainer(propagateToParent = false) {
+                                    customOverflowContent { expanded = false }
+                                }
                             } else {
                                 Button(attrs = {
                                     attr("type", "button")
@@ -684,30 +687,36 @@ internal fun HtmlNavigationDrawer(
     content: @Composable () -> Unit,
 ) {
     if (!props.expanded && props.variant != DomposableDrawerVariant.Permanent) return
-    DomposableHtmlModifiers(modifier) {
-        val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationDrawer
-        val modal = props.variant == DomposableDrawerVariant.Modal
-        val formEnabled = domposableFormEnabled()
-        Div(attrs = {
-            domposableAttributes(modifier)
-            if (modal) {
-                classes(
-                    "d-drawer-scrim",
-                )
-            } else {
-                classes("d-navigation-drawer-host", "d-navigation-drawer-${props.variant.name.lowercase()}")
+    val modal = props.variant == DomposableDrawerVariant.Modal
+    DomposableHtmlWidthDemandContainer(propagateToParent = !modal) {
+        DomposableHtmlModifiers(modifier) {
+            val appearance = props.appearance ?: LocalDomposableTokens.current.components.navigationDrawer
+            val formEnabled = domposableFormEnabled()
+            Div(attrs = {
+                domposableAttributes(modifier)
+                if (modal) {
+                    classes(
+                        "d-drawer-scrim",
+                    )
+                } else {
+                    classes("d-navigation-drawer-host", "d-navigation-drawer-${props.variant.name.lowercase()}")
+                }
+                if (modal) attr("aria-modal", "true")
+                if (props.gesturesEnabled) onClick { if (modal && formEnabled) props.onDismiss() }
+                if (modal &&
+                    props.gesturesEnabled
+                ) {
+                    onKeyDown { if (it.key == "Escape" && formEnabled) props.onDismiss() }
+                }
+            }) {
+                TagElement<HTMLElement>(if (modal) "section" else "nav", applyAttrs = {
+                    attr("aria-label", props.label)
+                    if (modal) attr("role", "dialog") else attr("role", "navigation")
+                    classes("d-navigation-drawer")
+                    style { surfaceAppearance(appearance) }
+                    if (modal) onClick { it.stopPropagation() }
+                }) { content() }
             }
-            if (modal) attr("aria-modal", "true")
-            if (props.gesturesEnabled) onClick { if (modal && formEnabled) props.onDismiss() }
-            if (modal && props.gesturesEnabled) onKeyDown { if (it.key == "Escape" && formEnabled) props.onDismiss() }
-        }) {
-            TagElement<HTMLElement>(if (modal) "section" else "nav", applyAttrs = {
-                attr("aria-label", props.label)
-                if (modal) attr("role", "dialog") else attr("role", "navigation")
-                classes("d-navigation-drawer")
-                style { surfaceAppearance(appearance) }
-                if (modal) onClick { it.stopPropagation() }
-            }) { content() }
         }
     }
 }
@@ -747,19 +756,21 @@ internal fun HtmlWideNavigationRail(
         val appearance = props.appearance ?: LocalDomposableTokens.current.components.wideNavigationRail
         val formEnabled = domposableFormEnabled()
         if (props.modal) {
-            Div(attrs = {
-                classes("d-drawer-scrim")
-                onClick { if (formEnabled) props.onDismiss() }
-            }) {
-                TagElement<HTMLElement>("nav", applyAttrs = {
-                    domposableAttributes(modifier)
-                    attr("aria-label", "Primary navigation")
-                    attr("role", "dialog")
-                    style { surfaceAppearance(appearance) }
-                    onClick { it.stopPropagation() }
+            DomposableHtmlWidthDemandContainer(propagateToParent = false) {
+                Div(attrs = {
+                    classes("d-drawer-scrim")
+                    onClick { if (formEnabled) props.onDismiss() }
                 }) {
-                    props.header()
-                    content()
+                    TagElement<HTMLElement>("nav", applyAttrs = {
+                        domposableAttributes(modifier)
+                        attr("aria-label", "Primary navigation")
+                        attr("role", "dialog")
+                        style { surfaceAppearance(appearance) }
+                        onClick { it.stopPropagation() }
+                    }) {
+                        props.header()
+                        content()
+                    }
                 }
             }
         } else {
@@ -950,12 +961,14 @@ internal fun HtmlSearchBar(
                 props.actions?.invoke()
             }
             if (props.expanded) {
-                Div(attrs = {
-                    id("$id-results")
-                    attr("role", "dialog")
-                    attr("aria-label", "Search results")
-                    classes("d-search-results")
-                }) { content() }
+                DomposableHtmlWidthDemandContainer(propagateToParent = false) {
+                    Div(attrs = {
+                        id("$id-results")
+                        attr("role", "dialog")
+                        attr("aria-label", "Search results")
+                        classes("d-search-results")
+                    }) { content() }
+                }
             }
         }
     }

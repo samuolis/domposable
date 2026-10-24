@@ -8,6 +8,7 @@ import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.ui.DomposableButtonProps
 import io.github.samuolis.domposable.ui.DomposableDialogVariant
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
+import io.github.samuolis.domposable.ui.DomposableHtmlWidthDemandContainer
 import io.github.samuolis.domposable.ui.DomposableModalAlignment
 import io.github.samuolis.domposable.ui.DomposableModalLayout
 import io.github.samuolis.domposable.ui.DomposableModifier
@@ -249,10 +250,14 @@ internal fun HtmlModal(
                 if (headerContent == null) {
                     H2(attrs = { id(titleId) }) { Text(title) }
                 } else {
-                    headerContent()
+                    DomposableHtmlWidthDemandContainer(propagateToParent = false) {
+                        headerContent()
+                    }
                 }
             }
-            content()
+            DomposableHtmlWidthDemandContainer(propagateToParent = false) {
+                content()
+            }
             if (headerContent == null) {
                 HtmlButton(
                     DomposableButtonProps({ dismiss() }, style = DomposableButtonStyle.Text),

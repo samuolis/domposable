@@ -45,6 +45,7 @@ import io.github.samuolis.domposable.ui.DomposableHtmlMenuAnchor
 import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacement
 import io.github.samuolis.domposable.ui.DomposableHtmlMenuPlacementHint
 import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
+import io.github.samuolis.domposable.ui.DomposableHtmlWidthDemandContainer
 import io.github.samuolis.domposable.ui.DomposableImageProps
 import io.github.samuolis.domposable.ui.DomposableLabelProps
 import io.github.samuolis.domposable.ui.DomposableLazyItem
@@ -111,6 +112,19 @@ private fun HtmlSurfaceBorderOverlay(appearance: DomposableSurfaceAppearance) {
             property("border-radius", "inherit")
         }
     }) { }
+}
+
+private fun StyleScope.applyFillWidthDemand(widthDemandPx: Double?) {
+    when {
+        widthDemandPx == Double.POSITIVE_INFINITY -> {
+            property("width", "100%")
+        }
+
+        widthDemandPx != null -> {
+            property("max-width", "100%")
+            property("min-width", "min(100%, ${widthDemandPx}px)")
+        }
+    }
 }
 
 private const val HTML_MENU_VIEWPORT_MARGIN = 8.0
@@ -198,21 +212,24 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-layout-column")
-                        style {
-                            property("display", "flex")
-                            property("flex-direction", "column")
-                            property(
-                                "row-gap",
-                                "${props.gap.value}px",
-                            )
-                            property("align-items", props.alignment.css())
-                            property("justify-content", props.arrangement.css())
-                        }
-                    }) { content() }
+                DomposableHtmlWidthDemandContainer(modifier = modifier) { fillWidthDemandPx ->
+                    DomposableHtmlModifiers(modifier) {
+                        Div(attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-layout-column")
+                            style {
+                                applyFillWidthDemand(fillWidthDemandPx)
+                                property("display", "flex")
+                                property("flex-direction", "column")
+                                property(
+                                    "row-gap",
+                                    "${props.gap.value}px",
+                                )
+                                property("align-items", props.alignment.css())
+                                property("justify-content", props.arrangement.css())
+                            }
+                        }) { content() }
+                    }
                 }
             },
             row = {
@@ -237,27 +254,34 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             }
                         }
                     }
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-row")
-                        if (horizontalScroll) attr("data-domposable-horizontal-scroll", "true")
-                        if (props.stretch) classes("d-row-stretch")
-                        style {
-                            property("display", "flex")
-                            property("min-width", "0")
-                            if (horizontalScroll) {
-                                property("width", "max-content")
-                                property("min-width", "100%")
+                DomposableHtmlWidthDemandContainer(
+                    modifier = modifier,
+                    sumSiblingRequestsWithGapPx = if (horizontalScroll) null else props.gap.value.toDouble(),
+                ) { fillWidthDemandPx ->
+                    DomposableHtmlModifiers(modifier) {
+                        Div(attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-row")
+                            if (horizontalScroll) attr("data-domposable-horizontal-scroll", "true")
+                            if (props.stretch) classes("d-row-stretch")
+                            style {
+                                property("display", "flex")
+                                property("min-width", "0")
+                                if (horizontalScroll) {
+                                    property("width", "max-content")
+                                    property("min-width", "100%")
+                                } else {
+                                    applyFillWidthDemand(fillWidthDemandPx)
+                                }
+                                property(
+                                    "column-gap",
+                                    "${props.gap.value}px",
+                                )
+                                property("align-items", if (props.stretch) "stretch" else props.alignment.css())
+                                property("justify-content", props.arrangement.css())
                             }
-                            property(
-                                "column-gap",
-                                "${props.gap.value}px",
-                            )
-                            property("align-items", if (props.stretch) "stretch" else props.alignment.css())
-                            property("justify-content", props.arrangement.css())
-                        }
-                    }) { content() }
+                        }) { content() }
+                    }
                 }
             },
             flowRow = {
@@ -265,23 +289,26 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-row", "d-flow-row")
-                        style {
-                            property("display", "flex")
-                            property("min-width", "0")
-                            property("flex-wrap", "wrap")
-                            property(
-                                "column-gap",
-                                "${props.gap.value}px",
-                            )
-                            property("row-gap", "${props.rowGap.value}px")
-                            property("justify-content", props.arrangement.css())
-                            property("align-items", props.alignment.css())
-                        }
-                    }) { content() }
+                DomposableHtmlWidthDemandContainer(modifier = modifier) { fillWidthDemandPx ->
+                    DomposableHtmlModifiers(modifier) {
+                        Div(attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-row", "d-flow-row")
+                            style {
+                                property("display", "flex")
+                                property("min-width", "0")
+                                property("flex-wrap", "wrap")
+                                property(
+                                    "column-gap",
+                                    "${props.gap.value}px",
+                                )
+                                property("row-gap", "${props.rowGap.value}px")
+                                applyFillWidthDemand(fillWidthDemandPx)
+                                property("justify-content", props.arrangement.css())
+                                property("align-items", props.alignment.css())
+                            }
+                        }) { content() }
+                    }
                 }
             },
             link = { props, modifier, _ -> HtmlDomposableLink(props, modifier) },
@@ -290,18 +317,21 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                 modifier,
                 content,
                 ->
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-box")
-                        style {
-                            property("display", "grid")
-                            property("position", "relative")
-                            property("grid-template-columns", "minmax(0,1fr)")
-                            property("justify-items", props.alignment.css())
-                            property("align-items", props.verticalAlignment.css())
-                        }
-                    }) { content() }
+                DomposableHtmlWidthDemandContainer(modifier = modifier) { fillWidthDemandPx ->
+                    DomposableHtmlModifiers(modifier) {
+                        Div(attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-box")
+                            style {
+                                applyFillWidthDemand(fillWidthDemandPx)
+                                property("display", "grid")
+                                property("position", "relative")
+                                property("grid-template-columns", "minmax(0,1fr)")
+                                property("justify-items", props.alignment.css())
+                                property("align-items", props.verticalAlignment.css())
+                            }
+                        }) { content() }
+                    }
                 }
             },
             lazyColumn = { props, modifier, _ ->
@@ -812,142 +842,147 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                             null
                         }
                 val borderWidth = if (borderColor != null) appearance.borderWidth.value else 0f
-                DomposableHtmlModifiers(modifier) {
-                    Div(attrs = {
-                        domposableAttributes(modifier)
-                        classes("d-card", "d-card-${props.variant.name.lowercase()}")
-                        style {
-                            if (modifier.hasExplicitHtmlHeight()) property("height", "100%")
-                            property("background-color", cardContainer.css())
-                            property("--d-card-container", cardContainer.css())
-                            property("--d-card-border-color", borderColor?.css() ?: "transparent")
-                            property("--d-card-border-width", "${borderWidth}px")
-                            props.contentPadding?.let { property("padding", it.cssPadding()) }
-                            appearance.content?.let { property("color", it.css()) }
-                            when (props.variant) {
-                                io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
-                                    Unit
-                                }
+                DomposableHtmlWidthDemandContainer(modifier = modifier) { fillWidthDemandPx ->
+                    DomposableHtmlModifiers(modifier) {
+                        Div(attrs = {
+                            domposableAttributes(modifier)
+                            classes("d-card", "d-card-${props.variant.name.lowercase()}")
+                            style {
+                                applyFillWidthDemand(fillWidthDemandPx)
+                                if (modifier.hasExplicitHtmlHeight()) property("height", "100%")
+                                property("background-color", cardContainer.css())
+                                property("--d-card-container", cardContainer.css())
+                                property("--d-card-border-color", borderColor?.css() ?: "transparent")
+                                property("--d-card-border-width", "${borderWidth}px")
+                                props.contentPadding?.let { property("padding", it.cssPadding()) }
+                                appearance.content?.let { property("color", it.css()) }
+                                when (props.variant) {
+                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Filled -> {
+                                        Unit
+                                    }
 
-                                io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {
+                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Elevated -> {
+                                        property(
+                                            "box-shadow",
+                                            "0 1px 3px rgb(0 0 0 / .24)",
+                                        )
+                                    }
+
+                                    io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined -> {
+                                        Unit
+                                    }
+                                }
+                                appearance.shape?.let { materialShape(it) }
+                                    ?: tokens.shapes.medium?.let { materialShape(it) }
+                                appearance.shadowElevation?.let {
                                     property(
                                         "box-shadow",
-                                        "0 1px 3px rgb(0 0 0 / .24)",
+                                        if (it.value ==
+                                            0f
+                                        ) {
+                                            "none"
+                                        } else {
+                                            "var(--d-card-shadow,0 ${it.value}px ${it.value * 2f}px rgb(0 0 0 / .12))"
+                                        },
                                     )
                                 }
+                                appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
+                            }
+                            if (props.href != null && !enabled) {
+                                attr("role", "link")
+                                attr("aria-disabled", "true")
+                                attr("tabindex", "-1")
+                            }
+                            if (props.href == null && props.actionLabel.isNullOrEmpty()) {
+                                props.onClick?.let { click ->
+                                    attr("role", "button")
+                                    if (enabled) attr("tabindex", "0") else attr("aria-disabled", "true")
+                                    onClick { event ->
+                                        if (enabled) {
+                                            val target = event.target as? Element
+                                            val interactive =
+                                                target?.closest(
+                                                    "a[href],button,input,select,textarea,label,summary," +
+                                                        "[contenteditable='true'],[role=button],[role=link]," +
+                                                        "[role=checkbox],[role=radio],[role=switch]," +
+                                                        "[role=menuitem],[role=tab]",
+                                                ) as? Element
+                                            if (interactive == null ||
+                                                interactive == event.currentTarget as? HTMLElement
+                                            ) {
+                                                click()
+                                            }
+                                        }
+                                    }
+                                    onKeyDown {
+                                        if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement)) {
+                                            when (it.key) {
+                                                "Enter" -> {
+                                                    it.preventDefault()
+                                                    if (enabled) click()
+                                                }
 
-                                io.github.samuolis.domposable.foundation.DomposableCardVariant.Outlined -> {
-                                    Unit
-                                }
-                            }
-                            appearance.shape?.let { materialShape(it) }
-                                ?: tokens.shapes.medium?.let { materialShape(it) }
-                            appearance.shadowElevation?.let {
-                                property(
-                                    "box-shadow",
-                                    if (it.value ==
-                                        0f
-                                    ) {
-                                        "none"
-                                    } else {
-                                        "var(--d-card-shadow,0 ${it.value}px ${it.value * 2f}px rgb(0 0 0 / .12))"
-                                    },
-                                )
-                            }
-                            appearance.textAppearance?.let { applyCatalogTextAppearance(it) }
-                        }
-                        if (props.href != null && !enabled) {
-                            attr("role", "link")
-                            attr("aria-disabled", "true")
-                            attr("tabindex", "-1")
-                        }
-                        if (props.href == null && props.actionLabel.isNullOrEmpty()) {
-                            props.onClick?.let { click ->
-                                attr("role", "button")
-                                if (enabled) attr("tabindex", "0") else attr("aria-disabled", "true")
-                                onClick { event ->
-                                    if (enabled) {
-                                        val target = event.target as? Element
-                                        val interactive =
-                                            target?.closest(
-                                                "a[href],button,input,select,textarea,label,summary," +
-                                                    "[contenteditable='true'],[role=button],[role=link]," +
-                                                    "[role=checkbox],[role=radio],[role=switch]," +
-                                                    "[role=menuitem],[role=tab]",
-                                            ) as? Element
-                                        if (interactive == null ||
-                                            interactive == event.currentTarget as? HTMLElement
+                                                " " -> {
+                                                    it.preventDefault()
+                                                }
+                                            }
+                                        }
+                                    }
+                                    onKeyUp {
+                                        if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement) &&
+                                            it.key == " "
                                         ) {
-                                            click()
+                                            it.preventDefault()
+                                            if (enabled) click()
                                         }
-                                    }
-                                }
-                                onKeyDown {
-                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement)) {
-                                        when (it.key) {
-                                            "Enter" -> {
-                                                it.preventDefault()
-                                                if (enabled) click()
-                                            }
-
-                                            " " -> {
-                                                it.preventDefault()
-                                            }
-                                        }
-                                    }
-                                }
-                                onKeyUp {
-                                    if ((it.target as? HTMLElement) == (it.currentTarget as? HTMLElement) &&
-                                        it.key == " "
-                                    ) {
-                                        it.preventDefault()
-                                        if (enabled) click()
                                     }
                                 }
                             }
-                        }
-                    }) {
-                        if (props.href == null && !props.actionLabel.isNullOrEmpty()) {
-                            props.onClick?.let { click ->
-                                Button(attrs = {
-                                    attr("type", "button")
-                                    props.actionLabel?.let { label -> attr("aria-label", label) }
-                                    if (!enabled) disabled()
-                                    classes("d-card-stretched-action")
-                                    onClick { if (enabled) click() }
+                        }) {
+                            if (props.href == null && !props.actionLabel.isNullOrEmpty()) {
+                                props.onClick?.let { click ->
+                                    Button(attrs = {
+                                        attr("type", "button")
+                                        props.actionLabel?.let { label -> attr("aria-label", label) }
+                                        if (!enabled) disabled()
+                                        classes("d-card-stretched-action")
+                                        onClick { if (enabled) click() }
+                                    }) { }
+                                }
+                            }
+                            props.href?.let(::safeDomposableHref)?.takeIf { enabled }?.let { href ->
+                                val action = props.onClick
+                                A(href = href, attrs = {
+                                    classes("d-card-stretched-link")
+                                    props.actionLabel?.takeIf(String::isNotEmpty)?.let { attr("aria-label", it) }
+                                        ?: attr("aria-labelledby", cardContentId)
+                                    onClick { event ->
+                                        val modified =
+                                            listOf(
+                                                event.ctrlKey,
+                                                event.metaKey,
+                                                event.shiftKey,
+                                                event.altKey,
+                                            ).any { it }
+                                        val unmodifiedPrimaryClick = !modified && event.button.toInt() == 0
+                                        if (enabled && unmodifiedPrimaryClick && action != null) {
+                                            event.preventDefault()
+                                            action()
+                                        }
+                                    }
                                 }) { }
                             }
-                        }
-                        props.href?.let(::safeDomposableHref)?.takeIf { enabled }?.let { href ->
-                            val action = props.onClick
-                            A(href = href, attrs = {
-                                classes("d-card-stretched-link")
-                                props.actionLabel?.takeIf(String::isNotEmpty)?.let { attr("aria-label", it) }
-                                    ?: attr("aria-labelledby", cardContentId)
-                                onClick { event ->
-                                    val modified =
-                                        listOf(
-                                            event.ctrlKey,
-                                            event.metaKey,
-                                            event.shiftKey,
-                                            event.altKey,
-                                        ).any { it }
-                                    val unmodifiedPrimaryClick = !modified && event.button.toInt() == 0
-                                    if (enabled && unmodifiedPrimaryClick && action != null) {
-                                        event.preventDefault()
-                                        action()
-                                    }
+                            Div(attrs = {
+                                id(cardContentId)
+                                classes("d-card-content")
+                                if (modifier.hasExplicitHtmlHeight()) style { property("height", "100%") }
+                                if (props.href == null &&
+                                    (props.onClick == null || props.actionLabel.isNullOrEmpty())
+                                ) {
+                                    style { property("pointer-events", "auto") }
                                 }
-                            }) { }
+                            }) { content() }
                         }
-                        Div(attrs = {
-                            id(cardContentId)
-                            classes("d-card-content")
-                            if (modifier.hasExplicitHtmlHeight()) style { property("height", "100%") }
-                            if (props.href == null && (props.onClick == null || props.actionLabel.isNullOrEmpty())) {
-                                style { property("pointer-events", "auto") }
-                            }
-                        }) { content() }
                     }
                 }
             },
@@ -1436,27 +1471,29 @@ actual fun rememberDomposableMaterialComponents(): DomposableComponents =
                                 property("pointer-events", "auto")
                             }
                         }) {
-                            DomposableHtmlModifiers(menuModifier) {
-                                Div(attrs = {
-                                    attr("role", "menu")
-                                    attr("aria-label", "Menu")
-                                    domposableAttributes(modifier)
-                                    classes("d-menu-popup")
-                                    style {
-                                        property("gap", "${props.contentSpacing.value}px")
-                                        surfaceAppearance(appearance)
+                            DomposableHtmlWidthDemandContainer(propagateToParent = false) {
+                                DomposableHtmlModifiers(menuModifier) {
+                                    Div(attrs = {
+                                        attr("role", "menu")
+                                        attr("aria-label", "Menu")
+                                        domposableAttributes(modifier)
+                                        classes("d-menu-popup")
+                                        style {
+                                            property("gap", "${props.contentSpacing.value}px")
+                                            surfaceAppearance(appearance)
+                                        }
+                                    }) {
+                                        props.items.forEach { item ->
+                                            HtmlDropdownMenuItem(
+                                                item.copy(onClick = {
+                                                    requestDismiss()
+                                                    item.onClick()
+                                                }),
+                                                DomposableModifier,
+                                            )
+                                        }
+                                        content()
                                     }
-                                }) {
-                                    props.items.forEach { item ->
-                                        HtmlDropdownMenuItem(
-                                            item.copy(onClick = {
-                                                requestDismiss()
-                                                item.onClick()
-                                            }),
-                                            DomposableModifier,
-                                        )
-                                    }
-                                    content()
                                 }
                             }
                         }
