@@ -140,8 +140,7 @@ class NativeTabsInteractionTest {
                     .onNodeWithTag(
                         if (matchContent) "$id-label" else "$id-selected",
                         useUnmergedTree = true,
-                    )
-                    .getUnclippedBoundsInRoot()
+                    ).getUnclippedBoundsInRoot()
                     .let { it.right - it.left }
             val pixels = compose.onNodeWithTag("$id-row").captureToImage().toPixelMap()
             val indicatorWidth = pixels.longestHorizontalRun(Color(0xFFFF0000)).toFloat()
