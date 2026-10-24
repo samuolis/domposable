@@ -122,6 +122,40 @@ class HtmlNestedColumnWidthTest {
                 root.parentNode?.removeChild(root)
             }
         }
+
+    @Test
+    fun weightedNestedRowsStayInsideTheirSiblingBounds() =
+        runTest {
+            val root = document.createElement("div") as HTMLElement
+            document.body!!.appendChild(root)
+            val composition = renderComposable(root) { WeightedRowOverlapFixture() }
+
+            try {
+                settleWidthDemand(root)
+
+                fun bounds(testId: String) =
+                    (root.querySelector("[data-testid=$testId]") as HTMLElement).getBoundingClientRect()
+
+                val row = bounds("weighted-row")
+                val leading = bounds("leading-slot")
+                val roster = bounds("roster-row")
+                val alex = bounds("alex-column")
+                val taylor = bounds("taylor-column")
+                val rating = bounds("rating-slot")
+
+                assertEquals(358.0, row.width, "fixed phone-width host")
+                assertEquals(row.left, leading.left, "leading slot starts at row edge")
+                assertTrue(leading.right <= roster.left + 1.0, "roster starts after the leading slot")
+                assertTrue(roster.right <= rating.left + 1.0, "roster ends before the rating slot")
+                assertTrue(alex.right <= taylor.left + 1.0, "weighted member columns do not overlap")
+                assertTrue(taylor.right <= roster.right + 1.0, "members stay inside the roster row")
+                assertTrue(rating.width < 150.0, "unweighted card keeps its intrinsic width")
+                assertEquals(row.right, rating.right, "rating slot ends at row edge")
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+            }
+        }
 }
 
 private suspend fun settleWidthDemand(root: HTMLElement) {

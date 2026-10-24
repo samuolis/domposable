@@ -16,6 +16,7 @@ import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.minHeight
 import io.github.samuolis.domposable.ui.padding
 import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.weight
 import io.github.samuolis.domposable.ui.width
 
 internal data class NestedColumnWidthExpectation(
@@ -259,6 +260,44 @@ internal fun NestedColumnWidthFixture(showFill: Boolean) {
                             DomposableCard(
                                 modifier = DomposableModifier.fillMaxWidth().testId("dynamic-fill-card"),
                             ) { DomposableText("Dynamic fill") }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun WeightedRowOverlapFixture() {
+    DomposableMaterialTheme {
+        DomposableBox(modifier = DomposableModifier.width(DomposableLength(358f)).testId("row-host")) {
+            DomposableRow(
+                modifier = DomposableModifier.fillMaxWidth().testId("weighted-row"),
+                gap = DomposableLength(8f),
+            ) {
+                DomposableBox(
+                    modifier = DomposableModifier.width(DomposableLength(44f)).testId("leading-slot"),
+                ) {
+                    DomposableText("#3")
+                }
+                DomposableRow(
+                    modifier = DomposableModifier.weight(1f).testId("roster-row"),
+                    gap = DomposableLength(8f),
+                ) {
+                    DomposableColumn(modifier = DomposableModifier.weight(1f).testId("alex-column")) {
+                        DomposableText("Alex Morgan", modifier = DomposableModifier.testId("alex-name"))
+                    }
+                    DomposableColumn(modifier = DomposableModifier.weight(1f).testId("taylor-column")) {
+                        DomposableText("Taylor Reed", modifier = DomposableModifier.testId("taylor-name"))
+                    }
+                }
+                DomposableCard(modifier = DomposableModifier.testId("rating-slot")) {
+                    DomposableColumn {
+                        DomposableText("1,528")
+                        DomposableRow(gap = DomposableLength(4f)) {
+                            DomposableText("Elo")
+                            DomposableText("ⓘ")
                         }
                     }
                 }

@@ -55,4 +55,29 @@ class NativeNestedColumnWidthTest {
             }
         }
     }
+
+    @Test
+    fun weightedNestedRowsStayInsideTheirSiblingBounds() {
+        compose.setContent { WeightedRowOverlapFixture() }
+
+        fun bounds(testId: String) = compose.onNodeWithTag(testId).getUnclippedBoundsInRoot()
+
+        val row = bounds("weighted-row")
+        val leading = bounds("leading-slot")
+        val roster = bounds("roster-row")
+        val alex = bounds("alex-column")
+        val taylor = bounds("taylor-column")
+        val rating = bounds("rating-slot")
+
+        compose.runOnIdle {
+            assertEquals(358f, row.right.value - row.left.value, 1f)
+            assertEquals(row.left.value, leading.left.value, 1f)
+            assertTrue(leading.right.value <= roster.left.value + 1f, "roster starts after the leading slot")
+            assertTrue(roster.right.value <= rating.left.value + 1f, "roster ends before the rating slot")
+            assertTrue(alex.right.value <= taylor.left.value + 1f, "weighted member columns do not overlap")
+            assertTrue(taylor.right.value <= roster.right.value + 1f, "members stay inside the roster row")
+            assertTrue(rating.right.value - rating.left.value < 150f, "unweighted card keeps its intrinsic width")
+            assertEquals(row.right.value, rating.right.value, 1f)
+        }
+    }
 }
