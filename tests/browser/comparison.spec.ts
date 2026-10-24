@@ -31,8 +31,9 @@ test('component comparison initializes equal theme and state routes in both fram
   await page.goto('/compare/');
   await page.getByLabel('Preview width', { exact: true }).selectOption('640');
   await page.getByLabel('Feature', { exact: true }).selectOption('compare/states');
-  await page.getByLabel('Component theme', { exact: true }).selectOption('brand-dark');
   const html = page.frameLocator('iframe[title="Domposable semantic HTML preview"]');
+  await expect(html.getByRole('heading', { name: 'states · light', exact: true })).toBeVisible();
+  await page.getByLabel('Component theme', { exact: true }).selectOption('brand-dark');
   await expect(html.getByRole('heading', { name: 'states · brand-dark', exact: true })).toBeVisible();
   await expect(html.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true })).toBeDisabled();
   await expect(html.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true })).toBeChecked();
