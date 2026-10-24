@@ -1,8 +1,10 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
@@ -11,6 +13,7 @@ import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -22,7 +25,6 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
@@ -82,7 +84,9 @@ class NativeTabsInteractionTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     @Config(qualifiers = "w360dp-h800dp-mdpi")
+    @Suppress("LongMethod") // Compare both width modes under fixed and scrollable Material rows.
     fun primaryIndicatorUsesTheRequestedLabelOrTabWidthForFixedAndScrollableRows() {
         val cases =
             listOf(
@@ -95,12 +99,17 @@ class NativeTabsInteractionTest {
             DomposableMaterialTheme {
                 Column {
                     cases.forEach { (id, scrollable, matchContent) ->
-                        val label = "$id selected"
+                        val label = "Selected"
                         DomposableTabs(
                             items =
                                 listOf(
                                     DomposableTabItem("before", "Before"),
-                                    DomposableTabItem("selected", label, testTag = "$id-selected"),
+                                    DomposableTabItem(
+                                        "selected",
+                                        label,
+                                        testTag = "$id-selected",
+                                        labelContent = { Text(label, Modifier.testTag("$id-label")) },
+                                    ),
                                     DomposableTabItem("after", "After"),
                                 ),
                             selectedIndex = 1,
@@ -127,21 +136,13 @@ class NativeTabsInteractionTest {
 
         cases.forEach { (id, _, matchContent) ->
             val selectedWidth =
-                if (matchContent) {
-                    compose.onNodeWithText("$id selected", useUnmergedTree = true).getUnclippedBoundsInRoot().let {
-                        it.right - it.left
-                    }
-                } else {
-                    compose.onNodeWithTag("$id-selected").getUnclippedBoundsInRoot().let {
-                        it.right - it.left
-                    }
-                }
-            val indicatorWidth =
-                compose.onNodeWithTag("$id-row")
-                    .captureToImage()
-                    .toPixelMap()
-                    .longestHorizontalRun(Color(0xFFFF0000))
-                    .toFloat()
+                compose
+                    .onNodeWithTag(
+                        if (matchContent) "$id-label" else "$id-selected",
+                        useUnmergedTree = true,
+                    ).getUnclippedBoundsInRoot().let { it.right - it.left }
+            val pixels = compose.onNodeWithTag("$id-row").captureToImage().toPixelMap()
+            val indicatorWidth = pixels.longestHorizontalRun(Color(0xFFFF0000)).toFloat()
 
             assertEquals(selectedWidth.value, indicatorWidth, 2f, "$id indicator width")
         }

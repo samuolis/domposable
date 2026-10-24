@@ -61,11 +61,12 @@ class NativeModalHeaderTest {
                     onDismiss = {},
                     modifier = DomposableModifier.testId("capped-dialog"),
                     variant = DomposableDialogVariant.Basic,
-                    layout = DomposableModalLayout(
-                        heightFraction = 1f,
-                        maxHeight = 220.dp,
-                        maxViewportFraction = 0.75f,
-                    ),
+                    layout =
+                        DomposableModalLayout(
+                            heightFraction = 1f,
+                            maxHeight = 220.dp,
+                            maxViewportFraction = 0.75f,
+                        ),
                 ) {
                     DomposableBox(DomposableModifier.fillMaxSize()) { Text("Visible content") }
                 }
