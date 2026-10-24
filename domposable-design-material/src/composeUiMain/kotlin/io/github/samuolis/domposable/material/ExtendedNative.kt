@@ -300,8 +300,9 @@ internal fun NativeFloatingActionButton(
             }
         }
     }
-    if (props.extended) {
+    if (props.extended || props.size == DomposableFabSize.Standard) {
         ExtendedFloatingActionButton(
+            expanded = props.extended,
             onClick = props.onClick,
             modifier = nativeModifier,
             icon = content,

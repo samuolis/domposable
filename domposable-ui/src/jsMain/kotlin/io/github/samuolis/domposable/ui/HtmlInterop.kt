@@ -170,6 +170,19 @@ fun DomposableHtmlModifiers(
     decorationRenderer: DomposableHtmlModifierDecorationRenderer? = null,
     content: @Composable () -> Unit,
 ) {
+    DomposableHtmlWidthDemandModifierOwner(modifier) {
+        HtmlScopedModifiers(modifier, wrapSemantics, operationRenderer, decorationRenderer, content)
+    }
+}
+
+@Composable
+private fun HtmlScopedModifiers(
+    modifier: DomposableModifier,
+    wrapSemantics: Boolean,
+    operationRenderer: DomposableHtmlModifierElementRenderer?,
+    decorationRenderer: DomposableHtmlModifierDecorationRenderer?,
+    content: @Composable () -> Unit,
+) {
     val renderer = operationRenderer ?: LocalDomposableHtmlModifierRenderer.current
     val decoration = decorationRenderer ?: LocalDomposableHtmlModifierDecorationRenderer.current
     val layout = modifier.elements.filter(::isChildLayoutOperation)
@@ -183,52 +196,78 @@ fun DomposableHtmlModifiers(
                 )
         }
     val pointerPassthrough = visual.contains(DomposableModifierOperation.PointerPassthrough)
+    val fillWidthDemanded = DomposableHtmlWidthDemandRequested()
     val stackingOrder = layout.sumOf { if (it is DomposableModifierOperation.ZIndex) it.value.toDouble() else 0.0 }
-    if (layout.isEmpty()) {
-        HtmlModifierBox(visual, 0, renderer, decoration, false, false, pointerPassthrough, wrapSemantics, content)
-    } else {
-        Div(attrs = {
-            attr("data-domposable-layout-item", "true")
-            if (layout.any { it is DomposableModifierOperation.Weight && it.fill }) {
-                attr("data-domposable-weight-fill", "true")
-            }
-            if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
-            style {
-                childLayoutSizing(visual)
-                property("box-sizing", "border-box")
-                property("display", "grid")
-                property("grid-template-columns", "minmax(0, 1fr)")
-                layout.forEach { element ->
-                    when (element) {
-                        is DomposableModifierOperation.Weight -> {
-                            property("min-width", "0")
-                            property("min-height", "0")
-                            property("flex-grow", element.weight.toString())
-                            property("flex-shrink", if (element.fill) "1" else "0")
-                            // Percent basis keeps intrinsic content when the document axis is unbounded.
-                            property("flex-basis", if (element.fill) "0%" else "auto")
-                        }
+    DomposableHtmlWidthDemandModifiers(modifier) {
+        if (layout.isEmpty()) {
+            HtmlModifierBox(
+                visual,
+                0,
+                renderer,
+                decoration,
+                false,
+                fillWidthDemanded,
+                pointerPassthrough,
+                wrapSemantics,
+                content,
+            )
+        } else {
+            Div(attrs = {
+                attr("data-domposable-layout-item", "true")
+                if (layout.any { it is DomposableModifierOperation.Weight && it.fill }) {
+                    attr("data-domposable-weight-fill", "true")
+                }
+                if (pointerPassthrough) attr("data-domposable-pointer-passthrough", "")
+                style {
+                    childLayoutSizing(visual)
+                    property("box-sizing", "border-box")
+                    property("display", "grid")
+                    property("grid-template-columns", "minmax(0, 1fr)")
+                    if (fillWidthDemanded) property("width", "100%")
+                    layout.forEach { element ->
+                        when (element) {
+                            is DomposableModifierOperation.Weight -> {
+                                property("min-width", "0")
+                                property("min-height", "0")
+                                property("flex-grow", element.weight.toString())
+                                property("flex-shrink", if (element.fill) "1" else "0")
+                                // Percent basis keeps intrinsic content when the document axis is unbounded.
+                                property("flex-basis", if (element.fill) "0%" else "auto")
+                            }
 
-                        is DomposableModifierOperation.AxisAlignment -> {
-                            property("align-self", element.alignment.css())
-                        }
+                            is DomposableModifierOperation.AxisAlignment -> {
+                                property("align-self", element.alignment.css())
+                            }
 
-                        is DomposableModifierOperation.BoxAlignment -> {
-                            property("place-self", "${element.vertical.css()} ${element.horizontal.css()}")
-                        }
+                            is DomposableModifierOperation.BoxAlignment -> {
+                                property("place-self", "${element.vertical.css()} ${element.horizontal.css()}")
+                            }
 
-                        is DomposableModifierOperation.ZIndex -> {
-                            property("position", "relative")
-                            property("z-index", stackingOrder.toString())
-                        }
+                            is DomposableModifierOperation.ZIndex -> {
+                                property("position", "relative")
+                                property("z-index", stackingOrder.toString())
+                            }
 
-                        else -> {
-                            error("Unexpected child layout modifier element: $element")
+                            else -> {
+                                error("Unexpected child layout modifier element: $element")
+                            }
                         }
                     }
                 }
+            }) {
+                HtmlModifierBox(
+                    visual,
+                    0,
+                    renderer,
+                    decoration,
+                    true,
+                    fillWidthDemanded,
+                    pointerPassthrough,
+                    wrapSemantics,
+                    content,
+                )
             }
-        }) { HtmlModifierBox(visual, 0, renderer, decoration, true, false, pointerPassthrough, wrapSemantics, content) }
+        }
     }
 }
 
@@ -282,6 +321,7 @@ private fun HtmlModifierBox(
                     DomposableModifierOperation.FillWidth,
                     is DomposableModifierOperation.Width,
                     is DomposableModifierOperation.FillWidthFraction,
+                    is DomposableModifierOperation.MaxWidth,
                     -> {
                         true
                     }
@@ -301,6 +341,7 @@ private fun HtmlModifierBox(
                 }
             } == DomposableModifierOperation.FillWidth
     val inheritedWidth = fillAvailableWidth || fillWidthAhead
+    val cappedFillWidth = DomposableHtmlWidthDemandValue()?.takeIf { it.isFinite() }
     if (operation == null) {
         val decoration = decorationRenderer?.invoke(element)
         if (decoration != null) {
@@ -501,7 +542,12 @@ private fun HtmlModifierBox(
                 }
 
                 is DomposableModifierOperation.MaxWidth -> {
-                    property("max-width", "${operation.length.value}px")
+                    if (cappedFillWidth != null) {
+                        property("width", "${minOf(cappedFillWidth, operation.length.value.toDouble())}px")
+                        property("max-width", "100%")
+                    } else {
+                        property("max-width", "${operation.length.value}px")
+                    }
                 }
 
                 is DomposableModifierOperation.FillWidthFraction -> {
