@@ -1702,6 +1702,8 @@ internal fun NativeTabs(
                     } else {
                         item.border
                     }
+                val borderWidth =
+                    if (selected) appearance.selectedBorderWidth ?: appearance.borderWidth else appearance.borderWidth
                 val tabModifier =
                     Modifier
                         .focusRequester(focusRequesters[index])
@@ -1743,21 +1745,13 @@ internal fun NativeTabs(
                         .then(appearance.shape?.let { Modifier.clip(it.nativeShape()) } ?: Modifier)
                         .then(background?.let { Modifier.background(it.nativeColor()) } ?: Modifier)
                         .then(
-                            border?.let {
+                            border?.takeIf { borderWidth.value > 0f }?.let {
                                 Modifier.border(
-                                    (
-                                        if (selected) {
-                                            appearance.selectedBorderWidth
-                                                ?: appearance.borderWidth
-                                        } else {
-                                            appearance.borderWidth
-                                        }
-                                    ).value.dp,
+                                    borderWidth.value.dp,
                                     it.nativeColor(),
                                     appearance.shape?.nativeShape() ?: MaterialTheme.shapes.small,
                                 )
-                            }
-                                ?: Modifier,
+                            } ?: Modifier,
                         )
                 val text: @Composable () -> Unit = {
                     Box(
