@@ -143,6 +143,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -1869,6 +1870,7 @@ internal fun NativeTabs(
                                     tabsAppearance?.indicatorMatchContent
                                         ?: (tabsAppearance?.indicatorThickness == null),
                             ),
+                        width = Dp.Unspecified,
                         height = tabsAppearance?.indicatorThickness?.value?.dp ?: 3.dp,
                         color =
                             (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()
@@ -1937,6 +1939,7 @@ internal fun NativeTabs(
                                     tabsAppearance?.indicatorMatchContent
                                         ?: (tabsAppearance?.indicatorThickness == null),
                             ),
+                        width = Dp.Unspecified,
                         height = tabsAppearance?.indicatorThickness?.value?.dp ?: 3.dp,
                         color =
                             (if (selectedTabDisabled) item.disabledSelectedBorder else null)?.nativeColor()

@@ -1,5 +1,27 @@
 import { test, expect } from '@playwright/test';
 
+test('provider-only cards keep their themed keyboard focus ring', async ({ page }, testInfo) => {
+  await page.goto('/#/catalog');
+  await expect(page.getByTestId('themed-action')).toBeVisible();
+  await page.evaluate(() => {
+    const root = document.createElement('div');
+    root.id = 'provider-card-fixture';
+    root.style.cssText = '--d-primary:#77503b;--d-variant:#fff;--d-radius:12px;--d-spacing:16px;padding:8px;background:#f8f1e8;position:fixed;top:12px;left:12px;z-index:99999';
+    root.innerHTML = '<div id="provider-card" class="d-card" role="button" tabindex="0">Open details</div>';
+    document.body.appendChild(root);
+  });
+  const card = page.locator('#provider-card');
+  expect(await card.evaluate(element => Boolean(element.closest('.d-theme')))).toBe(false);
+  await page.keyboard.press('Tab');
+  await card.focus();
+  await expect(card).toBeFocused();
+  await expect(card).toHaveCSS('outline-style', 'solid');
+  await expect(card).toHaveCSS('outline-width', '3px');
+  await expect(card).toHaveCSS('outline-color', 'rgb(119, 80, 59)');
+  await expect(card).toHaveCSS('outline-offset', '3px');
+  await page.locator('#provider-card-fixture').screenshot({path: testInfo.outputPath('provider-only-card-focus.png')});
+});
+
 test('component theme styles the real HTML button and loading retains its dimensions', async ({ page }) => {
   await page.goto('/#/catalog');
   const button = page.getByTestId('themed-action');

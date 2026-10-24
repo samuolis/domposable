@@ -52,6 +52,32 @@ class NativeModalHeaderTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    @Config(qualifiers = "w600dp-h960dp-mdpi")
+    fun viewportHeightRequestRespectsTheModalHeightCaps() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableDialog(
+                    title = "Capped dialog",
+                    onDismiss = {},
+                    modifier = DomposableModifier.testId("capped-dialog"),
+                    variant = DomposableDialogVariant.Basic,
+                    layout = DomposableModalLayout(
+                        heightFraction = 1f,
+                        maxHeight = 220.dp,
+                        maxViewportFraction = 0.75f,
+                    ),
+                ) {
+                    DomposableBox(DomposableModifier.fillMaxSize()) { Text("Visible content") }
+                }
+            }
+        }
+
+        val bounds = compose.onNodeWithTag("capped-dialog").getUnclippedBoundsInRoot()
+        assertEquals(220f, (bounds.bottom - bounds.top).value, 1f)
+        compose.onNodeWithText("Visible content").assertIsDisplayed()
+    }
+
+    @Test
     fun modalSheetContentRemainsVisibleAfterMaterialPositionsIt() = assertPositionedSheet(modal = true)
 
     @Test

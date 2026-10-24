@@ -328,9 +328,6 @@ private fun Modifier.modalLayout(layout: DomposableModalLayout): Modifier {
     if (layout.fillViewportWidth) {
         result = result.width((viewportWidth - inset * 2).coerceAtLeast(0.dp))
     }
-    layout.heightFraction?.let {
-        result = result.height((viewportHeight * it - inset * 2).coerceAtLeast(0.dp))
-    }
     val viewportMax =
         layout.maxViewportFraction?.let {
             minOf(viewportHeight * it, viewportHeight - inset * 2).coerceAtLeast(0.dp)
@@ -343,6 +340,9 @@ private fun Modifier.modalLayout(layout: DomposableModalLayout): Modifier {
             else -> explicitMax
         }
     maximum?.let { result = result.heightIn(max = it) }
+    layout.heightFraction?.let {
+        result = result.height((viewportHeight * it - inset * 2).coerceAtLeast(0.dp))
+    }
     return result
 }
 

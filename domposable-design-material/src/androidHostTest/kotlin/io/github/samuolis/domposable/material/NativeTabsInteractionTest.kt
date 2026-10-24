@@ -1,8 +1,10 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
@@ -17,8 +19,10 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
@@ -27,11 +31,15 @@ import androidx.compose.ui.unit.LayoutDirection
 import io.github.samuolis.domposable.foundation.DomposableColor
 import io.github.samuolis.domposable.foundation.DomposableItemAppearance
 import io.github.samuolis.domposable.foundation.DomposableItemColors
+import io.github.samuolis.domposable.foundation.DomposableLength
 import io.github.samuolis.domposable.ui.DomposableForm
+import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTabItem
 import io.github.samuolis.domposable.ui.DomposableTabs
 import io.github.samuolis.domposable.ui.DomposableTabsActivation
 import io.github.samuolis.domposable.ui.DomposableTabsAppearance
+import io.github.samuolis.domposable.ui.testId
+import io.github.samuolis.domposable.ui.width
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,6 +79,72 @@ class NativeTabsInteractionTest {
             .performClick()
         compose.runOnIdle { assertEquals(listOf(0), selected) }
         compose.onNodeWithTag("locked-tab").assertIsNotEnabled()
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h800dp-mdpi")
+    fun primaryIndicatorUsesTheRequestedLabelOrTabWidthForFixedAndScrollableRows() {
+        val cases =
+            listOf(
+                Triple("fixed-label", false, true),
+                Triple("fixed-tab", false, false),
+                Triple("scrollable-label", true, true),
+                Triple("scrollable-tab", true, false),
+            )
+        compose.setContent {
+            DomposableMaterialTheme {
+                Column {
+                    cases.forEach { (id, scrollable, matchContent) ->
+                        val label = "$id selected"
+                        DomposableTabs(
+                            items =
+                                listOf(
+                                    DomposableTabItem("before", "Before"),
+                                    DomposableTabItem("selected", label, testTag = "$id-selected"),
+                                    DomposableTabItem("after", "After"),
+                                ),
+                            selectedIndex = 1,
+                            onSelect = {},
+                            modifier = DomposableModifier.width(DomposableLength(300f)).testId("$id-row"),
+                            appearance =
+                                DomposableItemAppearance(
+                                    borderWidth = DomposableLength(0f),
+                                    selectedBorderWidth = DomposableLength(0f),
+                                    colors = DomposableItemColors(selectedBorder = DomposableColor(0xFFFF0000)),
+                                ),
+                            scrollable = scrollable,
+                            tabsAppearance =
+                                DomposableTabsAppearance(
+                                    indicatorThickness = DomposableLength(3f),
+                                    indicatorMatchContent = matchContent,
+                                    scrollableEdgePadding = DomposableLength(0f),
+                                ),
+                        )
+                    }
+                }
+            }
+        }
+
+        cases.forEach { (id, _, matchContent) ->
+            val selectedWidth =
+                if (matchContent) {
+                    compose.onNodeWithText("$id selected", useUnmergedTree = true).getUnclippedBoundsInRoot().let {
+                        it.right - it.left
+                    }
+                } else {
+                    compose.onNodeWithTag("$id-selected").getUnclippedBoundsInRoot().let {
+                        it.right - it.left
+                    }
+                }
+            val indicatorWidth =
+                compose.onNodeWithTag("$id-row")
+                    .captureToImage()
+                    .toPixelMap()
+                    .longestHorizontalRun(Color(0xFFFF0000))
+                    .toFloat()
+
+            assertEquals(selectedWidth.value, indicatorWidth, 2f, "$id indicator width")
+        }
     }
 
     @Test
@@ -221,4 +295,21 @@ class NativeTabsInteractionTest {
         compose.onNodeWithTag("rtl-last-tab").assertIsFocused()
         compose.runOnIdle { assertEquals(emptyList(), selected) }
     }
+}
+
+private fun androidx.compose.ui.graphics.PixelMap.longestHorizontalRun(color: Color): Int {
+    val expected = color.toArgb()
+    var longest = 0
+    for (y in 0 until height) {
+        var current = 0
+        for (x in 0 until width) {
+            if (this[x, y].toArgb() == expected) {
+                current++
+                longest = maxOf(longest, current)
+            } else {
+                current = 0
+            }
+        }
+    }
+    return longest
 }
