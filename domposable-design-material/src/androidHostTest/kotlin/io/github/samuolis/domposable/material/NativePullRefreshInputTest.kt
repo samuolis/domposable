@@ -62,6 +62,7 @@ class NativePullRefreshInputTest {
     @Test
     fun touchPullStillRequestsRefresh() {
         var refreshes = 0
+        var progress = 0f
         compose.setContent {
             DomposableMaterialTheme {
                 DomposablePullToRefresh(
@@ -69,6 +70,7 @@ class NativePullRefreshInputTest {
                     onRefresh = { refreshes++ },
                     label = "Refresh",
                     modifier = DomposableModifier.fillMaxSize().testId("pull"),
+                    indicatorContent = { state -> SideEffect { progress = state.progress } },
                 ) {
                     Column(
                         Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
@@ -86,5 +88,10 @@ class NativePullRefreshInputTest {
         pull.performTouchInput { up() }
         compose.waitForIdle()
         compose.runOnIdle { assertEquals(1, refreshes) }
+        pull.performMouseInput { scroll(-5000f) }
+        compose.runOnIdle {
+            assertEquals(1, refreshes)
+            assertEquals(0f, progress)
+        }
     }
 }
