@@ -133,10 +133,10 @@ queries. These are Kotlin/JS HTML host helpers, so native adapters keep their na
 layout implementation. The same CSS controls live HTML and exported snapshots:
 there is no second export-only layout rule. Presets remain application-owned.
 
-Theme styles must also be valid before startup. HTML hosts that generate stylesheet
-rules can obtain declarations from `domposableTokenCssVariables(tokens)`, the same
-mapping used by `domposableTokenVariables(tokens)`, rather than copying a palette.
-The application owns its brand colors and selection/system-theme policy.
+The exported document keeps the appearance it was captured with. If the application
+selects another system or saved theme at startup, a theme change can occur. The exporter
+does not infer alternative colors from serialized values; use the application's existing
+theme implementation rather than maintaining a second exported palette.
 
 Test the resulting files with JavaScript disabled at phone/desktop widths and
 light/dark appearance, then test the live controls with JavaScript enabled.

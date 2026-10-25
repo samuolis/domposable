@@ -57,6 +57,3 @@ final fun (org.jetbrains.compose.web.attributes/AttrsScope<*>).io.github.samuoli
 
 // Targets: [js]
 final fun (org.jetbrains.compose.web.attributes/AttrsScope<org.w3c.dom/HTMLElement>).io.github.samuolis.domposable.material/domposableTokenVariables(io.github.samuolis.domposable.foundation/DomposableTokens) // io.github.samuolis.domposable.material/domposableTokenVariables|domposableTokenVariables@org.jetbrains.compose.web.attributes.AttrsScope<org.w3c.dom.HTMLElement>(io.github.samuolis.domposable.foundation.DomposableTokens){}[0]
-
-// Targets: [js]
-final fun io.github.samuolis.domposable.material/domposableTokenCssVariables(io.github.samuolis.domposable.foundation/DomposableTokens): kotlin.collections/Map<kotlin/String, kotlin/String> // io.github.samuolis.domposable.material/domposableTokenCssVariables|domposableTokenCssVariables(io.github.samuolis.domposable.foundation.DomposableTokens){}[0]
