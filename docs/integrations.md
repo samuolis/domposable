@@ -105,17 +105,19 @@ KSP does not infer injection or enforce MVI. Injection defaults remain in ordina
 
 ## Public-page export without Kobweb
 
-Applications that already own their routes can use Domposable's standalone Node
-[page exporter](https://github.com/samuolis/domposable/tree/main/tools/page-export).
-It runs the existing browser renderer with caller-owned Playwright, serializes HTML/CSS,
-validates public metadata and records a content-hashed inventory. It does not add an SSR
-server, hydration engine or another feature-screen implementation.
+Applications that already own their routes can register the `ExportSite` task from
+`io.github.samuolis.domposable:domposable-export-gradle` in their Kotlin Gradle build.
+Consumers configure the production build directory, canonical origin and public paths;
+they do not write exporter JavaScript or maintain an npm project. The task bundles the
+reviewed exporter and lockfile and manages Playwright, Chromium and the temporary server.
+Node 22+ with npm and Java 21+ are build-machine prerequisites. See the complete
+[Kotlin Gradle setup](https://github.com/samuolis/domposable/tree/main/tools/page-export).
+The artifact is planned for the next minor release; it is not yet published.
 
-The exporter is a private, source-distributed Node package, independent of Maven runtime
-artifacts. Install an immutable GitHub source archive for the reviewed commit, rather
-than a moving branch; npm records its integrity in the consumer lockfile. For local
-consumer verification, run `npm pack --pack-destination /tmp` and install that tarball.
-Browser test dependencies are development-only and are excluded from consumer installs.
+The task serializes HTML/CSS, validates public metadata and records a content-hashed
+inventory. It does not add an SSR server, hydration engine or another feature-screen
+implementation. Node hosts that need custom capture hooks can also use the standalone
+source-distributed package pinned to an immutable GitHub archive.
 
 The host must supply only anonymous public paths and own data freshness, visibility
 checks, error responses, canonical URLs and refresh scheduling. Dynamic routes are

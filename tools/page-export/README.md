@@ -2,33 +2,78 @@
 
 Build-time prerendering of existing Compose HTML pages. This is a Node build tool,
 not a Kotlin runtime dependency, an SSR server or a hydration implementation.
-The host supplies a Playwright browser, explicit public paths, data policy and readiness.
+The host supplies a built application directory, explicit public paths and data policy.
 It renders the same screens used by the application, serializes generated CSS, validates
 content/metadata and writes HTML plus a content-hashed `domposable-export.json` inventory.
 
-```js
-import {chromium} from '@playwright/test';
-import {exportPages} from '@samuolis/domposable-page-export';
+## Kotlin Gradle setup
 
-const browser = await chromium.launch();
-try {
-  await exportPages({
-    browser,
-    baseUrl:'http://127.0.0.1:4173', // host serves the production app shell
-    canonicalOrigin:'https://example.com',
-    outputDir:'build/site',
-    pages:[{path:'/about/'}, {path:'/events/summer-cup', revision:'public-data-hash'}],
-    ready:async page => {
-      await page.locator('main h1').waitFor();
-      await page.waitForFunction(() => !document.querySelector('main [aria-busy="true"]'));
-    },
-  });
-} finally { await browser.close(); }
+Add the task artifact to the build script classpath and register an export task in the
+web application's `build.gradle.kts`. The artifact below is planned for the next minor
+release (0.22.0); it is not yet published.
+
+```kotlin
+import io.github.samuolis.domposable.export.ExportSite
+
+buildscript {
+    repositories { mavenCentral() }
+    dependencies {
+        classpath("io.github.samuolis.domposable:domposable-export-gradle:0.22.0")
+    }
+}
+
+tasks.register<ExportSite>("exportPublicPages") {
+    dependsOn("jsBrowserDistribution")
+    directory.set(layout.buildDirectory.dir("dist/js/productionExecutable"))
+    canonicalOrigin.set("https://example.com")
+    pages.addAll("/about/", "/events/summer-cup")
+}
 ```
+
+Run `./gradlew exportPublicPages`. Consumers write no exporter JavaScript, npm package
+or server setup. The published task bundles the exporter and lockfile, installs its
+pinned Playwright dependency and Chromium, then owns the temporary server/browser.
+Node 22+ with npm and Java 21+ must be installed on the build machine; first setup
+requires network access. The task runs every time because public data can change
+without an application rebuild. The task also supports Gradle's configuration cache.
+
+`pages` is a Gradle `ListProperty<String>`, so public event paths can be supplied by
+a Kotlin provider instead of a hardcoded list. The application still owns anonymous
+route discovery and publication policy. This task does not discover private routes.
+
+`outputDirectory` defaults to `directory`; set it for separately stored snapshots.
+`rootSelector` defaults to `#root`, and `markerAttribute` defaults to
+`data-domposable-prerender`. The exporter waits for a nonempty `h1` and no busy content
+inside that root. Metadata must already be supplied by the application. The original
+`index.html` is saved as `app-shell.html`, so subsequent exports start from the
+clean application rather than a previous snapshot. Keep this file with the build.
+
+## Advanced Node integrations
+
+Hosts that already maintain a Node build pipeline or need application-specific browser
+hooks can use the source-distributed package. Install an immutable source archive and
+Playwright as development dependencies, then install Chromium with
+`npx playwright install chromium --only-shell`.
+
+```js
+import {exportSite} from '@samuolis/domposable-page-export';
+
+await exportSite({
+  directory:'build/site',
+  canonicalOrigin:'https://example.com',
+  pages:['/about/', '/events/summer-cup'],
+});
+```
+
+Dynamic entries may instead be objects containing `path`, `locale` and an opaque
+`revision`. Advanced hosts with an existing server/browser can use
+`exportPages({browser, baseUrl, canonicalOrigin, outputDir, pages, ...hooks})`;
+its `pages` entries are objects.
 
 Each page gets a fresh anonymous context. Export only routes whose data is public;
 never pass share tokens or viewer sessions. The optional `prepareContext(context, entry)`
-hook lets the host select anonymous API endpoints; `settled(page, entry)` can enforce its
+hook lets the host select anonymous API endpoints; `ready(page, entry)` overrides
+the default content wait; `settled(page, entry)` can enforce its
 existing resource-readiness checks. These hooks must not install authenticated state.
 Same-origin images must decode. Remote avatars do not block export; use `settled` if
 the host requires particular remote artwork to be ready.

@@ -1,11 +1,51 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {mkdtemp, readFile, rm} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {chromium} from '@playwright/test';
-import {exportPages, pageFile} from './index.mjs';
+import {exportSite, exportPages, pageFile} from './index.mjs';
+
+test('exportSite owns lifecycle, waits for content, serves assets and reuses the original shell', async () => {
+  const directory = await mkdtemp(join(tmpdir(),'domposable-site-test-'));
+  const shell = `<!doctype html><html><head><title>Example</title><meta name="description" content="Example page"><link rel="canonical"></head><body><div id="root" aria-busy="true"></div><script src="/app.js"></script></body></html>`;
+  let capturedPage;
+  let sourceUrl;
+  const options = {directory,canonicalOrigin:'https://example.com',pages:['/about/'],
+    settled:async page => { capturedPage = page; sourceUrl = page.url(); }};
+  try {
+    await writeFile(join(directory,'index.html'),shell);
+    await writeFile(join(directory,'data.json'),JSON.stringify({title:'First render'}));
+    await writeFile(join(directory,'app.js'),`fetch('/data.json').then(x=>x.json()).then(data=>setTimeout(()=>{
+      document.querySelector('link[rel="canonical"]').href='https://example.com'+location.pathname;
+      const root=document.querySelector('#root'); root.innerHTML='<h1>'+data.title+'</h1>'; setTimeout(()=>root.removeAttribute('aria-busy'),100);
+    },100));`);
+    const first = await exportSite({...options,settled:async page=>{
+      await options.settled(page);
+      assert.equal(await page.locator('#root').getAttribute('aria-busy'),null);
+    }});
+    assert.equal(first.pages[0].title,'Example');
+    assert.match(await readFile(join(directory,'about/index.html'),'utf8'), /<h1>First render<\/h1>/);
+    assert.equal(await readFile(join(directory,'app-shell.html'),'utf8'),shell);
+    assert.equal(capturedPage.isClosed(),true);
+    await assert.rejects(fetch(sourceUrl));
+    await writeFile(join(directory,'data.json'),JSON.stringify({title:'Second render'}));
+    await exportSite({...options,pages:['/']});
+    assert.match(await readFile(join(directory,'index.html'),'utf8'), /<h1>Second render<\/h1>/);
+    await assert.rejects(readFile(join(directory,'about/index.html')),{code:'ENOENT'});
+    await writeFile(join(directory,'data.json'),JSON.stringify({title:'Third render'}));
+    await exportSite({...options,pages:['/']});
+    const previous = await readFile(join(directory,'index.html'),'utf8');
+    assert.match(previous, /<h1>Third render<\/h1>/);
+    await assert.rejects(exportSite({...options,pages:[{path:'/',revision:'updated'}],settled:async page=>{
+      capturedPage = page; sourceUrl = page.url(); throw new Error('Host policy rejected');
+    }}), /Host policy rejected/);
+    assert.equal(await readFile(join(directory,'index.html'),'utf8'),previous);
+    assert.equal(capturedPage.isClosed(),true);
+    await assert.rejects(fetch(sourceUrl));
+  } finally { await rm(directory,{recursive:true,force:true}); }
+});
 
 test('export paths cannot escape the artifact or include viewer-specific URL state', () => {
   assert.equal(pageFile('/events/42'), join('events','42','index.html'));

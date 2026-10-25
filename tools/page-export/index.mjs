@@ -1,8 +1,67 @@
 import {createHash} from 'node:crypto';
-import {mkdir, mkdtemp, readFile, rename, rm, writeFile} from 'node:fs/promises';
-import {dirname, join, resolve} from 'node:path';
+import {mkdir, mkdtemp, readFile, realpath, rename, rm, writeFile} from 'node:fs/promises';
+import {createServer} from 'node:http';
+import {dirname, extname, join, resolve, sep} from 'node:path';
 
 const manifestName = 'domposable-export.json';
+const contentTypes = {'.html':'text/html', '.js':'application/javascript', '.mjs':'application/javascript',
+  '.css':'text/css', '.json':'application/json', '.wasm':'application/wasm', '.svg':'image/svg+xml',
+  '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.webp':'image/webp',
+  '.gif':'image/gif', '.ico':'image/x-icon', '.woff':'font/woff', '.woff2':'font/woff2', '.ttf':'font/ttf'};
+
+/** Export a built application. Own the temporary server/browser; keep the original shell for reruns. */
+export async function exportSite({directory, canonicalOrigin, pages, outputDir = directory,
+  root = '#root', markerAttribute = 'data-domposable-prerender', ready, prepareContext, settled}) {
+  const entries = pages.map(page => typeof page === 'string' ? {path:page} : page);
+  const routes = new Set(entries.map(entry => { pageFile(entry.path); return entry.path; }));
+  const source = await realpath(directory);
+  const shellFile = join(source, 'app-shell.html');
+  let shell;
+  try { shell = await readFile(shellFile, 'utf8'); }
+  catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    shell = await readFile(join(source, 'index.html'), 'utf8');
+    if (/data-(?:domposable|public)-prerender/.test(shell) || shell.includes(markerAttribute + '=')) {
+      throw new Error('Export requires the original application shell');
+    }
+    await writeFile(shellFile, shell, {flag:'wx'});
+  }
+  const server = createServer(async (request, response) => {
+    try {
+      const path = new URL(request.url, 'http://localhost').pathname;
+      if (routes.has(path)) {
+        response.writeHead(200, {'content-type':'text/html'}); response.end(shell); return;
+      }
+      const file = await realpath(resolve(source, '.' + decodeURIComponent(path)));
+      if (!file.startsWith(source + sep)) { response.writeHead(403); response.end(); return; }
+      const body = await readFile(file);
+      response.writeHead(200, {'content-type':contentTypes[extname(file)] ?? 'application/octet-stream'});
+      response.end(body);
+    } catch { response.writeHead(404); response.end(); }
+  });
+  let browser;
+  try {
+    await new Promise((resolve, reject) => {
+      server.once('error', reject); server.listen(0, '127.0.0.1', resolve);
+    });
+    const {chromium} = await import('playwright');
+    browser = await chromium.launch({headless:true});
+    return await exportPages({browser, baseUrl:`http://127.0.0.1:${server.address().port}`,
+      canonicalOrigin, outputDir, pages:entries, root, markerAttribute, prepareContext, settled,
+      ready:ready ?? (page => page.waitForFunction(selector => {
+        const host = document.querySelector(selector);
+        return host?.querySelector('h1')?.textContent.trim() && !host.matches('[aria-busy="true"]') &&
+          !host.querySelector('[aria-busy="true"]');
+      }, root)),
+    });
+  } finally {
+    try { await browser?.close(); }
+    finally {
+      server.closeAllConnections();
+      if (server.listening) await new Promise(resolve => server.close(resolve));
+    }
+  }
+}
 
 /** Export paths are canonical public paths, never viewer-specific URLs or filesystem paths. */
 export function pageFile(path) {

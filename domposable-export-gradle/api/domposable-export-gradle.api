@@ -1,0 +1,14 @@
+public abstract class io/github/samuolis/domposable/export/ExportSite : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public final fun export ()V
+	public abstract fun getCanonicalOrigin ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	protected abstract fun getExecOperations ()Lorg/gradle/process/ExecOperations;
+	public abstract fun getMarkerAttribute ()Lorg/gradle/api/provider/Property;
+	public abstract fun getNodeExecutable ()Lorg/gradle/api/provider/Property;
+	public abstract fun getNpmExecutable ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPages ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getRootSelector ()Lorg/gradle/api/provider/Property;
+}
+
