@@ -5,7 +5,7 @@ consumer setup is a Kotlin Gradle `ExportSite` task and a `public-pages.txt` fil
 no user-written exporter JavaScript or npm project is required.
 
 See the [complete setup and limitations](https://github.com/samuolis/domposable/blob/main/docs/page-export.md).
-The Gradle artifact is planned for the next minor release and is not yet published.
+Use a published Gradle artifact version 0.22.0 or later.
 
 ## Advanced Node integrations
 

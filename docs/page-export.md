@@ -10,8 +10,9 @@ content/metadata and writes HTML plus a content-hashed `domposable-export.json` 
 ## Kotlin Gradle setup
 
 Add the task artifact to the build script classpath and register an export task in the
-web application's `build.gradle.kts`. The artifact below is planned for the next minor
-release (0.22.0); it is not yet published.
+web application's `build.gradle.kts`. This task requires version 0.22.0
+or later. Check [Releases](https://github.com/samuolis/domposable/releases) for
+published versions; the example uses the first release containing the task.
 
 ```kotlin
 import io.github.samuolis.domposable.export.ExportSite

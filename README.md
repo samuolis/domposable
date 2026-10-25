@@ -36,7 +36,7 @@ Domposable is a Kotlin Multiplatform UI library with optional integration helper
 - **A replaceable design system** — scoped brand styles and typed renderers; customize one control or supply a complete provider.
 - **Adaptive layouts** — measure the space a feature receives and choose breakpoints, panes and layout recipes.
 - **Optional Material design system** — standard Material 3 components, selected expressive components and variants, with scoped theme styles. [Catalog and configuration](docs/material-catalog.md).
-- **Build-time public HTML export** — Kotlin Gradle setup and a TXT route list; captures existing marketing and public event screens with content, metadata and generated CSS. [Setup and limitations](docs/page-export.md). Planned for the next minor release; not yet published.
+- **Build-time public HTML export** — Kotlin Gradle setup and a TXT route list; captures existing marketing and public event screens with content, metadata and generated CSS. [Setup and limitations](docs/page-export.md). Requires version 0.22.0 or later; check [Releases](https://github.com/samuolis/domposable/releases) for published versions.
 - **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
 
 The supported baseline uses stable Compose Multiplatform core; optional design mappings do not force an alpha core upgrade. See [tested versions and upgrade policy](docs/compatibility.md).
@@ -246,7 +246,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 
 | Artifact | Purpose |
 | --- | --- |
-| `domposable-export-gradle` | Build-time public HTML/CSS export from Kotlin Gradle and a TXT route list; planned for the next minor release |
+| `domposable-export-gradle` | Build-time public HTML/CSS export from Kotlin Gradle and a TXT route list; available from 0.22.0 |
 
 ## Documentation
 

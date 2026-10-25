@@ -112,7 +112,8 @@ they do not write exporter JavaScript or maintain an npm project. The task bundl
 reviewed exporter and lockfile and manages Playwright, Chromium and the temporary server.
 Node 22+ with npm and Java 21+ are build-machine prerequisites. See the complete
 [Kotlin Gradle and TXT setup](page-export.md).
-The artifact is planned for the next minor release; it is not yet published.
+The artifact requires version 0.22.0 or later; check
+[Releases](https://github.com/samuolis/domposable/releases) for published versions.
 
 The task serializes HTML/CSS, validates public metadata and records a content-hashed
 inventory. It does not add an SSR server, hydration engine or another feature-screen
