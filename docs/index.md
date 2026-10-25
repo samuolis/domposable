@@ -8,7 +8,7 @@ Android and iOS render Compose UI. Kotlin/JS emits semantic HTML with browser li
 
 [Get started](getting-started.md) · [Try the component playground](https://samuolis.github.io/domposable/demo/) · [Open the storefront](https://samuolis.github.io/domposable/shop/) · [Compare HTML and Wasm](compare.md)
 
-The [0.9.0 demo measurement](how-it-works.md#code-sharing-and-responsive-layouts) includes shared features and platform hosts. Actual sharing depends on your app’s native integrations and custom renderers. Domposable’s HTML target is a client-rendered SPA; it does not support SSR.
+The [0.9.0 demo measurement](how-it-works.md#code-sharing-and-responsive-layouts) includes shared features and platform hosts. Actual sharing depends on your app’s native integrations and custom renderers. Domposable’s HTML target is a client-rendered SPA. The optional [public-page exporter](page-export.md) captures existing pages at build time through Kotlin Gradle and a TXT route list; it does not provide SSR. The exporter is planned for the next minor release and is not yet published.
 
 ## See a complete feature
 

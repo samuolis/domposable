@@ -27,5 +27,7 @@ tasks.register<ExportSite>("exportPublicPages") {
     directory.set(layout.buildDirectory.dir("site"))
     outputDirectory.set(layout.buildDirectory.dir("exported"))
     canonicalOrigin.set("https://example.com")
-    pages.addAll("/about/", "/events/42")
+    pagesFile.set(
+        layout.projectDirectory.file(providers.gradleProperty("export.pagesFile").getOrElse("public-pages.txt")),
+    )
 }

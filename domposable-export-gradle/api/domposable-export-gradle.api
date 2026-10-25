@@ -9,6 +9,7 @@ public abstract class io/github/samuolis/domposable/export/ExportSite : org/grad
 	public abstract fun getNpmExecutable ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getPages ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getPagesFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getRootSelector ()Lorg/gradle/api/provider/Property;
 }
 

@@ -1,6 +1,6 @@
 # Getting started
 
-**Web rendering:** Domposable uses Compose HTML to render a single-page application (SPA) in the browser. It does not provide server-side rendering (SSR). JavaScript must run to compose feature content. Hash/path URLs and static hosting entry pages do not change this rendering model.
+**Web rendering:** Domposable uses Compose HTML to render a single-page application (SPA) in the browser. It does not provide server-side rendering (SSR). JavaScript composes feature content. The optional [public-page exporter](page-export.md) runs that renderer at build time and writes HTML/CSS for explicit public routes, so those snapshots can show content before JavaScript starts. Export is not SSR; hash/path URLs and ordinary static hosting entry pages alone do not prerender content.
 
 Add `mavenCentral()` and `google()` to your repositories. Use the current version from [Releases](https://github.com/samuolis/domposable/releases); `0.0.0` is an unpublished development baseline.
 

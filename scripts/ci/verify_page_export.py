@@ -30,3 +30,14 @@ for entry, title in zip(manifest['pages'], ['About', 'Event 42']):
     assert '<button inert="">' in html
     assert f'href="https://example.com{entry["path"]}"' in html
 print('Published Kotlin Gradle consumer: both routes and configuration-cache reuse verified')
+inventory = (output / 'domposable-export.json').read_bytes()
+invalid = output.parent / 'invalid-public-pages.txt'
+for contents, message in [('# Only comments\n\n', 'Declare public pages'),
+                          ('/events/42?share=secret\n', 'Invalid export path')]:
+    invalid.write_text(contents)
+    failed = subprocess.run(command + [f'-Pexport.pagesFile={invalid}'], cwd=root,
+                            text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    assert failed.returncode != 0, failed.stdout
+    assert message in failed.stdout, failed.stdout
+    assert (output / 'domposable-export.json').read_bytes() == inventory
+print('TXT configuration: comments, blank lines, empty input and unsafe routes verified')

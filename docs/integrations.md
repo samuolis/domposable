@@ -107,11 +107,11 @@ KSP does not infer injection or enforce MVI. Injection defaults remain in ordina
 
 Applications that already own their routes can register the `ExportSite` task from
 `io.github.samuolis.domposable:domposable-export-gradle` in their Kotlin Gradle build.
-Consumers configure the production build directory, canonical origin and public paths;
+Consumers configure the production build directory, canonical origin and a `public-pages.txt` route list;
 they do not write exporter JavaScript or maintain an npm project. The task bundles the
 reviewed exporter and lockfile and manages Playwright, Chromium and the temporary server.
 Node 22+ with npm and Java 21+ are build-machine prerequisites. See the complete
-[Kotlin Gradle setup](https://github.com/samuolis/domposable/tree/main/tools/page-export).
+[Kotlin Gradle and TXT setup](page-export.md).
 The artifact is planned for the next minor release; it is not yet published.
 
 The task serializes HTML/CSS, validates public metadata and records a content-hashed

@@ -3,10 +3,13 @@ package io.github.samuolis.domposable.export
 import groovy.json.JsonOutput
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -31,6 +34,11 @@ abstract class ExportSite : DefaultTask() {
     @get:Input
     abstract val pages: ListProperty<String>
 
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val pagesFile: RegularFileProperty
+
     @get:Input
     abstract val rootSelector: Property<String>
 
@@ -52,6 +60,7 @@ abstract class ExportSite : DefaultTask() {
         outputDirectory.convention(directory)
         rootSelector.convention("#root")
         markerAttribute.convention("data-domposable-prerender")
+        pages.convention(emptyList())
         nodeExecutable.convention("node")
         npmExecutable.convention(if (System.getProperty("os.name").startsWith("Windows")) "npm.cmd" else "npm")
         outputs.upToDateWhen { false }
@@ -59,7 +68,15 @@ abstract class ExportSite : DefaultTask() {
 
     @TaskAction
     fun export() {
-        require(pages.get().isNotEmpty()) { "Declare at least one public page to export" }
+        val publicPages =
+            pages.get() +
+                pagesFile.orNull
+                    ?.asFile
+                    ?.readLines()
+                    .orEmpty()
+                    .map(String::trim)
+                    .filter { it.isNotEmpty() && !it.startsWith("#") }
+        require(publicPages.isNotEmpty()) { "Declare public pages using pagesFile or pages" }
         val runtime = temporaryDir.resolve("runtime")
         for (name in listOf(
             "package.json",
@@ -81,7 +98,7 @@ abstract class ExportSite : DefaultTask() {
                     "directory" to directory.get().asFile.absolutePath,
                     "outputDir" to outputDirectory.get().asFile.absolutePath,
                     "canonicalOrigin" to canonicalOrigin.get(),
-                    "pages" to pages.get(),
+                    "pages" to publicPages,
                     "root" to rootSelector.get(),
                     "markerAttribute" to markerAttribute.get(),
                 ),
