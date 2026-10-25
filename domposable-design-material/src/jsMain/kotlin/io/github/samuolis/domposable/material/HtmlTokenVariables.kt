@@ -5,12 +5,22 @@ import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.DomposableTypographyRole
 import org.jetbrains.compose.web.attributes.AttrsScope
-import org.jetbrains.compose.web.css.StyleScope
 import org.w3c.dom.HTMLElement
 
 /** Applies Domposable custom properties to an existing HTML host. */
 fun AttrsScope<HTMLElement>.domposableTokenVariables(tokens: DomposableTokens) {
-    style { applyTokenVariables(tokens) }
+    style { domposableTokenCssVariables(tokens).forEach { (name, value) -> property(name, value) } }
+}
+
+/** CSS declarations from the same token mapping used by HTML hosts, for generated theme stylesheets. */
+fun domposableTokenCssVariables(tokens: DomposableTokens): Map<String, String> =
+    buildMap { applyTokenVariables(tokens) }
+
+private fun MutableMap<String, String>.property(
+    name: String,
+    value: String,
+) {
+    put(name, value)
 }
 
 private data class CssTokenColors(
@@ -18,7 +28,7 @@ private data class CssTokenColors(
     val fallbacks: List<DomposableColor?>,
 )
 
-private fun StyleScope.applyTokenVariables(tokens: DomposableTokens) {
+private fun MutableMap<String, String>.applyTokenVariables(tokens: DomposableTokens) {
     val colors = tokens.colors.withMaterialColorDefaults()
     applyCoreColorTokens(colors)
     applyFixedColorTokens(colors)
@@ -27,7 +37,9 @@ private fun StyleScope.applyTokenVariables(tokens: DomposableTokens) {
     applyShapeTokens(tokens)
 }
 
-private fun StyleScope.applyCoreColorTokens(colors: io.github.samuolis.domposable.foundation.DomposableColors) {
+private fun MutableMap<String, String>.applyCoreColorTokens(
+    colors: io.github.samuolis.domposable.foundation.DomposableColors,
+) {
     val variables =
         listOf(
             CssTokenColors("--d-primary", listOf(colors.primary)),
@@ -77,7 +89,9 @@ private fun StyleScope.applyCoreColorTokens(colors: io.github.samuolis.domposabl
     applyColorVariables(variables)
 }
 
-private fun StyleScope.applyFixedColorTokens(colors: io.github.samuolis.domposable.foundation.DomposableColors) {
+private fun MutableMap<String, String>.applyFixedColorTokens(
+    colors: io.github.samuolis.domposable.foundation.DomposableColors,
+) {
     val variables =
         listOf(
             CssTokenColors("--d-primary-fixed", listOf(colors.primaryFixed, colors.primaryContainer, colors.primary)),
@@ -129,13 +143,13 @@ private fun StyleScope.applyFixedColorTokens(colors: io.github.samuolis.domposab
     applyColorVariables(variables)
 }
 
-private fun StyleScope.applyColorVariables(variables: List<CssTokenColors>) {
+private fun MutableMap<String, String>.applyColorVariables(variables: List<CssTokenColors>) {
     variables.forEach { variable ->
         property(variable.name, variable.fallbacks.firstNotNullOf { it }.css())
     }
 }
 
-private fun StyleScope.applyTypographyTokens(tokens: DomposableTokens) {
+private fun MutableMap<String, String>.applyTypographyTokens(tokens: DomposableTokens) {
     val typography = tokens.typography
     property("--d-font", typography.fontFamily)
     property("--d-body", "${typography.bodySize}px")
@@ -154,7 +168,7 @@ private fun StyleScope.applyTypographyTokens(tokens: DomposableTokens) {
     }
 }
 
-private fun StyleScope.applyTypographyRole(
+private fun MutableMap<String, String>.applyTypographyRole(
     prefix: String,
     appearance: DomposableTextAppearance?,
 ) {
@@ -165,14 +179,14 @@ private fun StyleScope.applyTypographyRole(
     appearance?.letterSpacing?.let { property("$prefix-letter-spacing", "${it}px") }
 }
 
-private fun StyleScope.applyMetricTokens(tokens: DomposableTokens) {
+private fun MutableMap<String, String>.applyMetricTokens(tokens: DomposableTokens) {
     property("--d-spacing", "${tokens.spacing.medium.value}px")
     property("--d-radius", "${tokens.radius.value}px")
     property("--d-elevation", "${tokens.elevation.value}px")
     property("--d-motion", "${tokens.motionDurationMillis}ms")
 }
 
-private fun StyleScope.applyShapeTokens(tokens: DomposableTokens) {
+private fun MutableMap<String, String>.applyShapeTokens(tokens: DomposableTokens) {
     property("--d-shape-extra-small", tokens.shapes.extraSmall?.cssRadius() ?: "4px")
     property("--d-shape-small", tokens.shapes.small?.cssRadius() ?: "8px")
     property("--d-shape-medium", tokens.shapes.medium?.cssRadius() ?: "12px")

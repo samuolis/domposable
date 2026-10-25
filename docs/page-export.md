@@ -107,10 +107,39 @@ replace that root when starting, as regular Compose HTML does not hydrate it. Sn
 buttons/form controls are inert; anchors remain usable. Scripts remain in the HTML.
 Exporting does not itself reduce the application's JavaScript payload.
 
-Responsive layouts must be expressed in CSS, and appearance must be valid before app
-startup. Exporting JavaScript-measured inline layout freezes the export viewport. Test
-the resulting files with JavaScript disabled at phone/desktop widths and light/dark
-appearance; then test the live controls with JavaScript enabled.
+## Responsive HTML and appearance
+
+The exporter preserves the HTML renderer's CSS. It does not translate arbitrary
+Kotlin/JavaScript measurement branches into responsive rules. Use the CSS-backed
+HTML host helpers from `domposable-adaptive` when a snapshot must adapt before
+JavaScript starts:
+
+```kotlin
+import io.github.samuolis.domposable.adaptive.DomposableHtmlResponsiveGrid
+import io.github.samuolis.domposable.adaptive.DomposableResponsive
+import io.github.samuolis.domposable.foundation.DomposableLength
+
+DomposableHtmlResponsiveGrid(
+    columns = DomposableResponsive(compact = 1, medium = 2, expanded = 3, large = 4),
+    gap = DomposableLength(16f),
+) {
+    // The existing HTML content.
+}
+```
+
+`DomposableHtmlResponsiveSplit` stacks or splits its slots using container queries;
+`DomposableHtmlResponsiveHeight` selects declared heights with container or viewport
+queries. These are Kotlin/JS HTML host helpers, so native adapters keep their native
+layout implementation. The same CSS controls live HTML and exported snapshots:
+there is no second export-only layout rule. Presets remain application-owned.
+
+Theme styles must also be valid before startup. HTML hosts that generate stylesheet
+rules can obtain declarations from `domposableTokenCssVariables(tokens)`, the same
+mapping used by `domposableTokenVariables(tokens)`, rather than copying a palette.
+The application owns its brand colors and selection/system-theme policy.
+
+Test the resulting files with JavaScript disabled at phone/desktop widths and
+light/dark appearance, then test the live controls with JavaScript enabled.
 
 For changing public data, the host owns discovery, refresh, deletion and visibility
 checks. `revision` is opaque host metadata, not an automatic freshness guarantee.
