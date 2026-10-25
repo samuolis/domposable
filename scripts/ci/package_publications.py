@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from version import read_version
 
 ROOT = Path(__file__).resolve().parents[2]
-MODULES = {"foundation", "ui", "design-material", "adaptive", "screens", "navigation3", "lifecycle-viewmodel", "ksp"}
+MODULES = {"foundation", "ui", "design-material", "adaptive", "screens", "navigation3", "lifecycle-viewmodel", "ksp", "export-gradle"}
 
 def package(repository: Path, target: Path, signed: bool):
     version, _ = read_version(ROOT / "version.properties")

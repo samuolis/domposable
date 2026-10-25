@@ -15,7 +15,7 @@ The 0.9.0 demo shares **90.9% of its application source** across targets. Built-
 Domposable is a Kotlin Multiplatform UI library with optional integration helpers, built on Compose. Feature teams write regular composables with shared components, modifiers and adaptive layouts. An installed design system provider renders those calls as Compose UI on native targets or semantic HTML on Kotlin/JS. The primary web target is HTML; it does not require Wasm.
 
 > [!IMPORTANT]
-> **The HTML target is a client-rendered single-page application (SPA), built on Compose HTML. Domposable does not provide server-side rendering (SSR).** Route URLs and static hosting entry pages do not render feature content on the server. Hosts such as Kobweb may offer their own static pre-rendering; that is a separate integration, not Domposable SSR.
+> **The HTML target is a client-rendered single-page application (SPA), built on Compose HTML. Domposable does not provide server-side rendering (SSR).** Route URLs and static hosting entry pages do not render feature content on the server. The optional [public-page exporter](docs/page-export.md) captures existing pages as HTML/CSS at build time, including explicitly listed event URLs. Configure it in Kotlin Gradle with a TXT route list. This is prerendering, not SSR; it does not guarantee search-engine indexing.
 
 ## Contents
 
@@ -36,6 +36,7 @@ Domposable is a Kotlin Multiplatform UI library with optional integration helper
 - **A replaceable design system** — scoped brand styles and typed renderers; customize one control or supply a complete provider.
 - **Adaptive layouts** — measure the space a feature receives and choose breakpoints, panes and layout recipes.
 - **Optional Material design system** — standard Material 3 components, selected expressive components and variants, with scoped theme styles. [Catalog and configuration](docs/material-catalog.md).
+- **Build-time public HTML export** — Kotlin Gradle setup and a TXT route list; captures existing marketing and public event screens with content, metadata and generated CSS. [Setup and limitations](docs/page-export.md). Requires version 0.22.0 or later; check [Releases](https://github.com/samuolis/domposable/releases) for published versions.
 - **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
 
 The supported baseline uses stable Compose Multiplatform core; optional design mappings do not force an alpha core upgrade. See [tested versions and upgrade policy](docs/compatibility.md).
@@ -241,6 +242,12 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | `domposable-lifecycle-viewmodel` | AndroidX entry ownership and optional state/action helpers |
 | `domposable-ksp` | Generated typed entries and feature entry lists |
 
+### Optional build tooling
+
+| Artifact | Purpose |
+| --- | --- |
+| `domposable-export-gradle` | Build-time public HTML/CSS export from Kotlin Gradle and a TXT route list; available from 0.22.0 |
+
 ## Documentation
 
 | I want to… | Read |
@@ -252,6 +259,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | Adapt a feature to its available space | [Adaptive layouts](docs/adaptive.md) |
 | Build or customize a design system | [Design systems](docs/design-systems.md) |
 | Add screens, Navigation 3 or generated entries | [Screens and navigation](docs/screens.md) |
+| Export marketing and public event pages as HTML | [Public-page export](docs/page-export.md) |
 | Integrate Koin, Metro or Kobweb | [Integrations](docs/integrations.md) |
 | Follow the API/implementation module example | [Modular app walkthrough](docs/modular-demo.md) |
 | Check supported versions and limitations | [Compatibility](docs/compatibility.md) |

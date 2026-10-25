@@ -43,7 +43,7 @@ def expected_paths(policy: dict) -> list[str]:
             f"{module}/api/jvm/{module}.api",
             f"{module}/api/{module}.klib.api",
         ])
-    paths.extend(f"{module}/api/{module}.api" for module in policy["processor_modules"])
+    paths.extend(f"{module}/api/{module}.api" for module in policy["processor_modules"] + policy.get("tooling_modules", []))
     if len(paths) != len(set(paths)) or not paths:
         raise ValueError("Binary API policy must contain distinct published modules.")
     return sorted(paths)
@@ -54,7 +54,7 @@ def inventory(root: Path, policy: dict) -> dict[str, str]:
     actual = {p.relative_to(root).as_posix() for p in root.glob("domposable-*/api/**/*.api")}
     if actual != expected:
         raise ValueError(f"ABI inventory mismatch: missing={sorted(expected - actual)}, unexpected={sorted(actual - expected)}")
-    declared = set(policy["runtime_modules"] + policy["processor_modules"])
+    declared = set(policy["runtime_modules"] + policy["processor_modules"] + policy.get("tooling_modules", []))
     published = {
         p.parent.name for p in root.glob("domposable-*/build.gradle.kts")
         if "alias(libs.plugins.maven.publish)" in p.read_text()
@@ -103,7 +103,7 @@ def report(root: Path, base: str, head: str, release: str | None, output: Path) 
     release_ref = release or latest_release(root, head_sha)
     release_sha = revision(root, release_ref)
     results = {"head": head_sha, "baseline_count": len(current), "comparisons": {}}
-    lines = ["## Binary API review", "", f"Validated inventory: **{len(current)} ABI dumps** across **{len(policy['runtime_modules']) + len(policy['processor_modules'])} published modules**.", "", "Kotlin's `binaryApiCheck` validates compiled signatures against these reviewed baselines. The diffs below describe baseline changes, including previously reviewed unreleased changes; they do not establish semantic or source compatibility.", ""]
+    lines = ["## Binary API review", "", f"Validated inventory: **{len(current)} ABI dumps** across **{len(policy['runtime_modules']) + len(policy['processor_modules']) + len(policy.get('tooling_modules', []))} published modules**.", "", "Kotlin's `binaryApiCheck` validates compiled signatures against these reviewed baselines. The diffs below describe baseline changes, including previously reviewed unreleased changes; they do not establish semantic or source compatibility.", ""]
     output.mkdir(parents=True, exist_ok=True)
     for label, ref, sha in [("pr-base", base, base_sha), ("release", release_ref, release_sha)]:
         changes, diff = compare(dumps_at(root, sha), current)

@@ -52,6 +52,16 @@ class BinaryApiTest(unittest.TestCase):
         self.assertEqual('v0.2.0', report['comparisons']['release']['ref'])
         self.assertEqual([], report['comparisons']['pr-base']['changes'])
 
+    def test_build_tooling_modules_have_reviewed_jvm_dumps(self):
+        self.policy['tooling_modules'] = ['domposable-export-gradle']
+        path = 'domposable-export-gradle/api/domposable-export-gradle.api'
+        self.write('domposable-export-gradle/build.gradle.kts', 'plugins { alias(libs.plugins.maven.publish) }')
+        self.write(path, 'public abstract class test/ExportSite {}')
+        self.assertIn(path, api.inventory(self.root, self.policy))
+        (self.root / path).unlink()
+        with self.assertRaisesRegex(ValueError, 'inventory mismatch'):
+            api.inventory(self.root, self.policy)
+
     def test_removed_signatures_remain_visible_after_baseline_update(self):
         path = 'domposable-ui/api/jvm/domposable-ui.api'
         self.write(path, 'public final class test/Ui {\n}\n')

@@ -130,3 +130,18 @@ DomposableScaffold(topBar = { AppHeader() }) {
 Keep stack/model ownership outside the layout decision. Shrinking from two panes to one hides an entry without popping it. The [navigation recipes](recipes.md) demonstrate drafts surviving width changes and a supporting third pane.
 
 ![Shared shopping UI on mobile and a wide browser](assets/examples/shop-web.png)
+
+
+## Responsive HTML before JavaScript starts
+
+The Kotlin/JS host helpers `DomposableHtmlResponsiveGrid`,
+`DomposableHtmlResponsiveSplit` and `DomposableHtmlResponsiveHeight` express their
+width rules in CSS container or viewport queries. They use the same
+`DomposableResponsive` values and `DomposableBreakpoints` defaults as the shared
+adaptive model. Their emitted HTML/CSS can be [exported at build time](page-export.md)
+and adapts when resized with JavaScript disabled. This avoids capturing a fixed
+layout selected by a browser measurement callback.
+
+Use these helpers inside an HTML adapter; keep shared feature contracts and native
+adapters unchanged. Arbitrary conditional compositions driven by
+`rememberDomposableAdaptiveInfo` still need JavaScript to select another branch.

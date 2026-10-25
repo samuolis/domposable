@@ -27,6 +27,7 @@ include(
     ":domposable-navigation3",
     ":domposable-lifecycle-viewmodel",
     ":domposable-ksp",
+    ":domposable-export-gradle",
     ":demo",
     ":androidApp",
     ":metro-example",

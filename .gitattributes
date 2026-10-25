@@ -1,0 +1,2 @@
+# Kotlin ABI dumps require the generator's final blank line for exact validation.
+domposable-*/api/** whitespace=-blank-at-eof

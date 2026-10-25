@@ -102,3 +102,26 @@ Use `DomposableColumn` for an embedded feature rather than the demo's full-windo
 | Kobweb | Render a JS feature in `@Page`; let its router own URLs | Full static export; three-browser routing, reload, accessibility and pre-rendered content checks |
 
 KSP does not infer injection or enforce MVI. Injection defaults remain in ordinary Kotlin composables; explicit models and factories are available when needed.
+
+## Public-page export without Kobweb
+
+Applications that already own their routes can register the `ExportSite` task from
+`io.github.samuolis.domposable:domposable-export-gradle` in their Kotlin Gradle build.
+Consumers configure the production build directory, canonical origin and a `public-pages.txt` route list;
+they do not write exporter JavaScript or maintain an npm project. The task bundles the
+reviewed exporter and lockfile and manages Playwright, Chromium and the temporary server.
+Node 22+ with npm and Java 21+ are build-machine prerequisites. See the complete
+[Kotlin Gradle and TXT setup](page-export.md).
+The artifact requires version 0.22.0 or later; check
+[Releases](https://github.com/samuolis/domposable/releases) for published versions.
+
+The task serializes HTML/CSS, validates public metadata and records a content-hashed
+inventory. It does not add an SSR server, hydration engine or another feature-screen
+implementation. Node hosts that need custom capture hooks can also use the standalone
+source-distributed package pinned to an immutable GitHub archive.
+
+The host must supply only anonymous public paths and own data freshness, visibility
+checks, error responses, canonical URLs and refresh scheduling. Dynamic routes are
+explicit export entries, not automatically safe to publish. Exported controls wait
+for application startup, while anchors and content remain available without JavaScript.
+Responsive CSS and appearance before startup must be tested separately from settled UI.

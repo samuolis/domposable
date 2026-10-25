@@ -9,5 +9,6 @@
     "domposable-lifecycle-viewmodel"
   ],
   "processor_modules": ["domposable-ksp"],
+  "tooling_modules": ["domposable-export-gradle"],
   "klib_targets": ["iosArm64", "iosSimulatorArm64", "js", "wasmJs"]
 }

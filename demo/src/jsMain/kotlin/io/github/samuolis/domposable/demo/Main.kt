@@ -26,6 +26,10 @@ fun main() {
     }
     val base = document.body?.getAttribute("data-route-base")
     val urls = if (base == null) DomposableBrowserUrls.Hash else DomposableBrowserUrls.Path(base, trailingSlash = true)
+    if (window.location.pathname.startsWith("/fixtures/responsive-export")) {
+        renderComposable(rootElementId = "root") { ResponsiveExportFixture() }
+        return
+    }
     URLSearchParams(window.location.search).get("deepLink")?.let { path ->
         if (base != null && path.startsWith("/") && !path.startsWith("//")) {
             window.history.replaceState(null, "", base.trimEnd('/') + path)

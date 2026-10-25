@@ -194,7 +194,8 @@ val qualityCheck =
 
 val binaryApiPolicy = JsonSlurper().parse(file("config/binary-api.json")) as Map<*, *>
 val binaryApiModules =
-    (binaryApiPolicy["runtime_modules"] as List<*>) + (binaryApiPolicy["processor_modules"] as List<*>)
+    (binaryApiPolicy["runtime_modules"] as List<*>) + (binaryApiPolicy["processor_modules"] as List<*>) +
+        (binaryApiPolicy["tooling_modules"] as List<*>)
 
 tasks.register("binaryApiCheck") {
     group = "verification"

@@ -71,6 +71,8 @@ jobs:
         run: python scripts/ci/sign_release.py --verify-debug
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Verify reusable public-page exporter with a real browser
+        run: npm run test:export
       - name: Export the complete Kobweb application and test its static routes
         run: |
           python scripts/ci/kobweb_export.py
@@ -292,6 +294,8 @@ jobs:
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
       - run: ./gradlew publishAllPublicationsToFixtureRepository :demo:compileKotlinIosArm64 :demo:compileKotlinIosSimulatorArm64 :metro-example:compileAndroidMain :metro-example:compileKotlinIosArm64 :metro-example:compileKotlinIosSimulatorArm64 :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 --console=plain
+      - name: Verify published Kotlin Gradle page export without consumer JavaScript
+        run: python scripts/ci/verify_page_export.py
       - run: python scripts/ci/package_publications.py --unsigned
       - name: Resolve and compile published artifacts on all six targets
         run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 :koin-example:compileKotlinJvm :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain

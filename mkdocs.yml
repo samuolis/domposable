@@ -26,6 +26,7 @@ nav:
       - Screens and navigation: screens.md
       - Navigation recipes and URLs: recipes.md
       - Integrations: integrations.md
+      - Public-page export: page-export.md
       - Architecture: architecture.md
       - Migration: migration.md
       - Compatibility and coverage: compatibility.md
