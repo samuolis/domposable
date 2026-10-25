@@ -199,6 +199,7 @@ private fun responsiveLayoutCss(): String {
         [data-d-html-responsive-height-root]>[data-d-html-responsive-height]{--d-responsive-height:var(--d-height-compact)}
         [data-d-html-responsive-split-layout]{display:flex;min-width:0;flex-direction:column;gap:var(--d-split-gap,0px)}
         [data-d-html-responsive-split-media],[data-d-html-responsive-split-text]{flex:1 1 0%;min-width:0}
+        [data-d-html-responsive-split][data-d-html-responsive-split-media-fixed-width=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]{width:min(var(--d-split-media-width),100%);max-width:100%}
         [data-d-html-responsive-split-media-content]{width:100%;min-width:0}
         [data-d-html-responsive-split-media]{order:1}
         [data-d-html-responsive-split-text]{order:0}

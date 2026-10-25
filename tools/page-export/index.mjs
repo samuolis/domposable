@@ -16,15 +16,19 @@ export async function exportSite({directory, canonicalOrigin, pages, outputDir =
   const routes = new Set(entries.map(entry => { pageFile(entry.path); return entry.path; }));
   const source = await realpath(directory);
   const shellFile = join(source, 'app-shell.html');
+  const index = await readFile(join(source, 'index.html'), 'utf8');
+  const isSnapshot = /data-(?:domposable|public)-prerender/.test(index) || index.includes(markerAttribute + '=');
   let shell;
-  try { shell = await readFile(shellFile, 'utf8'); }
-  catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-    shell = await readFile(join(source, 'index.html'), 'utf8');
-    if (/data-(?:domposable|public)-prerender/.test(shell) || shell.includes(markerAttribute + '=')) {
+  if (isSnapshot) {
+    try { shell = await readFile(shellFile, 'utf8'); }
+    catch (error) {
+      if (error.code !== 'ENOENT') throw error;
       throw new Error('Export requires the original application shell');
     }
-    await writeFile(shellFile, shell, {flag:'wx'});
+  } else {
+    // A fresh build can replace index.html while retaining the previous export's saved shell.
+    shell = index;
+    await writeFile(shellFile, shell);
   }
   const server = createServer(async (request, response) => {
     try {

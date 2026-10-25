@@ -27,6 +27,7 @@ test('responsive HTML layouts resize in-browser and survive real export without 
   expect(phoneOrder.text.width).toBeCloseTo(phoneOrder.media.width, 0);
   const phoneMediaFirst = await splitBounds(page, 'split-long');
   expect(phoneMediaFirst.media.y).toBeLessThan(phoneMediaFirst.text.y);
+  expect(phoneMediaFirst.media.width).toBeCloseTo(240, 0);
 
   for (const width of [768, 1280]) {
     await page.setViewportSize({ width, height: 1000 });

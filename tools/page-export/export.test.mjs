@@ -44,6 +44,11 @@ test('exportSite owns lifecycle, waits for content, serves assets and reuses the
     assert.equal(await readFile(join(directory,'index.html'),'utf8'),previous);
     assert.equal(capturedPage.isClosed(),true);
     await assert.rejects(fetch(sourceUrl));
+    const rebuiltShell = shell.replace('<title>Example</title>', '<title>Rebuilt app</title>');
+    await writeFile(join(directory,'index.html'),rebuiltShell);
+    const rebuilt = await exportSite({...options,pages:['/']});
+    assert.equal(rebuilt.pages[0].title,'Rebuilt app');
+    assert.equal(await readFile(join(directory,'app-shell.html'),'utf8'),rebuiltShell);
   } finally { await rm(directory,{recursive:true,force:true}); }
 });
 
