@@ -102,3 +102,23 @@ Use `DomposableColumn` for an embedded feature rather than the demo's full-windo
 | Kobweb | Render a JS feature in `@Page`; let its router own URLs | Full static export; three-browser routing, reload, accessibility and pre-rendered content checks |
 
 KSP does not infer injection or enforce MVI. Injection defaults remain in ordinary Kotlin composables; explicit models and factories are available when needed.
+
+## Public-page export without Kobweb
+
+Applications that already own their routes can use Domposable's standalone Node
+[page exporter](https://github.com/samuolis/domposable/tree/main/tools/page-export).
+It runs the existing browser renderer with caller-owned Playwright, serializes HTML/CSS,
+validates public metadata and records a content-hashed inventory. It does not add an SSR
+server, hydration engine or another feature-screen implementation.
+
+The exporter is a private, source-distributed Node package, independent of Maven runtime
+artifacts. Install an immutable GitHub source archive for the reviewed commit, rather
+than a moving branch; npm records its integrity in the consumer lockfile. For local
+consumer verification, run `npm pack --pack-destination /tmp` and install that tarball.
+Browser test dependencies are development-only and are excluded from consumer installs.
+
+The host must supply only anonymous public paths and own data freshness, visibility
+checks, error responses, canonical URLs and refresh scheduling. Dynamic routes are
+explicit export entries, not automatically safe to publish. Exported controls wait
+for application startup, while anchors and content remain available without JavaScript.
+Responsive CSS and appearance before startup must be tested separately from settled UI.

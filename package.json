@@ -1,6 +1,10 @@
 {
-  "name": "domposable-browser-tests",
+  "name": "@samuolis/domposable-page-export",
+  "version": "0.1.0",
   "private": true,
-  "scripts": { "test": "playwright test", "test:browser": "playwright test" },
+  "engines": {"node": ">=22"},
+  "exports": "./tools/page-export/index.mjs",
+  "files": ["tools/page-export/index.mjs", "tools/page-export/README.md", "LICENSE"],
+  "scripts": { "test": "playwright test", "test:browser": "playwright test", "test:export": "node --test tools/page-export/export.test.mjs" },
   "devDependencies": { "@playwright/test": "1.64.1", "@axe-core/playwright": "4.13.0" }
 }
