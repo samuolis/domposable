@@ -5,7 +5,12 @@ import io.github.samuolis.domposable.adaptive.DomposableHtmlResponsiveGrid
 import io.github.samuolis.domposable.adaptive.DomposableHtmlResponsiveHeight
 import io.github.samuolis.domposable.adaptive.DomposableHtmlResponsiveSplit
 import io.github.samuolis.domposable.adaptive.DomposableResponsive
+import io.github.samuolis.domposable.foundation.DomposableShape
 import io.github.samuolis.domposable.foundation.dp
+import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
+import io.github.samuolis.domposable.ui.DomposableModifier
+import io.github.samuolis.domposable.ui.clip
+import io.github.samuolis.domposable.ui.fillMaxWidth
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
@@ -63,17 +68,25 @@ private fun matchedSplit(
         mediaMaxHeight = 400.dp,
         rootAttrs = { attr("id", id) },
         mediaContent = {
-            DomposableHtmlResponsiveHeight(
-                heights = DomposableResponsive(100.dp),
-                useViewport = true,
-                rootAttrs = { attr("id", "$id-media-height") },
-            ) {
-                Div(attrs = {
-                    style {
-                        property("height", "100%")
-                        property("background", "#dcfce7")
-                    }
-                }) { Text("Media") }
+            DomposableHtmlModifiers(DomposableModifier.fillMaxWidth().clip(DomposableShape.Rounded(12.dp))) {
+                DomposableHtmlResponsiveHeight(
+                    heights = DomposableResponsive(100.dp),
+                    useViewport = true,
+                    rootAttrs = {
+                        attr("id", "$id-media-height")
+                        style { property("position", "relative") }
+                    },
+                ) {
+                    Div(attrs = {
+                        attr("id", "$id-media-art")
+                        style {
+                            property("position", "absolute")
+                            property("inset", "0")
+                            property("height", "100%")
+                            property("background", "#dcfce7")
+                        }
+                    }) { Text("Media") }
+                }
             }
         },
         textContent = {

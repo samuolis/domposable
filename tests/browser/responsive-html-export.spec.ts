@@ -40,6 +40,9 @@ test('responsive HTML layouts resize in-browser and survive real export without 
   expect(desktopBounds.media.height).toBeCloseTo(520, 0);
   expect(desktopBounds.mediaContent.height).toBeCloseTo(400, 0);
   expect(desktopBounds.mediaHeight.height).toBeCloseTo(400, 0);
+  expect(desktopBounds.art.height).toBeCloseTo(400, 0);
+  expect(desktopBounds.art.y + desktopBounds.art.height / 2).toBeCloseTo(
+    desktopBounds.media.y + desktopBounds.media.height / 2, 0);
   expect(desktopBounds.mediaHeight.y + desktopBounds.mediaHeight.height / 2).toBeCloseTo(
     desktopBounds.media.y + desktopBounds.media.height / 2, 0);
   expect(desktopBounds.mediaHeight.y).toBeGreaterThan(desktopBounds.media.y);
@@ -47,11 +50,13 @@ test('responsive HTML layouts resize in-browser and survive real export without 
   expect(shortBounds.media.height).toBeCloseTo(200, 0);
   expect(shortBounds.mediaContent.height).toBeCloseTo(200, 0);
   expect(shortBounds.mediaHeight.height).toBeCloseTo(200, 0);
+  expect(shortBounds.art.height).toBeCloseTo(200, 0);
   expect(shortBounds.text.height).toBeLessThan(shortBounds.media.height);
   const middleBounds = await splitBounds(page, 'split-middle');
   expect(middleBounds.media.height).toBeCloseTo(300, 0);
   expect(middleBounds.mediaContent.height).toBeCloseTo(300, 0);
   expect(middleBounds.mediaHeight.height).toBeCloseTo(300, 0);
+  expect(middleBounds.art.height).toBeCloseTo(300, 0);
   expect(middleBounds.mediaHeight.y + middleBounds.mediaHeight.height / 2).toBeCloseTo(
     middleBounds.media.y + middleBounds.media.height / 2, 0);
 
@@ -80,6 +85,9 @@ test('responsive HTML layouts resize in-browser and survive real export without 
     expect(exportedBounds.media.height).toBeCloseTo(520, 0);
     expect(exportedBounds.mediaContent.height).toBeCloseTo(400, 0);
     expect(exportedBounds.mediaHeight.height).toBeCloseTo(400, 0);
+    expect(exportedBounds.art.height).toBeCloseTo(400, 0);
+    expect(exportedBounds.art.y + exportedBounds.art.height / 2).toBeCloseTo(
+      exportedBounds.media.y + exportedBounds.media.height / 2, 0);
     expect(exportedBounds.mediaHeight.y + exportedBounds.mediaHeight.height / 2).toBeCloseTo(
       exportedBounds.media.y + exportedBounds.media.height / 2, 0);
     expect(await exportedPage.locator('#responsive-grid').evaluate(node => getComputedStyle(node).display)).toBe('grid');
@@ -109,6 +117,7 @@ async function splitBounds(page: import('@playwright/test').Page, id: string) {
       media: bounds('[data-d-html-responsive-split-media]'),
       mediaContent: bounds('[data-d-html-responsive-split-media-content]'),
       mediaHeight: bounds(`#${element.id}-media-height`),
+      art: bounds(`#${element.id}-media-art`),
       text: bounds(`#${element.id}-text`),
     };
   });
