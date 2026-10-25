@@ -66,8 +66,25 @@ jobs:
           python scripts/release.py prepare --bump "$BUMP"
       - uses: ./.github/actions/setup
       - name: Await candidate CI
+        id: candidate-ci
         if: steps.candidate.outputs.resume != 'true'
         run: python scripts/release.py wait-ci
+      - name: Download website from the successful candidate CI run
+        if: steps.candidate.outputs.resume != 'true'
+        env:
+          CI_RUN_ID: ${{ steps.candidate-ci.outputs.ci_run_id }}
+        run: |
+          if [ -z "$CI_RUN_ID" ]; then
+            echo 'Successful candidate CI run ID is missing' >&2
+            exit 1
+          fi
+          if ! gh run download "$CI_RUN_ID" --repo "$GITHUB_REPOSITORY" --name release-site --dir build/release-site; then
+            echo "Could not download release-site from successful candidate CI run $CI_RUN_ID" >&2
+            exit 1
+          fi
+      - name: Verify and package the candidate website
+        if: steps.candidate.outputs.resume != 'true'
+        run: python scripts/release.py package-site --site-dir build/release-site
       - name: Build signed Android demo download
         if: steps.candidate.outputs.resume != 'true'
         env:
@@ -77,19 +94,18 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256 }}
         run: python scripts/ci/sign_release.py
-      - name: Build signed publications and released website
+      - name: Build signed publications
         if: steps.candidate.outputs.resume != 'true'
         env:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
         run: |
-          ./gradlew publishAllPublicationsToFixtureRepository :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution dokkaGenerate --console=plain
+          ./gradlew publishAllPublicationsToFixtureRepository --console=plain
           python - <<'PY'
           import os, subprocess
           subprocess.run(['gpg','--batch','--import'], input=os.environ['ORG_GRADLE_PROJECT_signingInMemoryKey'].encode(), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
           PY
           python scripts/ci/package_publications.py
-          python scripts/ci/build_site.py
           python scripts/release.py manifest
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: steps.candidate.outputs.resume != 'true'

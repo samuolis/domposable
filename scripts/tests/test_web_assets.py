@@ -4,7 +4,7 @@ import sys
 import tempfile
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'ci'))
-from web_assets import copy_hashed_bundle, digest, verify_bundle
+from web_assets import copy_hashed_bundle, digest, inventory, verify_bundle
 
 class WebAssetsTest(unittest.TestCase):
     def setUp(self):
@@ -17,6 +17,11 @@ class WebAssetsTest(unittest.TestCase):
         (self.source / 'demo.js.LICENSE.txt').write_text('license')
         (self.source / '1234.wasm').write_bytes(b'wasm binary')
     def tearDown(self): self.temp.cleanup()
+    def test_inventory_can_include_a_manifest_named_file_outside_browser_bundles(self):
+        path = self.source / 'web-assets.json'
+        path.write_text('ordinary API content')
+        self.assertNotIn('web-assets.json', inventory(self.source))
+        self.assertIn('web-assets.json', inventory(self.source, exclude_manifest=False))
     def test_runtime_sidecars_and_html_use_content_hashes_without_changing_compiler_output(self):
         target = self.root / 'site'
         metadata = copy_hashed_bundle(self.source, target)

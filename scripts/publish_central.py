@@ -44,7 +44,11 @@ def request_status(deployment_id):
             raise RuntimeError("Central status polling failed after retries; rerun to resume this deployment") from None
         time.sleep(STATUS_RETRY_DELAYS[attempt])
 
+def progress(started, message):
+    print(f"{message} (elapsed {int(time.monotonic() - started)}s)", flush=True)
+
 def publish(mode, recovered_id=None):
+    started = time.monotonic()
     verify_assets(); state = read_state(); github = GitHub()
     bundle = ASSETS / "maven-bundle.zip"
     if hashlib.sha256(bundle.read_bytes()).hexdigest() != state['bundle_sha256']: raise RuntimeError("Bundle changed after staging")
@@ -61,13 +65,19 @@ def publish(mode, recovered_id=None):
         data = (f'--{boundary}\r\nContent-Disposition: form-data; name="bundle"; filename="maven-bundle.zip"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode() + bundle.read_bytes() + f'\r\n--{boundary}--\r\n'.encode())
         import urllib.parse
         query = urllib.parse.urlencode({"name": state['central_upload_intent'], "publishingType": "USER_MANAGED"})
+        progress(started, "Uploading immutable Maven bundle to Central")
         deployment = request("/upload?" + query, data, "multipart/form-data; boundary=" + boundary).strip().strip('"')
         uuid.UUID(deployment)
         state['deployment_id'] = deployment; checkpoint(state, github)
+        progress(started, "Central accepted the bundle; waiting for validation")
     deadline = time.monotonic() + 3600
     while time.monotonic() < deadline:
+        progress(started, "Checking Central deployment status")
         status = json.loads(request_status(state['deployment_id']))
         current = status['deploymentState']
+        known_states = {"PENDING", "VALIDATING", "VALIDATED", "PUBLISHING", "PUBLISHED", "FAILED"}
+        display_state = current if isinstance(current, str) and current in known_states else "unknown"
+        progress(started, f"Central deployment state: {display_state}")
         if current != state.get('central_state'):
             state['central_state'] = current; checkpoint(state, github)
         if current == "FAILED": raise RuntimeError("Central validation failed. Inspect its deployment errors in the portal; the same version remains reserved")
@@ -76,6 +86,7 @@ def publish(mode, recovered_id=None):
             if mode == "validate": return
             if state.get('phase') not in ['main-advanced', 'github-published', 'complete']:
                 raise RuntimeError("Publish only after the tested version commit has advanced main")
+            progress(started, "Activating validated Central deployment")
             request("/deployment/" + state['deployment_id'])
         time.sleep(20)
     raise RuntimeError("Central is still processing. Rerun Bump and release to resume this deployment")
