@@ -6,9 +6,11 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import release
 from version import Version, write_version
+from web_assets import copy_hashed_bundle, distribution_hash, inventory
 
 class ReleaseGuardsTest(unittest.TestCase):
     def setUp(self):
@@ -137,6 +139,69 @@ class ReleaseGuardsTest(unittest.TestCase):
         release.verify_assets()
         (self.assets / 'website.zip').write_bytes(b'changed!')
         with self.assertRaisesRegex(RuntimeError, 'Corrupt'): release.verify_assets()
+    def candidate_site(self, state):
+        site = self.root / 'build/release-site'
+        (site / 'api').mkdir(parents=True)
+        (site / 'index.html').write_text('site')
+        (site / 'api/index.html').write_text('api')
+        (site / 'api/guide.md').write_text('guide')
+        (site / 'api/web-assets.json').write_text('API content, not a bundle manifest')
+        web = {}
+        for name in ('demo', 'wasm'):
+            source = self.root / f'{name}-source'; source.mkdir()
+            (source / 'index.html').write_text('<script src="demo.js"></script>')
+            (source / 'demo.js').write_text(name)
+            web['html' if name == 'demo' else 'wasm'] = copy_hashed_bundle(source, site / name)
+        api_files = inventory(site / 'api', exclude_manifest=False)
+        (site / 'release.json').write_text(json.dumps({
+            'version': state['version'], 'build': state['build'], 'commit': state['commit'],
+            'status': 'release', 'api': {'sha256': distribution_hash(api_files), 'files': api_files}, 'web': web,
+        }))
+        return site
+    def test_packages_verified_exact_candidate_site(self):
+        state = self.candidate(); site = self.candidate_site(state)
+        release.package_site(site)
+        with zipfile.ZipFile(self.assets / 'website.zip') as archive:
+            self.assertIn('release.json', archive.namelist())
+            self.assertIn('api/index.html', archive.namelist())
+            self.assertIn('api/guide.md', archive.namelist())
+            self.assertIn('api/web-assets.json', archive.namelist())
+            self.assertIn('demo/web-assets.json', archive.namelist())
+            self.assertIn('wasm/web-assets.json', archive.namelist())
+    def test_candidate_site_metadata_must_match_release_state(self):
+        state = self.candidate(); site = self.candidate_site(state)
+        metadata_path = site / 'release.json'; metadata = json.loads(metadata_path.read_text())
+        for key, wrong in [('commit', 'f' * 40), ('version', '0.2.0'), ('build', state['build'] + 1), ('status', 'preview')]:
+            with self.subTest(key=key):
+                metadata_path.write_text(json.dumps({**metadata, key: wrong}))
+                with self.assertRaisesRegex(RuntimeError, 'metadata does not match'):
+                    release.package_site(site)
+        metadata_path.write_text(json.dumps(metadata))
+        (site / 'api/guide.md').write_text('changed guide')
+        with self.assertRaisesRegex(RuntimeError, 'API tree does not match'):
+            release.package_site(site)
+        (site / 'api/guide.md').write_text('guide')
+        (site / 'api/guide.md').unlink()
+        with self.assertRaisesRegex(RuntimeError, 'API tree does not match'):
+            release.package_site(site)
+        (site / 'api/guide.md').write_text('guide')
+        (site / 'api/web-assets.json').unlink()
+        with self.assertRaisesRegex(RuntimeError, 'API tree does not match'):
+            release.package_site(site)
+        (site / 'api/web-assets.json').write_text('API content, not a bundle manifest')
+        (site / 'demo/web-assets.json').write_text('{}')
+        with self.assertRaisesRegex(RuntimeError, 'invalid html browser bundle'):
+            release.package_site(site)
+    def test_candidate_site_requires_api_index(self):
+        state = self.candidate(); site = self.candidate_site(state)
+        (site / 'api/index.html').unlink()
+        with self.assertRaisesRegex(RuntimeError, 'missing api/index.html'):
+            release.package_site(site)
+    def test_candidate_site_rejects_symlinks(self):
+        state = self.candidate(); site = self.candidate_site(state)
+        (site / 'escape').symlink_to(self.root / 'outside')
+        with self.assertRaisesRegex(RuntimeError, 'symbolic link'):
+            release.package_site(site)
     def test_main_race_prevents_push(self):
         self.candidate()
         commands = []
@@ -158,6 +223,15 @@ class ReleaseGuardsTest(unittest.TestCase):
         with patch.object(release, 'GitHub') as github:
             github.return_value.request.return_value = {'head_sha':'f'*40, 'conclusion':'success', 'path':'.github/workflows/ci.yml'}
             with self.assertRaisesRegex(RuntimeError, 'this commit'): release.verify_candidate_ci(state)
+    def test_wait_ci_outputs_the_exact_successful_run_id(self):
+        state = self.candidate()
+        output = self.root / 'github-output'
+        run = {'id':321, 'head_sha':state['commit'], 'head_branch':state['branch'], 'status':'completed', 'conclusion':'success'}
+        with patch.dict('os.environ', {'GITHUB_OUTPUT':str(output)}), patch.object(release, 'GitHub') as github:
+            github.return_value.request.return_value = {'workflow_runs':[run]}
+            release.wait_ci()
+        self.assertEqual(output.read_text(), 'ci_run_id=321\n')
+        self.assertEqual(release.read_state()['ci_run_id'], 321)
     def test_missing_ci_checkpoint_rejected(self):
         with self.assertRaisesRegex(RuntimeError, 'no successful CI'): release.verify_candidate_ci(self.candidate())
     def test_download_redirect_drops_github_credentials(self):

@@ -5,6 +5,8 @@ import sys
 import tempfile
 import urllib.error
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import publish_central as central
@@ -43,6 +45,20 @@ class CentralRecoveryTest(unittest.TestCase):
             central.publish('publish')
         self.assertEqual(self.state['central_state'],'PUBLISHED')
         self.assertFalse(any('/upload?' in call.args[0] for call in request.call_args_list))
+    def test_progress_logs_state_and_elapsed_without_secrets_or_response_body(self):
+        self.state.update(deployment_id='d5650f77-692f-4189-96ed-28b5f40607ca',phase='main-advanced')
+        output = StringIO()
+        with patch.dict('os.environ', {'CENTRAL_USERNAME':'hidden-user','CENTRAL_PASSWORD':'hidden-password'}), \
+             patch.object(central,'request',side_effect=['{"deploymentState":"VALIDATED"}', '', '{"deploymentState":"PUBLISHED"}']), \
+             redirect_stdout(output):
+            central.publish('publish')
+        logs = output.getvalue()
+        self.assertIn('Central deployment state: VALIDATED', logs)
+        self.assertIn('Central deployment state: PUBLISHED', logs)
+        self.assertIn('elapsed ', logs)
+        self.assertNotIn('hidden-user', logs)
+        self.assertNotIn('hidden-password', logs)
+        self.assertNotIn('{"deploymentState"', logs)
     def test_status_recovers_from_dns_failure_with_bounded_timeout(self):
         deployment_id = 'd5650f77-692f-4189-96ed-28b5f40607ca'
         with patch.object(central,'request',side_effect=[urllib.error.URLError(socket.gaierror('DNS unavailable')), '{"deploymentState":"PUBLISHED"}']) as request:
