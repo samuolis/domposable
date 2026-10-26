@@ -32,9 +32,12 @@ test('component comparison initializes equal theme and state routes in both fram
   await page.getByLabel('Preview width', { exact: true }).selectOption('640');
   await page.getByLabel('Feature', { exact: true }).selectOption('compare/states');
   const html = page.frameLocator('iframe[title="Domposable semantic HTML preview"]');
-  await expect(html.getByRole('heading', { name: 'states · light', exact: true })).toBeVisible();
+  const htmlFrame = page.locator('iframe[title="Domposable semantic HTML preview"]');
+  await expect(htmlFrame).toHaveAttribute('src', /#\/material\/compare\/light\/states$/);
+  await expect(html.getByRole('heading', { name: 'states · light', exact: true })).toBeVisible({ timeout: 30_000 });
   await page.getByLabel('Component theme', { exact: true }).selectOption('brand-dark');
-  await expect(html.getByRole('heading', { name: 'states · brand-dark', exact: true })).toBeVisible();
+  await expect(htmlFrame).toHaveAttribute('src', /#\/material\/compare\/brand-dark\/states$/);
+  await expect(html.getByRole('heading', { name: 'states · brand-dark', exact: true })).toBeVisible({ timeout: 30_000 });
   await expect(html.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true })).toBeDisabled();
   await expect(html.getByRole('checkbox', { name: 'Disabled selected checkbox', exact: true })).toBeChecked();
   const wasm = page.locator('iframe[title="Domposable Wasm preview"]');

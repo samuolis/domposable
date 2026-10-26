@@ -1348,6 +1348,12 @@ internal fun HtmlTimePicker(
                     }) {
                         val values = if (selectingHour) (if (props.is24Hour) 0..23 else 1..12) else (0..55 step 5)
                         values.forEach { value ->
+                            val displayedValue =
+                                if (selectingHour && value in 1..12) {
+                                    value.toString()
+                                } else {
+                                    value.toString().padStart(2, '0')
+                                }
                             val displayedHour = if (props.is24Hour) props.hour else ((props.hour + 11) % 12) + 1
                             val selected = value == if (selectingHour) displayedHour else props.minute
                             val angle = if (selectingHour) (value % 12) * 30 else value * 6
@@ -1357,12 +1363,9 @@ internal fun HtmlTimePicker(
                                 attr(
                                     "aria-label",
                                     if (selectingHour) {
-                                        "Hour ${value.toString().padStart(
-                                            2,
-                                            '0',
-                                        )}"
+                                        "Hour $displayedValue"
                                     } else {
-                                        "Minute ${value.toString().padStart(2, '0')}"
+                                        "Minute $displayedValue"
                                     },
                                 )
                                 if (!formEnabled) disabled()
@@ -1413,15 +1416,7 @@ internal fun HtmlTimePicker(
                                     }
                                 }
                             }) {
-                                Text(
-                                    if (selectingHour &&
-                                        value in 1..12
-                                    ) {
-                                        value.toString()
-                                    } else {
-                                        value.toString().padStart(2, '0')
-                                    },
-                                )
+                                Text(displayedValue)
                             }
                         }
                     }

@@ -89,7 +89,7 @@ for (const [name, width, height, route] of [
 test('DOM visual shop-cart-phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/shop/collection/');
-  await page.getByRole('button', { name: 'Add Canvas weekender to bag', exact: true }).click();
+  await page.getByRole('button', { name: 'Add to bag, Canvas weekender', exact: true }).click();
   await page.getByRole('link', { name: 'Bag (1)', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your bag' })).toBeVisible();
   await expect(page.locator('main img').first()).toHaveAttribute('data-testid', /-loaded$/);

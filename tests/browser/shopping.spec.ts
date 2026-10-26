@@ -11,7 +11,7 @@ test('shop URLs, filters, cart and validated demo checkout', async ({ page }) =>
   await page.getByLabel('Search products').fill('not found');
   await expect(page.getByText('No products match your search.')).toBeVisible();
   await page.getByRole('button',{name:'Clear filters'}).click();
-  await page.getByRole('button',{name:'View Canvas weekender',exact:true}).click();
+  await page.getByRole('button',{name:'View details, Canvas weekender',exact:true}).click();
   await expect(page).toHaveURL(/\/shop\/products\/canvas-weekender\/$/);
   await page.reload();
   await expect(page.getByRole('heading',{name:'Canvas weekender',exact:true})).toBeVisible();

@@ -28,9 +28,13 @@ test('calendar is a keyboard-operable grid and preserves a selected date', async
   await expect(grid.locator('.d-calendar-day[aria-pressed="true"]')).toHaveCount(1);
 });
 
-test('time picker modes preserve and update controlled hour and minute values', async ({ page }) => {
+test('time picker modes preserve and update controlled hour and minute values', async ({ page }, testInfo) => {
   await openInputs(page);
   const picker = page.getByRole('group', { name: 'Time picker' });
+  await expect(picker.getByRole('button', { name: '10, Select hours', exact: true })).toBeVisible();
+  await expect(picker.getByRole('button', { name: '30, Select minutes', exact: true })).toBeVisible();
+  await testInfo.attach('time-picker-aria-labels', { body: await picker.screenshot(), contentType: 'image/png' });
+  await expect(picker.getByRole('button', { name: 'Hour 1', exact: true })).toBeVisible();
   await picker.getByRole('button', { name: 'Hour 11', exact: true }).click();
   await picker.getByRole('button', { name: 'Minute 45', exact: true }).click();
   await expect(page.getByTestId('material-selected-time')).toContainText('11:45');
@@ -47,7 +51,7 @@ test('time picker modes preserve and update controlled hour and minute values', 
   await switchMode.click();
   await expect(picker.getByRole('textbox')).toHaveCount(0);
   await expect(page.getByTestId('material-selected-time')).toContainText('12:15');
-  await picker.getByRole('button', { name: 'Select hours', exact: true }).click();
+  await picker.getByRole('button', { name: '12, Select hours', exact: true }).click();
   const hour = picker.getByRole('button', { name: 'Hour 12', exact: true });
   await expect(hour).toHaveAttribute('aria-pressed', 'true');
   await hour.focus();
@@ -198,7 +202,7 @@ test('24-hour clock places midnight and noon on distinct concentric rings', asyn
   const picker = page.getByRole('group', { name: 'Time picker' });
   const midnight = (await picker.getByRole('button', { name: 'Hour 00', exact: true }).boundingBox())!;
   const noon = (await picker.getByRole('button', { name: 'Hour 12', exact: true }).boundingBox())!;
-  const one = (await picker.getByRole('button', { name: 'Hour 01', exact: true }).boundingBox())!;
+  const one = (await picker.getByRole('button', { name: 'Hour 1', exact: true }).boundingBox())!;
   const thirteen = (await picker.getByRole('button', { name: 'Hour 13', exact: true }).boundingBox())!;
   expect(Math.abs(midnight.x - noon.x)).toBeLessThan(1);
   expect(midnight.y - noon.y).toBeGreaterThan(30);
