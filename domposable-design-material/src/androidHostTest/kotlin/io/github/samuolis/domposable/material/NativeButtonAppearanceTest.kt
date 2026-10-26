@@ -3,8 +3,11 @@ package io.github.samuolis.domposable.material
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LocalContentColor
@@ -15,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
@@ -24,9 +28,11 @@ import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -50,6 +56,7 @@ import io.github.samuolis.domposable.ui.DomposableIconButton
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableSwitch
 import io.github.samuolis.domposable.ui.DomposableText
+import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.testId
 import org.junit.Rule
 import org.junit.Test
@@ -66,6 +73,60 @@ import androidx.compose.ui.unit.dp as nativeDp
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeButtonAppearanceTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
+    fun explicitCompactHeightKeepsLayoutAndExpandedTouchTarget() {
+        var compactClicks = 0
+        compose.setContent {
+            DomposableMaterialTheme {
+                Column(Modifier.width(200.nativeDp)) {
+                    DomposableButton(
+                        DomposableButtonProps(
+                            onClick = { compactClicks++ },
+                            appearance = DomposableButtonAppearance(minHeight = 32.dp),
+                        ),
+                        DomposableModifier.fillMaxWidth().testId("compact"),
+                    ) { Box(Modifier.size(8.nativeDp)) }
+                    Spacer(Modifier.height(32.nativeDp))
+                    DomposableButton(
+                        DomposableButtonProps(onClick = {}, style = DomposableButtonStyle.Filled),
+                        DomposableModifier.testId("default"),
+                    ) { DomposableText("Default") }
+                }
+            }
+        }
+
+        val compact = compose.onNodeWithTag("compact")
+        compact.assertHeightIsEqualTo(32.nativeDp).assertWidthIsEqualTo(200.nativeDp)
+        val capturedCompact = compact.captureToImage().toPixelMap()
+        assertEquals(32.nativeDp, with(compose.density) { capturedCompact.height.toDp() })
+        compose.onNodeWithTag("default").assertHeightIsEqualTo(40.nativeDp)
+        compact.performTouchInput {
+            click(center + Offset(0f, 19.nativeDp.toPx()))
+        }
+        compose.runOnIdle { assertEquals(1, compactClicks) }
+    }
+
+    @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
+    fun explicitCompactHeightRespectsExactParentHeight() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                Box(Modifier.height(32.nativeDp)) {
+                    DomposableButton(
+                        DomposableButtonProps(
+                            onClick = {},
+                            appearance = DomposableButtonAppearance(minHeight = 32.dp),
+                        ),
+                        DomposableModifier.testId("exact-height"),
+                    ) { Box(Modifier.size(8.nativeDp)) }
+                }
+            }
+        }
+
+        compose.onNodeWithTag("exact-height").assertHeightIsEqualTo(32.nativeDp)
+    }
 
     @Test
     @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
