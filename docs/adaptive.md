@@ -90,6 +90,35 @@ listModifier = DomposableModifier.padding(
 )
 ```
 
+An exported page captures the resolved pane layout at its export width. If a captured `ListDetail`
+should collapse in a narrower browser without JavaScript, pass `collapseBelow` using the same
+content-width breakpoint as the route's pane recipe. HTML applies this CSS fallback at that width;
+native layout continues to follow `layout`, and the default `null` leaves explicit `ListDetail`
+layouts unchanged.
+
+For example, when the route resolves its panes from the default expanded breakpoint, reuse that
+breakpoint for the export fallback:
+
+```kotlin
+val breakpoints = DomposableBreakpoints()
+val info = rememberDomposableAdaptiveInfo(contentSize, breakpoints)
+val paneRecipe = DomposablePaneRecipe()
+val layout = resolveDomposablePaneLayout(entries, paneRecipe.isDualPane(info)) { pane(it.route) }
+
+DomposablePaneScaffold(
+    layout = layout,
+    collapseBelow = breakpoints.expanded.dp,
+    listLabel = "Catalog",
+    detailLabel = "Product details",
+) { entry ->
+    RenderEntry(entry)
+}
+```
+
+This parameter changes the scaffold's binary signature, so precompiled consumers must recompile.
+Source calls using named arguments or a trailing content lambda remain unchanged; calls that pass
+both `contentKey` and `content` positionally should name `content` (or use a trailing lambda).
+
 HTML modifier operations can create ordered wrapper elements. Adding or removing those operations
 can replace descendants; a stable `contentKey` preserves entry identity but does not make an arbitrary
 modifier wrapper change preserve browser state.

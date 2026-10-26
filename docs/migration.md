@@ -1,5 +1,14 @@
 # Migrating a Compose feature
 
+## Responsive exported pane scaffolds in 0.23
+
+`DomposablePaneScaffold` adds the optional `collapseBelow` breakpoint for exported HTML pages
+whose captured `ListDetail` layout should collapse without JavaScript. It defaults to `null`, so
+existing layouts keep their behavior. This changes the compiled scaffold signature: recompile
+consumers for 0.23. Named-argument calls and trailing content lambdas keep their source form; calls
+passing both `contentKey` and `content` positionally should name `content` or move it to a trailing
+lambda. Native layout continues to follow the resolved `layout`.
+
 ## Bottom-sheet anchors in 0.19
 
 `DomposableBottomSheet` and `DomposableBottomSheetProps` now accept

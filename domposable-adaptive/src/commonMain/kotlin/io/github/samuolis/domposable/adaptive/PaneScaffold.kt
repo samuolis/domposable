@@ -14,6 +14,8 @@ import io.github.samuolis.domposable.ui.fillMaxWidth
  * [retainedList] keeps a list composed when a compact detail temporarily hides it.
  * Pane modifiers configure brand spacing and separators; no HTML or native layout code is needed.
  * Native expanded panes fill their bounded parent height; HTML panes stretch to the taller pane's content.
+ * [collapseBelow] lets HTML collapse an expanded layout at a caller-owned content width, including
+ * when a captured page is viewed without JavaScript; native layouts follow their resolved [layout].
  */
 @Composable
 @Suppress("LongParameterList")
@@ -31,6 +33,7 @@ fun <T : Any> DomposablePaneScaffold(
     retainedList: T? = null,
     singlePaneRole: DomposablePaneRole = DomposablePaneRole.Detail,
     contentKey: (T) -> Any = { it },
+    collapseBelow: DomposableLength? = null,
     content: @Composable (T) -> Unit,
 ) {
     require(listLabel.isNotBlank() && detailLabel.isNotBlank()) { "Panes require accessible labels" }
@@ -38,6 +41,9 @@ fun <T : Any> DomposablePaneScaffold(
         "The list fraction must leave room for both panes"
     }
     require(maxListWidth == null || minListWidth.value <= maxListWidth.value)
+    require(collapseBelow == null || (collapseBelow.value.isFinite() && collapseBelow.value > 0f)) {
+        "The responsive pane collapse width must be positive"
+    }
     val expanded = layout is DomposablePaneLayout.ListDetail
     val list =
         when (layout) {
@@ -66,7 +72,11 @@ fun <T : Any> DomposablePaneScaffold(
             }
         }
     DomposableRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier =
+            domposablePaneScaffoldRootModifier(
+                modifier.fillMaxWidth(),
+                collapseBelow.takeIf { expanded },
+            ),
         gap = if (expanded) gap else 0.dp,
         stretch = expanded,
     ) {
@@ -75,6 +85,7 @@ fun <T : Any> DomposablePaneScaffold(
                 DomposablePaneContentHost(
                     pane = DomposablePaneScaffoldPane.List,
                     expanded = expanded,
+                    collapseBelow = collapseBelow,
                     visible = expanded || singlePaneRole == DomposablePaneRole.List,
                     label = listLabel,
                     widthFraction = listFraction,
@@ -95,6 +106,7 @@ fun <T : Any> DomposablePaneScaffold(
                 DomposablePaneContentHost(
                     pane = DomposablePaneScaffoldPane.Detail,
                     expanded = expanded,
+                    collapseBelow = collapseBelow,
                     visible = true,
                     label = detailLabel,
                     widthFraction = 1f,
@@ -113,12 +125,18 @@ fun <T : Any> DomposablePaneScaffold(
     }
 }
 
+internal expect fun domposablePaneScaffoldRootModifier(
+    modifier: DomposableModifier,
+    responsiveBreakpoint: DomposableLength?,
+): DomposableModifier
+
 internal enum class DomposablePaneScaffoldPane { List, Detail }
 
 @Composable
 internal expect fun DomposablePaneContentHost(
     pane: DomposablePaneScaffoldPane,
     expanded: Boolean,
+    collapseBelow: DomposableLength?,
     visible: Boolean,
     label: String,
     widthFraction: Float,
