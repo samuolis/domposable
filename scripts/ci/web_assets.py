@@ -11,9 +11,9 @@ MANIFEST = 'web-assets.json'
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
-def inventory(folder: Path) -> dict[str, str]:
+def inventory(folder: Path, exclude_manifest: bool = True) -> dict[str, str]:
     return {path.relative_to(folder).as_posix(): digest(path.read_bytes())
-            for path in sorted(folder.rglob('*')) if path.is_file() and path.name != MANIFEST}
+            for path in sorted(folder.rglob('*')) if path.is_file() and (not exclude_manifest or path.name != MANIFEST)}
 
 def distribution_hash(files: dict[str, str]) -> str:
     return digest(json.dumps(files, sort_keys=True, separators=(',', ':')).encode())

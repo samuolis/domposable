@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -18,6 +19,9 @@ import zipfile
 from version import Version, read_checkpoint_version, read_version, write_version
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts/ci"))
+from web_assets import distribution_hash, inventory, verify_bundle
+
 STATE = ROOT / ".release/state.json"
 ASSETS = ROOT / ".release/artifacts"
 MARKER = re.compile(r"<!-- domposable-release (.+?) -->")
@@ -232,7 +236,9 @@ def wait_ci():
                         github.request(f"actions/runs/{latest['id']}/rerun", "POST", {})
                         retried = True; time.sleep(20); continue
                     raise RuntimeError("Candidate CI failed; main and published releases were not changed")
-                state["ci_run_id"] = latest["id"]; checkpoint(state); return
+                state["ci_run_id"] = latest["id"]; checkpoint(state)
+                output(ci_run_id=latest["id"])
+                return
         time.sleep(15)
     raise RuntimeError("Timed out waiting for candidate CI")
 
@@ -249,6 +255,62 @@ def manifest():
     state["bundle_sha256"] = checksums["maven-bundle.zip"]
     state["phase"] = "staged"
     write_state(state)
+
+def package_site(site_dir):
+    state = read_state()
+    site_dir = Path(site_dir)
+    if not site_dir.is_absolute(): site_dir = ROOT / site_dir
+    if site_dir.is_symlink() or not site_dir.is_dir():
+        raise RuntimeError("Candidate website artifact is missing or unsafe")
+    site_dir = site_dir.resolve(strict=True)
+    files = []
+    for path in site_dir.rglob("*"):
+        if path.is_symlink(): raise RuntimeError("Candidate website contains a symbolic link")
+        if path.is_file():
+            relative = path.relative_to(site_dir)
+            if relative.is_absolute() or ".." in relative.parts:
+                raise RuntimeError("Candidate website contains an unsafe path")
+            if not path.resolve(strict=True).is_relative_to(site_dir):
+                raise RuntimeError("Candidate website path escapes its artifact directory")
+            files.append((path, relative))
+        elif not path.is_dir():
+            raise RuntimeError("Candidate website contains a non-file entry")
+    metadata_path = site_dir / "release.json"
+    try:
+        metadata = json.loads(metadata_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        raise RuntimeError("Candidate website artifact has no valid release metadata") from None
+    expected = {
+        "version": state["version"],
+        "build": state["build"],
+        "commit": state["commit"],
+        "status": "release",
+    }
+    if not isinstance(metadata, dict) or any(metadata.get(key) != value for key, value in expected.items()):
+        raise RuntimeError("Candidate website metadata does not match the release state")
+    web = metadata.get("web")
+    if type(metadata.get("build")) is not int or not isinstance(web, dict) or not {"html", "wasm"} <= web.keys():
+        raise RuntimeError("Candidate website metadata is incomplete")
+    for required in (site_dir / "index.html", site_dir / "api/index.html"):
+        if not required.is_file(): raise RuntimeError(f"Candidate website is missing {required.relative_to(site_dir)}")
+    api = metadata.get("api")
+    try:
+        api_files = inventory(site_dir / "api", exclude_manifest=False)
+    except OSError:
+        raise RuntimeError("Candidate website has an invalid API tree") from None
+    if not isinstance(api, dict) or api.get("files") != api_files or api.get("sha256") != distribution_hash(api_files):
+        raise RuntimeError("Candidate website API tree does not match its release metadata")
+    for name, directory in (("html", "demo"), ("wasm", "wasm")):
+        try:
+            verify_bundle(site_dir / directory, web[name])
+        except (OSError, ValueError, TypeError, KeyError):
+            raise RuntimeError(f"Candidate website has an invalid {name} browser bundle") from None
+    if not files: raise RuntimeError("Candidate website artifact is empty")
+    target = ASSETS / "website.zip"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as archive:
+        for path, relative in sorted(files, key=lambda item: item[1].as_posix()):
+            archive.write(path, relative.as_posix())
 
 def stage():
     state = read_state(); validate_candidate(state); verify_assets()
@@ -326,11 +388,15 @@ def abandon():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["prepare", "wait-ci", "manifest", "stage", "advance-main", "publish-github", "extract-website", "complete", "abandon"])
+    parser.add_argument("command", choices=["prepare", "wait-ci", "package-site", "manifest", "stage", "advance-main", "publish-github", "extract-website", "complete", "abandon"])
     parser.add_argument("--bump", default="patch", choices=["patch", "minor", "major"])
+    parser.add_argument("--site-dir")
     args = parser.parse_args()
     try:
         if args.command == "prepare": prepare(args.bump)
+        elif args.command == "package-site":
+            if not args.site_dir: parser.error("package-site requires --site-dir")
+            package_site(args.site_dir)
         else: {"wait-ci": wait_ci, "manifest": manifest, "stage": stage, "advance-main": advance_main, "publish-github": publish_github, "extract-website": extract_website, "complete": complete, "abandon": abandon}[args.command]()
     except (RuntimeError, ValueError, KeyError) as error:
         raise SystemExit(str(error)) from None

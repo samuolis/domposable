@@ -11,6 +11,9 @@ test('responsive HTML layouts resize in-browser and survive real export without 
   test.setTimeout(60_000);
   await page.goto(fixturePath);
   await expect(page.getByRole('heading', { level: 1, name: 'Responsive export fixture' })).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await expect(page.locator('#export-pane-list')).toBeVisible();
+  await expect(page.locator('#export-pane-detail')).toBeVisible();
 
   for (const [width, expectedColumns] of [[390, 1], [768, 2], [1024, 3], [1280, 4]] as const) {
     await page.setViewportSize({ width, height: 1000 });
@@ -67,17 +70,68 @@ test('responsive HTML layouts resize in-browser and survive real export without 
     const html = await readFile(join(output, 'fixtures/responsive-export/index.html'), 'utf8');
     expect(html).toContain('@container');
     expect(html).toContain('data-d-html-responsive-split');
+    expect(html).toContain('data-domposable-pane-scaffold="768"');
+    expect(html).toContain('d-domposable-pane-scaffold (width < 768px)');
 
     const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 1000 } });
     const exportedPage = await noScript.newPage();
     await exportedPage.setContent(html);
     await expect(exportedPage.getByRole('heading', { level: 1, name: 'Responsive export fixture' })).toBeVisible();
+    const responsiveListHost = exportedPage.locator('#export-pane-root > [data-domposable-pane-host="list"]');
+    const unconfiguredListHost = exportedPage.locator('#export-unconfigured-pane-root > [data-domposable-pane-host="list"]');
+    await expect(responsiveListHost).toHaveCSS('display', 'none');
+    await expect(exportedPage.locator('#export-pane-list')).toBeHidden();
+    await expect(exportedPage.locator('#export-pane-detail')).toBeVisible();
+    await expect(unconfiguredListHost).toHaveCSS('display', 'grid');
+    await expect(exportedPage.locator('#export-unconfigured-pane-detail')).toBeVisible();
+    await expect(exportedPage.locator('#export-single-directory [data-domposable-pane-host="list"]')).toHaveCSS('display', 'grid');
+    const phonePaneWidths = await exportedPage.evaluate(() => ({
+      root: document.querySelector('#export-pane-root')!.getBoundingClientRect().width,
+      detail: document.querySelector('#export-pane-detail')!.getBoundingClientRect().width,
+      single: document.querySelector('#export-single-directory')!.getBoundingClientRect().width,
+      singlePane: document.querySelector('#export-single-directory [data-domposable-pane-host="list"]')!.getBoundingClientRect().width,
+    }));
+    expect(phonePaneWidths.detail).toBeCloseTo(phonePaneWidths.root, 0);
+    expect(phonePaneWidths.singlePane).toBeCloseTo(phonePaneWidths.single, 0);
+    expect(await exportedPage.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    await mkdir(join(process.cwd(), 'build/screenshots/dom'), { recursive: true });
+    await exportedPage.locator('#export-pane-root').screenshot({ path: join(process.cwd(), 'build/screenshots/dom/responsive-panes-phone.png') });
     await expect.poll(() => columnCount(exportedPage)).toBe(1);
     await expect.poll(() => splitDirection(exportedPage, 'split-short')).toBe('column');
-    await mkdir(join(process.cwd(), 'build/screenshots/dom'), { recursive: true });
     await exportedPage.screenshot({ path: join(process.cwd(), 'build/screenshots/dom/responsive-export-phone.png'), fullPage: true });
 
     await exportedPage.setViewportSize({ width: 1280, height: 1000 });
+    await expect(responsiveListHost).toHaveCSS('display', 'grid');
+    await expect(exportedPage.locator('#export-pane-detail')).toBeVisible();
+    await expect(exportedPage.locator('#export-single-directory [data-domposable-pane-host="list"]')).toHaveCSS('display', 'grid');
+    const desktopPaneBounds = await exportedPage.evaluate(() => {
+      const bounds = (selector: string) => {
+        const rect = document.querySelector(selector)!.getBoundingClientRect();
+        return { x: rect.x, width: rect.width };
+      };
+      return {
+        list: bounds('#export-pane-list'),
+        detail: bounds('#export-pane-detail'),
+        root: bounds('#export-pane-root'),
+        single: bounds('#export-single-directory'),
+        singlePane: bounds('#export-single-directory [data-domposable-pane-host="list"]'),
+      };
+    });
+    expect(desktopPaneBounds.list.width).toBeLessThanOrEqual(360);
+    expect(desktopPaneBounds.list.x).toBeLessThan(desktopPaneBounds.detail.x);
+    expect(desktopPaneBounds.detail.width).toBeGreaterThan(desktopPaneBounds.list.width);
+    expect(desktopPaneBounds.singlePane.width).toBeCloseTo(desktopPaneBounds.single.width, 0);
+    await exportedPage.locator('#export-pane-root').screenshot({ path: join(process.cwd(), 'build/screenshots/dom/responsive-panes-desktop.png') });
+
+    const responsiveRoot = exportedPage.locator('#export-pane-root');
+    for (const [width, display] of [[767, 'none'], [768, 'grid']] as const) {
+      await responsiveRoot.evaluate((element, value) => { (element as HTMLElement).style.width = `${value}px`; }, width);
+      await expect.poll(() => responsiveRoot.evaluate((element) => element.getBoundingClientRect().width)).toBe(width);
+      await expect(responsiveListHost).toHaveCSS('display', display);
+    }
+    await responsiveRoot.evaluate((element) => { (element as HTMLElement).style.removeProperty('width'); });
+    await expect(unconfiguredListHost).toHaveCSS('display', 'grid');
+
     await expect.poll(() => columnCount(exportedPage)).toBe(4);
     await expect.poll(() => splitDirection(exportedPage, 'split-short')).toBe('row');
     const exportedBounds = await splitBounds(exportedPage, 'split-long');

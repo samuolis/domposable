@@ -56,6 +56,7 @@ class HtmlModalLifecycleTest {
                 val dialog = root.querySelector("dialog") as HTMLElement
                 assertEquals("-1", dialog.getAttribute("tabindex"))
                 assertEquals(dialog, document.activeElement)
+                assertEquals("none", window.getComputedStyle(dialog).outlineStyle)
                 val tab = keyboardEvent("Tab")
                 document.dispatchEvent(tab)
                 assertTrue(tab.defaultPrevented)

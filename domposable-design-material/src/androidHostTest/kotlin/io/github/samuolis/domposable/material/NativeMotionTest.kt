@@ -94,10 +94,9 @@ class NativeMotionTest {
         val indicator = compose.onNodeWithTag("indicator")
         val restingTop = indicator.getUnclippedBoundsInRoot().top.value
         val pull = compose.onNodeWithTag("pull")
-        pull.performTouchInput {
-            down(center)
-            moveBy(Offset(0f, 80f), delayMillis = 100)
-        }
+        pull.performTouchInput { down(center) }
+        compose.mainClock.advanceTimeByFrame()
+        pull.performTouchInput { moveBy(Offset(0f, 80f), delayMillis = 100) }
         val partialTop = indicator.getUnclippedBoundsInRoot().top.value
         pull.performTouchInput { moveBy(Offset(0f, 40f), delayMillis = 100) }
         val furtherTop = indicator.getUnclippedBoundsInRoot().top.value
