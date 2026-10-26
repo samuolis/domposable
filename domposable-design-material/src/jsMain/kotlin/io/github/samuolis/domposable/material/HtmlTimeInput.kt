@@ -103,23 +103,23 @@ internal fun HtmlTimeHeading(
                     attr("aria-hidden", "true")
                 }) { Text(":") }
             }
+            val number =
+                if (!hour) {
+                    props.minute
+                } else if (props.is24Hour) {
+                    props.hour
+                } else {
+                    ((props.hour + 11) % 12) + 1
+                }
+            val displayedValue = number.toString().padStart(2, '0')
             Button(attrs = {
                 attr("type", "button")
-                attr("aria-label", if (hour) "Select hours" else "Select minutes")
+                attr("aria-label", "$displayedValue, ${if (hour) "Select hours" else "Select minutes"}")
                 attr("aria-pressed", (hour == selectingHour).toString())
                 if (!enabled) disabled()
                 onClick { if (enabled) onSelect(hour) }
             }) {
-                val number =
-                    if (!hour) {
-                        props.minute
-                    } else if (props.is24Hour) {
-                        props.hour
-                    } else {
-                        ((props.hour + 11) % 12) +
-                            1
-                    }
-                Text(number.toString().padStart(2, '0'))
+                Text(displayedValue)
             }
         }
         if (!props.is24Hour) HtmlTimePeriod(props, enabled)
