@@ -637,6 +637,7 @@ fun ComponentCatalogScreen(
     var slider by rememberSaveable { mutableFloatStateOf(0.5f) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var dialog by remember { mutableStateOf(false) }
+    var dialogScrim by remember { mutableStateOf<Float?>(null) }
     var sheet by remember { mutableStateOf(false) }
     var menu by remember { mutableStateOf(false) }
     var themedLoading by remember { mutableStateOf(false) }
@@ -696,7 +697,14 @@ fun ComponentCatalogScreen(
         DomposableTabs(labels = listOf("First", "Second"), selectedIndex = tab, onSelect = { tab = it })
         DomposableText("Selected section: ${tab + 1}")
         DomposableFlowRow(gap = 12.dp) {
-            DomposableButton("Open dialog", { dialog = true })
+            DomposableButton("Open dialog", {
+                dialogScrim = null
+                dialog = true
+            })
+            DomposableButton("Open 50% scrim", {
+                dialogScrim = 0.5f
+                dialog = true
+            })
             DomposableButton("Open sheet", { sheet = true })
             DomposableMenu(
                 expanded = menu,
@@ -807,7 +815,7 @@ fun ComponentCatalogScreen(
     if (dialog) {
         DomposableDialog(title = "Example dialog", onDismiss = {
             dialog = false
-        }) { DomposableText("Escape closes this dialog and restores focus.") }
+        }, scrimOpacity = dialogScrim) { DomposableText("Escape closes this dialog and restores focus.") }
     }
     if (sheet) {
         DomposableBottomSheet(title = "Example sheet", onDismiss = {

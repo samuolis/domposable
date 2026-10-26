@@ -540,7 +540,13 @@ data class DomposableDialogProps(
     val layout: DomposableModalLayout = DomposableModalLayout(),
     val dismissOnBackPress: Boolean = true,
     val dismissOnClickOutside: Boolean = true,
-)
+    /** Null preserves the platform default; otherwise black backdrop opacity from 0 to 1. */
+    val scrimOpacity: Float? = null,
+) {
+    init {
+        require(scrimOpacity == null || (scrimOpacity.isFinite() && scrimOpacity in 0f..1f))
+    }
+}
 
 @DomposableComponent("BottomSheet")
 data class DomposableBottomSheetProps(

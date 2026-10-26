@@ -53,6 +53,30 @@ Domposable supports Android API 24 and newer. The library modules, demo and publ
 
 The Compose plugin, Runtime, UI and Foundation use a stable compatible baseline. The optional Material provider is compiled against that baseline; it must not raise the core to a prerelease version. On Wasm, mixing older compile-time UI dependencies with newer runtime UI can bundle incompatible Skiko JavaScript glue; the startup checks exercise the actual browser bundle.
 
+### Migration to 0.24.0
+
+Dialogs now accept an optional `scrimOpacity` from `0f` (clear) to `1f` (black).
+Leave it `null` to keep the platform default; other dialog and sheet defaults are unchanged.
+
+```kotlin
+DomposableDialog(
+    title = "Saving changes",
+    onDismiss = {},
+    dismissOnBackPress = false,
+    dismissOnClickOutside = false,
+    scrimOpacity = 0.5f,
+) {
+    DomposableProgress(label = "Saving changes")
+}
+```
+
+Adding the property changes the binary signatures of `DomposableDialogProps`
+(including its generated `copy`) and the `DomposableDialog` convenience function.
+Rebuild all consumers together against 0.24.0; do not mix precompiled 0.23.x callers
+with the new UI library. Calls using a trailing content lambda remain source compatible.
+If content was passed positionally inside parentheses, use the named `content` argument.
+This pre-1.0 binary break requires a minor release.
+
 ### Migration from 0.7.0
 
 The stable-core baseline removes `DomposableTimePickerMode.Scroll` and `DomposableDialogVariant.VibrantTimePicker`, which mapped to newer upstream APIs. Use `DomposableTimePickerMode.Dial` or `Input`, and `DomposableDialogVariant.TimePicker`. Other component families remain available on the compatible Material baseline. This is a breaking change and requires a pre-1.0 minor release; rebuild consumers rather than mixing the old and new binaries.

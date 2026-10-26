@@ -41,7 +41,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import io.github.samuolis.domposable.foundation.DomposableSurfaceAppearance
 import io.github.samuolis.domposable.ui.DomposableBottomSheetProps
 import io.github.samuolis.domposable.ui.DomposableDialogProps
@@ -74,7 +73,10 @@ internal fun NativeDialog(
         val body = @Composable {
             CompositionLocalProvider(
                 LocalSaveableStateRegistry provides featureRegistry,
-            ) { content() }
+            ) {
+                ApplyNativeDialogScrim(props.scrimOpacity)
+                content()
+            }
         }
         val title = @Composable {
             if (props.headerContent == null) {
@@ -201,15 +203,6 @@ internal fun NativeDialog(
         }
     }
 }
-
-private fun dialogProperties(
-    props: DomposableDialogProps,
-    usePlatformDefaultWidth: Boolean = true,
-) = DialogProperties(
-    usePlatformDefaultWidth = usePlatformDefaultWidth && !props.layout.fillViewportWidth,
-    dismissOnBackPress = props.dismissOnBackPress,
-    dismissOnClickOutside = props.dismissOnClickOutside,
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
