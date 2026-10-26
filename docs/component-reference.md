@@ -38,7 +38,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableDataTable](#domposabledatatable) | Core / additional controls | 9 |
 | [DomposableDatePicker](#domposabledatepicker) | Input | 8 |
 | [DomposableDateRangePicker](#domposabledaterangepicker) | Input | 9 |
-| [DomposableDialog](#domposabledialog) | Containment | 9 |
+| [DomposableDialog](#domposabledialog) | Containment | 10 |
 | [DomposableDisclosure](#domposabledisclosure) | Core / additional controls | 5 |
 | [DomposableDivider](#domposabledivider) | Containment | 2 |
 | [DomposableDragHandle](#domposabledraghandle) | Expressive structure | 4 |
@@ -184,7 +184,7 @@ Navigation. [Full API and overloads](https://samuolis.github.io/domposable/api/d
 
 ## DomposableBottomSheet
 
-Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L545)
+Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-bottom-sheet-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L551)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
@@ -379,6 +379,7 @@ Containment. [Full API and overloads](https://samuolis.github.io/domposable/api/
 | `layout` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-modal-layout/index.html">DomposableModalLayout</a></code> | `DomposableModalLayout()` |
 | `dismissOnBackPress` | <code>Boolean</code> | `true` |
 | `dismissOnClickOutside` | <code>Boolean</code> | `true` |
+| `scrimOpacity` | <code>Float?</code> | `null` |
 
 ## DomposableDisclosure
 
@@ -793,7 +794,7 @@ Core / additional controls. [Full API and overloads](https://samuolis.github.io/
 
 ## DomposableScaffold
 
-Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L557)
+Structure. [Full API and overloads](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold.html) · [Props API](https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-scaffold-props/index.html) · [Source](https://github.com/samuolis/domposable/blob/main/domposable-ui/src/commonMain/kotlin/io/github/samuolis/domposable/ui/Components.kt#L563)
 
 | Parameter | Type | Default |
 | --- | --- | --- |
