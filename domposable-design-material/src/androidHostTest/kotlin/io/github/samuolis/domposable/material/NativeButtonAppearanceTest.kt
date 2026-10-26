@@ -1,5 +1,6 @@
 package io.github.samuolis.domposable.material
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
@@ -64,6 +66,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import androidx.compose.ui.unit.dp as nativeDp
@@ -99,8 +102,12 @@ class NativeButtonAppearanceTest {
 
         val compact = compose.onNodeWithTag("compact")
         compact.assertHeightIsEqualTo(32.nativeDp).assertWidthIsEqualTo(200.nativeDp)
-        val capturedCompact = compact.captureToImage().toPixelMap()
+        val capture = compact.captureToImage()
+        val capturedCompact = capture.toPixelMap()
         assertEquals(32.nativeDp, with(compose.density) { capturedCompact.height.toDp() })
+        val target = File("../build/screenshots/android/compact-native-button.png")
+        target.parentFile!!.mkdirs()
+        target.outputStream().use { capture.asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it) }
         compose.onNodeWithTag("default").assertHeightIsEqualTo(40.nativeDp)
         compact.performTouchInput {
             click(center + Offset(0f, 19.nativeDp.toPx()))
