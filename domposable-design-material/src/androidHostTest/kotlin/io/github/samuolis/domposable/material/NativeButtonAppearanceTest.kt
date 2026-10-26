@@ -79,11 +79,11 @@ class NativeButtonAppearanceTest {
 
     @Test
     @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
-    fun explicitCompactHeightKeepsLayoutAndExpandedTouchTarget() {
+    fun compactAppearancePreservesMaterialLayoutAndExpandedTouchTarget() {
         var compactClicks = 0
         compose.setContent {
             DomposableMaterialTheme {
-                Column(Modifier.width(200.nativeDp)) {
+                Column(Modifier.width(200.nativeDp).testTag("button-layout")) {
                     DomposableButton(
                         DomposableButtonProps(
                             onClick = { compactClicks++ },
@@ -101,7 +101,8 @@ class NativeButtonAppearanceTest {
         }
 
         val compact = compose.onNodeWithTag("compact")
-        compact.assertHeightIsEqualTo(32.nativeDp).assertWidthIsEqualTo(200.nativeDp)
+        compose.onNodeWithTag("button-layout").assertHeightIsEqualTo(128.nativeDp)
+        compact.assertWidthIsEqualTo(200.nativeDp)
         val capture = compact.captureToImage()
         val capturedCompact = capture.toPixelMap()
         assertEquals(32.nativeDp, with(compose.density) { capturedCompact.height.toDp() })

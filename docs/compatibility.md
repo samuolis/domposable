@@ -55,6 +55,12 @@ The Compose plugin, Runtime, UI and Foundation use a stable compatible baseline.
 
 ### Migration to 0.24.0
 
+Native styled buttons again reserve Material's 48dp interaction layout space around
+smaller visual faces, restoring the spacing before 0.23.1. A 32dp face stays 32dp;
+its parent reserves 48dp. Explicit fixed parent constraints still take precedence.
+The `minHeight` appearance property remains a visual minimum, rather than an opt-out
+from Material interaction spacing. Semantic HTML button layout is unchanged.
+
 Dialogs now accept an optional `scrimOpacity` from `0f` (clear) to `1f` (black).
 Leave it `null` to keep the platform default; other dialog and sheet defaults are unchanged.
 

@@ -701,10 +701,6 @@ fun ComponentCatalogScreen(
                 dialogScrim = null
                 dialog = true
             })
-            DomposableButton("Open 50% scrim", {
-                dialogScrim = 0.5f
-                dialog = true
-            })
             DomposableButton("Open sheet", { sheet = true })
             DomposableMenu(
                 expanded = menu,
@@ -811,6 +807,10 @@ fun ComponentCatalogScreen(
         }
         DomposableSpacer()
         DomposableText("Open More components for app bars, selection fields and feedback controls.")
+        DomposableButton("Open 50% scrim", {
+            dialogScrim = 0.5f
+            dialog = true
+        })
     }
     if (dialog) {
         DomposableDialog(title = "Example dialog", onDismiss = {
