@@ -1,6 +1,7 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -46,12 +47,17 @@ internal fun HtmlModal(
     dismissOnBackPress: Boolean = true,
     dismissOnClickOutside: Boolean = true,
     skipPartiallyExpanded: Boolean = false,
+    scrimOpacity: Float? = null,
     content: @Composable () -> Unit,
 ) {
     val dismiss by rememberUpdatedState(onDismiss)
     val allowBackDismiss by rememberUpdatedState(dismissOnBackPress)
     val allowOutsideDismiss by rememberUpdatedState(dismissOnClickOutside)
     val titleId = remember { "d-dialog-${nextHtmlModalId++}" }
+    SideEffect {
+        val fallback = document.getElementById("$titleId-scrim") as? HTMLElement
+        fallback?.style?.setProperty("--d-dialog-scrim-opacity", "${(scrimOpacity ?: 0.32f) * 100}%")
+    }
     DomposableHtmlModifiers(modifier) {
         TagElement<HTMLDialogElement>("dialog", applyAttrs = {
             domposableAttributes(modifier)
@@ -63,6 +69,7 @@ internal fun HtmlModal(
             style {
                 surfaceAppearance(appearance)
                 modalLayout(layout)
+                scrimOpacity?.let { property("--d-dialog-scrim-opacity", "${it * 100}%") }
             }
             ref { element ->
                 val previousFocus = document.activeElement as? HTMLElement
@@ -176,6 +183,10 @@ internal fun HtmlModal(
                     element.classList.add("d-dialog-fallback")
                     fallbackScrim = document.createElement("div") as HTMLElement
                     fallbackScrim?.classList?.add("d-dialog-fallback-scrim")
+                    fallbackScrim?.id = "$titleId-scrim"
+                    scrimOpacity?.let {
+                        fallbackScrim?.style?.setProperty("--d-dialog-scrim-opacity", "${it * 100}%")
+                    }
                     fallbackScrim?.style?.zIndex =
                         "${HTML_MODAL_SCRIM_Z_INDEX + openHtmlModalOrder.indexOf(
                             element,

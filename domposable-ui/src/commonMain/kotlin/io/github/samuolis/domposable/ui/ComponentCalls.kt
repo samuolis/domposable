@@ -510,6 +510,7 @@ fun DomposableDialog(
     layout: DomposableModalLayout = DomposableModalLayout(),
     dismissOnBackPress: Boolean = true,
     dismissOnClickOutside: Boolean = true,
+    scrimOpacity: Float? = null,
     content: @Composable () -> Unit,
 ) = DomposableDialog(
     DomposableDialogProps(
@@ -522,6 +523,7 @@ fun DomposableDialog(
         layout = layout,
         dismissOnBackPress = dismissOnBackPress,
         dismissOnClickOutside = dismissOnClickOutside,
+        scrimOpacity = scrimOpacity,
     ),
     modifier,
     content,

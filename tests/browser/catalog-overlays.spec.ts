@@ -178,3 +178,19 @@ test('forced colors retain chip selection and a visible keyboard focus ring with
   expect(paint.outline).toBe('solid');
   expect(paint.outlineWidth).toBe('2px');
 });
+
+for (const [triggerName, opacity] of [['Open dialog', '0.32'], ['Open 50% scrim', '0.5']] as const) {
+  test(`dialog backdrop uses ${opacity} opacity without changing dismissal`, async ({page}, testInfo) => {
+    await page.setViewportSize({width: 390, height: 844});
+    await page.goto('/#/catalog');
+    const trigger = page.getByRole('button', {name: triggerName, exact: true});
+    await trigger.click();
+    const dialog = page.getByRole('dialog', {name: 'Example dialog', exact: true});
+    await expect(dialog).toBeVisible();
+    expect(await dialog.evaluate(element => getComputedStyle(element, '::backdrop').backgroundColor)).toContain(opacity);
+    await page.screenshot({path: testInfo.outputPath(`dialog-scrim-${opacity}.png`), animations: 'disabled'});
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+  });
+}

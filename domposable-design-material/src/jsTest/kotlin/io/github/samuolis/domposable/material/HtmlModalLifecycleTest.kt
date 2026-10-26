@@ -412,6 +412,46 @@ class HtmlModalLifecycleTest {
     }
 
     @Test
+    fun fallbackScrimOpacityUpdatesAndReturnsToTheDefault() =
+        CoroutineScope(Dispatchers.Unconfined).promise {
+            withFallbackDialogs {
+                val opacity = mutableStateOf<Float?>(0.5f)
+                withModalHost(content = {
+                    DomposableDialog("Saving", {}, scrimOpacity = opacity.value) { DomposableText("Loading") }
+                }) {
+                    val scrim = document.querySelector(".d-dialog-fallback-scrim") as HTMLElement
+                    assertTrue(window.getComputedStyle(scrim).backgroundColor.contains("0.5"))
+                    opacity.value = 0.7f
+                    settleModals()
+                    assertTrue(window.getComputedStyle(scrim).backgroundColor.contains("0.7"))
+                    opacity.value = null
+                    settleModals()
+                    assertTrue(window.getComputedStyle(scrim).backgroundColor.contains("0.32"))
+                }
+            }
+        }
+
+    @Test
+    fun customDialogScrimOpacityAppliesToNativeAndFallbackBackdrops() {
+        withHost(content = {
+            DomposableDialog("Saving", {}, scrimOpacity = 0.5f) { DomposableText("Loading") }
+        }) { root ->
+            val dialog = root.querySelector("dialog") as HTMLElement
+            val color = window.asDynamic().getComputedStyle(dialog, "::backdrop").backgroundColor as String
+            assertTrue(color.contains("0.5"), "Native backdrop opacity: $color")
+        }
+        withFallbackDialogs {
+            withHost(content = {
+                DomposableDialog("Saving", {}, scrimOpacity = 0.5f) { DomposableText("Loading") }
+            }) {
+                val scrim = document.querySelector(".d-dialog-fallback-scrim") as HTMLElement
+                val color = window.getComputedStyle(scrim).backgroundColor
+                assertTrue(color.contains("0.5"), "Fallback backdrop opacity: $color")
+            }
+        }
+    }
+
+    @Test
     fun nativeAndFallbackScrimsUseTranslucentMaterialColor() {
         withHost(content = {
             DomposableDialog("Native scrim", {}) { DomposableText("Dialog content") }
