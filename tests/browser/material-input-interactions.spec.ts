@@ -202,7 +202,7 @@ test('24-hour clock places midnight and noon on distinct concentric rings', asyn
   const picker = page.getByRole('group', { name: 'Time picker' });
   const midnight = (await picker.getByRole('button', { name: 'Hour 00', exact: true }).boundingBox())!;
   const noon = (await picker.getByRole('button', { name: 'Hour 12', exact: true }).boundingBox())!;
-  const one = (await picker.getByRole('button', { name: 'Hour 01', exact: true }).boundingBox())!;
+  const one = (await picker.getByRole('button', { name: 'Hour 1', exact: true }).boundingBox())!;
   const thirteen = (await picker.getByRole('button', { name: 'Hour 13', exact: true }).boundingBox())!;
   expect(Math.abs(midnight.x - noon.x)).toBeLessThan(1);
   expect(midnight.y - noon.y).toBeGreaterThan(30);
