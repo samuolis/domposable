@@ -188,10 +188,10 @@ internal fun StorefrontContent(
                                 DomposableFlowRow(gap = 8.dp) {
                                     DomposableButton("View details", {
                                         onProduct(product.id)
-                                    }, DomposableModifier.contentDescription("View ${product.name}"))
+                                    }, DomposableModifier.contentDescription("View details, ${product.name}"))
                                     DomposableButton("Add to bag", {
                                         onAction(CatalogAction.Add(product.id))
-                                    }, DomposableModifier.contentDescription("Add ${product.name} to bag"))
+                                    }, DomposableModifier.contentDescription("Add to bag, ${product.name}"))
                                 }
                             }
                         }
