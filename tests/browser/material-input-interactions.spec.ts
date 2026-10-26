@@ -34,6 +34,7 @@ test('time picker modes preserve and update controlled hour and minute values', 
   await expect(picker.getByRole('button', { name: '10, Select hours', exact: true })).toBeVisible();
   await expect(picker.getByRole('button', { name: '30, Select minutes', exact: true })).toBeVisible();
   await testInfo.attach('time-picker-aria-labels', { body: await picker.screenshot(), contentType: 'image/png' });
+  await expect(picker.getByRole('button', { name: 'Hour 1', exact: true })).toBeVisible();
   await picker.getByRole('button', { name: 'Hour 11', exact: true }).click();
   await picker.getByRole('button', { name: 'Minute 45', exact: true }).click();
   await expect(page.getByTestId('material-selected-time')).toContainText('11:45');
