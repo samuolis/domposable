@@ -260,8 +260,14 @@ internal fun NativeButton(
                 interaction?.focusRingOffset?.value ?: if (interaction != null) 3f else null,
                 shape,
             ).scale(scale)
-            .minimumInteractiveComponentSize()
-            .shadow(if (props.style == DomposableButtonStyle.Elevated && useEnabledColors) 1.dp else 0.dp, shape)
+            .then(
+                // Keep an explicitly compact layout while clickable still expands its physical hit target to 48dp.
+                if (appearance.minHeight?.value?.let { it < 48f } == true) {
+                    Modifier
+                } else {
+                    Modifier.minimumInteractiveComponentSize()
+                },
+            ).shadow(if (props.style == DomposableButtonStyle.Elevated && useEnabledColors) 1.dp else 0.dp, shape)
             .heightIn(min = (appearance.minHeight?.value ?: 40f).dp)
             .clip(shape)
             .semantics(mergeDescendants = true) {
