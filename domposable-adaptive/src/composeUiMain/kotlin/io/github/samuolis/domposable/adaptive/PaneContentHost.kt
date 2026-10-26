@@ -9,10 +9,16 @@ import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.region
 import io.github.samuolis.domposable.ui.weight
 
+internal actual fun domposablePaneScaffoldRootModifier(
+    modifier: DomposableModifier,
+    responsiveBreakpoint: DomposableLength?,
+): DomposableModifier = modifier
+
 @Composable
 internal actual fun DomposablePaneContentHost(
     pane: DomposablePaneScaffoldPane,
     expanded: Boolean,
+    collapseBelow: DomposableLength?,
     visible: Boolean,
     label: String,
     widthFraction: Float,
