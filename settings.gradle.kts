@@ -38,7 +38,7 @@ include(
     ":checkout-api",
     ":checkout-impl",
     ":consumer-fixture",
-    ":custom-provider-fixture",
+    ":component-wrapper-fixture",
 )
 
 // Unique Gradle identities avoid api/impl capability collisions between features.

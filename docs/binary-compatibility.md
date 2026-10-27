@@ -13,6 +13,8 @@ Domposable uses [Kotlin's built-in ABI validation](https://kotlinlang.org/docs/g
 
 `config/binary-api.json` declares the eight published modules and expected Klib targets. The inventory check rejects missing/empty dumps, absent Klib targets, unexpected baseline paths and published modules omitted from that policy. macOS CI disables target inference so these targets must actually compile.
 
+The dependency-only `domposable-design-material` module has explicit empty baselines. The policy checks that it exposes no API declarations and exposes `domposable-ui` through an API dependency. All other runtime baselines must contain declarations and the expected targets.
+
 The Gradle check compares compiled signatures with the checked-in baselines under each module's `api/` directory. Any difference fails, including an additive overload. CI also generates independent diffs against the PR base and the latest semver release tag in the checkout's ancestry, so updating a baseline does not erase the review history. Git tags and full history are required; visual-evidence buckets and prerelease tags are excluded.
 
 The `binary-api` Actions artifact retains the reviewed and generated dumps, JSON/Markdown inventory and full comparison diffs for **30 days**. Compiler mismatch diagnostics appear in the job log. The job summary lists changed files and added/removed line counts. Counts describe text changes; they are not a semantic compatibility classifier.

@@ -12,7 +12,7 @@
 
 Domposable is a Kotlin Multiplatform UI library. Write your components and layouts in `commonMain`, then render them with Compose UI on Android and iOS or semantic HTML on Kotlin/JS. Desktop and Wasm are available as experimental targets.
 
-Start with the included Material 3 design system, adapt it to your brand, or supply your own renderers. Your app keeps its state management, dependency injection and navigation.
+Start with the included Material 3 controls, adapt them to your brand, and wrap them behind your own component names. Your app keeps its state management, dependency injection and navigation.
 
 Domposable is used in [Podiumas](https://podiumas.eu), a live sports tournament app. The examples below show smaller features you can explore and reuse.
 
@@ -32,7 +32,7 @@ Domposable is used in [Podiumas](https://podiumas.eu), a live sports tournament 
 
 - **Shared components and layouts.** Write ordinary Compose functions with your own state and callbacks.
 - **Real HTML.** Use browser links, form controls, headings and page landmarks, styled with CSS.
-- **Customizable design systems.** Set theme defaults, override a control, or replace the component renderers for part of your app.
+- **Customizable design systems.** Set theme defaults and per-control styles. Use an app-owned platform implementation when a control needs different behavior.
 - **Adaptive layouts.** Use available width to choose breakpoints, panes and layout recipes.
 - **Material 3 controls.** Start with standard components and selected expressive variants. [Browse the catalog](docs/material-catalog.md).
 - **Public-page export.** Generate HTML and CSS snapshots of existing public pages at build time. Configure the exporter in Kotlin Gradle with a list of routes. [Setup and limitations](docs/page-export.md).
@@ -40,7 +40,7 @@ Domposable is used in [Podiumas](https://podiumas.eu), a live sports tournament 
 
 Use components directly with Compose state, an existing ViewModel, Metro, Koin or another DI container. You do not need application KSP setup or a screen registry to use the components. Existing frameworks can also [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
 
-The core uses stable Compose Multiplatform. The optional Material provider currently uses Material 3 alpha APIs. See [tested versions and platform boundaries](docs/compatibility.md).
+The core uses stable Compose Multiplatform. Native controls currently use Material 3 alpha APIs. See [tested versions and platform boundaries](docs/compatibility.md).
 
 > [!NOTE]
 > This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). Before 1.0, minor releases may change APIs. Check the [migration guide](docs/migration.md) when upgrading.
@@ -57,7 +57,7 @@ val domposableVersion = "<released-version>"
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.samuolis.domposable:domposable-design-material:$domposableVersion")
+            implementation("io.github.samuolis.domposable:domposable-ui:$domposableVersion")
             // Optional: adaptive layout helpers.
             implementation("io.github.samuolis.domposable:domposable-adaptive:$domposableVersion")
         }
@@ -65,7 +65,7 @@ kotlin {
 }
 ```
 
-The Material artifact includes the shared UI API and default platform providers. See the [installation guide](docs/getting-started.md) and [tested toolchain](docs/compatibility.md) for Compose plugins and target setup.
+The UI artifact includes the shared API and platform implementations. The Material artifact remains a compatibility alias. See the [installation guide](docs/getting-started.md) and [tested toolchain](docs/compatibility.md) for Compose plugins and target setup.
 
 ### 2. Write a shared feature
 
@@ -102,19 +102,21 @@ Use Android `setContent`, iOS `ComposeUIViewController`, a desktop Compose windo
 
 ## How it works
 
-For most apps, setup is simply `DomposableMaterialTheme { AppContent() }`. The theme installs the platform's component renderers. Shared component calls use those renderers to create controls and connect events to your callbacks.
+For most apps, setup is simply `DomposableMaterialTheme { AppContent() }`. The theme supplies appearance values. Shared component calls use direct platform implementations to create controls and connect events to your callbacks.
 
 ```mermaid
 flowchart TB
     Feature[Shared feature composable] --> Components[Domposable component calls]
-    Components --> Provider[Installed theme and component provider]
-    Provider --> Native[Compose UI: Android, iOS, desktop, Wasm]
-    Provider --> HTML[Semantic HTML and CSS: Kotlin/JS]
+    Components --> Platform[Compile-time expect / actual]
+    Platform --> Native[Compose UI: Android, iOS, desktop, Wasm]
+    Platform --> HTML[Semantic HTML and CSS: Kotlin/JS]
 ```
 
-Domposable uses `expect` / `actual` to choose the platform's default renderer factory. The provider lets you replace a control or a design system within a subtree. Most applications only configure the theme. You do not need to implement a provider for each screen.
-
-Set colors, typography, shapes and component styles through the theme. Write a custom renderer when you need a different control implementation. [How providers and platform implementations fit together](docs/how-it-works.md).
+Built-in components use `expect` / `actual` directly. There is no component provider
+to configure. Keep your own names such as `AppButton`, wrap Domposable controls,
+and set colors, typography, shapes and styles through the theme. For a different
+control implementation, use an app-owned platform contract.
+[Follow the component call](docs/how-it-works.md).
 
 Set brand defaults once. Every argument is optional:
 
@@ -139,7 +141,7 @@ Custom cards are shared composition too: use `DomposableBox` for overlapping ima
 
 | Your app | Adopt | Keep in your app |
 | --- | --- | --- |
-| Starting a shared UI | Material provider, components and adaptive helpers | Models, DI and application behaviour |
+| Starting a shared UI | Components, themes and adaptive helpers | Models, DI and application behaviour |
 | Has a design system | [Theme defaults](docs/design-systems.md#theme-defaults-and-component-overrides) and thin adapters behind existing component names | Brand tokens, product layouts and custom controls |
 | Has Navigation 3 or another router | Optional entry display, pane and browser helpers | Back stack, entry decorators, route identity and URL policy |
 | Has screen annotations and codegen | Optional KSP function driver | Annotation contract, DI bindings and generated host templates |
@@ -234,8 +236,8 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | Artifact | Purpose |
 | --- | --- |
 | `domposable-foundation` | Portable values and theme tokens |
-| `domposable-ui` | Shared components, typed renderer contracts and ordered modifiers |
-| `domposable-design-material` | Default native Material and semantic HTML providers |
+| `domposable-ui` | Shared components, platform implementations and ordered modifiers |
+| `domposable-design-material` | Compatibility alias for `domposable-ui` |
 | `domposable-adaptive` | Content-sized breakpoints, preferences and pane recipes |
 
 ### Optional screen integration
@@ -258,7 +260,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | I want to… | Read |
 | --- | --- |
 | Install Domposable and set up platform hosts | [Getting started](docs/getting-started.md) |
-| Understand components, props, providers and modifiers | [How the API works](docs/how-it-works.md) |
+| Understand components, props and platform implementations | [How the API works](docs/how-it-works.md) |
 | Use shared controls with examples | [Components](docs/components.md) |
 | Configure Material 3 and expressive components | [Material catalog](docs/material-catalog.md) |
 | Adapt a feature to its available space | [Adaptive layouts](docs/adaptive.md) |

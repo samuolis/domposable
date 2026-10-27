@@ -22,7 +22,7 @@ Desktop and Wasm support are **experimental**. HTML and Wasm share the optional 
 | Kotlin / Compose compiler | 2.4.21 |
 | Compose Multiplatform plugin / runtime / UI / HTML | 1.12.2 (stable) |
 | AndroidX Compose core / host tests | 1.12.1 (stable) |
-| Material3 provider | 1.12.0-alpha03 (separately versioned) |
+| Native Material3 | 1.12.0-alpha03 (separately versioned) |
 | Navigation 3 runtime / Compose UI display | 1.2.0 / 1.2.0 |
 | KSP | 2.3.12 |
 | Android Gradle plugin / Gradle | 9.4.1 / 9.8.2 |
@@ -31,18 +31,18 @@ Desktop and Wasm support are **experimental**. HTML and Wasm share the optional 
 | Koin integration example | 4.2.2 |
 | Playwright | 1.64.0 |
 
-This is the supported build baseline. Domposable builds against stable Compose core and raises that minimum only when a necessary feature requires it. Material is an optional provider with its own release track; the compatible prerelease Material APIs do not make Compose core alpha. CI checks the resolved packaged-consumer graphs on all six targets and rejects prerelease Runtime, UI, Foundation or Animation artifacts.
+This is the supported build baseline. Domposable builds against stable Compose core and raises that minimum only when a necessary feature requires it. Native Material has its own release track. The compatible prerelease Material APIs do not make Compose core alpha. CI checks the resolved packaged-consumer graphs on all six targets and rejects prerelease Runtime, UI, Foundation or Animation artifacts.
 
 Applications may select a compatible newer Compose version or install their own component and modifier renderers. The library does not install global dependency-resolution rules in consumer builds. A version outside this baseline needs application-level verification.
 
 Domposable 0.7.0 was built against Compose 1.13.0-alpha02. Upgrade the library to a build targeting this stable baseline before downgrading the consumer graph; forcing an older runtime beneath the existing 0.7.0 binaries can cause linkage failures.
 
-These are the versions verified together. Applications adopting older/newer Compose, Kotlin or Kobweb versions must compile and test their own dependency graph. All seven runtime libraries publish six target variants; the optional KSP processor runs on JVM and generates shared declarations. CI compiles both a feature consumer and an independent provider against packaged Maven artifacts.
+These are the versions verified together. Applications adopting older/newer Compose, Kotlin or Kobweb versions must compile and test their own dependency graph. All seven runtime libraries publish six target variants; the optional KSP processor runs on JVM and generates shared declarations. CI compiles both a feature consumer and an app-owned component wrapper against packaged Maven artifacts.
 
 ## Rendering differences
 
 HTML menus use the browser Popover API to appear above application stacking
-contexts, so the Material provider requires a browser that implements that API.
+contexts, so the HTML renderer requires a browser that implements that API.
 CI exercises the Chromium, Firefox and WebKit versions bundled with the pinned
 Playwright release. HTML menus currently use a viewport-positioned popup;
 trigger-anchored placement is not yet shared with native Material menus.
@@ -51,7 +51,7 @@ HTML uses headings, anchors, input types, landmarks, lists and dialogs. Wasm use
 
 Domposable supports Android API 24 and newer. The library modules, demo and published-consumer fixtures use the same minimum; applications upgrading must also set `minSdk = 24` or higher.
 
-The Compose plugin, Runtime, UI and Foundation use a stable compatible baseline. The optional Material provider is compiled against that baseline; it must not raise the core to a prerelease version. On Wasm, mixing older compile-time UI dependencies with newer runtime UI can bundle incompatible Skiko JavaScript glue; the startup checks exercise the actual browser bundle.
+The Compose plugin, Runtime, UI and Foundation use a stable compatible baseline. The native Material renderer is compiled against that baseline; it must not raise the core to a prerelease version. On Wasm, mixing older compile-time UI dependencies with newer runtime UI can bundle incompatible Skiko JavaScript glue; the startup checks exercise the actual browser bundle.
 
 ### Migration to 0.24.0
 

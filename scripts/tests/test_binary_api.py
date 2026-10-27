@@ -127,6 +127,26 @@ class BinaryApiTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'distinct'):
             api.expected_paths(self.policy)
 
+    def test_dependency_only_module_keeps_explicit_empty_baselines(self):
+        module = 'domposable-design-material'
+        self.policy['runtime_modules'].append(module)
+        self.policy['forwarding_modules'] = {module: 'domposable-ui'}
+        script = 'plugins { alias(libs.plugins.maven.publish) }\napi(project(":domposable-ui"))'
+        self.write(f'{module}/build.gradle.kts', script)
+        paths = [p for p in api.expected_paths(self.policy) if p.startswith(module + '/')]
+        for path in paths:
+            self.write(path, '// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]\n' if path.endswith('.klib.api') else '')
+        self.assertEqual('', api.inventory(self.root, self.policy)[paths[0]])
+        self.write(paths[0], 'public final class unexpected/Api {}')
+        with self.assertRaisesRegex(ValueError, 'unexpectedly exposes'):
+            api.inventory(self.root, self.policy)
+        self.write(paths[0], '')
+        self.write(paths[0], '// Klib ABI Dump\n// No public declarations\n')
+        self.assertIn(paths[0], api.inventory(self.root, self.policy))
+        self.write(f'{module}/build.gradle.kts', 'plugins { alias(libs.plugins.maven.publish) }')
+        with self.assertRaisesRegex(ValueError, 'expose its target'):
+            api.inventory(self.root, self.policy)
+
 
 if __name__ == '__main__':
     unittest.main()

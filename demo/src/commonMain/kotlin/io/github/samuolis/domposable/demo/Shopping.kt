@@ -31,7 +31,6 @@ import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.DomposableTokens
 import io.github.samuolis.domposable.foundation.DomposableTypography
 import io.github.samuolis.domposable.foundation.dp
-import io.github.samuolis.domposable.material.rememberDomposableMaterialComponents
 import io.github.samuolis.domposable.navigation3.DomposableBrowserUrls
 import io.github.samuolis.domposable.navigation3.DomposableNavHost
 import io.github.samuolis.domposable.navigation3.DomposableRouteCodec
@@ -157,7 +156,7 @@ fun ShoppingApp(
         LocalShopArtwork provides artwork,
         LocalShopArtworkLoaded provides onArtworkLoaded,
     ) {
-        DomposableTheme(ShopTokens, rememberDomposableMaterialComponents()) {
+        DomposableTheme(ShopTokens) {
             DomposableScaffold(topBar = {
                 DomposableSurface(color = ShopTokens.colors.primary, modifier = DomposableModifier.fillMaxWidth()) {
                     DomposableText(

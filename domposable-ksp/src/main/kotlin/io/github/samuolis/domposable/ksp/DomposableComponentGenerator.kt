@@ -7,7 +7,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.Modifier
 
-/** Validates annotated Props declarations, then emits built-in and consumer component providers. */
+/** Validates annotated Props declarations, then emits direct built-in functions and consumer component extensions. */
 internal class DomposableComponentGenerator(
     private val environment: SymbolProcessorEnvironment,
 ) {
@@ -177,30 +177,15 @@ internal class DomposableComponentGenerator(
                 appendLine("package io.github.samuolis.domposable.ui")
                 appendLine("import androidx.compose.runtime.Composable")
                 for ((name, props, _) in declarations) {
-                    appendLine("fun interface Domposable${name}Renderer {")
-                    appendLine(
-                        "    @Composable fun Render(props: $props, modifier: DomposableModifier, " +
-                            "content: @Composable () -> Unit)",
-                    )
-                    appendLine("}")
                     appendLine(
                         "@Composable fun Domposable$name(props: $props, modifier: " +
                             "DomposableModifier = DomposableModifier, content: @Composable () -> Unit = {}) {",
                     )
                     appendLine(
-                        "    LocalDomposableComponents.current.${name.replaceFirstChar(
-                            Char::lowercase,
-                        )}.Render(props, modifier, content)",
+                        "    io.github.samuolis.domposable.material.RenderDomposable$name(props, modifier, content)",
                     )
                     appendLine("}")
                 }
-                appendLine("data class DomposableComponents(")
-                for ((name, _) in declarations) {
-                    appendLine(
-                        "    val ${name.replaceFirstChar(Char::lowercase)}: Domposable${name}Renderer,",
-                    )
-                }
-                appendLine(")")
             }
         environment.codeGenerator
             .createNewFile(

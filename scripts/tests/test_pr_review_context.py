@@ -69,3 +69,8 @@ DomposableButton("Add", onAdd)
         self.assertEqual([], review.validate_description(self.body.replace(old, new), ['demo/src/commonMain/Shop.kt']))
         for invalid in [new.replace('samuolis/domposable', 'someone/else'), new.replace('a'*64, 'latest'), new.replace('visual-evidence', 'v0.1.0')]:
             self.assertTrue(review.validate_description(self.body.replace(old, invalid), ['demo/src/commonMain/Shop.kt']))
+
+    def test_ui_renderer_moves_keep_visual_review_required(self):
+        paths = ['domposable-ui/src/jsMain/kotlin/material/HtmlMaterial.kt']
+        self.assertEqual([], review.validate_description(self.body, paths))
+        self.assertTrue(review.validate_description(self.body.replace('## Visual evidence', '## Other'), paths))

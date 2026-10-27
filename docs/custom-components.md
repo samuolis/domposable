@@ -26,7 +26,7 @@ fun CounterCard(
 }
 ```
 
-No registration or platform implementation is needed. The installed provider renders the constituent controls. The app owns its public parameters and state; add the slots, callbacks and appearance values your component needs.
+No registration or platform implementation is needed. Each constituent control uses its platform implementation. The app owns its public parameters and state; add the slots, callbacks and appearance values your component needs.
 
 ## Image cards and overlays without application CSS
 
@@ -129,23 +129,16 @@ DomposableMenu(
 
 Use `DomposableHtmlMenuPlacement.Auto` to retain automatic placement, or pass a resolver when the preference depends on the rendered menu's ancestry. This API exists only in the JS source set; native menu placement remains unchanged.
 
-## Replace an existing library renderer
+## Own the component API
 
-If every `DomposableButton` should use your design system, copy the default provider and replace its button slot. If your application does not use Material, supply a complete provider instead; the core UI module does not require the Material artifact.
+Use `AppButton` in your features and implement it with `DomposableButton` plus your
+styles and options. If the structure or behavior differs, replace the body of
+`AppButton` or give it a platform-specific `expect` / `actual` implementation.
+You do not install or copy a built-in component provider.
 
-```kotlin
-val defaults = rememberDomposableMaterialComponents()
-val branded = remember(defaults) {
-    defaults.copy(button = { props, modifier, content ->
-        AppButtonRenderer(props, modifier, content)
-    })
-}
-DomposableTheme(components = branded) {
-    FeatureContent()
-}
-```
-
-`AppButtonRenderer` belongs to the app and has a native or HTML implementation. It receives the library's typed parameters, modifier and content, including enabled state and callbacks. Honor the contract's accessible names, loading state and interaction semantics. Use [theme styles](design-systems.md#theme-defaults-and-component-overrides) when appearance settings are sufficient; replace a renderer when structure or behavior differs.
+Preserve enabled state, callbacks, accessible names and interaction semantics in
+your wrapper. Use [theme styles](design-systems.md#theme-defaults-and-component-overrides)
+when appearance settings are sufficient.
 
 ## Add typed provider bindings when useful
 

@@ -61,15 +61,24 @@ def inventory(root: Path, policy: dict) -> dict[str, str]:
     }
     if published != declared:
         raise ValueError(f"Published modules differ from binary API policy: published={sorted(published)}, policy={sorted(declared)}")
+    forwarding = policy.get("forwarding_modules", {})
+    for module, target in forwarding.items():
+        if module not in policy["runtime_modules"] or target not in policy["runtime_modules"] or module == target:
+            raise ValueError(f"Invalid forwarding module: {module} -> {target}")
+        if f'api(project(":{target}"))' not in (root / module / "build.gradle.kts").read_text():
+            raise ValueError(f"Forwarding module must expose its target: {module} -> {target}")
     dumps = {}
     for path in sorted(expected):
         content = (root / path).read_text(encoding="utf-8")
+        is_forwarding = path.split("/")[0] in forwarding
+        if is_forwarding and any(line.strip() and not line.startswith("//") for line in content.splitlines()):
+            raise ValueError(f"Forwarding module unexpectedly exposes its own API: {path}")
         if path.endswith(".klib.api"):
             match = re.search(r"^// Targets: \[([^]]+)\]$", content, re.MULTILINE)
             targets = {part.strip() for part in match.group(1).split(",")} if match else set()
-            if targets != set(policy["klib_targets"]) or not re.search(r"^\S.*(?:class|interface|fun|object) ", content, re.MULTILINE):
+            if targets != set(policy["klib_targets"]) or (not is_forwarding and not re.search(r"^\S.*(?:class|interface|fun|object) ", content, re.MULTILINE)):
                 raise ValueError(f"Incomplete Klib ABI dump: {path}")
-        elif not re.search(r"^public .* (?:class|interface) ", content, re.MULTILINE):
+        elif not is_forwarding and not re.search(r"^public .* (?:class|interface) ", content, re.MULTILINE):
             raise ValueError(f"Empty or malformed JVM/Android ABI dump: {path}")
         dumps[path] = content
     return dumps

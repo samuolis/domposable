@@ -15,7 +15,6 @@ import io.github.samuolis.domposable.material.DomposableMaterialTheme
 import io.github.samuolis.domposable.screens.DomposableEntryScope
 import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableColumn
-import io.github.samuolis.domposable.ui.DomposableComponents
 import io.github.samuolis.domposable.ui.DomposableFloatingActionButton
 import io.github.samuolis.domposable.ui.DomposableIcon
 import io.github.samuolis.domposable.ui.DomposableIconButton
@@ -76,10 +75,10 @@ fun App(factory: () -> FeatureModel) {
     }
 }
 
-// The renderer interface is public. No state machine or ViewModel is required.
+// Shared branding needs no renderer registry, state machine or ViewModel.
 @Composable
-fun BrandedApp(components: DomposableComponents) {
-    DomposableTheme(components = components) { DomposableText("Custom design system") }
+fun BrandedApp() {
+    DomposableTheme { DomposableText("Custom design system") }
 }
 
 // Compile scoped branding and partial overrides through the published API on every target.

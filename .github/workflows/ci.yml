@@ -64,7 +64,7 @@ jobs:
         with: {persist-credentials: false}
       - uses: ./.github/actions/setup
       - run: python -m unittest discover -s scripts/tests -v
-      - run: xvfb-run -a ./gradlew jvmTest :domposable-ui:jsBrowserTest :domposable-design-material:jsBrowserTest :domposable-navigation3:jsBrowserTest :demo:testAndroidHostTest :domposable-design-material:testAndroidHostTest :androidApp:assembleDebug :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs dokkaGenerate --continue --console=plain
+      - run: xvfb-run -a ./gradlew jvmTest :domposable-ui:jsBrowserTest :domposable-navigation3:jsBrowserTest :demo:testAndroidHostTest :domposable-ui:testAndroidHostTest :androidApp:assembleDebug :metro-example:compileKotlinJs :metro-example:compileKotlinWasmJs :kobweb-example:compileKotlinJs :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs dokkaGenerate --continue --console=plain
       - name: Export compiled references for review
         run: python scripts/ci/api_reference.py --output-dir build/generated-reference
       - name: Verify the Android demo version derived from SemVer
@@ -306,7 +306,11 @@ jobs:
         run: python scripts/ci/verify_page_export.py
       - run: python scripts/ci/package_publications.py --unsigned
       - name: Resolve and compile published artifacts on all six targets
-        run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :custom-provider-fixture:compileKotlinJvm :custom-provider-fixture:compileKotlinJs :custom-provider-fixture:compileKotlinWasmJs :custom-provider-fixture:compileAndroidMain :custom-provider-fixture:compileKotlinIosArm64 :custom-provider-fixture:compileKotlinIosSimulatorArm64 :koin-example:compileKotlinJvm :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
+        run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :component-wrapper-fixture:compileKotlinJvm :component-wrapper-fixture:compileKotlinJs :component-wrapper-fixture:compileKotlinWasmJs :component-wrapper-fixture:compileAndroidMain :component-wrapper-fixture:compileKotlinIosArm64 :component-wrapper-fixture:compileKotlinIosSimulatorArm64 :koin-example:compileKotlinJvm :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
+      - name: Check minimal published consumer bundle size
+        run: |
+          ./gradlew :consumer-fixture:jsBrowserDistribution -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
+          python scripts/ci/check_minimal_bundle.py
       - name: Verify stable Compose core in every packaged consumer target
         run: ./gradlew :consumer-fixture:verifyStableComposeBaseline -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

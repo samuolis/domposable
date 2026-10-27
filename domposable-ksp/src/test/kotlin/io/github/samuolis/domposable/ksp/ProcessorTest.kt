@@ -425,9 +425,12 @@ class ProcessorTest {
         val result = process(source, components = true)
         assertTrue(result.success, result.errors.toString())
         val components = result.files.getValue("DomposableComponents.kt")
-        assertContains(components, "fun interface DomposableButtonRenderer")
-        assertContains(components, "LocalDomposableComponents.current.text.Render(props, modifier, content)")
-        assertTrue(components.indexOf("val button:") < components.indexOf("val text:"))
+        assertFalse("DomposableComponents(" in components)
+        assertContains(
+            components,
+            "io.github.samuolis.domposable.material.RenderDomposableText(props, modifier, content)",
+        )
+        assertTrue(components.indexOf("fun DomposableButton(") < components.indexOf("fun DomposableText("))
     }
 
     @Test

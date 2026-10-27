@@ -31,7 +31,7 @@ fun ProductActions(name: String, price: String, onAdd: () -> Unit) {
 }
 ```
 
-Wrap your app in `DomposableMaterialTheme` to install the default platform renderers. Set colors, typography and spacing through the theme. You only need a custom provider when replacing component implementations. [Follow the component call](how-it-works.md), [customize a design system](design-systems.md), or explore [adaptive layouts](adaptive.md).
+Wrap your app in `DomposableMaterialTheme` to set colors, typography and spacing. Components use direct platform implementations with no provider setup. Keep your own component names and wrap the library controls. [Follow the component call](how-it-works.md), [customize a design system](design-systems.md), or explore [adaptive layouts](adaptive.md).
 
 ## Bring your architecture
 
