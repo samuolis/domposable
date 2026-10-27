@@ -79,7 +79,7 @@ The same table declaration uses a native collection on Android and a real table 
 
 Use unique, stable string keys and positive dimensions. At least one overscan item/row lets keyboard focus reach the next window. A focused HTML item stays mounted outside the visible range. `rememberSaveable` drafts follow item keys through scrolling and reordering; removed keys discard their saved state. Ordinary `remember` values can be lost when an item unmounts. A new layout mode starts a new collection owner in the demo; business drafts that must survive changing modes should live in your model.
 
-Keep `window = null` for small collections, full-document browser find, printing or accessibility browsing of every item. Windowed HTML omits offscreen items from the DOM; list positions and table coordinates describe the full dataset but do not make absent content searchable. Complete custom providers must honor and document each window contract themselves.
+Keep `window = null` for small collections, full-document browser find, printing or accessibility browsing of every item. Windowed HTML omits offscreen items from the DOM; list positions and table coordinates describe the full dataset but do not make absent content searchable. App-owned collection implementations must define and document their own windowing behavior.
 
 ## Run the gallery and checks
 
@@ -93,7 +93,7 @@ npx playwright test tests/browser/collections.spec.ts tests/browser/advanced-col
 
 PR CI runs HTML behavior in Chromium, Firefox and WebKit. Tests gate bounded DOM size, keyed drafts, focus, keyboard traversal, resizing, RTL offsets and table semantics. `build/benchmarks/` records mounted counts and diagnostic timings; `android-html-evidence` retains them for 30 days. Timings include browser scheduling and do not establish a universal speed guarantee. Automated checks do not establish physical screen-reader parity.
 
-See [migration](migration.md) for the next minor release's provider/props ABI changes.
+See [migration](migration.md) for the move from the built-in registry to direct platform calls.
 
 
 ## Browser download size

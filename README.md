@@ -12,7 +12,7 @@
 
 Domposable is a Kotlin Multiplatform UI library. Write your components and layouts in `commonMain`, then render them with Compose UI on Android and iOS or semantic HTML on Kotlin/JS. Desktop and Wasm are available as experimental targets.
 
-Start with the included Material 3 design system, adapt it to your brand, or supply your own renderers. Your app keeps its state management, dependency injection and navigation.
+Start with the included Material 3 controls, adapt them to your brand, and wrap them behind your own component names. Your app keeps its state management, dependency injection and navigation.
 
 Domposable is used in [Podiumas](https://podiumas.eu), a live sports tournament app. The examples below show smaller features you can explore and reuse.
 
@@ -32,7 +32,7 @@ Domposable is used in [Podiumas](https://podiumas.eu), a live sports tournament 
 
 - **Shared components and layouts.** Write ordinary Compose functions with your own state and callbacks.
 - **Real HTML.** Use browser links, form controls, headings and page landmarks, styled with CSS.
-- **Customizable design systems.** Set theme defaults, override a control, or replace the component renderers for part of your app.
+- **Customizable design systems.** Set theme defaults and per-control styles. Use an app-owned platform implementation when a control needs different behavior.
 - **Adaptive layouts.** Use available width to choose breakpoints, panes and layout recipes.
 - **Material 3 controls.** Start with standard components and selected expressive variants. [Browse the catalog](docs/material-catalog.md).
 - **Public-page export.** Generate HTML and CSS snapshots of existing public pages at build time. Configure the exporter in Kotlin Gradle with a list of routes. [Setup and limitations](docs/page-export.md).
