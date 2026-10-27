@@ -1,14 +1,14 @@
 ![Domposable — shared features for native apps and responsive HTML](assets/brand/header.svg)
 
-# One feature. Many screens.
+# Shared Compose UI. Real HTML.
 
-**90%+ shared application code in the demo, with responsive layouts across native apps and semantic HTML.** Build from one Compose feature codebase. Write ordinary `@Composable` functions, supply your own models, and choose a design provider.
+Build Android, iOS and web interfaces from shared Compose components and layouts. Domposable renders with Compose UI on native platforms and semantic HTML on Kotlin/JS. Desktop and Wasm are available as experimental targets.
 
-Android and iOS render Compose UI. Kotlin/JS emits semantic HTML with browser links, form controls and layout. Desktop and Wasm use Compose UI as experimental targets.
+Use the included Material 3 theme or create your own design system. Keep your existing state management, dependency injection and navigation. Domposable is used in [Podiumas](https://podiumas.eu), a live sports tournament app.
 
 [Get started](getting-started.md) · [Try the component playground](https://samuolis.github.io/domposable/demo/) · [Open the storefront](https://samuolis.github.io/domposable/shop/) · [Compare HTML and Wasm](compare.md)
 
-The [0.9.0 demo measurement](how-it-works.md#code-sharing-and-responsive-layouts) includes shared features and platform hosts. Actual sharing depends on your app’s native integrations and custom renderers. Domposable’s HTML target is a client-rendered SPA. The optional [public-page exporter](page-export.md) captures existing pages at build time through Kotlin Gradle and a TXT route list; it does not provide SSR. The exporter requires version 0.22.0 or later.
+The HTML target runs in the browser. The optional [public-page exporter](page-export.md) creates HTML and CSS snapshots at build time for a list of public routes. This is prerendering, not server-side rendering. The exporter is available from version 0.22.0.
 
 ## See a complete feature
 
@@ -31,12 +31,12 @@ fun ProductActions(name: String, price: String, onAdd: () -> Unit) {
 }
 ```
 
-[Follow the call from shared code to its platform renderer](how-it-works.md). Install a provider around the feature. Theme tokens set your product's colors, type and spacing; replace individual component renderers or supply a complete [design system](design-systems.md). Use measured content widths for [adaptive layouts](adaptive.md).
+Wrap your app in `DomposableMaterialTheme` to install the default platform renderers. Set colors, typography and spacing through the theme. You only need a custom provider when replacing component implementations. [Follow the component call](how-it-works.md), [customize a design system](design-systems.md), or explore [adaptive layouts](adaptive.md).
 
 ## Bring your architecture
 
-Screens return `Unit`. Pass plain state and callbacks, a model, a ViewModel or a store. Your app owns dependencies: manual factories, Metro, Koin and other DI choices can stay at its boundary. [Screen entries](screens.md) and Navigation 3 are optional; KSP generates registration helpers without creating business logic or injection rules.
+Screens return `Unit`. Pass plain state and callbacks, a model, a ViewModel or a store. Your app owns its dependencies. Use manual factories, Metro, Koin or another DI container. [Screen entries](screens.md), Navigation 3 and KSP registration helpers are optional.
 
 The [Metro and Koin examples](integrations.md) compile on all six targets. The runnable Kobweb example exports static index, contacts and contact-detail pages, tested with browser JavaScript disabled and enabled. See the [compatibility table](compatibility.md) for tested versions and platform differences.
 
-**Before 1.0:** APIs may change in minor releases. Use a published version from [Releases](https://github.com/samuolis/domposable/releases) for Maven dependencies and the signed APK demo. `0.0.0` is the unpublished bootstrap baseline. The repository also includes runnable HTML, Wasm and native examples.
+**Before 1.0:** APIs may change in minor releases. Use a published version from [Releases](https://github.com/samuolis/domposable/releases) for Maven dependencies and the signed APK demo. The repository also includes runnable HTML, Wasm and native examples.

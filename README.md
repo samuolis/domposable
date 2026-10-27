@@ -2,9 +2,7 @@
 
 # Domposable
 
-**Share your Compose code across native apps and semantic HTML, with responsive layouts on every platform.**
-
-The 0.9.0 demo shares **90.9% of its application source** across targets. Built-in sizing, wrapping and adaptive pane APIs let the same feature respond to phone, tablet and desktop space. [What the sharing measurement includes](docs/how-it-works.md#code-sharing-and-responsive-layouts).
+**Build shared Compose UIs for Android, iOS and the web. Render real HTML in the browser.**
 
 [![CI](https://github.com/samuolis/domposable/actions/workflows/ci.yml/badge.svg)](https://github.com/samuolis/domposable/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/samuolis/domposable)](https://github.com/samuolis/domposable/releases/latest)
@@ -12,10 +10,11 @@ The 0.9.0 demo shares **90.9% of its application source** across targets. Built-
 
 [Documentation](https://samuolis.github.io/domposable/) · [Shopping demo](https://samuolis.github.io/domposable/shop/) · [Playground](https://samuolis.github.io/domposable/demo/) · [API reference](https://samuolis.github.io/domposable/api/)
 
-Domposable is a Kotlin Multiplatform UI library with optional integration helpers, built on Compose. Feature teams write regular composables with shared components, modifiers and adaptive layouts. An installed design system provider renders those calls as Compose UI on native targets or semantic HTML on Kotlin/JS. The primary web target is HTML; it does not require Wasm.
+Domposable is a Kotlin Multiplatform UI library. Write your components and layouts in `commonMain`, then render them with Compose UI on Android and iOS or semantic HTML on Kotlin/JS. Desktop and Wasm are available as experimental targets.
 
-> [!IMPORTANT]
-> **The HTML target is a client-rendered single-page application (SPA), built on Compose HTML. Domposable does not provide server-side rendering (SSR).** Route URLs and static hosting entry pages do not render feature content on the server. The optional [public-page exporter](docs/page-export.md) captures existing pages as HTML/CSS at build time, including explicitly listed event URLs. Configure it in Kotlin Gradle with a TXT route list. This is prerendering, not SSR; it does not guarantee search-engine indexing.
+Start with the included Material 3 design system, adapt it to your brand, or supply your own renderers. Your app keeps its state management, dependency injection and navigation.
+
+Domposable is used in [Podiumas](https://podiumas.eu), a live sports tournament app. The examples below show smaller features you can explore and reuse.
 
 ## Contents
 
@@ -31,22 +30,20 @@ Domposable is a Kotlin Multiplatform UI library with optional integration helper
 
 ## Features
 
-- **Shared feature code** — ordinary Compose functions with your models and callbacks.
-- **Real HTML** — headings, links, forms and header/main/footer landmarks, styled with CSS.
-- **A replaceable design system** — scoped brand styles and typed renderers; customize one control or supply a complete provider.
-- **Adaptive layouts** — measure the space a feature receives and choose breakpoints, panes and layout recipes.
-- **Optional Material design system** — standard Material 3 components, selected expressive components and variants, with scoped theme styles. [Catalog and configuration](docs/material-catalog.md).
-- **Build-time public HTML export** — Kotlin Gradle setup and a TXT route list; captures existing marketing and public event screens with content, metadata and generated CSS. [Setup and limitations](docs/page-export.md). Requires version 0.22.0 or later; check [Releases](https://github.com/samuolis/domposable/releases) for published versions.
-- **Optional screen tooling** — manual registration, generated KSP entries, Navigation 3 and browser URL integration when your app needs them.
+- **Shared components and layouts.** Write ordinary Compose functions with your own state and callbacks.
+- **Real HTML.** Use browser links, form controls, headings and page landmarks, styled with CSS.
+- **Customizable design systems.** Set theme defaults, override a control, or replace the component renderers for part of your app.
+- **Adaptive layouts.** Use available width to choose breakpoints, panes and layout recipes.
+- **Material 3 controls.** Start with standard components and selected expressive variants. [Browse the catalog](docs/material-catalog.md).
+- **Public-page export.** Generate HTML and CSS snapshots of existing public pages at build time. Configure the exporter in Kotlin Gradle with a list of routes. [Setup and limitations](docs/page-export.md).
+- **Optional navigation and screen tooling.** Add Navigation 3, browser URL handling or KSP-generated entries when you need them.
 
-The supported baseline uses stable Compose Multiplatform core; optional design mappings do not force an alpha core upgrade. See [tested versions and upgrade policy](docs/compatibility.md).
+Use components directly with Compose state, an existing ViewModel, Metro, Koin or another DI container. You do not need application KSP setup or a screen registry to use the components. Existing frameworks can also [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
 
-Your application owns its dependencies and state. Pass an existing ViewModel, use your DI container's Compose integration, or keep state in a composable. [Koin and Metro](docs/screens.md#one-entry-api-for-koin-and-metro) use the same generated entry API; existing frameworks can [reuse the generator with their own annotations and hosts](docs/screens.md#existing-annotations-and-application-hosts).
-
-Build your own visual language with shared layouts and controls, theme an existing provider, or add custom native/HTML renderers and modifier decorations without changing Domposable. [Custom design systems](docs/design-systems.md#build-your-own-ui) keep feature code common across platforms.
+The core uses stable Compose Multiplatform. The optional Material provider currently uses Material 3 alpha APIs. See [tested versions and platform boundaries](docs/compatibility.md).
 
 > [!NOTE]
-> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). Before 1.0, minor releases may change APIs; see the [migration guide](docs/migration.md) when upgrading.
+> This README describes `main`. Choose a published version from [Releases](https://github.com/samuolis/domposable/releases). Before 1.0, minor releases may change APIs. Check the [migration guide](docs/migration.md) when upgrading.
 
 ## Quick start
 
@@ -99,13 +96,13 @@ fun App(onAddContact: () -> Unit) {
 
 ### 3. Call it from your platform host
 
-Use Android `setContent`, iOS `ComposeUIViewController`, a desktop Compose window or Kotlin/JS `renderComposable` for HTML. The feature and its callbacks stay in `commonMain`; the host selects the platform's composition environment. An optional experimental Wasm host is available for Compose UI comparisons.
+Use Android `setContent`, iOS `ComposeUIViewController`, a desktop Compose window or Kotlin/JS `renderComposable` for HTML. The feature and its callbacks stay in `commonMain`. The host selects the platform's composition environment. An optional experimental Wasm host is available for Compose UI comparisons.
 
 [Platform entry-point examples →](docs/getting-started.md#platform-entry-points)
 
 ## How it works
 
-Each `Domposable` component reads the nearest theme's typed renderer and forwards its values, callbacks and ordered modifier chain. The renderer creates the platform control and connects events back to the feature.
+For most apps, setup is simply `DomposableMaterialTheme { AppContent() }`. The theme installs the platform's component renderers. Shared component calls use those renderers to create controls and connect events to your callbacks.
 
 ```mermaid
 flowchart TB
@@ -115,9 +112,11 @@ flowchart TB
     Provider --> HTML[Semantic HTML and CSS: Kotlin/JS]
 ```
 
-The same feature can use different element structures and styling on each platform. Set theme colors, typography, shapes and component styles, or replace a renderer for a different control implementation. Component use requires no application KSP setup or navigation registry.
+Domposable uses `expect` / `actual` to choose the platform's default renderer factory. The provider lets you replace a control or a design system within a subtree. Most applications only configure the theme. You do not need to implement a provider for each screen.
 
-Brand the standard controls once; every argument is optional:
+Set colors, typography, shapes and component styles through the theme. Write a custom renderer when you need a different control implementation. [How providers and platform implementations fit together](docs/how-it-works.md).
+
+Set brand defaults once. Every argument is optional:
 
 ```kotlin
 DomposableMaterialTheme(
@@ -132,7 +131,7 @@ DomposableMaterialTheme(
 
 Use `DomposableTheme.styles.button.copy(...)` for a local override. Nested themes inherit their enclosing brand values. Styles are composition-scoped, so different parts of an app can use different brands.
 
-Custom cards are shared composition too: use `DomposableBox` for overlapping image/content layers, a portable gradient for the scrim, and the same theme for controls. Application CSS is an escape hatch for a custom renderer, rather than a requirement for every custom layout. [Build a card without CSS](docs/custom-components.md#image-cards-and-overlays-without-application-css) · [Card and pane demo](https://samuolis.github.io/domposable/demo/#/composition).
+Custom cards are shared composition too: use `DomposableBox` for overlapping image/content layers, a portable gradient for the scrim, and the same theme for controls. Use application CSS when you need it inside a custom HTML renderer. [Build a card without CSS](docs/custom-components.md#image-cards-and-overlays-without-application-css) · [Card and pane demo](https://samuolis.github.io/domposable/demo/#/composition).
 
 [Understand the API →](docs/how-it-works.md) · [Customize a design system →](docs/design-systems.md) · [Build adaptive layouts →](docs/adaptive.md)
 
@@ -147,7 +146,7 @@ Custom cards are shared composition too: use `DomposableBox` for overlapping ima
 
 Components and adaptive helpers do not depend on the screen registry, navigator or ViewModel adapter. KSP is optional. Your app can use Koin, Metro, another DI container or no DI.
 
-Existing Compose UI widgets cannot run inside an HTML composition. Sharing a feature requires portable component calls or your own native/HTML adapters; this is more than changing imports. [Migrate one feature at a time →](docs/migration.md)
+Existing Compose UI widgets cannot run inside an HTML composition. Sharing a feature requires portable component calls or your own native/HTML adapters. Existing Compose UI screens need migration beyond changing imports. [Migrate one feature at a time →](docs/migration.md)
 
 ## Supported platforms
 
@@ -159,7 +158,13 @@ Existing Compose UI widgets cannot run inside an HTML composition. Sharing a fea
 | JVM desktop | Compose UI + Material 3 | Experimental |
 | Web, Kotlin/Wasm | Compose UI in the browser | Experimental |
 
-HTML and Wasm support optional browser history, hash or path URLs and portable entry-state restoration. HTML collections normally render all keyed items; columns, rows, grids and tables can opt into [bounded windowing](https://samuolis.github.io/domposable/performance/).
+HTML and Wasm support optional browser history, hash or path URLs and portable entry-state restoration. HTML collections render all keyed items by default. Columns, rows, grids and tables can opt into [bounded windowing](https://samuolis.github.io/domposable/performance/).
+
+### Web rendering and public pages
+
+The HTML target is a client-rendered single-page application built on Compose HTML. It does not require Wasm and does not provide server-side rendering.
+
+The optional [public-page exporter](docs/page-export.md) captures HTML, metadata and generated CSS at build time for an explicit list of routes, including public event pages. These snapshots can display content before JavaScript starts. This is prerendering, not SSR, and it does not guarantee search-engine indexing. The exporter is available from version 0.22.0.
 
 [Compatibility, tested versions and platform boundaries →](docs/compatibility.md)
 
@@ -246,7 +251,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 
 | Artifact | Purpose |
 | --- | --- |
-| `domposable-export-gradle` | Build-time public HTML/CSS export from Kotlin Gradle and a TXT route list; available from 0.22.0 |
+| `domposable-export-gradle` | Public HTML/CSS snapshots from Kotlin Gradle and a route list (0.22.0+) |
 
 ## Documentation
 
@@ -270,7 +275,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 
 Bug reports and focused contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, validation and maintainer workflows, or [open an issue](https://github.com/samuolis/domposable/issues).
 
-PR checks cover ktlint, detekt, Android lint, JVM/Android [coverage floors](docs/coverage.md), required [binary API checks](docs/binary-compatibility.md), packaged consumers, and functional/screenshot tests across native, HTML and Wasm targets. CI keeps reports and captures in GitHub Actions artifacts. API baseline changes need compatibility, migration and version-impact notes.
+PR checks cover ktlint, detekt, Android lint, JVM/Android [coverage floors](docs/coverage.md), required [binary API checks](docs/binary-compatibility.md), packaged consumers, and functional and screenshot tests for Android, desktop, HTML and Wasm. iOS has compilation, ABI and packaged-consumer checks. Simulator runtime checks are not automatic release gates. CI keeps reports and captures in GitHub Actions artifacts. API baseline changes need compatibility, migration and version-impact notes.
 
 ## License
 
