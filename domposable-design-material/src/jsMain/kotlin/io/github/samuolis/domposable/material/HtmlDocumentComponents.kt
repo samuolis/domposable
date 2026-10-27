@@ -3,6 +3,7 @@ package io.github.samuolis.domposable.material
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import io.github.samuolis.domposable.foundation.DomposableButtonStyle
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
@@ -171,7 +172,7 @@ internal fun HtmlDomposableRichHtml(
     modifier: DomposableModifier,
 ) {
     val currentOnLinkClick by rememberUpdatedState(props.onLinkClick)
-    val nodes = parseDomposableRichHtml(props.rawHtml)
+    val nodes = remember(props.rawHtml) { parseDomposableRichHtml(props.rawHtml) }
     val tokens = LocalDomposableTokens.current
     val appearance = props.appearance ?: tokens.components.text
     val effectiveSelectable = appearance.selectable ?: props.selectable

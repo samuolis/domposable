@@ -51,8 +51,10 @@ private class RichHtmlParser(
     private fun consumeTag() {
         val end = findTagEnd(html, index)
         if (end < 0) {
-            if (suppressed.isEmpty()) stack.last().children += MutableText("<")
-            index++
+            if (suppressed.isEmpty()) {
+                stack.last().children += MutableText(decodeRichHtmlEntities(html.substring(index)))
+            }
+            index = html.length
         } else {
             val token = html.substring(index, end + 1)
             index = end + 1

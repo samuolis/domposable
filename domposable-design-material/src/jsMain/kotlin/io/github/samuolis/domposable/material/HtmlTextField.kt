@@ -291,7 +291,10 @@ private fun <T : HTMLElement> AttrsScope<T>.inputEvents(
     props.onImeAction?.let { submit ->
         val imeEnabled = props.enabled && !props.readOnly
         onKeyDown { event ->
-            if (event.key == "Enter" && props.singleLine && imeEnabled) {
+            val nativeEvent = event.nativeEvent.asDynamic()
+            // Some browsers clear isComposing before the final IME keydown (229).
+            val composing = nativeEvent.isComposing == true || nativeEvent.keyCode == 229
+            if (event.key == "Enter" && props.singleLine && imeEnabled && !composing) {
                 event.preventDefault()
                 submit()
             }
