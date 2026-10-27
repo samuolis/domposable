@@ -1,6 +1,6 @@
 # Design systems
 
-`DomposableTheme` installs semantic tokens and a complete `DomposableComponents` provider. The Material artifact is optional: a product can supply every renderer without depending on Material.
+`DomposableTheme` supplies semantic tokens. Built-in components use direct platform implementations. Applications own their component names and can wrap the library controls or provide their own native and HTML implementations.
 
 ## Build your own UI
 
@@ -9,10 +9,10 @@ Domposable shares feature UI across native Compose and semantic HTML. Its core p
 Choose the level that fits each component:
 
 - Compose a custom layout from existing shared primitives and controls.
-- Configure the optional Material provider through theme styles and per-call appearance values.
-- Replace a built-in renderer, or introduce a custom shared component with native and HTML implementations.
+- Configure built-in controls through theme styles and per-call appearance values.
+- Wrap a built-in control, or introduce a custom shared component with native and HTML implementations.
 
-Feature code uses the same shared API in each case. A custom control may need platform implementations, but its callers do not need separate native and web screens. The Material catalog is a ready-made design system, not the limit of what a Domposable application can render. Expressive components and theme settings are optional choices within that provider.
+Feature code uses the same shared API in each case. A custom control may need platform implementations, but its callers do not need separate native and web screens. The Material catalog is a ready-made design system, not the limit of what a Domposable application can render. Expressive components and theme settings are optional choices within the theme.
 
 ## Adopt inside an existing design system
 
@@ -111,27 +111,14 @@ The `app-button` CSS belongs to your design system. Your common feature continue
 
 Adopt library form, scroll, layout and pane helpers where they replace generic infrastructure. Keep product-specific editor, diagram, camera and routing behaviour in the app. The [platform modifier callbacks](#extend-portable-modifiers) handle your own portable modifier elements without copying the library's built-in operation model.
 
-Use a typed provider when you want to replace `DomposableButton` itself or switch a set of renderers at runtime. That is a separate choice from adding an HTML implementation behind your own design system.
+## Customize components through your app API
 
-## Supply a component provider
-
-```kotlin
-DomposableTheme(tokens = productTokens, components = productComponents) {
-    FeatureScreen(model)
-}
-```
-
-For incremental customization, copy a provider and replace one renderer:
-
-```kotlin
-val defaults = rememberDomposableMaterialComponents()
-val product = defaults.copy(button = { props, modifier, content ->
-    ProductButton(props, modifier, content)
-})
-DomposableTheme(components = product) { FeatureScreen(model) }
-```
-
-`ProductButton` is a platform implementation. It receives the same enabled state, click handler, modifier and composable content. It can replace the element structure, interaction and styling. The demo supplies foundation-based native buttons and dashed DOM buttons to show this.
+Use your own `AppButton` throughout features and delegate to `DomposableButton`
+with your theme styles and per-call appearance values. If a component needs a
+different implementation, change your wrapper or its platform implementation.
+There is no built-in provider setup and no requirement to implement the whole
+catalog. The demo's `DemoButton` shows an app-owned choice between a custom button
+and the standard control.
 
 Tokens cover colors, typography, spacing, radius and motion duration. Theme scope maps values to native Material defaults or CSS variables; nested themes remain local. Product-specific dimensions can be supplied through your own composition locals. Typography roles map to the native Material type scale and HTML styles. Native font assets remain supplied by the host; CSS font-family names do not register platform fonts.
 
@@ -152,7 +139,7 @@ val shopTokens = DomposableTokens(
     typography = DomposableTypography(titleSize = 30f),
     radius = 8.dp,
 )
-DomposableTheme(shopTokens, rememberDomposableMaterialComponents()) {
+DomposableTheme(shopTokens) {
     ShopFeature(model, openProduct)
 }
 ```
@@ -181,14 +168,15 @@ fun ProductButton(props: DomposableButtonProps, modifier: DomposableModifier, co
 }
 ```
 
-Import `Button` from `org.jetbrains.compose.web.dom` and `disabled` from `org.jetbrains.compose.web.attributes`. Keep accessible state and portable modifier semantics when replacing a renderer. A DOM renderer must only compose HTML nodes. The [custom-provider fixture](https://github.com/samuolis/domposable/tree/main/custom-provider-fixture) demonstrates a complete provider without Material.
+Import `Button` from `org.jetbrains.compose.web.dom` and `disabled` from `org.jetbrains.compose.web.attributes`. Keep accessible state and portable modifier semantics when replacing a renderer. A DOM renderer must only compose HTML nodes. The [component-wrapper fixture](https://github.com/samuolis/domposable/tree/main/component-wrapper-fixture) demonstrates an ordinary app-owned wrapper.
 
 
 ## Add typed product components
 
-A product can add renderer contracts without changing the published default provider. Define the
-props in shared code; the modifier and callbacks remain portable. The optional processor emits a
-provider in your package, so it cannot overwrite Domposable's own `DomposableComponents`.
+For custom components that need runtime replacement, a product can opt into typed
+provider bindings. Define props in shared code. The modifier and callbacks remain
+portable. The optional processor emits a provider in your package. This is independent
+of built-in rendering and is unnecessary for ordinary app wrappers.
 
 ```kotlin
 @DomposableComponent("ProductCard")

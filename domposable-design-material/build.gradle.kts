@@ -30,66 +30,7 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
-        val commonMain =
-            getByName("commonMain") {
-                dependencies {
-                    api(libs.compose.runtime)
-                    api(project(":domposable-ui"))
-                    implementation(libs.graphics.shapes)
-                    implementation(libs.androidx.collection)
-                }
-            }
-        val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
-        getByName("jsTest") {
-            dependencies {
-                implementation(project(":domposable-adaptive"))
-                implementation(libs.coroutines.test)
-            }
-        }
-        getByName("androidHostTest") {
-            dependencies {
-                implementation(project(":domposable-adaptive"))
-                implementation(libs.robolectric)
-                implementation(libs.junit)
-                implementation(libs.androidx.test.runner)
-                implementation(libs.android.compose.ui.test)
-                implementation(libs.android.compose.ui.test.manifest)
-            }
-        }
-        val iosMain = create("iosMain") { dependsOn(commonMain) }
-        getByName("iosArm64Main").dependsOn(iosMain)
-        getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        val composeUiMain =
-            create("composeUiMain") {
-                dependsOn(commonMain)
-                dependencies {
-                    api(libs.compose.ui)
-                    api(libs.compose.foundation)
-                    implementation(libs.material3)
-                    implementation(libs.coil.compose)
-                    implementation(libs.coil.network.ktor)
-                }
-            }
-        getByName("androidMain").dependsOn(composeUiMain)
-        wasmJsMain {
-            dependencies {
-                implementation(libs.ktor.client.js)
-                implementation(libs.kotlinx.browser)
-            }
-        }
-        androidMain { dependencies { implementation(libs.ktor.client.okhttp) } }
-        jvmMain { dependencies { implementation(libs.ktor.client.java) } }
-        iosMain { dependencies { implementation(libs.ktor.client.darwin) } }
-        getByName("jvmMain").dependsOn(composeUiMain)
-        getByName("wasmJsMain").dependsOn(composeUiMain)
-        iosMain.dependsOn(composeUiMain)
-        jsMain {
-            dependencies {
-                implementation(libs.compose.html)
-                implementation(libs.kotlinx.browser)
-                implementation(libs.compose.runtime.saveable)
-            }
-        }
+        commonMain.dependencies { api(project(":domposable-ui")) }
     }
 }
 
@@ -100,9 +41,4 @@ publishing {
             url = uri(rootProject.layout.buildDirectory.dir("repository"))
         }
     }
-}
-
-// Robolectric API 36 accesses FileDescriptor internals; these exports apply only to host tests.
-tasks.withType<Test>().matching { it.name == "testAndroidHostTest" }.configureEach {
-    jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
 }

@@ -65,7 +65,7 @@ Kobweb builds on Compose HTML. A Kotlin/JS Domposable feature can therefore rend
 @Composable
 fun ContactsPage(ctx: PageContext) {
     val model = remember { ContactsPageModel() }
-    DomposableTheme(components = rememberDomposableMaterialComponents()) {
+    DomposableTheme() {
         ContactsFeature(model, onOpen = {
             ctx.router.navigateTo("/contacts/$it")
         })

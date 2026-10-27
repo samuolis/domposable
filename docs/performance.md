@@ -94,3 +94,35 @@ npx playwright test tests/browser/collections.spec.ts tests/browser/advanced-col
 PR CI runs HTML behavior in Chromium, Firefox and WebKit. Tests gate bounded DOM size, keyed drafts, focus, keyboard traversal, resizing, RTL offsets and table semantics. `build/benchmarks/` records mounted counts and diagnostic timings; `android-html-evidence` retains them for 30 days. Timings include browser scheduling and do not establish a universal speed guarantee. Automated checks do not establish physical screen-reader parity.
 
 See [migration](migration.md) for the next minor release's provider/props ABI changes.
+
+
+## Browser download size
+
+Build with `jsBrowserDistribution` or `jsBrowserProductionWebpack` when measuring
+startup. Development output is not a useful download-size baseline. Production
+Kotlin/JS performs dead code elimination and name minification.
+
+Built-in Domposable components dispatch through `expect` / `actual`. Calling a
+button does not construct a registry of every control. Unused implementations can
+be removed by the compiler. Keep app wrappers focused on the controls they use.
+
+CI builds a minimal button-and-text consumer against packaged Maven artifacts and
+checks its compressed JavaScript size with `scripts/ci/check_minimal_bundle.py`.
+The 300 KB gzip budget is a regression gate for that fixture, not a promise about
+complete applications. Navigation, feature code, DI graphs, resources and other
+libraries also contribute to an application's payload.
+
+Chunk grouping can reduce request overhead without reducing much code. Actual
+on-demand downloading requires dynamic imports and an entry point that does not
+already reference the deferred implementation. A lazy Kotlin property or Metro
+provider delays construction, not the network download. Keep route metadata and
+shared services in the host if introducing feature downloads, and test direct
+links, back navigation, failed loads and shared state before adopting that design.
+
+Start with measurements of compressed bytes, cold requests and time until the
+screen is usable. Retain a more complex loading design only when its measured
+benefit warrants its failure handling and lifecycle costs.
+
+References: [Kotlin/JS optimizations](https://kotlinlang.org/docs/js-ir-compiler.html),
+[JavaScript target and output settings](https://kotlinlang.org/docs/js-project-setup.html),
+[Webpack code splitting](https://webpack.js.org/guides/code-splitting/).

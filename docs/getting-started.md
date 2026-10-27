@@ -6,7 +6,7 @@ Add `mavenCentral()` and `google()` to your repositories. Use the current versio
 
 ```kotlin
 commonMain.dependencies {
-    implementation("io.github.samuolis.domposable:domposable-design-material:<version>")
+    implementation("io.github.samuolis.domposable:domposable-ui:<version>")
     implementation("io.github.samuolis.domposable:domposable-adaptive:<version>")
 }
 ```
@@ -26,7 +26,7 @@ fun Greeting() {
 }
 ```
 
-Install a provider at the app root and call the shared composable from Android `setContent`, iOS `ComposeUIViewController`, or JS `renderComposable(rootElementId = "root")`. Import `DomposableMaterialTheme` from `io.github.samuolis.domposable.material` for the default provider shown below. The feature itself does not choose its renderer. The JS entry point uses Compose HTML; add `org.jetbrains.compose.html:html-core` matching the catalog version to the application host. Android/iOS hosts use standard Compose UI.
+Set a theme at the app root and call the shared composable from Android `setContent`, iOS `ComposeUIViewController`, or JS `renderComposable(rootElementId = "root")`. Import `DomposableMaterialTheme` from `io.github.samuolis.domposable.material` for the theme shown below. The feature itself does not choose its renderer. The JS entry point uses Compose HTML; add `org.jetbrains.compose.html:html-core` matching the catalog version to the application host. Android/iOS hosts use standard Compose UI.
 
 Use the [consumer fixture](https://github.com/samuolis/domposable/tree/main/consumer-fixture) and demo as runnable integration examples. No runtime reflection registry or DI adapter is required.
 
@@ -73,9 +73,9 @@ fun main() {
 
 Use standard Compose hosts and compiler plugins matching the [tested toolchain](compatibility.md). `renderComposable` comes from `org.jetbrains.compose.web`; `ComposeUIViewController` from `androidx.compose.ui.window`; `ComposeViewport` from `androidx.compose.ui.window`; `document` from `kotlinx.browser`.
 
-These snippets illustrate host boundaries; runnable target configurations are in [`demo/build.gradle.kts`](https://github.com/samuolis/domposable/blob/main/demo/build.gradle.kts) and its source sets. Do not call Compose UI layout or Material composables from the HTML host. Within shared feature code, use the `Domposable` primitives so the selected provider controls rendering.
+These snippets illustrate host boundaries; runnable target configurations are in [`demo/build.gradle.kts`](https://github.com/samuolis/domposable/blob/main/demo/build.gradle.kts) and its source sets. Do not call Compose UI layout or Material composables from the HTML host. Within shared feature code, use the `Domposable` primitives so the platform implementation controls rendering.
 
-Read [how the API works](how-it-works.md) for the relationship between calls, props, providers, modifiers and adaptive layout.
+Read [how the API works](how-it-works.md) for the relationship between calls, props, platform implementations, modifiers and adaptive layout.
 
 ## Supply your dependencies
 

@@ -136,7 +136,7 @@ def validate_description(body: str, changed_paths: Iterable[str]) -> list[str]:
         build_changes = section(body, "Build changes")
         if not build_changes or not has_code_example(build_changes):
             errors.append("Build changes need a concrete Gradle or CI example under `## Build changes`.")
-    visual = any(p.startswith(("demo/src/", "domposable-design-material/src/")) and p.endswith((".kt", ".css", ".html", ".png", ".svg")) for p in paths)
+    visual = any(p.startswith(("demo/src/", "domposable-design-material/src/", "domposable-ui/src/")) and p.endswith((".kt", ".css", ".html", ".png", ".svg")) for p in paths)
     if visual:
         evidence = section(body, "Visual evidence") or ""
         image_urls = re.findall(r"!\[([^\]]+)\]\((https://[^)]+)\)", evidence)

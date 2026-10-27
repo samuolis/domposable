@@ -42,7 +42,6 @@ import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldColors
 import io.github.samuolis.domposable.foundation.DomposableTextStyle
 import io.github.samuolis.domposable.foundation.dp
-import io.github.samuolis.domposable.material.rememberDomposableMaterialComponents
 import io.github.samuolis.domposable.navigation3.DomposableBrowserHistory
 import io.github.samuolis.domposable.navigation3.DomposableBrowserUrls
 import io.github.samuolis.domposable.navigation3.DomposableNavigation3Host
@@ -54,9 +53,7 @@ import io.github.samuolis.domposable.ui.DomposableAvatar
 import io.github.samuolis.domposable.ui.DomposableBadge
 import io.github.samuolis.domposable.ui.DomposableBanner
 import io.github.samuolis.domposable.ui.DomposableBottomSheet
-import io.github.samuolis.domposable.ui.DomposableButton
 import io.github.samuolis.domposable.ui.DomposableButtonProps
-import io.github.samuolis.domposable.ui.DomposableButtonRenderer
 import io.github.samuolis.domposable.ui.DomposableCard
 import io.github.samuolis.domposable.ui.DomposableCheckbox
 import io.github.samuolis.domposable.ui.DomposableChip
@@ -90,7 +87,6 @@ import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
 import io.github.samuolis.domposable.ui.DomposableTheme
 import io.github.samuolis.domposable.ui.DomposableVectorIcon
-import io.github.samuolis.domposable.ui.LocalDomposableComponents
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.contentDescription
 import io.github.samuolis.domposable.ui.fillMaxHeight
@@ -361,7 +357,7 @@ fun DemoApp(
         return
     }
     if (initialRoute is DemoRoute.CallerHistory) {
-        DomposableTheme(tokens = DemoTokens, components = rememberDomposableMaterialComponents()) {
+        DomposableTheme(tokens = DemoTokens) {
             CallerHistoryDemo(initialRoute.page, callerHistoryFallback, browserUrls)
         }
         return
@@ -369,20 +365,6 @@ fun DemoApp(
     val workspace = remember { TaskWorkspaceModel() }
     val stack = rememberDomposableBackStack<DemoRoute>(initialRoute)
     var customButtons by rememberSaveable { mutableStateOf(false) }
-    val defaultComponents = rememberDomposableMaterialComponents()
-    val custom =
-        remember(defaultComponents) {
-            defaultComponents.copy(
-                button =
-                    DomposableButtonRenderer {
-                        props,
-                        modifier,
-                        content,
-                        ->
-                        CustomDemoButton(props, modifier, content)
-                    },
-            )
-        }
     val screens =
         remember(workspace, stack) {
             domposableScreenRegistry {
@@ -459,7 +441,7 @@ fun DemoApp(
                 )
             }
         }
-    DomposableTheme(tokens = DemoTokens, components = if (customButtons) custom else defaultComponents) {
+    DemoTheme(customButtons) {
         DomposableBrowserHistory(stack, DemoCodec, browserUrls)
         DomposableMeasure { shellSize ->
             val shell = rememberDomposableAdaptiveInfo(shellSize)
@@ -533,7 +515,7 @@ fun DemoApp(
                             onCheckedChange = { customButtons = it },
                             label = "Custom buttons",
                         )
-                        DomposableButton("Shop demo", { openShopDemo { shopping = true } })
+                        DemoButton("Shop demo", { openShopDemo { shopping = true } })
                     }
                 },
                 navigation = { if (shell.widthClass != DomposableWidthClass.Compact) navigation() },
@@ -584,7 +566,7 @@ fun TaskListScreen(
             message = "Open a task, write a draft, then resize. Wide layouts keep the list alongside its detail.",
         )
         DomposableTextField(title, { title = it }, "New task", modifier = DomposableModifier.testId("new-task"))
-        DomposableButton("Add task", {
+        DemoButton("Add task", {
             model.add(title)
             title = ""
         }, enabled = title.isNotBlank())
@@ -592,7 +574,7 @@ fun TaskListScreen(
             key(task.id) {
                 DomposableCard(DomposableModifier.fillMaxWidth()) {
                     DomposableColumn(DomposableModifier.padding(16.dp), gap = 8.dp) {
-                        DomposableButton(task.title, { onOpen(task.id) }, DomposableModifier.testId("task-${task.id}"))
+                        DemoButton(task.title, { onOpen(task.id) }, DomposableModifier.testId("task-${task.id}"))
                         DomposableCheckbox(task.done, {
                             model.toggle(task.id)
                         }, "Completed", DomposableModifier.contentDescription("Complete ${task.title}"))
@@ -612,7 +594,7 @@ fun TaskDetailScreen(
 ) {
     val task = workspace.tasks.firstOrNull { it.id == model.taskId }
     DomposableColumn(DomposableModifier.padding(24.dp).fillMaxWidth().verticalScroll(), gap = 16.dp) {
-        DomposableButton("Back to tasks", onBack)
+        DemoButton("Back to tasks", onBack)
         if (task == null) {
             DomposableBanner(message = "This task is unavailable", isError = true)
         } else {
@@ -653,10 +635,10 @@ fun ComponentCatalogScreen(
         }
         DomposableText("Actions", style = DomposableTextStyle.Title, headingLevel = 3)
         DomposableFlowRow(gap = 12.dp) {
-            DomposableButton("More components", onMoreComponents)
-            DomposableButton("Filled", {})
-            DomposableButton({}, style = DomposableButtonStyle.Outlined) { DomposableText("Outlined") }
-            DomposableButton({}, enabled = false) { DomposableText("Disabled") }
+            DemoButton("More components", onMoreComponents)
+            DemoButton("Filled", {})
+            DemoButton({}, style = DomposableButtonStyle.Outlined) { DomposableText("Outlined") }
+            DemoButton({}, enabled = false) { DomposableText("Disabled") }
             DomposableIconButton(onClick = {}, label = "Favorite") { DomposableIcon(symbol = "♡", description = null) }
             DomposableIcon(
                 vector = DomposableVectorIcon("M12 2 3 21h18L12 2z"),
@@ -697,15 +679,15 @@ fun ComponentCatalogScreen(
         DomposableTabs(labels = listOf("First", "Second"), selectedIndex = tab, onSelect = { tab = it })
         DomposableText("Selected section: ${tab + 1}")
         DomposableFlowRow(gap = 12.dp) {
-            DomposableButton("Open dialog", {
+            DemoButton("Open dialog", {
                 dialogScrim = null
                 dialog = true
             })
-            DomposableButton("Open sheet", { sheet = true })
+            DemoButton("Open sheet", { sheet = true })
             DomposableMenu(
                 expanded = menu,
                 onDismiss = { menu = false },
-                anchor = { DomposableButton("Open menu", { menu = true }) },
+                anchor = { DemoButton("Open menu", { menu = true }) },
                 items = listOf(DomposableMenuItem("Other action", {})),
             ) {
                 DomposableDropdownMenuItem(
@@ -770,11 +752,10 @@ fun ComponentCatalogScreen(
                             ),
                     ),
             ),
-            LocalDomposableComponents.current,
         ) {
-            DomposableButton("Independent theme styles", {})
-            DomposableButton({}, enabled = false) { DomposableText("Themed disabled") }
-            DomposableButton(
+            DemoButton("Independent theme styles", {})
+            DemoButton({}, enabled = false) { DomposableText("Themed disabled") }
+            DemoButton(
                 DomposableButtonProps(
                     onClick = { themedLoading = true },
                     loading = themedLoading,
@@ -782,7 +763,7 @@ fun ComponentCatalogScreen(
                 ),
                 modifier = DomposableModifier.testId("themed-action"),
             ) { DomposableText("Themed action") }
-            DomposableButton("Reset themed action", { themedLoading = false })
+            DemoButton("Reset themed action", { themedLoading = false })
             DomposableTextField(
                 io.github.samuolis.domposable.ui.DomposableTextFieldProps(
                     value = themedPhone,
@@ -807,7 +788,7 @@ fun ComponentCatalogScreen(
         }
         DomposableSpacer()
         DomposableText("Open More components for app bars, selection fields and feedback controls.")
-        DomposableButton("Open 50% scrim", {
+        DemoButton("Open 50% scrim", {
             dialogScrim = 0.5f
             dialog = true
         })
@@ -840,7 +821,7 @@ fun UnavailableScreen(
     DomposableColumn(DomposableModifier.padding(24.dp), gap = 16.dp) {
         DomposableText("Page not found", style = DomposableTextStyle.Title)
         DomposableText("No example matches $path")
-        DomposableButton("Return to tasks", onHome)
+        DemoButton("Return to tasks", onHome)
     }
 }
 

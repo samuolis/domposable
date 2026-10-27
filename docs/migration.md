@@ -1,5 +1,35 @@
 # Migrating a Compose feature
 
+## Direct component rendering in the next 0.x minor release
+
+Built-in components now use direct `expect` / `actual` implementations. This is a
+breaking API change and requires recompiling applications and adapters. It will
+ship as a normal 0.x minor release, not 1.0 or a GitHub prerelease.
+
+- Remove calls to `rememberDomposableMaterialComponents` and the `components`
+  argument of `DomposableTheme`. Use `DomposableMaterialTheme { ... }` or
+  `DomposableTheme(tokens) { ... }`.
+- Replace built-in `DomposableComponents` copies and renderer interfaces with
+  app-owned wrappers such as `AppButton`. Use your own `expect` / `actual` contract
+  when the implementation needs different native and HTML bodies.
+- Colors, typography, shapes, component styles, props and ordinary component calls
+  remain available. Theme values can still differ within a subtree.
+- `ProvideDomposableMaterialComponents` remains available for existing hosts. It
+  supplies theme values and host behavior, without constructing a component registry.
+- The renderer implementations now ship in `domposable-ui`. Existing
+  `domposable-design-material` dependencies forward to it. Material package imports
+  remain valid. Native consumers receive Material dependencies through UI.
+- The optional typed extension API for custom components remains separate and
+  unchanged. It is not required for built-in controls.
+
+Direct dispatch allows production Kotlin/JS dead code elimination to discard
+unused component implementations. A small app can benefit substantially. An app
+that uses most controls should expect a smaller reduction. Measure the production
+application before claiming startup gains.
+
+The older migration sections below describe the APIs in those historical releases.
+
+
 ## Responsive exported pane scaffolds in 0.23
 
 `DomposablePaneScaffold` adds the optional `collapseBelow` breakpoint for exported HTML pages

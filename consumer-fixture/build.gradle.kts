@@ -19,6 +19,7 @@ kotlin {
     jvm()
     js {
         browser()
+        binaries.executable()
     }
     wasmJs {
         browser()
@@ -83,7 +84,7 @@ tasks.matching { it.name.startsWith("ksp") && it.name != "kspCommonMainKotlinMet
     enabled = false
 }
 
-// Consumer-defined renderers live in their own namespace, beside the published default provider.
+// Consumer-defined renderers live in their own namespace, independent of built-in component dispatch.
 ksp {
     arg("domposable.components.package", "example.consumer.components.generated")
     arg("domposable.components.provider", "ConsumerComponents")

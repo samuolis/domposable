@@ -574,10 +574,6 @@ data class DomposableScaffoldProps(
 )
 
 val LocalDomposableTokens = staticCompositionLocalOf { DomposableTokens() }
-val LocalDomposableComponents =
-    staticCompositionLocalOf<DomposableComponents> {
-        error("Install DomposableTheme with a component provider before rendering Domposable UI")
-    }
 
 /** Current theme values from the nearest enclosing theme, rather than mutable global branding. */
 object DomposableTheme {
@@ -598,11 +594,14 @@ object DomposableTheme {
 @Composable
 fun DomposableTheme(
     tokens: DomposableTokens = LocalDomposableTokens.current,
-    components: DomposableComponents,
     content: @Composable () -> Unit,
 ) {
-    CompositionLocalProvider(LocalDomposableTokens provides tokens, LocalDomposableComponents provides components) {
-        components.theme.Render(DomposableThemeProps(tokens), DomposableModifier, content)
+    CompositionLocalProvider(LocalDomposableTokens provides tokens) {
+        io.github.samuolis.domposable.material.RenderDomposableTheme(
+            DomposableThemeProps(tokens),
+            DomposableModifier,
+            content,
+        )
     }
 }
 
