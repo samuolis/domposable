@@ -7,8 +7,8 @@ Domposable uses plain semantic versions. Until 1.0, minor releases may change AP
 | Target | Renderer | UI/behavior checks | Visual baselines | URL owner |
 | --- | --- | --- | --- | --- |
 | Android, API 24+ | Compose UI + Material3 | Robolectric API 36 interaction tests; APK build | Robolectric native graphics, 390 × 844 logical pixels | Application |
-| iOS arm64 | Compose UI + Material3 | Device compilation; simulator input/rotation tests | iPad mini A17 Pro, iOS 26.5, portrait/landscape | Application |
-| iOS simulator arm64 | Same native renderer | XCUITest, unsigned app artifact | Same simulator fixtures | Application |
+| iOS arm64 | Compose UI + Material3 | Compilation, ABI and packaged consumer checks | No automatic runtime visual gate | Application |
+| iOS simulator arm64 | Same native renderer | Compilation, ABI and packaged consumer checks | No automatic runtime visual gate | Application |
 | JVM desktop | Compose UI + Material3 | JVM tests and compiled consumer | Compose desktop test scene on Ubuntu | Application |
 | Kotlin/JS HTML | Native DOM + CSS + browser controls | Chromium, Firefox, WebKit; axe; inputs/focus/history/URLs | Chromium on Ubuntu, phone/tablet/wide | Hash or path history; or host router |
 | Kotlin/Wasm JS | Compose UI + Material3 | Chromium startup, history/restoration, Unicode input, password privacy, disabled canvas interactions and modal actions; documented stable-bridge omissions and bounded accessibility regression audit | Chromium on Ubuntu, phone/wide | Hash or path history; or host router |
@@ -23,10 +23,10 @@ Desktop and Wasm support are **experimental**. HTML and Wasm share the optional 
 | Compose Multiplatform plugin / runtime / UI / HTML | 1.12.2 (stable) |
 | AndroidX Compose core / host tests | 1.12.1 (stable) |
 | Material3 provider | 1.12.0-alpha03 (separately versioned) |
-| Navigation 3 runtime / Compose UI display | 1.1.7 / 1.1.2 |
+| Navigation 3 runtime / Compose UI display | 1.2.0 / 1.2.0 |
 | KSP | 2.3.12 |
-| Android Gradle plugin / Gradle | 9.4.1 / 9.7.1 |
-| Metro example | 1.4.5 |
+| Android Gradle plugin / Gradle | 9.4.1 / 9.8.2 |
+| Metro example | 1.5.0 |
 | Kobweb application/export example | 0.25.1 |
 | Koin integration example | 4.2.2 |
 | Playwright | 1.64.0 |

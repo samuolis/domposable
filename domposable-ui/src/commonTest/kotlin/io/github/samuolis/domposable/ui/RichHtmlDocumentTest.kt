@@ -7,6 +7,17 @@ import kotlin.test.assertTrue
 
 class RichHtmlDocumentTest {
     @Test
+    fun unterminatedMarkupIsConsumedAsOneTextNode() {
+        val html = "<".repeat(100_000) + "&amp;"
+        assertEquals(listOf(DomposableRichHtmlNode.Text("<".repeat(100_000) + "&")), parseDomposableRichHtml(html))
+        assertEquals(emptyList(), parseDomposableRichHtml("<script>" + html))
+        assertEquals(
+            listOf(DomposableRichHtmlNode.Text("<a title=\"unfinished > &")),
+            parseDomposableRichHtml("<a title=\"unfinished > &amp;"),
+        )
+    }
+
+    @Test
     fun safeHrefAllowsRelativeAndExplicitSafeSchemes() {
         assertEquals("/help?topic=one&amp;other=two", safeDomposableHref("/help?topic=one&amp;other=two"))
         assertEquals("../guide", safeDomposableHref("../guide"))
