@@ -67,7 +67,7 @@ def compare(before, after):
     # Expand markers for visibility after GitHub scales the comparison on phones.
     highlight.paste(Image.new('RGB', after.size, '#ed008c'), mask=mask.filter(ImageFilter.MaxFilter(7)))
     return panel([before.crop(crop), highlight.crop(crop), after.crop(crop)],
-                 ['Main (crop)', 'Changed pixels (enlarged)', 'PR (crop)'])
+                 ['Main', 'Pixel diff', 'PR'])
 
 def asset_name(pr: int, run: int, platform: str, scenario: str, data: bytes) -> str:
     if pr <= 0 or run <= 0 or platform not in {'android', 'desktop', 'ios', 'dom', 'wasm'} or not re.fullmatch(r'[a-z0-9-]+', scenario):
