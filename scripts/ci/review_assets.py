@@ -170,6 +170,7 @@ def main():
     manifest = json.loads(base64.b64decode(manifest_file['content']))
     validate_manifest(manifest)
     files = []
+    compared = 0
     with tempfile.TemporaryDirectory(prefix='domposable-visual-review-') as directory:
         for artifact in sorted(names):
             subprocess.run(['gh','run','download',str(args.run),'--repo',REPO,'--dir',str(Path(directory)/artifact),'--name',artifact],check=True)
@@ -181,6 +182,7 @@ def main():
                 candidates = list(Path(directory).glob(f'*/build/screenshots/{platform}/{name}.png'))
                 if len(candidates) != 1: raise SystemExit(f'Missing/ambiguous capture: {platform}/{name}')
                 after = png(candidates[0].read_bytes())
+                compared += 1
                 baseline_path = f'screenshots/{platform}/{name}.png'
                 try:
                     url = f'https://raw.githubusercontent.com/{REPO}/{pr["base"]["sha"]}/{baseline_path}'
@@ -195,7 +197,9 @@ def main():
                 else:
                     data = panel([after], [f'Added: {platform} {name}']); label = f'{platform} {name}: added preview'
                 files.append((platform, name, data, label))
-    markdown = publish_images(files, args.pr, args.run)
+    markdown = (f"Compared {compared} screenshots for revision `{run['head_sha']}` in "
+                f"[CI run](https://github.com/{REPO}/actions/runs/{args.run}).\n\n"
+                + publish_images(files, args.pr, args.run))
     Path('build').mkdir(exist_ok=True); Path('build/visual-review.md').write_text(markdown)
     print(markdown)
 

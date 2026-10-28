@@ -74,3 +74,18 @@ DomposableButton("Add", onAdd)
         paths = ['domposable-ui/src/jsMain/kotlin/material/HtmlMaterial.kt']
         self.assertEqual([], review.validate_description(self.body, paths))
         self.assertTrue(review.validate_description(self.body.replace('## Visual evidence', '## Other'), paths))
+
+    def test_no_change_report_requires_current_revision_and_ci_source(self):
+        head = 'b' * 40
+        evidence = (f"Compared 156 screenshots for revision `{head}` in "
+                    "[CI run](https://github.com/samuolis/domposable/actions/runs/1234).\n\n"
+                    "No screenshot changes above the comparison tolerance (12 per channel).")
+        start = self.body.index('## Visual evidence')
+        end = self.body.index('## Verification')
+        body = self.body[:start] + '## Visual evidence\n' + evidence + '\n' + self.body[end:]
+        paths = ['demo/src/commonMain/Shop.kt']
+        self.assertEqual([], review.validate_description(body, paths, head))
+        self.assertTrue(review.validate_description(body, paths, 'c' * 40))
+        self.assertTrue(review.validate_description(body, paths))
+        self.assertTrue(review.validate_description(body.replace('/actions/runs/1234', '/issues/1234'), paths, head))
+        self.assertTrue(review.validate_description(body.replace('Compared 156', 'Compared 0'), paths, head))

@@ -95,7 +95,7 @@ def section(body: str, heading: str) -> str | None:
     return match.group(1).strip() if match else None
 
 
-def validate_description(body: str, changed_paths: Iterable[str]) -> list[str]:
+def validate_description(body: str, changed_paths: Iterable[str], head: str | None = None) -> list[str]:
     errors: list[str] = []
     summary = section(body, "Summary")
     if not summary or not re.search(r"^\s*[-*]\s+\S", summary, re.MULTILINE):
@@ -143,8 +143,12 @@ def validate_description(body: str, changed_paths: Iterable[str]) -> list[str]:
         immutable_git = r"https://raw\.githubusercontent\.com/samuolis/domposable/[0-9a-f]{40}/[^)]+\.png"
         addressed_asset = r"https://github\.com/samuolis/domposable/releases/download/visual-evidence(?:-[1-9][0-9]*)?/pr-[1-9][0-9]*-run-[1-9][0-9]*-(?:android|desktop|ios|dom|wasm)-[a-z0-9-]+-[0-9a-f]{64}\.png"
         images = [(label, url) for label, url in image_urls if re.fullmatch(immutable_git, url) or re.fullmatch(addressed_asset, url)]
-        if not images:
-            errors.append("Visual changes need descriptive inline PNG previews at content-addressed release asset URLs (or legacy immutable commit URLs) under `## Visual evidence`; artifact links alone are insufficient.")
+        unchanged = (head is not None
+                     and "No screenshot changes above the comparison tolerance (12 per channel)." in evidence
+                     and re.search(rf"Compared [1-9][0-9]* screenshots for revision `{re.escape(head)}` in "
+                                   r"\[CI run\]\(https://github\.com/samuolis/domposable/actions/runs/[1-9][0-9]*\)", evidence))
+        if not images and not unchanged:
+            errors.append("Visual changes need descriptive inline PNG previews at content-addressed release asset URLs (or legacy immutable commit URLs) under `## Visual evidence`, or the publisher's no-change report for the current revision; artifact links alone are insufficient.")
     verification = section(body, "Verification")
     if not verification or not re.search(r"^\s*[-*]\s+\S", verification, re.MULTILINE):
         errors.append("Include relevant validation results under `## Verification`.")
@@ -170,7 +174,7 @@ def main() -> None:
 
     args = parser.parse_args()
     changed_paths = collect_changed_paths(args.base, args.head)
-    errors = validate_title(args.title) + validate_description(Path(args.body_file).read_text(encoding="utf-8"), changed_paths)
+    errors = validate_title(args.title) + validate_description(Path(args.body_file).read_text(encoding="utf-8"), changed_paths, args.head)
     if errors:
         raise SystemExit("\n".join(f"error: {error}" for error in errors))
 
