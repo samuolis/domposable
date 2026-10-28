@@ -118,3 +118,26 @@ class ReviewEvidenceTest(unittest.TestCase):
         image = module.png(module.compare(before, after))
         # The middle panel marks a blue-only change beyond the gate's tolerance.
         self.assertEqual(image.getpixel((49, 40)), (237, 0, 140))
+
+    def test_unchanged_and_tolerated_noise_are_omitted(self):
+        before = Image.new('RGB', (80, 80), 'white')
+        self.assertIsNone(module.compare(before, before.copy()))
+        noisy = before.copy()
+        noisy.putpixel((40, 40), (243, 255, 255))
+        self.assertIsNone(module.compare(before, noisy))
+        with patch.object(module, 'evidence_bucket') as bucket:
+            self.assertIn('No screenshot changes', module.publish_images([], 9, 1234))
+            bucket.assert_not_called()
+
+    def test_sparse_change_is_cropped_and_middle_panel_contains_only_changes(self):
+        before = Image.new('RGB', (1000, 1000), 'black')
+        after = before.copy()
+        after.putpixel((500, 500), (0, 0, 255))
+        image = module.png(module.compare(before, after))
+        self.assertEqual(image.size, (243, 113))
+        self.assertEqual(image.getpixel((97, 40)), (255, 255, 255))
+        self.assertEqual(image.getpixel((121, 64)), (237, 0, 140))
+        self.assertEqual(image.getpixel((124, 64)), (237, 0, 140))
+
+    def test_dimension_changes_are_not_omitted(self):
+        self.assertIsNotNone(module.compare(Image.new('RGB', (4, 4)), Image.new('RGB', (5, 4))))

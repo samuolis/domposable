@@ -16,7 +16,7 @@ import tempfile
 import time
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 REPO = 'samuolis/domposable'
 ASSET_TAG = 'visual-evidence'
@@ -48,14 +48,26 @@ def panel(images, labels):
     out = BytesIO(); result.save(out, format='PNG'); return out.getvalue()
 
 def compare(before, after):
-    if before.size == after.size:
-        diff = ImageChops.difference(before, after)
-        # Match the regression gate: a difference in any channel counts.
-        mask = diff.point(lambda v: 255 if v > 12 else 0).convert('L').point(lambda v: 255 if v else 0)
-        highlight = after.copy(); highlight.paste(Image.new('RGB', after.size, '#ed008c'), mask=mask)
-    else:
-        highlight = Image.new('RGB', after.size, '#ed008c')
-    return panel([before, highlight, after], ['Main', 'Pixel difference', 'PR'])
+    if before.size != after.size:
+        return panel([before, Image.new('RGB', after.size, '#ed008c'), after],
+                     ['Main', 'Size changed', 'PR'])
+    diff = ImageChops.difference(before, after)
+    # Ignore the same per-channel noise as the screenshot gate.
+    channels = diff.split()
+    mask = ImageChops.lighter(ImageChops.lighter(channels[0], channels[1]), channels[2])
+    mask = mask.point(lambda value: 255 if value > 12 else 0)
+    bounds = mask.getbbox()
+    if bounds is None:
+        return None
+    # Crop shared context so sparse changes stay visible on mobile.
+    left, top, right, bottom = bounds
+    crop = (max(0, left - 24), max(0, top - 24),
+            min(after.width, right + 24), min(after.height, bottom + 24))
+    highlight = Image.new('RGB', after.size, '#ffffff')
+    # Expand markers for visibility after GitHub scales the comparison on phones.
+    highlight.paste(Image.new('RGB', after.size, '#ed008c'), mask=mask.filter(ImageFilter.MaxFilter(7)))
+    return panel([before.crop(crop), highlight.crop(crop), after.crop(crop)],
+                 ['Main', 'Pixel diff', 'PR'])
 
 def asset_name(pr: int, run: int, platform: str, scenario: str, data: bytes) -> str:
     if pr <= 0 or run <= 0 or platform not in {'android', 'desktop', 'ios', 'dom', 'wasm'} or not re.fullmatch(r'[a-z0-9-]+', scenario):
@@ -114,6 +126,8 @@ def evidence_bucket(count):
     raise ValueError('Visual evidence buckets are full')
 
 def publish_images(files, pr: int, run: int):
+    if not files:
+        return 'No screenshot changes above the comparison tolerance (12 per channel).\n'
     release, existing = evidence_bucket(len(files))
     by_name = {asset['name']: asset for asset in existing}
     lines = []
@@ -156,6 +170,7 @@ def main():
     manifest = json.loads(base64.b64decode(manifest_file['content']))
     validate_manifest(manifest)
     files = []
+    compared = 0
     with tempfile.TemporaryDirectory(prefix='domposable-visual-review-') as directory:
         for artifact in sorted(names):
             subprocess.run(['gh','run','download',str(args.run),'--repo',REPO,'--dir',str(Path(directory)/artifact),'--name',artifact],check=True)
@@ -167,6 +182,7 @@ def main():
                 candidates = list(Path(directory).glob(f'*/build/screenshots/{platform}/{name}.png'))
                 if len(candidates) != 1: raise SystemExit(f'Missing/ambiguous capture: {platform}/{name}')
                 after = png(candidates[0].read_bytes())
+                compared += 1
                 baseline_path = f'screenshots/{platform}/{name}.png'
                 try:
                     url = f'https://raw.githubusercontent.com/{REPO}/{pr["base"]["sha"]}/{baseline_path}'
@@ -175,11 +191,15 @@ def main():
                     if error.code != 404: raise
                     before = None
                 if before is not None:
-                    data = compare(before, after); label = f'{platform} {name}: Main | Pixel difference | PR'
+                    data = compare(before, after)
+                    if data is None: continue
+                    label = f'{platform} {name}: Main | Pixel difference | PR (changed region)'
                 else:
                     data = panel([after], [f'Added: {platform} {name}']); label = f'{platform} {name}: added preview'
                 files.append((platform, name, data, label))
-    markdown = publish_images(files, args.pr, args.run)
+    markdown = (f"Compared {compared} screenshots for revision `{run['head_sha']}` in "
+                f"[CI run](https://github.com/{REPO}/actions/runs/{args.run}).\n\n"
+                + publish_images(files, args.pr, args.run))
     Path('build').mkdir(exist_ok=True); Path('build/visual-review.md').write_text(markdown)
     print(markdown)
 
