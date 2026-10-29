@@ -102,6 +102,18 @@ class HtmlTooltipTest {
                 settleTooltip()
                 assertFalse(popup.matches(":popover-open"))
                 assertEquals(2, dismissals)
+                button.click()
+                settleTooltip()
+                val outside = document.createElement("button") as HTMLElement
+                document.body!!.appendChild(outside)
+                try {
+                    outside.focus()
+                    settleTooltip()
+                    assertFalse(popup.matches(":popover-open"))
+                    assertEquals(3, dismissals)
+                } finally {
+                    outside.remove()
+                }
             } finally {
                 composition.dispose()
                 root.remove()

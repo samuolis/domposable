@@ -490,8 +490,12 @@ internal fun HtmlTooltip(
             }
             val observer: dynamic = js("new ResizeObserver(updatePosition)")
             observer.observe(element)
+            var dismissRequested = false
             val dismiss: () -> Unit = {
-                if (props.visible == null) dismissed = true else onDismiss?.invoke()
+                if (!dismissRequested) {
+                    dismissRequested = true
+                    if (props.visible == null) dismissed = true else onDismiss?.invoke()
+                }
             }
             val keyDown: (Event) -> Unit = { event ->
                 if ((event as KeyboardEvent).key == "Escape") {
@@ -504,15 +508,21 @@ internal fun HtmlTooltip(
                 val node = event.target as? Node
                 if (node == null || !target.contains(node)) dismiss()
             }
+            val outsideFocus: (Event) -> Unit = { event ->
+                val node = event.target as? Node
+                if (props.visible != null && (node == null || !target.contains(node))) dismiss()
+            }
             window.addEventListener("resize", reposition)
             window.addEventListener("scroll", reposition, true)
             document.addEventListener("keydown", keyDown, true)
             document.addEventListener("pointerdown", outsidePointer, true)
+            document.addEventListener("focusin", outsideFocus, true)
             onDispose {
                 window.removeEventListener("resize", reposition)
                 window.removeEventListener("scroll", reposition, true)
                 document.removeEventListener("keydown", keyDown, true)
                 document.removeEventListener("pointerdown", outsidePointer, true)
+                document.removeEventListener("focusin", outsideFocus, true)
                 observer.disconnect()
                 resizeFrame?.let(window::cancelAnimationFrame)
                 if (element.matches(":popover-open")) element.asDynamic().hidePopover()
