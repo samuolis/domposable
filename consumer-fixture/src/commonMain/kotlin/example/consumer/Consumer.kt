@@ -244,6 +244,15 @@ fun SharedControls() {
     DomposableTooltip("Supplemental help") {
         DomposableIconButton({}, "Help") { DomposableText("?") }
     }
+    var showHelp by remember { mutableStateOf(false) }
+    DomposableTooltip(
+        "Saved estimate. Source: Elo.",
+        visible = showHelp,
+        onDismiss = { showHelp = false },
+        surfaceModifier = DomposableModifier.padding(4.dp),
+    ) {
+        DomposableButton("Win probability", { showHelp = true })
+    }
 }
 
 // Windowing is opt-in; existing row/grid calls remain valid without a window.

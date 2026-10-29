@@ -212,6 +212,7 @@ internal fun MaterialNavigation() {
 @Composable
 internal fun MaterialFeedback() {
     var animate by rememberSaveable { mutableStateOf(false) }
+    var showTooltip by rememberSaveable { mutableStateOf(false) }
     DomposableSwitch(animate, { animate = it }, "Animate loading indicators")
     val messages = rememberDomposableSnackbarHostState()
     val scope = rememberCoroutineScope()
@@ -252,8 +253,10 @@ internal fun MaterialFeedback() {
     DomposableSnackbar("Changes saved", actionLabel = "Undo", onAction = {})
     DomposableTooltip("Plain tooltip") { DomposableButton("Tooltip target", {}) }
     DomposableTooltip("Helpful details", title = "Rich tooltip", action = {
-        DomposableButton("Learn more", {})
-    }) { DomposableButton("Rich tooltip target", {}) }
+        DomposableButton("Learn more", { showTooltip = false })
+    }, visible = showTooltip, onDismiss = { showTooltip = false }) {
+        DomposableButton("Rich tooltip target", { showTooltip = true })
+    }
     DomposableBanner("Informational message")
     DomposableDivider()
 }

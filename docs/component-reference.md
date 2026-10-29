@@ -92,7 +92,7 @@ Feature code can use direct arguments. These tables describe the canonical `Prop
 | [DomposableTheme](#domposabletheme) | Core / additional controls | 1 |
 | [DomposableTimePicker](#domposabletimepicker) | Input | 6 |
 | [DomposableToggleButton](#domposabletogglebutton) | Expressive actions | 5 |
-| [DomposableTooltip](#domposabletooltip) | Communication | 4 |
+| [DomposableTooltip](#domposabletooltip) | Communication | 7 |
 | [DomposableTopAppBar](#domposabletopappbar) | Navigation | 9 |
 | [DomposableValueChart](#domposablevaluechart) | Core / additional controls | 7 |
 | [DomposableWideNavigationRail](#domposablewidenavigationrail) | Expressive navigation | 5 |
@@ -1108,6 +1108,9 @@ Communication. [Full API and overloads](https://samuolis.github.io/domposable/ap
 | `appearance` | <code><a href="https://samuolis.github.io/domposable/api/domposable-foundation/io.github.samuolis.domposable.foundation/-domposable-surface-appearance/index.html">DomposableSurfaceAppearance</a>?</code> | `null` |
 | `title` | <code>String?</code> | `null` |
 | `action` | <code>@Composable () -&gt; Unit?</code> | `null` |
+| `visible` | <code>Boolean?</code> | `null` |
+| `onDismiss` | <code>() -&gt; Unit?</code> | `null` |
+| `surfaceModifier` | <code><a href="https://samuolis.github.io/domposable/api/domposable-ui/io.github.samuolis.domposable.ui/-domposable-modifier/index.html">DomposableModifier</a></code> | `DomposableModifier` |
 
 ## DomposableTopAppBar
 

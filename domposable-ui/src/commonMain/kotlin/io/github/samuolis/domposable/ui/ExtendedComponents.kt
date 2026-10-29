@@ -122,4 +122,13 @@ data class DomposableTooltipProps(
     val appearance: DomposableSurfaceAppearance? = null,
     val title: String? = null,
     val action: (@Composable () -> Unit)? = null,
-)
+    /** Null keeps hover/focus/long-press behavior; otherwise the caller owns visibility. */
+    val visible: Boolean? = null,
+    val onDismiss: (() -> Unit)? = null,
+    /** Applied to the popup surface, independently of the anchor's modifier. */
+    val surfaceModifier: DomposableModifier = DomposableModifier,
+) {
+    init {
+        require(visible == null || onDismiss != null) { "A controlled tooltip requires onDismiss" }
+    }
+}

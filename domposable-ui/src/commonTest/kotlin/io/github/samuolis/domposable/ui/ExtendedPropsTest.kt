@@ -6,6 +6,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ExtendedPropsTest {
+    @Test fun controlledTooltipsRequireADismissHandler() {
+        assertEquals(null, DomposableTooltipProps("Action label").visible)
+        assertFailsWith<IllegalArgumentException> { DomposableTooltipProps("Help", visible = true) }
+        assertEquals(true, DomposableTooltipProps("Help", visible = true, onDismiss = {}).visible)
+    }
+
     @Test fun selectUsesUniqueStableValuesAndRejectsAnUnknownSelection() {
         val options = listOf(DomposableSelectOption("home", "Home"), DomposableSelectOption("work", "Office"))
         val props = DomposableSelectProps("work", {}, "Address", options.reversed())
