@@ -1,5 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { stableCapture } from './stable-capture';
 
 const test = base.extend<{ runtimeErrors: void }>({
   runtimeErrors: [async ({ page }, use) => {
@@ -83,5 +84,41 @@ for (const width of [390, 1440]) {
     await page.keyboard.press('ArrowRight');
     await expect(period.getByRole('radio', { name: 'Month', exact: true })).toBeChecked();
     await expect(actions).toHaveText('Period actions: 3');
+  });
+}
+
+for (const width of [320, 390, 1280]) {
+  test(`controlled tooltip opens on tap and stays inside the viewport at ${width}px`, async ({ page, browserName }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/#/material/feedback');
+    const trigger = page.getByRole('button', { name: 'Rich tooltip target', exact: true });
+    const popup = page.getByRole('dialog', { name: 'Rich tooltip', exact: true });
+    await trigger.evaluate(element => {
+      Object.assign((element.closest('.d-tooltip-anchor') as HTMLElement).style, {
+        position: 'fixed', right: '0px', top: '8px', zIndex: '10',
+      });
+    });
+    await trigger.focus();
+    await expect(popup).toBeHidden();
+    await trigger.click();
+    await expect(popup).toBeVisible();
+    await expect(popup).toContainText('Helpful details');
+    const bounds = await popup.boundingBox();
+    expect(bounds!.x).toBeGreaterThanOrEqual(7);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width - 7);
+    expect(bounds!.y).toBeGreaterThanOrEqual(7);
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(837);
+    if (width === 390 && browserName === 'chromium') {
+      await stableCapture(page, 'dom', 'tooltip-open');
+    }
+    await popup.getByRole('button', { name: 'Learn more', exact: true }).click();
+    await expect(popup).toBeHidden();
+    await trigger.click();
+    await page.keyboard.press('Escape');
+    await expect(popup).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await trigger.click();
+    await page.mouse.click(8, 800);
+    await expect(popup).toBeHidden();
   });
 }

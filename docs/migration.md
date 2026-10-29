@@ -1,5 +1,13 @@
 # Migrating a Compose feature
 
+## Controlled tooltips in the next 0.x minor release
+
+`DomposableTooltip` and `DomposableTooltipProps` add `visible`, `onDismiss` and `surfaceModifier`.
+Existing source calls keep their hover/focus/long-press behavior. Recompile consumers because
+the constructor, `copy` and function ABI have changed. This requires a minor release before 1.0.
+Passing `visible` requires `onDismiss`; short info controls can then open help on tap and dismiss
+it without a second dialog. Put popup effects in `surfaceModifier`, keeping anchor layout in `modifier`.
+
 ## Direct component rendering in the next 0.x minor release
 
 Built-in components now use direct `expect` / `actual` implementations. This is a

@@ -2,6 +2,9 @@ package io.github.samuolis.domposable.material
 
 /** Generic hooks for the app header, skip link, footer, modal drawer, and breadcrumbs. */
 internal const val DOMPOSABLE_HTML_SHELL_SLOT_CSS = """
+.d-frosted-surface{background:var(--d-frosted-solid-color,var(--d-surface))}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.d-frosted-surface{background:var(--d-frosted-surface-color,color-mix(in srgb,var(--d-surface) 63%,transparent));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active){.d-frosted-surface{background:var(--d-frosted-solid-color,var(--d-surface));backdrop-filter:none;-webkit-backdrop-filter:none}}
 .d-skip-link{position:absolute;top:8px;left:16px;transform:translateY(-200%);z-index:50;padding:12px;border-radius:12px;background:var(--d-surface);color:var(--d-primary)}
 .d-skip-link:focus{left:16px;top:8px;transform:none;z-index:50}
 .d-app-header{position:sticky;top:0;z-index:var(--d-app-header-z-index,20);padding-top:env(safe-area-inset-top,0px);padding-inline:max(0px,env(safe-area-inset-left,0px)) max(0px,env(safe-area-inset-right,0px));background:var(--d-app-header-surface,var(--d-surface));border-bottom:1px solid color-mix(in srgb,var(--d-outline-variant,var(--d-outline)) 24%,transparent)}

@@ -5,6 +5,7 @@
 
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -36,6 +37,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
@@ -45,13 +47,24 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
@@ -76,6 +89,7 @@ import io.github.samuolis.domposable.ui.DomposableTopAppBarProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.toComposeModifier
+import kotlinx.coroutines.flow.drop
 
 @Composable
 internal fun NativeTopAppBar(
@@ -481,13 +495,56 @@ internal fun NativeTooltip(
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.tooltip
     val shape = appearance.nativeShape(TooltipDefaults.plainTooltipContainerShape)
+    val state =
+        rememberTooltipState(
+            initialIsVisible = props.visible == true,
+            isPersistent = props.visible != null || props.action != null,
+        )
+    val visible by rememberUpdatedState(props.visible)
+    val onDismiss by rememberUpdatedState(props.onDismiss)
+    val popupFocus = remember { FocusRequester() }
+    val dismissOnKey: (KeyEvent) -> Boolean = { event ->
+        val dismissKey = event.key == Key.Escape || event.key == Key.Back
+        if (props.visible != null && state.isVisible && dismissKey) {
+            if (event.type == KeyEventType.KeyUp) state.dismiss()
+            true
+        } else {
+            false
+        }
+    }
+    LaunchedEffect(props.visible) {
+        when (props.visible) {
+            true -> state.show()
+            false -> state.dismiss()
+            null -> Unit
+        }
+    }
+    LaunchedEffect(state) {
+        snapshotFlow { state.isVisible }.drop(1).collect { showing ->
+            if (!showing && visible == true) onDismiss?.invoke()
+        }
+    }
     NativeWindow { featureRegistry ->
         TooltipBox(
-            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
             tooltip = {
+                val surfaceModifier =
+                    props.surfaceModifier
+                        .toComposeModifier()
+                        .nativeClipAndBorder(appearance, shape)
+                        .then(
+                            if (props.visible != null) {
+                                Modifier.focusRequester(popupFocus).onPreviewKeyEvent(dismissOnKey).focusable()
+                            } else {
+                                Modifier
+                            },
+                        )
+                if (props.visible != null) {
+                    LaunchedEffect(Unit) { popupFocus.requestFocus() }
+                }
                 if (props.title != null || props.action != null) {
                     RichTooltip(
-                        modifier = Modifier.then(Modifier.nativeClipAndBorder(appearance, shape)),
+                        modifier = surfaceModifier,
                         title =
                             props.title?.let { title ->
                                 {
@@ -519,7 +576,7 @@ internal fun NativeTooltip(
                     }
                 } else {
                     PlainTooltip(
-                        modifier = Modifier.then(Modifier.nativeClipAndBorder(appearance, shape)),
+                        modifier = surfaceModifier,
                         shape = shape,
                         contentColor = appearance.content?.nativeColor() ?: TooltipDefaults.plainTooltipContentColor,
                         containerColor =
@@ -534,8 +591,11 @@ internal fun NativeTooltip(
                     }
                 }
             },
-            state = rememberTooltipState(),
-            modifier = modifier.toComposeModifier(),
+            state = state,
+            enableUserInput = props.visible == null,
+            focusable = props.visible != null || props.action != null,
+            hasAction = props.action != null,
+            modifier = modifier.toComposeModifier().onPreviewKeyEvent(dismissOnKey),
             content = { CompositionLocalProvider(LocalSaveableStateRegistry provides featureRegistry) { content() } },
         )
     }

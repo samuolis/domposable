@@ -1,10 +1,12 @@
 package io.github.samuolis.domposable.material
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant
@@ -21,6 +23,8 @@ import io.github.samuolis.domposable.ui.DomposableTopAppBarProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableAttributes
 import io.github.samuolis.domposable.ui.domposableFormEnabled
+import kotlinx.browser.document
+import kotlinx.browser.window
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.attributes.disabled
 import org.jetbrains.compose.web.dom.Button
@@ -35,7 +39,10 @@ import org.jetbrains.compose.web.dom.TagElement
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLSelectElement
+import org.w3c.dom.Node
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.FocusEvent
+import org.w3c.dom.events.KeyboardEvent
 
 private var nextControlId = 0
 
@@ -443,9 +450,11 @@ internal fun HtmlTooltip(
 ) {
     val tooltipId = remember { "d-tooltip-${nextControlId++}" }
     var anchor by remember { mutableStateOf<HTMLElement?>(null) }
+    var popup by remember { mutableStateOf<HTMLElement?>(null) }
     var hovering by remember { mutableStateOf(false) }
     var focused by remember { mutableStateOf(false) }
     var dismissed by remember { mutableStateOf(false) }
+    val onDismiss by rememberUpdatedState(props.onDismiss)
     val described = remember { mutableMapOf<HTMLElement, String?>() }
     // Describe the actual control without replacing any application-supplied description.
     SideEffect {
@@ -453,7 +462,7 @@ internal fun HtmlTooltip(
         if (controls != null) {
             for (index in 0 until controls.length) {
                 val control = controls.item(index) as HTMLElement
-                if (!described.containsKey(control)) {
+                if (popup?.contains(control) != true && !described.containsKey(control)) {
                     val original = control.getAttribute("aria-describedby")
                     described[control] = original
                     control.setAttribute("aria-describedby", listOfNotNull(original, tooltipId).joinToString(" "))
@@ -461,7 +470,67 @@ internal fun HtmlTooltip(
             }
         }
     }
-    val visible = (hovering || focused) && !dismissed
+    val visible = props.visible ?: ((hovering || focused) && !dismissed)
+    DisposableEffect(visible, props.visible, popup, anchor) {
+        val element = popup
+        val target = anchor
+        if (visible && element != null && target != null) {
+            element.asDynamic().showPopover()
+            positionHtmlTooltip(element, target)
+            val reposition: (Event) -> Unit = { positionHtmlTooltip(element, target) }
+            var resizeFrame: Int? = null
+            val updatePosition: () -> Unit = {
+                if (resizeFrame == null) {
+                    resizeFrame =
+                        window.requestAnimationFrame {
+                            resizeFrame = null
+                            positionHtmlTooltip(element, target)
+                        }
+                }
+            }
+            val observer: dynamic = js("new ResizeObserver(updatePosition)")
+            observer.observe(element)
+            var dismissRequested = false
+            val dismiss: () -> Unit = {
+                if (!dismissRequested) {
+                    dismissRequested = true
+                    if (props.visible == null) dismissed = true else onDismiss?.invoke()
+                }
+            }
+            val keyDown: (Event) -> Unit = { event ->
+                if ((event as KeyboardEvent).key == "Escape") {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    dismiss()
+                }
+            }
+            val outsidePointer: (Event) -> Unit = { event ->
+                val node = event.target as? Node
+                if (node == null || !target.contains(node)) dismiss()
+            }
+            val outsideFocus: (Event) -> Unit = { event ->
+                val node = event.target as? Node
+                if (props.visible != null && (node == null || !target.contains(node))) dismiss()
+            }
+            window.addEventListener("resize", reposition)
+            window.addEventListener("scroll", reposition, true)
+            document.addEventListener("keydown", keyDown, true)
+            document.addEventListener("pointerdown", outsidePointer, true)
+            document.addEventListener("focusin", outsideFocus, true)
+            onDispose {
+                window.removeEventListener("resize", reposition)
+                window.removeEventListener("scroll", reposition, true)
+                document.removeEventListener("keydown", keyDown, true)
+                document.removeEventListener("pointerdown", outsidePointer, true)
+                document.removeEventListener("focusin", outsideFocus, true)
+                observer.disconnect()
+                resizeFrame?.let(window::cancelAnimationFrame)
+                if (element.matches(":popover-open")) element.asDynamic().hidePopover()
+            }
+        } else {
+            onDispose { }
+        }
+    }
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.tooltip
     DomposableHtmlModifiers(modifier) {
         Div(attrs = {
@@ -472,13 +541,6 @@ internal fun HtmlTooltip(
                 dismissed = false
             }
             onMouseLeave { hovering = false }
-            onKeyDown {
-                if (it.key == "Escape" && visible) {
-                    it.preventDefault()
-                    it.stopPropagation()
-                    dismissed = true
-                }
-            }
             ref { element ->
                 anchor = element
                 val focusIn: (org.w3c.dom.events.Event) -> Unit = {
@@ -511,17 +573,45 @@ internal fun HtmlTooltip(
             }
         }) {
             content()
-            TagElement<HTMLElement>(if (props.action == null) "span" else "div", applyAttrs = {
-                id(tooltipId)
-                attr("role", if (props.action == null) "tooltip" else "dialog")
-                classes("d-tooltip")
-                style { surfaceAppearance(appearance) }
+            Div(attrs = {
+                attr("popover", "manual")
+                classes("d-tooltip-popup")
                 if (!visible) attr("hidden", "")
+                ref { element ->
+                    popup = element
+                    onDispose { popup = null }
+                }
             }) {
-                props.title?.let { H2 { Text(it) } }
-                Span { Text(props.text) }
-                props.action?.invoke()
+                DomposableHtmlModifiers(props.surfaceModifier) {
+                    TagElement<HTMLElement>(if (props.action == null) "span" else "div", applyAttrs = {
+                        domposableAttributes(props.surfaceModifier)
+                        id(tooltipId)
+                        attr("role", if (props.action == null) "tooltip" else "dialog")
+                        if (props.action != null) attr("aria-label", props.title ?: props.text)
+                        classes("d-tooltip")
+                        style { surfaceAppearance(appearance) }
+                    }) {
+                        props.title?.let { H2 { Text(it) } }
+                        Span { Text(props.text) }
+                        props.action?.invoke()
+                    }
+                }
             }
         }
     }
+}
+
+private fun positionHtmlTooltip(
+    popup: HTMLElement,
+    anchor: HTMLElement,
+) {
+    val bounds = anchor.getBoundingClientRect()
+    val size = popup.getBoundingClientRect()
+    val margin = 8.0
+    val maxLeft = (window.innerWidth - size.width - margin).coerceAtLeast(margin)
+    val left = (bounds.left + (bounds.width - size.width) / 2).coerceIn(margin, maxLeft)
+    val preferredTop = if (bounds.top >= size.height + margin) bounds.top - size.height else bounds.bottom
+    val maxTop = (window.innerHeight - size.height - margin).coerceAtLeast(margin)
+    popup.style.left = "${left}px"
+    popup.style.top = "${preferredTop.coerceIn(margin, maxTop)}px"
 }

@@ -124,6 +124,21 @@ overrides those defaults.
 
 Tooltips provide supplemental descriptions. The control still needs its own accessible label. HTML shows help on hover or keyboard focus and supports Escape; native delegates hover/long-press behavior to Material. Link emits a browser anchor or opens the native URI handler. Navigation items with `href` preserve browser new-tab behavior while ordinary clicks call `onSelect`.
 
+For short help opened by a tap or click, control tooltip visibility explicitly. It stays open until dismissed rather than requiring a long press. Keep required instructions and errors visible in the form, and use a dialog or sheet for longer content.
+
+```kotlin
+var showHelp by remember { mutableStateOf(false) }
+DomposableTooltip(
+    text = "Saved estimate. Source: Elo.",
+    visible = showHelp,
+    onDismiss = { showHelp = false },
+) {
+    DomposableButton("Win probability", { showHelp = true })
+}
+```
+
+The ordinary `modifier` belongs to the anchor. `surfaceModifier` decorates the popup itself, so product renderers can apply a native backdrop effect or HTML surface attributes without changing the control. HTML tooltips use the browser top layer and stay within viewport edges as their contents resize. For an HTML frosted surface, add `d-frosted-surface` through `htmlAttributes`; optional `--d-frosted-surface-color` and `--d-frosted-solid-color` CSS variables supply the product tint and solid fallback. Unsupported blur and reduced-transparency preferences use the solid surface.
+
 Use `description = null` for a decorative Icon inside a labelled control. IconButton and FloatingActionButton take the control's accessible `label`; the decorative glyph does not become part of that name.
 
 For custom filled vector artwork, pass SVG path data rather than encoding it as a text glyph. The vector inherits the current content color, uses a 24-unit viewport by default, and follows the supplied modifier size on both renderers:

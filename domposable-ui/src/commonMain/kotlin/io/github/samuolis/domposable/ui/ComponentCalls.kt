@@ -672,9 +672,20 @@ fun DomposableTooltip(
     appearance: DomposableSurfaceAppearance? = null,
     title: String? = null,
     action: (@Composable () -> Unit)? = null,
+    visible: Boolean? = null,
+    onDismiss: (() -> Unit)? = null,
+    surfaceModifier: DomposableModifier = DomposableModifier,
     content: @Composable () -> Unit,
 ) = DomposableTooltip(
-    DomposableTooltipProps(text, appearance = appearance, title = title, action = action),
+    DomposableTooltipProps(
+        text,
+        appearance = appearance,
+        title = title,
+        action = action,
+        visible = visible,
+        onDismiss = onDismiss,
+        surfaceModifier = surfaceModifier,
+    ),
     modifier,
     content,
 )
