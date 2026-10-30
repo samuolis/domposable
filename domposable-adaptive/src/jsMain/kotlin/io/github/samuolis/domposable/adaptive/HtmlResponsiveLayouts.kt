@@ -44,7 +44,10 @@ fun DomposableHtmlResponsiveGrid(
     }
 }
 
-/** A stack-on-small, two-column HTML layout with optional bounded media matching. */
+/**
+ * A stack-on-small, two-column HTML layout with optional bounded media matching.
+ * Height-managed media matches the text pane; intrinsic content still contributes its full height.
+ */
 @Composable
 fun DomposableHtmlResponsiveSplit(
     breakpoint: DomposableLength = DomposableLength(DomposableBreakpoints().medium),
@@ -219,8 +222,10 @@ private fun responsiveSplitCss(threshold: String): String =
     @container d-responsive-split (min-width:${threshold}px){
         [data-d-html-responsive-split="$threshold"]>[data-d-html-responsive-split-layout]{flex-direction:row}
         [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-fixed-width=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]{flex:0 0 min(var(--d-split-media-width),100%)}
-        [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-matches-text=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]{--d-split-media-height:100%;contain:size;container-name:d-responsive-split-media;container-type:size;align-self:stretch;display:flex;align-items:center;min-height:var(--d-split-media-min-height)}
-        [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-matches-text=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]>[data-d-html-responsive-split-media-content]{flex:1 1 0%;align-self:center;height:100%;min-height:0;max-height:var(--d-split-media-max-height);display:flex;justify-content:center;align-items:center}
+        [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-matches-text=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]{--d-split-media-height:100%;align-self:stretch;display:flex;align-items:center;min-height:var(--d-split-media-min-height)}
+        [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-matches-text=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]>[data-d-html-responsive-split-media-content]{flex:1 1 0%;align-self:center;min-height:0;display:flex;justify-content:center;align-items:center}
+        [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-matches-text=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]:has([data-d-html-responsive-height-root]){contain:size;container-name:d-responsive-split-media;container-type:size}
+        [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-matches-text=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]>[data-d-html-responsive-split-media-content]:has([data-d-html-responsive-height-root]){height:100%;max-height:var(--d-split-media-max-height)}
         [data-d-html-responsive-split="$threshold"][data-d-html-responsive-split-media-matches-text=true]>[data-d-html-responsive-split-layout]>[data-d-html-responsive-split-media]>[data-d-html-responsive-split-media-content] :is([data-domposable-modifier],[data-domposable-layout-item]):has([data-d-html-responsive-height-root]){height:var(--d-split-media-height,auto);max-height:var(--d-split-media-max-height,none)}
     }
     """.trimIndent()
