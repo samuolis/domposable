@@ -151,7 +151,10 @@ private fun matchedSplit(
 
 /** Intrinsic artwork exceeds the image-height cap and must remain in document flow. */
 @Composable
-private fun intrinsicSplit(id: String, textHeight: Int) {
+private fun intrinsicSplit(
+    id: String,
+    textHeight: Int,
+) {
     DomposableHtmlResponsiveSplit(
         gap = 12.dp,
         mediaFirst = true,
