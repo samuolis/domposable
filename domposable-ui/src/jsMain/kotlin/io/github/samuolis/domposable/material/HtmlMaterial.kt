@@ -1514,7 +1514,7 @@ internal actual fun RenderDomposableMenu(
 
         fun isMenuAnchor(target: Node?): Boolean =
             target != null &&
-                (opener?.contains(target) == true || slotAnchor?.contains(target) == true)
+                ((slotAnchor ?: opener)?.contains(target) == true)
         TagElement<HTMLElement>("div", applyAttrs = {
             classes("d-menu-backdrop")
             attr("popover", "manual")
@@ -1603,9 +1603,14 @@ internal actual fun RenderDomposableMenu(
                 window.addEventListener("resize", reposition)
                 window.addEventListener("scroll", reposition, true)
                 var restorePreviousFocus = true
+                var pointerOnAnchor = false
+                val pointerDown: (Event) -> Unit = { event ->
+                    pointerOnAnchor = isMenuAnchor(event.target as? Node)
+                }
+                val pointerCancel: (Event) -> Unit = { pointerOnAnchor = false }
                 val focusOut: (Event) -> Unit = { event ->
                     val next = event.asDynamic().relatedTarget as? Node
-                    if (next == null || (!element.contains(next) && !isMenuAnchor(next))) {
+                    if (!pointerOnAnchor && (next == null || (!element.contains(next) && !isMenuAnchor(next)))) {
                         if (next != null && next != document.body && next != document.documentElement) {
                             restorePreviousFocus = false
                         }
@@ -1616,6 +1621,7 @@ internal actual fun RenderDomposableMenu(
                     val target = event.target as? Node
                     val popup = element.querySelector(".d-menu-position")
                     val insidePopup = target?.let { popup?.contains(it) } == true
+                    pointerOnAnchor = false
                     if (!insidePopup && !isMenuAnchor(target)) {
                         val active = document.activeElement?.takeUnless { element.contains(it) }
                         if (active != null && active != document.body &&
@@ -1626,6 +1632,8 @@ internal actual fun RenderDomposableMenu(
                         requestDismiss()
                     }
                 }
+                document.addEventListener("pointerdown", pointerDown, true)
+                document.addEventListener("pointercancel", pointerCancel, true)
                 document.addEventListener("click", outsideClick)
                 element.addEventListener("focusout", focusOut)
                 val focusTarget =
@@ -1634,6 +1642,8 @@ internal actual fun RenderDomposableMenu(
                 onDispose {
                     window.removeEventListener("resize", reposition)
                     window.removeEventListener("scroll", reposition, true)
+                    document.removeEventListener("pointerdown", pointerDown, true)
+                    document.removeEventListener("pointercancel", pointerCancel, true)
                     document.removeEventListener("click", outsideClick)
                     element.removeEventListener("focusout", focusOut)
                     if (element.matches(":popover-open")) element.asDynamic().hidePopover()

@@ -109,6 +109,20 @@ test('clicking outside a menu activates the control and preserves dialog focus',
   await expect.poll(() => dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
 });
 
+test('a canceled anchor pointer does not prevent focus-out dismissal', async ({ page }) => {
+  await page.goto('/#/catalog');
+  const trigger = page.getByRole('button', { name: 'Open menu', exact: true });
+  const other = page.getByRole('button', { name: 'Open dialog', exact: true });
+  await trigger.click();
+  const menu = page.getByRole('menu');
+  await expect(menu).toBeVisible();
+  await trigger.dispatchEvent('pointerdown', { bubbles: true });
+  await trigger.dispatchEvent('pointercancel', { bubbles: true });
+  await other.focus();
+  await expect(menu).toHaveCount(0);
+  await expect(other).toBeFocused();
+});
+
 test('action chips remain actions while filter chips expose their controlled selection', async ({ page }) => {
   await page.goto('/#/material/compare/light/selection');
   for (const variant of ['assist', 'suggestion']) {

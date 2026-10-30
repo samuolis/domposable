@@ -499,8 +499,11 @@ internal fun HtmlTooltip(
             }
             val keyDown: (Event) -> Unit = { event ->
                 if ((event as KeyboardEvent).key == "Escape") {
-                    event.preventDefault()
-                    event.stopPropagation()
+                    val eventTarget = event.target as? Node
+                    if (eventTarget != null && (target.contains(eventTarget) || element.contains(eventTarget))) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
                     dismiss()
                 }
             }
