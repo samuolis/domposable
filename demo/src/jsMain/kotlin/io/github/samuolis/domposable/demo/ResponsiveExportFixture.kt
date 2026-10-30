@@ -55,6 +55,8 @@ internal fun ResponsiveExportFixture() {
             matchedSplit("split-short", mediaFirst = false, textHeight = 80)
             matchedSplit("split-middle", mediaFirst = false, textHeight = 300)
             matchedSplit("split-long", mediaFirst = true, textHeight = 520, mediaWidth = 240.dp)
+            intrinsicSplit("split-intrinsic-short", textHeight = 80)
+            intrinsicSplit("split-intrinsic-long", textHeight = 800)
             paneScaffolds()
         }
     }
@@ -143,6 +145,41 @@ private fun matchedSplit(
                     property("background", "#f3f4f6")
                 }
             }) { Text("Text panel ".repeat(3)) }
+        },
+    )
+}
+
+/** Intrinsic artwork exceeds the image-height cap and must remain in document flow. */
+@Composable
+private fun intrinsicSplit(
+    id: String,
+    textHeight: Int,
+) {
+    DomposableHtmlResponsiveSplit(
+        gap = 12.dp,
+        mediaFirst = true,
+        mediaMatchesText = true,
+        mediaMinHeight = 200.dp,
+        mediaMaxHeight = 400.dp,
+        rootAttrs = { attr("id", id) },
+        mediaContent = {
+            Div(attrs = {
+                attr("id", "$id-art")
+                style {
+                    property("width", "100%")
+                    property("height", "560px")
+                    property("background", "linear-gradient(#bce7d8,#147b65)")
+                }
+            }) { Text("Intrinsic artwork — full height") }
+        },
+        textContent = {
+            Div(attrs = {
+                attr("id", "$id-text")
+                style {
+                    property("height", "${textHeight}px")
+                    property("background", "#f3f4f6")
+                }
+            }) { Text("Adjacent description") }
         },
     )
 }

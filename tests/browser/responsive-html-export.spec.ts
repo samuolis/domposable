@@ -63,6 +63,8 @@ test('responsive HTML layouts resize in-browser and survive real export without 
   expect(middleBounds.mediaHeight.y + middleBounds.mediaHeight.height / 2).toBeCloseTo(
     middleBounds.media.y + middleBounds.media.height / 2, 0);
 
+  await assertIntrinsicMedia(page);
+
   const output = await mkdtemp(join(tmpdir(), 'domposable-responsive-export-'));
   try {
     await exportPages({ browser, baseUrl: baseURL!, canonicalOrigin: 'https://example.test', outputDir: output,
@@ -146,6 +148,10 @@ test('responsive HTML layouts resize in-browser and survive real export without 
       exportedBounds.media.y + exportedBounds.media.height / 2, 0);
     expect(await exportedPage.locator('#responsive-grid').evaluate(node => getComputedStyle(node).display)).toBe('grid');
     await exportedPage.screenshot({ path: join(process.cwd(), 'build/screenshots/dom/responsive-export-wide.png'), fullPage: true });
+    await assertIntrinsicMedia(exportedPage);
+    await exportedPage.locator('#split-intrinsic-short').screenshot({
+      path: join(process.cwd(), 'build/screenshots/dom/responsive-intrinsic-media.png'),
+    });
     await noScript.close();
   } finally {
     await rm(output, { recursive: true, force: true });
@@ -175,4 +181,24 @@ async function splitBounds(page: import('@playwright/test').Page, id: string) {
       text: bounds(`#${element.id}-text`),
     };
   });
+}
+
+async function assertIntrinsicMedia(page: import('@playwright/test').Page) {
+  for (const width of [390, 768, 1280]) {
+    await page.setViewportSize({width, height: 1000});
+    for (const id of ['split-intrinsic-short', 'split-intrinsic-long']) {
+      await expect.poll(() => page.locator(`#${id}`).evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        const art = element.querySelector(`[id$="-art"]`)!.getBoundingClientRect();
+        return Math.max(rect.top - art.top, art.bottom - rect.bottom, Math.abs(art.height - 560));
+      })).toBeLessThanOrEqual(1);
+    }
+    if (width >= 768) {
+      await expect.poll(() => page.locator('#split-intrinsic-long').evaluate(element => {
+        const media = element.querySelector('[data-d-html-responsive-split-media]')!.getBoundingClientRect();
+        const art = element.querySelector('[id$="-art"]')!.getBoundingClientRect();
+        return Math.abs(media.top + media.height / 2 - art.top - art.height / 2);
+      })).toBeLessThanOrEqual(1);
+    }
+  }
 }
