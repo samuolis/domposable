@@ -1610,7 +1610,8 @@ internal actual fun RenderDomposableMenu(
                 val pointerEnd: (Event) -> Unit = { pointerOnAnchor = false }
                 val focusOut: (Event) -> Unit = { event ->
                     val next = event.asDynamic().relatedTarget as? Node
-                    if (!pointerOnAnchor && (next == null || (!element.contains(next) && !isMenuAnchor(next)))) {
+                    val focusLeftMenu = next == null || (!element.contains(next) && !isMenuAnchor(next))
+                    if (!pointerOnAnchor && focusLeftMenu) {
                         if (next != null && next != document.body && next != document.documentElement) {
                             restorePreviousFocus = false
                         }
