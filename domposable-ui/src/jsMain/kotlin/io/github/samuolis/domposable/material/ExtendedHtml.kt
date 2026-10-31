@@ -509,7 +509,11 @@ internal fun HtmlTooltip(
             }
             val outsidePointer: (Event) -> Unit = { event ->
                 val node = event.target as? Node
-                if (node == null || !target.contains(node)) dismiss()
+                if (node != null && target.contains(node)) {
+                    dismissRequested = false
+                } else {
+                    dismiss()
+                }
             }
             val outsideFocus: (Event) -> Unit = { event ->
                 val node = event.target as? Node
