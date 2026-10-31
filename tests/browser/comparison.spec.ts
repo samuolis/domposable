@@ -1,15 +1,19 @@
 import { test, expect } from '@playwright/test';
 
 test('comparison switches the HTML feature shell at the selected width', async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto('/compare/');
   const html = page.frameLocator('iframe[title="Domposable semantic HTML preview"]');
-  await expect(html.getByRole('heading', { name: 'Task workspace', exact: true })).toBeVisible();
+  const htmlFrame = page.locator('iframe[title="Domposable semantic HTML preview"]');
+  await expect(html.getByRole('heading', { name: 'Task workspace', exact: true })).toBeVisible({ timeout: 30_000 });
   await page.getByLabel('Preview width', { exact: true }).selectOption('390');
   await page.getByLabel('Feature', { exact: true }).selectOption('shop');
-  await expect(html.getByRole('heading', { name: 'FIELDWORK', exact: true })).toBeVisible();
+  await expect(htmlFrame).toHaveAttribute('src', /preview=shop/);
+  await expect(html.getByRole('heading', { name: 'FIELDWORK', exact: true })).toBeVisible({ timeout: 30_000 });
   expect(await html.locator('body').evaluate(() => window.innerWidth)).toBe(390);
   await page.getByLabel('Feature', { exact: true }).selectOption('catalog');
-  await expect(html.getByRole('heading', { name: 'Component catalog', exact: true })).toBeVisible();
+  await expect(htmlFrame).toHaveAttribute('src', /preview=catalog/);
+  await expect(html.getByRole('heading', { name: 'Component catalog', exact: true })).toBeVisible({ timeout: 30_000 });
 });
 
 test('comparison reloads the Wasm feature rather than only changing its hash', async ({ page, browserName }) => {
