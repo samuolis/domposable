@@ -87,6 +87,21 @@ for (const width of [390, 1440]) {
   });
 }
 
+test('controlled tooltip can dismiss after a rapid close and reopen', async ({ page }) => {
+  await page.goto('/#/material/feedback');
+  const trigger = page.getByRole('button', { name: 'Rich tooltip target', exact: true });
+  const popup = page.getByRole('dialog', { name: 'Rich tooltip', exact: true });
+  await trigger.click();
+  await expect(popup).toBeVisible();
+  await trigger.evaluate(button => {
+    document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    button.click();
+    button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  });
+  await expect(popup).toBeHidden();
+});
+
 for (const width of [320, 390, 1280]) {
   test(`controlled tooltip opens on tap and stays inside the viewport at ${width}px`, async ({ page, browserName }) => {
     await page.setViewportSize({ width, height: 844 });
@@ -114,10 +129,12 @@ for (const width of [320, 390, 1280]) {
     await popup.getByRole('button', { name: 'Learn more', exact: true }).click();
     await expect(popup).toBeHidden();
     await trigger.click();
+    await expect(popup).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(popup).toBeHidden();
     await expect(trigger).toBeFocused();
     await trigger.click();
+    await expect(popup).toBeVisible();
     await page.mouse.click(8, 800);
     await expect(popup).toBeHidden();
   });
