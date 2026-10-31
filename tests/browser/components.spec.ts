@@ -78,6 +78,23 @@ test('tooltip describes its control, opens with keyboard focus and dismisses wit
   await expect(tooltip).toBeVisible();
 });
 
+test('a hovered tooltip does not consume Escape from an unrelated focused control', async ({ page }) => {
+  await page.goto('/#/components');
+  const control = page.getByRole('button', { name: 'About preferences', exact: true });
+  const other = page.getByRole('combobox', { name: 'Delivery', exact: true });
+  await other.focus();
+  await other.evaluate(element => {
+    element.addEventListener('keydown', event => {
+      if ((event as KeyboardEvent).key === 'Escape') element.setAttribute('data-escape-received', 'true');
+    });
+  });
+  await control.hover();
+  await expect(page.getByRole('tooltip')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(other).toHaveAttribute('data-escape-received', 'true');
+  await expect(page.getByRole('tooltip')).toBeHidden();
+});
+
 
 test('logical padding follows right-to-left layout', async ({ page }) => {
   await page.addInitScript(() => document.addEventListener('DOMContentLoaded', () => { document.documentElement.dir = 'rtl'; }));
