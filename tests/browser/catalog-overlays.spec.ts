@@ -109,7 +109,7 @@ test('clicking outside a menu activates the control and preserves dialog focus',
   await expect.poll(() => dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
 });
 
-test('a canceled anchor pointer does not prevent focus-out dismissal', async ({ page }) => {
+for (const end of ['pointerup', 'pointercancel']) test(`an anchor ${end} does not prevent focus-out dismissal`, async ({ page }) => {
   await page.goto('/#/catalog');
   const trigger = page.getByRole('button', { name: 'Open menu', exact: true });
   const other = page.getByRole('button', { name: 'Open dialog', exact: true });
@@ -117,7 +117,7 @@ test('a canceled anchor pointer does not prevent focus-out dismissal', async ({ 
   const menu = page.getByRole('menu');
   await expect(menu).toBeVisible();
   await trigger.dispatchEvent('pointerdown', { bubbles: true });
-  await trigger.dispatchEvent('pointercancel', { bubbles: true });
+  await trigger.dispatchEvent(end, { bubbles: true });
   await other.focus();
   await expect(menu).toHaveCount(0);
   await expect(other).toBeFocused();
