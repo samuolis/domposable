@@ -230,7 +230,7 @@ private fun HtmlScopedModifiers(
                                 property("min-width", "0")
                                 property("min-height", "0")
                                 property("flex-grow", element.weight.toString())
-                                property("flex-shrink", if (element.fill) "1" else "0")
+                                property("flex-shrink", "1")
                                 // Percent basis keeps intrinsic content when the document axis is unbounded.
                                 property("flex-basis", if (element.fill) "0%" else "auto")
                             }

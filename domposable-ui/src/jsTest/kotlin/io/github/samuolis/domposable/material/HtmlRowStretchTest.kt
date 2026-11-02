@@ -32,6 +32,47 @@ import kotlin.test.assertTrue
 
 class HtmlRowStretchTest {
     @Test
+    fun nonFillWeightedMessageWrapsBeforeItsTrailingTimestampInABoundedRow() {
+        val root = document.createElement("div")
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableRow(modifier = DomposableModifier.width(280.dp).testId("message-row")) {
+                        DomposableColumn(
+                            modifier = DomposableModifier.weight(1f, fill = false).testId("message-body"),
+                        ) {
+                            DomposableText(
+                                "This conversation update has a longer message body that wraps beside its timestamp.",
+                                modifier = DomposableModifier.testId("message-text"),
+                            )
+                        }
+                        DomposableText("12:34", modifier = DomposableModifier.testId("message-time"))
+                    }
+                }
+            }
+
+        try {
+            val row = root.querySelector("[data-testid=message-row]") as HTMLElement
+            val body = root.querySelector("[data-testid=message-body]") as HTMLElement
+            val text = root.querySelector("[data-testid=message-text]") as HTMLElement
+            val time = root.querySelector("[data-testid=message-time]") as HTMLElement
+            val rowBounds = row.getBoundingClientRect()
+            val bodyBounds = body.getBoundingClientRect()
+            val textBounds = text.getBoundingClientRect()
+            val timeBounds = time.getBoundingClientRect()
+
+            assertEquals(280.0, rowBounds.width, 1.0)
+            assertTrue(textBounds.height > timeBounds.height, "long message body should wrap onto multiple lines")
+            assertTrue(bodyBounds.right <= timeBounds.left + 1, "message body must leave room for the timestamp")
+            assertTrue(timeBounds.right <= rowBounds.right + 1, "timestamp must stay inside the bounded row")
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
+    @Test
     @Suppress("LongMethod")
     fun weightedRowsFillStartAlignedPaddedBoxesOnlyWhenChildWeightFills() {
         val root = document.createElement("div")
