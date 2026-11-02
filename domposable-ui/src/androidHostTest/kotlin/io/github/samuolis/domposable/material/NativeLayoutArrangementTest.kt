@@ -146,4 +146,30 @@ class NativeLayoutArrangementTest {
         assertEquals(fixedBox.left.value, fixedRow.left.value, 1f)
         assertEquals(fixedBox.right.value, fixedRow.right.value, 1f)
     }
+
+    @Test
+    fun nonFillWeightedMessageWrapsBeforeItsTrailingTimestampInABoundedRow() {
+        compose.setContent {
+            DomposableTheme {
+                DomposableRow(modifier = DomposableModifier.width(280.dp).testId("message-row")) {
+                    DomposableColumn(modifier = DomposableModifier.weight(1f, fill = false).testId("message-body")) {
+                        DomposableText(
+                            "This conversation update has a longer message body that wraps beside its timestamp.",
+                            modifier = DomposableModifier.testId("message-text"),
+                        )
+                    }
+                    DomposableText("12:34", modifier = DomposableModifier.testId("message-time"))
+                }
+            }
+        }
+
+        val row = compose.onNodeWithTag("message-row").getUnclippedBoundsInRoot()
+        val body = compose.onNodeWithTag("message-body").getUnclippedBoundsInRoot()
+        val text = compose.onNodeWithTag("message-text").getUnclippedBoundsInRoot()
+        val time = compose.onNodeWithTag("message-time").getUnclippedBoundsInRoot()
+
+        assertTrue(text.bottom - text.top > time.bottom - time.top)
+        assertTrue(body.right.value <= time.left.value + 1f)
+        assertTrue(time.right.value <= row.right.value + 1f)
+    }
 }
