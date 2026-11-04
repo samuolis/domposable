@@ -19,7 +19,8 @@
     "material-gestures",
     "material-scaffold",
     "extensions",
-    "composition"
+    "composition",
+    "dialog-scroll-actions"
   ],
   "desktop": [
     "tasks",
