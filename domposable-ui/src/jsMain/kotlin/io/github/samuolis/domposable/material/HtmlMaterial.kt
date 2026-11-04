@@ -1591,7 +1591,7 @@ internal actual fun RenderDomposableMenu(
                     alignToLogicalEnd = props.anchor == null,
                     placement = placement,
                 )
-                val reposition: (Event) -> Unit = {
+                val position: () -> Unit = {
                     positionHtmlMenu(
                         element,
                         resolveAnchor(),
@@ -1600,6 +1600,19 @@ internal actual fun RenderDomposableMenu(
                         placement = placement,
                     )
                 }
+                val reposition: (Event) -> Unit = { position() }
+                var resizeFrame: Int? = null
+                val updatePosition: () -> Unit = {
+                    if (resizeFrame == null) {
+                        resizeFrame =
+                            window.requestAnimationFrame {
+                                resizeFrame = null
+                                position()
+                            }
+                    }
+                }
+                val resizeObserver: dynamic = js("new ResizeObserver(updatePosition)")
+                (element.querySelector(".d-menu-position") as? HTMLElement)?.let { resizeObserver.observe(it) }
                 window.addEventListener("resize", reposition)
                 window.addEventListener("scroll", reposition, true)
                 var restorePreviousFocus = true
@@ -1644,6 +1657,8 @@ internal actual fun RenderDomposableMenu(
                 onDispose {
                     window.removeEventListener("resize", reposition)
                     window.removeEventListener("scroll", reposition, true)
+                    resizeObserver.disconnect()
+                    resizeFrame?.let(window::cancelAnimationFrame)
                     document.removeEventListener("pointerdown", pointerDown, true)
                     document.removeEventListener("pointerup", pointerEnd, true)
                     document.removeEventListener("pointercancel", pointerEnd, true)
