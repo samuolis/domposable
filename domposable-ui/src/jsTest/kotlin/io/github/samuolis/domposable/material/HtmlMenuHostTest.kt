@@ -120,6 +120,77 @@ class HtmlMenuHostTest {
         }
 
     @Test
+    fun menuRepositionsWhenItsContentGrowsBesideTheViewportEdge() =
+        CoroutineScope(Dispatchers.Unconfined).promise {
+            var expanded by mutableStateOf(false)
+            val rootStyle = document.documentElement!!.asDynamic().style
+            val previousMaxWidth = rootStyle.getPropertyValue("--d-menu-max-width") as String
+            rootStyle.setProperty("--d-menu-max-width", "304px")
+            val root = document.createElement("div") as HTMLElement
+            document.body!!.appendChild(root)
+            val composition =
+                renderComposable(root) {
+                    DomposableMaterialTheme {
+                        Button(attrs = {
+                            attr("data-testid", "viewport-edge-menu-trigger")
+                            style {
+                                property("position", "fixed")
+                                property("right", "8px")
+                                property("top", "80px")
+                            }
+                        }) { Text("Actions") }
+                        DomposableMenu(
+                            DomposableMenuProps(
+                                expanded = true,
+                                onDismiss = {},
+                                items = listOf(DomposableMenuItem("Copy", {})),
+                            ),
+                            DomposableModifier
+                                .htmlMenuAnchor { menuElement ->
+                                    menuElement.parentElement
+                                        ?.querySelector("[data-testid=viewport-edge-menu-trigger]") as? HTMLElement
+                                }.width(if (expanded) 304.dp else 264.dp),
+                            {},
+                        )
+                    }
+                }
+            try {
+                settleMenuComposition()
+                val anchor = root.querySelector("[data-testid=viewport-edge-menu-trigger]") as HTMLElement
+                val position = root.querySelector(".d-menu-position") as HTMLElement
+                val initialMenu = root.querySelector(".d-menu-popup") as HTMLElement
+                val initialBounds = initialMenu.getBoundingClientRect()
+                assertEquals(264.0, initialBounds.width, 1.0)
+                assertEquals(anchor.getBoundingClientRect().right, initialBounds.right, 1.0)
+
+                expanded = true
+                settleMenuComposition()
+                repeat(3) {
+                    suspendCoroutine<Unit> { continuation ->
+                        window.requestAnimationFrame { continuation.resume(Unit) }
+                    }
+                }
+
+                val grownBounds = initialMenu.getBoundingClientRect()
+                assertEquals(304.0, grownBounds.width, 1.0)
+                assertEquals(
+                    anchor.getBoundingClientRect().right - grownBounds.width,
+                    position.getBoundingClientRect().left,
+                    1.0,
+                )
+                assertTrue(grownBounds.right <= window.innerWidth - 7.0, "Expanded menu must stay inside the viewport")
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+                if (previousMaxWidth.isEmpty()) {
+                    rootStyle.removeProperty("--d-menu-max-width")
+                } else {
+                    rootStyle.setProperty("--d-menu-max-width", previousMaxWidth)
+                }
+            }
+        }
+
+    @Test
     fun anchoredMenuUsesTriggerGeometryAndRendersRichAccessibleItemText() =
         withHost(content = {
             DomposableMenu(
