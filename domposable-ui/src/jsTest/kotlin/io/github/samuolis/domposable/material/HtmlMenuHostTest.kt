@@ -165,11 +165,7 @@ class HtmlMenuHostTest {
 
                 expanded = true
                 settleMenuComposition()
-                repeat(3) {
-                    suspendCoroutine<Unit> { continuation ->
-                        window.requestAnimationFrame { continuation.resume(Unit) }
-                    }
-                }
+                repeat(3) { awaitAnimationFrame() }
 
                 val grownBounds = initialMenu.getBoundingClientRect()
                 assertEquals(304.0, grownBounds.width, 1.0)
@@ -182,11 +178,7 @@ class HtmlMenuHostTest {
             } finally {
                 composition.dispose()
                 root.parentNode?.removeChild(root)
-                if (previousMaxWidth.isEmpty()) {
-                    rootStyle.removeProperty("--d-menu-max-width")
-                } else {
-                    rootStyle.setProperty("--d-menu-max-width", previousMaxWidth)
-                }
+                rootStyle.setProperty("--d-menu-max-width", previousMaxWidth)
             }
         }
 
@@ -598,5 +590,9 @@ class HtmlMenuHostTest {
         repeat(2) {
             suspendCoroutine<Unit> { continuation -> window.requestAnimationFrame { continuation.resume(Unit) } }
         }
+    }
+
+    private suspend fun awaitAnimationFrame() {
+        suspendCoroutine<Unit> { continuation -> window.requestAnimationFrame { continuation.resume(Unit) } }
     }
 }
