@@ -1,6 +1,12 @@
 package io.github.samuolis.domposable.demo
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.isDialog
@@ -11,6 +17,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.filters.SdkSuppress
+import io.github.samuolis.domposable.material.DomposableMaterialTheme
+import io.github.samuolis.domposable.ui.DomposableDialog
+import io.github.samuolis.domposable.ui.DomposableDialogVariant
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,6 +48,25 @@ class PolicyVisualTest {
         compose.onNodeWithText("Request back").performScrollTo().performClick()
         compose.waitForIdle()
         save("navigation-overlay", true)
+    }
+
+    @Test fun longDialogActions() {
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableDialog(
+                    title = "Confirm payment",
+                    onDismiss = {},
+                    variant = DomposableDialogVariant.Basic,
+                    actions = { Button(onClick = {}) { Text("Confirm") } },
+                ) {
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        repeat(60) { Text("Payment detail ${it + 1}") }
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        save("dialog-scroll-actions", true)
     }
 
     private fun save(
