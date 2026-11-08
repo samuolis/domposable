@@ -77,7 +77,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-calendar-header{min-height:56px;padding:3px 12px;justify-content:flex-end;gap:0;font-size:var(--d-type-label-large-size);line-height:var(--d-type-label-large-line-height);font-weight:var(--d-type-label-large-weight)}
 .d-calendar-header>span{order:0;margin-inline-start:12px;margin-inline-end:auto}.d-calendar-header>button:first-child{order:1}.d-calendar-header>button:last-child{order:2}
 .d-calendar-header>button{width:48px;height:48px;border:0;border-radius:50%;background:transparent;color:inherit;font-size:24px}
-.d-calendar-grid{padding:0 12px 16px;gap:0}.d-calendar-week{gap:0;min-height:48px;align-items:center;grid-template-columns:repeat(7,minmax(40px,1fr))}
+.d-calendar-grid{--d-calendar-day-radius:20px;padding:0 12px 16px;gap:0}.d-calendar-week{gap:0;min-height:48px;align-items:center;grid-template-columns:repeat(7,minmax(40px,1fr))}
 .d-calendar-week>[role=columnheader]{font-size:var(--d-type-body-large-size);line-height:var(--d-type-body-large-line-height);padding:0}
 .d-calendar-week>[role=gridcell]{display:grid;place-items:center;height:40px}
 .d-calendar-day{width:40px;height:40px;min-width:40px;min-height:40px;padding:0;font-size:var(--d-type-body-large-size);line-height:var(--d-type-body-large-line-height)}
