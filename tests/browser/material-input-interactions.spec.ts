@@ -106,6 +106,47 @@ test('date range start cannot be cleared while leaving an orphan end date', asyn
   await expect(end).toBeDisabled();
 });
 
+test('calendar range forms a continuous band with round ends at phone and desktop widths', async ({ page }, testInfo) => {
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openInputs(page);
+    await page.locator('html').evaluate(element => { element.dir = 'ltr'; });
+    const range = page.getByRole('group', { name: 'Date range' });
+    const grid = range.getByRole('grid');
+    const day = (number: number) => grid.locator('.d-calendar-day').filter({ hasText: new RegExp(`^${number}$`) });
+    await day(1).click();
+    await day(10).click();
+    const start = grid.locator('.d-calendar-day-in-range.d-calendar-day-range-start');
+    const end = grid.locator('.d-calendar-day-in-range.d-calendar-day-range-end');
+    await expect(start).toHaveCount(1);
+    await expect(end).toHaveCount(1);
+    const radius = await start.evaluate(element => getComputedStyle(element, '::before').borderStartStartRadius);
+    expect(radius).toBe('20px');
+    const middle = grid.locator('.d-calendar-day-in-range:not(.d-calendar-day-range-start):not(.d-calendar-day-range-end)');
+    expect(await middle.count()).toBeGreaterThan(0);
+    await expect(grid.locator('.d-calendar-day[aria-pressed="true"]')).toHaveCount(2);
+    await range.screenshot({ path: testInfo.outputPath(`date-range-${width}.png`) });
+    await page.locator('html').evaluate(element => { element.dir = 'rtl'; });
+    expect(await start.evaluate(element => getComputedStyle(element, '::before').borderStartStartRadius)).toBe('20px');
+    await page.emulateMedia({ forcedColors: 'active' });
+    const colors = await middle.first().locator('.d-calendar-day').evaluate(element => {
+      const sample = document.createElement('span');
+      sample.style.color = 'HighlightText';
+      document.body.appendChild(sample);
+      const result = [getComputedStyle(element).color, getComputedStyle(sample).color];
+      sample.remove();
+      return result;
+    });
+    expect(colors[0]).toBe(colors[1]);
+    await page.emulateMedia({ forcedColors: 'none' });
+    await day(1).click();
+    await day(1).click();
+    const single = grid.locator('.d-calendar-day-range-start.d-calendar-day-range-end');
+    await expect(single).toHaveCount(1);
+    expect(await single.evaluate(element => getComputedStyle(element, '::before').display)).toBe('none');
+  }
+});
+
 test('scroll field wheel movement updates the controlled value', async ({ page }) => {
   await openInputs(page);
   await expect(page.getByRole('heading', { name: 'Material catalog', exact: true })).toBeInViewport();
