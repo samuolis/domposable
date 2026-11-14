@@ -261,6 +261,26 @@ jobs:
           BUILD: ${{ needs.portable.result }}
           BROWSER: ${{ needs.browser.result }}
         run: test "$BUILD" = success && test "$BROWSER" = success
+  ios-runtime:
+    name: iOS simulator interactions
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: ./.github/actions/setup
+      - name: Build and exercise the iOS demo
+        run: |
+          python scripts/ci/generate_xcode_project.py
+          ./gradlew :demo:linkDebugFrameworkIosSimulatorArm64 --console=plain
+          python scripts/ci/ios_test.py --interactions
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: ios-simulator-results
+          path: build/ios-tests-*.xcresult
+          retention-days: 30
+          if-no-files-found: ignore
   binary-api:
     name: Binary API compatibility
     runs-on: macos-26
@@ -325,7 +345,7 @@ jobs:
   passed:
     name: CI passed
     if: always()
-    needs: [hygiene, quality, portable, preview, browser, portable-evidence, consumers, binary-api]
+    needs: [hygiene, quality, portable, preview, browser, portable-evidence, consumers, binary-api, ios-runtime]
     runs-on: ubuntu-24.04
     steps:
       - name: Require validation and prevent recording from satisfying branch or release gates
@@ -338,5 +358,6 @@ jobs:
           EVIDENCE: ${{ needs.portable-evidence.result }}
           CONSUMERS: ${{ needs.consumers.result }}
           BINARY_API: ${{ needs.binary-api.result }}
+          IOS_RUNTIME: ${{ needs.ios-runtime.result }}
           RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_screenshots }}
-        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$BROWSER" = success && test "$PREVIEW" = success && test "$EVIDENCE" = success && test "$CONSUMERS" = success && test "$BINARY_API" = success && test "$RECORD" != true
+        run: test "$HYGIENE" = success && test "$QUALITY" = success && test "$PORTABLE" = success && test "$BROWSER" = success && test "$PREVIEW" = success && test "$EVIDENCE" = success && test "$CONSUMERS" = success && test "$BINARY_API" = success && test "$IOS_RUNTIME" = success && test "$RECORD" != true

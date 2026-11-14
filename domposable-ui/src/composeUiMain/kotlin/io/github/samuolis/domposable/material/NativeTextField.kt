@@ -59,6 +59,7 @@ import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableFormEnabled
+import io.github.samuolis.domposable.ui.effectiveSingleLine
 import io.github.samuolis.domposable.ui.rememberDomposableFormSubmitOrNull
 import io.github.samuolis.domposable.ui.toComposeModifier
 import kotlinx.coroutines.flow.collect
@@ -218,7 +219,7 @@ internal fun NativeTextField(
     val customNativeDecoration =
         appearance.contentPadding != null || appearance.outlineWidth != null || appearance.focusedOutlineWidth != null
     val securePassword =
-        props.purpose == DomposableInputPurpose.Password && props.singleLine && !props.readOnly &&
+        props.purpose == DomposableInputPurpose.Password && props.effectiveSingleLine && !props.readOnly &&
             !customNativeDecoration && nativeOptions == null
     if (securePassword) {
         val secureState = remember { TextFieldState(props.value) }
@@ -369,7 +370,7 @@ internal fun NativeTextField(
             cursorBrush = SolidColor(if (props.isError) colors.errorCursorColor else colors.cursorColor),
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
-            singleLine = props.singleLine,
+            singleLine = props.effectiveSingleLine,
             minLines = props.minLines,
             maxLines = props.maxLines,
             visualTransformation = visualTransformation,
@@ -380,7 +381,7 @@ internal fun NativeTextField(
                         value = props.value,
                         innerTextField = innerTextField,
                         enabled = enabled,
-                        singleLine = props.singleLine,
+                        singleLine = props.effectiveSingleLine,
                         visualTransformation = visualTransformation,
                         interactionSource = interactions,
                         isError = props.isError,
@@ -411,7 +412,7 @@ internal fun NativeTextField(
                         value = props.value,
                         innerTextField = innerTextField,
                         enabled = enabled,
-                        singleLine = props.singleLine,
+                        singleLine = props.effectiveSingleLine,
                         visualTransformation = visualTransformation,
                         interactionSource = interactions,
                         isError = props.isError,
@@ -453,7 +454,7 @@ internal fun NativeTextField(
             leadingIcon = leadingIcon,
             prefix = props.prefix,
             trailingIcon = trailingIcon,
-            singleLine = props.singleLine,
+            singleLine = props.effectiveSingleLine,
             minLines = props.minLines,
             maxLines = props.maxLines,
             isError = props.isError,
@@ -478,7 +479,7 @@ internal fun NativeTextField(
             leadingIcon = leadingIcon,
             prefix = props.prefix,
             trailingIcon = trailingIcon,
-            singleLine = props.singleLine,
+            singleLine = props.effectiveSingleLine,
             minLines = props.minLines,
             maxLines = props.maxLines,
             isError = props.isError,

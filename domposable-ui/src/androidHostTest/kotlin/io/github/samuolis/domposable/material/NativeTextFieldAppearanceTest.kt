@@ -46,6 +46,21 @@ class NativeTextFieldAppearanceTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    fun copiedMultilineFieldAcceptsNewlines() {
+        val value = mutableStateOf("")
+        compose.setContent {
+            DomposableMaterialTheme {
+                DomposableTextField(
+                    DomposableTextFieldProps(value = value.value, onValueChange = { value.value = it }, label = "Notes")
+                        .copy(multiline = true),
+                )
+            }
+        }
+        compose.onNodeWithText("Notes").performTextInput("first\nsecond")
+        compose.runOnIdle { assertEquals("first\nsecond", value.value) }
+    }
+
+    @Test
     fun passwordEditsStayMaskedAndOutOfSavedState() {
         val value = mutableStateOf("")
         val visible = mutableStateOf(false)

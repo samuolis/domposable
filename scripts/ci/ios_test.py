@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Run native UI tests on an isolated simulator and remove it afterwards."""
+import argparse
 import json
 import os
 from pathlib import Path
 import subprocess
 from PIL import Image, ImageOps
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--interactions", action="store_true", help="Run focused input and collection interactions")
+args = parser.parse_args()
 root = Path(__file__).resolve().parents[2]
 def output(*command):
     return subprocess.check_output(command, text=True)
@@ -25,6 +29,8 @@ try:
         "xcodebuild", "test", "-project", "iosApp/DomposableDemo.xcodeproj", "-scheme", "DomposableDemo",
         "-configuration", "Debug", "-destination", f"id={identifier}",
         "-derivedDataPath", f"build/ios-tests/{os.getpid()}", "-resultBundlePath", str(result),
+        *(["-only-testing:DomposableDemoUITests/SmokeTests/testSharedFeatureAndNotes",
+           "-only-testing:DomposableDemoUITests/SmokeTests/testCollectionLayoutsAndTableInput"] if args.interactions else []),
         "CODE_SIGNING_ALLOWED=NO",
     ], cwd=root, check=True, timeout=1800)
 finally:

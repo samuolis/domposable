@@ -13,6 +13,7 @@ import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableAttributes
+import io.github.samuolis.domposable.ui.effectiveSingleLine
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.dom.Div
@@ -205,14 +206,14 @@ private fun fieldInput(
         inputSemantics(props, id, appearance)
         inputEvents(props, onFocusChange)
         inputAppearance(appearance, props, focused, floating)
-        if (appearance.autoSize && (props.multiline || !props.singleLine)) {
+        if (appearance.autoSize && !props.effectiveSingleLine) {
             ref { element ->
                 val cleanup = installHtmlTextAreaAutoSize(element, autoSizeBinding)
                 onDispose { cleanup() }
             }
         }
     }
-    if (props.multiline || !props.singleLine) {
+    if (!props.effectiveSingleLine) {
         TextArea(value = props.value, attrs = {
             applyInputAttributes()
             // Auto-sized fields start at their requested line count; otherwise the browser's
@@ -289,7 +290,7 @@ private fun <T : HTMLElement> AttrsScope<T>.inputEvents(
     onFocusChange: (Boolean) -> Unit,
 ) {
     props.onImeAction?.let { submit ->
-        val imeEnabled = props.enabled && !props.readOnly && props.singleLine
+        val imeEnabled = props.enabled && !props.readOnly && props.effectiveSingleLine
         onKeyDown { event ->
             val nativeEvent = event.nativeEvent.asDynamic()
             // Some browsers clear isComposing before the final IME keydown (229).

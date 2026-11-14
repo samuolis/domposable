@@ -30,7 +30,7 @@ import io.github.samuolis.domposable.foundation.DomposableTabsVariant
 import io.github.samuolis.domposable.foundation.DomposableTopAppBarVariant
 import io.github.samuolis.domposable.foundation.dp
 
-/** Stable keys preserve each item's composition when the application reorders its data. */
+/** Stable keys preserve composition on reorder. HTML renders all items unless a window is supplied; native is lazy. */
 @Composable
 fun <T> DomposableLazyColumn(
     items: List<T>,
@@ -57,6 +57,7 @@ fun <T> DomposableLazyColumn(
     window,
 )
 
+/** HTML renders all items unless a window is supplied; native is lazy. */
 @Composable
 fun <T> DomposableLazyRow(
     items: List<T>,
@@ -76,6 +77,7 @@ fun <T> DomposableLazyRow(
     itemContent: @Composable (T) -> Unit,
 ) = DomposableLazyRow(items.map { item -> DomposableLazyItem(key(item)) { itemContent(item) } }, modifier, gap, window)
 
+/** HTML renders all items unless a window is supplied; native is lazy. */
 @Composable
 fun <T> DomposableLazyGrid(
     items: List<T>,
