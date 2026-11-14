@@ -7,6 +7,12 @@ pluginManagement {
 }
 dependencyResolutionManagement {
     repositories {
+        providers.gradleProperty("pill.consumer.repository").orNull?.let { repository ->
+            maven {
+                url = uri(repository)
+                content { includeGroup("io.github.samuolis") }
+            }
+        }
         providers.gradleProperty("domposable.consumer.repository").orNull?.let { repository ->
             maven {
                 url = uri(repository)
