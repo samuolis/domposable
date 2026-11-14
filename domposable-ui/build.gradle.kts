@@ -71,6 +71,9 @@ kotlin {
                 dependencies {
                     api(libs.compose.ui)
                     api(libs.compose.foundation)
+                    implementation(
+                        "io.github.samuolis:pill:${providers.gradleProperty("pill.version").getOrElse("0.1.0")}",
+                    )
                     implementation(libs.material3)
                     implementation(libs.coil.compose)
                     implementation(libs.coil.network.ktor)
