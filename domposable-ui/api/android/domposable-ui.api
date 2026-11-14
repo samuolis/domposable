@@ -2628,6 +2628,34 @@ public final class io/github/samuolis/domposable/ui/DomposablePagedCarouselLayou
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/samuolis/domposable/ui/DomposablePillMaterial : java/lang/Enum {
+	public static final field Frosted Lio/github/samuolis/domposable/ui/DomposablePillMaterial;
+	public static final field Glass Lio/github/samuolis/domposable/ui/DomposablePillMaterial;
+	public static final field Solid Lio/github/samuolis/domposable/ui/DomposablePillMaterial;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/samuolis/domposable/ui/DomposablePillMaterial;
+	public static fun values ()[Lio/github/samuolis/domposable/ui/DomposablePillMaterial;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposablePillNavigationItem {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ZLkotlin/jvm/functions/Function2;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ZLkotlin/jvm/functions/Function2;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getBadge ()Lkotlin/jvm/functions/Function2;
+	public final fun getContentDescription ()Ljava/lang/String;
+	public final fun getEnabled ()Z
+	public final fun getHref ()Ljava/lang/String;
+	public final fun getIcon ()Lkotlin/jvm/functions/Function2;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/ui/DomposablePillNavigation_composeKt {
+	public static final fun DomposablePillBackdropHost (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+	public static final fun DomposablePillBackdropSource (Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun DomposablePillNavigationBar (Ljava/util/List;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLkotlin/jvm/functions/Function0;ZZLio/github/samuolis/domposable/ui/DomposablePillMaterial;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/github/samuolis/domposable/ui/DomposableProgressProps {
 	public static final field $stable I
 	public fun <init> ()V
