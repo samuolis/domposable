@@ -16,6 +16,7 @@ class CiGateTest(unittest.TestCase):
             self.assertIn(f':demo:compileKotlin{target}', consumers)
             self.assertIn(f':consumer-fixture:compileKotlin{target}', consumers)
         self.assertIn('binary-api', workflow['jobs']['passed']['needs'])
+        self.assertIn('ios-runtime', workflow['jobs']['passed']['needs'])
         required = set(step['env']) - {'RECORD'}
         base = dict.fromkeys(required, 'success') | {'RECORD': 'false'}
 

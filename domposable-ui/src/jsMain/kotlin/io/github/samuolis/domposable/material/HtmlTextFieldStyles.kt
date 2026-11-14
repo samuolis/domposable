@@ -6,6 +6,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldVariant
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
+import io.github.samuolis.domposable.ui.effectiveSingleLine
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.StyleScope
 import org.jetbrains.compose.web.dom.Span
@@ -300,7 +301,7 @@ private fun StyleScope.floatingInputGeometry(
             (padding?.end?.value ?: MATERIAL_FIELD_PADDING) - borderDelta
         }
     property("padding-inline", "${startPadding}px ${endPadding}px")
-    if (props.multiline || !props.singleLine) {
+    if (!props.effectiveSingleLine) {
         property("min-height", "${height}px")
     } else {
         property("height", "${height}px")

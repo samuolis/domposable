@@ -211,6 +211,7 @@ data class DomposableIconButtonProps(
 /**
  * Renderer-neutral text input behavior and content. New primary-constructor parameters preserve
  * existing Kotlin source calls through defaults; binary consumers should use the next 0.x minor.
+ * When [multiline] is true it takes precedence over [singleLine] on every platform.
  */
 @Suppress("LongParameterList")
 @DomposableComponent("TextField")
@@ -248,6 +249,9 @@ data class DomposableTextFieldProps(
         require(maxLines >= minLines)
     }
 }
+
+internal val DomposableTextFieldProps.effectiveSingleLine: Boolean
+    get() = singleLine && !multiline
 
 @DomposableComponent("Checkbox")
 data class DomposableCheckboxProps(
@@ -646,6 +650,25 @@ fun DomposableTheme(
 ) {
     val textAppearance = buttonLabelTextAppearance()
     DomposableButton(onClick, modifier, enabled) {
+        DomposableText(text, appearance = textAppearance)
+    }
+}
+
+/** A labelled button with the same loading and appearance options as the content overload. */
+@Composable
+fun DomposableButton(
+    text: String,
+    onClick: () -> Unit,
+    loading: Boolean = false,
+    modifier: DomposableModifier = DomposableModifier,
+    enabled: Boolean = true,
+    style: DomposableButtonStyle = DomposableButtonStyle.Filled,
+    loadingLabel: String? = null,
+    expanded: Boolean? = null,
+    appearance: DomposableButtonAppearance? = null,
+) {
+    val textAppearance = buttonLabelTextAppearance()
+    DomposableButton(onClick, modifier, enabled, style, loading, loadingLabel, expanded, appearance) {
         DomposableText(text, appearance = textAppearance)
     }
 }

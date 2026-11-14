@@ -13,6 +13,27 @@ import kotlin.test.assertTrue
 
 class HtmlTextFieldImeTest {
     @Test
+    fun copiedMultilineFieldUsesTextareaWithoutSubmittingEnter() {
+        val root = document.createElement("div") as HTMLElement
+        document.body!!.appendChild(root)
+        var submissions = 0
+        val field =
+            DomposableTextFieldProps(value = "", label = "Notes", onValueChange = {}, onImeAction = { submissions++ })
+                .copy(multiline = true)
+        val composition = renderComposable(root) { DomposableMaterialTheme { DomposableTextField(field) } }
+        try {
+            val textarea = root.querySelector("textarea")!!
+            val enter = js("new KeyboardEvent('keydown', {key: 'Enter', bubbles: true, cancelable: true})") as Event
+            textarea.dispatchEvent(enter)
+            assertEquals(0, submissions)
+            assertFalse(enter.defaultPrevented)
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
+    @Test
     fun enterOnlySubmitsAfterImeCompositionFinishes() {
         val root = document.createElement("div") as HTMLElement
         document.body!!.appendChild(root)

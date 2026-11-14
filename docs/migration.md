@@ -1,6 +1,9 @@
 # Migrating a Compose feature
 
-## Controlled tooltips in the next 0.x minor release
+Text fields now treat `multiline = true` as multiline even if `singleLine = true`.
+This also applies when copying existing props; remove the conflict to make intent clear.
+
+## Controlled tooltips in 0.26.0
 
 `DomposableTooltip` and `DomposableTooltipProps` add `visible`, `onDismiss` and `surfaceModifier`.
 Existing source calls keep their hover/focus/long-press behavior. Recompile consumers because
@@ -8,11 +11,10 @@ the constructor, `copy` and function ABI have changed. This requires a minor rel
 Passing `visible` requires `onDismiss`; short info controls can then open help on tap and dismiss
 it without a second dialog. Put popup effects in `surfaceModifier`, keeping anchor layout in `modifier`.
 
-## Direct component rendering in the next 0.x minor release
+## Direct component rendering in 0.25.0
 
 Built-in components now use direct `expect` / `actual` implementations. This is a
-breaking API change and requires recompiling applications and adapters. It will
-ship as a normal 0.x minor release, not 1.0 or a GitHub prerelease.
+breaking API change and requires recompiling applications and adapters. It shipped in 0.25.0.
 
 - Remove calls to `rememberDomposableMaterialComponents` and the `components`
   argument of `DomposableTheme`. Use `DomposableMaterialTheme { ... }` or

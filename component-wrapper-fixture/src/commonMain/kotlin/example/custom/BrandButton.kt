@@ -21,3 +21,12 @@ fun BrandButton(
         DomposableText(label)
     }
 }
+
+@Composable
+fun SaveButton(
+    onClick: () -> Unit,
+    saving: Boolean,
+) {
+    DomposableButton(text = "Save", onClick = onClick, loading = saving)
+    DomposableButton("Cancel", onClick)
+}
