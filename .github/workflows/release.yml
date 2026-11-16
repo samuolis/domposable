@@ -7,6 +7,10 @@ on:
         type: choice
         options: [patch, minor, major]
         default: patch
+      retry_failed:
+        description: 'Resubmit a quota-failed staged bundle after Central restores publishing'
+        type: boolean
+        default: false
       deployment_id:
         description: 'Recovery only: Central deployment ID for an upload with unknown outcome'
         type: string
@@ -63,6 +67,8 @@ jobs:
           BUMP: ${{ inputs.bump }}
         run: |
           gh auth setup-git
+          mkdir -p "$RUNNER_TEMP/domposable-release"
+          cp scripts/publish_central.py "$RUNNER_TEMP/domposable-release/publish_central.py"
           python scripts/release.py prepare --bump "$BUMP"
       - uses: ./.github/actions/setup
       - name: Await candidate CI
@@ -119,8 +125,14 @@ jobs:
         if: steps.candidate.outputs.resume != 'true'
         run: python scripts/release.py stage
       - name: Validate with Maven Central
-        env: {RECOVERY_ID: '${{ inputs.deployment_id }}'}
-        run: python scripts/publish_central.py validate --deployment-id "$RECOVERY_ID"
+        env:
+          RECOVERY_ID: '${{ inputs.deployment_id }}'
+          RETRY_FAILED: '${{ inputs.retry_failed }}'
+          PYTHONPATH: '${{ github.workspace }}/scripts'
+        run: |
+          args=()
+          if [ "$RETRY_FAILED" = true ]; then args+=(--retry-failed); fi
+          python "$RUNNER_TEMP/domposable-release/publish_central.py" validate --deployment-id "$RECOVERY_ID" "${args[@]}"
       - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         id: refreshed-app
         with:
@@ -132,7 +144,8 @@ jobs:
         env: {GH_TOKEN: '${{ steps.refreshed-app.outputs.token }}'}
         run: python scripts/release.py advance-main
       - name: Publish Maven Central
-        run: python scripts/publish_central.py publish
+        env: {PYTHONPATH: '${{ github.workspace }}/scripts'}
+        run: python "$RUNNER_TEMP/domposable-release/publish_central.py" publish
       - name: Verify Central consumers after propagation
         run: python scripts/ci/verify_central.py
       - name: Publish GitHub release and extract its website
