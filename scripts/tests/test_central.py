@@ -59,6 +59,45 @@ class CentralRecoveryTest(unittest.TestCase):
         self.assertNotIn('hidden-user', logs)
         self.assertNotIn('hidden-password', logs)
         self.assertNotIn('{"deploymentState"', logs)
+    def test_quota_failed_release_can_be_resubmitted_once_with_same_bundle(self):
+        self.state.update(deployment_id='d5650f77-692f-4189-96ed-28b5f40607ca', phase='main-advanced', central_upload_intent='original')
+        failed = '{"deploymentState":"FAILED","errors":{"deployment":["Publishing blocked: monthly file count limit"]}}'
+        new_id = '03afdd4b-0f83-4bf9-80de-a0eadf72070e'
+        with patch.object(central, 'request', side_effect=[failed, new_id, '{"deploymentState":"VALIDATED"}']) as request:
+            central.publish('validate', retry_failed=True)
+        self.assertEqual(self.state['central_retry_predecessor'], 'd5650f77-692f-4189-96ed-28b5f40607ca')
+        self.assertEqual(self.state['deployment_id'], new_id)
+        self.assertEqual(sum('/upload?' in call.args[0] for call in request.call_args_list), 1)
+        self.assertIn(b'preserved bundle', request.call_args_list[1].args[1])
+
+    def test_failed_deployment_is_not_retried_without_explicit_quota_recovery(self):
+        self.state.update(deployment_id='d5650f77-692f-4189-96ed-28b5f40607ca', phase='main-advanced', central_upload_intent='original')
+        cases = [('{"deploymentState":"FAILED","errors":{"deployment":["monthly file count limit"]}}', False),
+                 ('{"deploymentState":"FAILED","errors":{"deployment":["bad signature"]}}', True)]
+        for failed, retry in cases:
+            with self.subTest(retry=retry), patch.object(central, 'request', return_value=failed) as request:
+                with self.assertRaisesRegex(RuntimeError, 'Central validation failed'):
+                    central.publish('validate', retry_failed=retry)
+                request.assert_called_once()
+
+    def test_failed_retry_with_unknown_upload_outcome_never_uploads_twice(self):
+        self.state.update(deployment_id='d5650f77-692f-4189-96ed-28b5f40607ca', phase='main-advanced', central_upload_intent='original')
+        failed = '{"deploymentState":"FAILED","errors":{"deployment":["monthly file count limit"]}}'
+        with patch.object(central, 'request', side_effect=[failed, central.CentralHttpError(503)]) as request:
+            with self.assertRaises(central.CentralHttpError): central.publish('validate', retry_failed=True)
+            self.assertEqual(request.call_count, 2)
+        with patch.object(central, 'request') as request:
+            with self.assertRaisesRegex(RuntimeError, 'outcome is unknown'): central.publish('validate', retry_failed=True)
+            request.assert_not_called()
+
+    def test_retry_rejects_already_attempted_or_not_advanced(self):
+        failed = '{"deploymentState":"FAILED","errors":{"deployment":["monthly file count limit"]}}'
+        for phase, prior in [('staged', None), ('main-advanced', '00000000-0000-0000-0000-000000000001')]:
+            self.state.update(deployment_id='d5650f77-692f-4189-96ed-28b5f40607ca', phase=phase, central_retry_predecessor=prior)
+            with patch.object(central, 'request', return_value=failed) as request:
+                with self.assertRaisesRegex(RuntimeError, 'Central validation failed'): central.publish('validate', retry_failed=True)
+                request.assert_called_once()
+
     def test_status_recovers_from_dns_failure_with_bounded_timeout(self):
         deployment_id = 'd5650f77-692f-4189-96ed-28b5f40607ca'
         with patch.object(central,'request',side_effect=[urllib.error.URLError(socket.gaierror('DNS unavailable')), '{"deploymentState":"PUBLISHED"}']) as request:

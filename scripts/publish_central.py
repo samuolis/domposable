@@ -47,7 +47,19 @@ def request_status(deployment_id):
 def progress(started, message):
     print(f"{message} (elapsed {int(time.monotonic() - started)}s)", flush=True)
 
-def publish(mode, recovered_id=None):
+def upload_bundle(state, bundle, github, started):
+    boundary = uuid.uuid4().hex
+    data = (f'--{boundary}\r\nContent-Disposition: form-data; name="bundle"; filename="maven-bundle.zip"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode() + bundle.read_bytes() + f'\r\n--{boundary}--\r\n'.encode())
+    import urllib.parse
+    query = urllib.parse.urlencode({"name": state['central_upload_intent'], "publishingType": "USER_MANAGED"})
+    progress(started, "Uploading immutable Maven bundle to Central")
+    deployment = request("/upload?" + query, data, "multipart/form-data; boundary=" + boundary).strip().strip('"')
+    uuid.UUID(deployment)
+    state['deployment_id'] = deployment; checkpoint(state, github)
+    progress(started, "Central accepted the bundle; waiting for validation")
+
+
+def publish(mode, recovered_id=None, retry_failed=False):
     started = time.monotonic()
     verify_assets(); state = read_state(); github = GitHub()
     bundle = ASSETS / "maven-bundle.zip"
@@ -61,15 +73,7 @@ def publish(mode, recovered_id=None):
             raise RuntimeError("Previous Central upload outcome is unknown. Locate the named deployment in Central and rerun with its deployment ID; never upload a second bundle blindly")
         state['central_upload_intent'] = f"domposable-{state['version']}-{state['bundle_sha256'][:12]}"
         checkpoint(state, github)
-        boundary = uuid.uuid4().hex
-        data = (f'--{boundary}\r\nContent-Disposition: form-data; name="bundle"; filename="maven-bundle.zip"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode() + bundle.read_bytes() + f'\r\n--{boundary}--\r\n'.encode())
-        import urllib.parse
-        query = urllib.parse.urlencode({"name": state['central_upload_intent'], "publishingType": "USER_MANAGED"})
-        progress(started, "Uploading immutable Maven bundle to Central")
-        deployment = request("/upload?" + query, data, "multipart/form-data; boundary=" + boundary).strip().strip('"')
-        uuid.UUID(deployment)
-        state['deployment_id'] = deployment; checkpoint(state, github)
-        progress(started, "Central accepted the bundle; waiting for validation")
+        upload_bundle(state, bundle, github, started)
     deadline = time.monotonic() + 3600
     while time.monotonic() < deadline:
         progress(started, "Checking Central deployment status")
@@ -80,7 +84,16 @@ def publish(mode, recovered_id=None):
         progress(started, f"Central deployment state: {display_state}")
         if current != state.get('central_state'):
             state['central_state'] = current; checkpoint(state, github)
-        if current == "FAILED": raise RuntimeError("Central validation failed. Inspect its deployment errors in the portal; the same version remains reserved")
+        if current == "FAILED":
+            errors = json.dumps(status.get("errors", {})).lower()
+            if not retry_failed or mode != "validate" or state.get("phase") != "main-advanced" or state.get("central_retry_predecessor") or "monthly" not in errors or "file count" not in errors:
+                raise RuntimeError("Central validation failed. Inspect its deployment errors in the portal; the same version remains reserved")
+            state['central_retry_predecessor'] = state.pop('deployment_id')
+            state['central_upload_intent'] = f"domposable-{state['version']}-{state['bundle_sha256'][:12]}-retry"
+            checkpoint(state, github)
+            upload_bundle(state, bundle, github, started)
+            retry_failed = False
+            continue
         if current == "PUBLISHED": return
         if current == "VALIDATED":
             if mode == "validate": return
@@ -95,6 +108,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("mode", choices=["validate", "publish"])
     parser.add_argument("--deployment-id", default=None)
+    parser.add_argument("--retry-failed", action="store_true")
     args = parser.parse_args()
-    try: publish(args.mode, args.deployment_id or None)
+    try: publish(args.mode, args.deployment_id or None, args.retry_failed)
     except (RuntimeError, ValueError, KeyError) as error: raise SystemExit(str(error)) from None

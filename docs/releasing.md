@@ -69,3 +69,7 @@ A local build can exercise all unsigned artifacts and scripts, but live signing,
 Before the first release, **Publish bootstrap website** deploys the complete guides, API reference and HTML demo from a successful CI run for the exact main commit. It is restricted to the unpublished `0.0.0` baseline and records `status: preview` in `release.json`. After a version is released, websites use the ordinary **Bump and release** pipeline.
 
 The dedicated Maven public key is checked in as `signing-key.asc`; its primary fingerprint is `646AC0FE7F73C347929C825937E5A0EA1E6DA396`. It is also published to `keyserver.ubuntu.com` for Central signature verification. Private identities are held in the protected release environment, never in source control.
+
+### Retrying a quota-failed staged release
+
+After Central restores publishing capacity, dispatch **Bump and release** with `retry_failed` enabled. This narrowly retries one deployment that Central currently reports as failed for the monthly file-count limit after the candidate has already advanced main. The workflow verifies and resubmits the same staged bundle. It checkpoints the old deployment ID and new upload intent before uploading, so an unknown upload outcome still requires locating and supplying the new deployment ID rather than uploading again. Other failure reasons remain blocked for investigation.
