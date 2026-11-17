@@ -34,6 +34,11 @@ test('DOM visual narrow segmented controls', async ({ page }) => {
   await page.keyboard.press('ArrowRight');
   await expect(radios.nth(1)).toBeChecked();
   await expect.poll(() => group.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await expect.poll(() => radios.nth(1).evaluate(element => {
+    const item = element.getBoundingClientRect();
+    const viewport = element.closest('[role=radiogroup]')!.getBoundingClientRect();
+    return item.left >= viewport.left - 1 && item.right <= viewport.right + 1;
+  })).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 

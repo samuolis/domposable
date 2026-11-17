@@ -345,6 +345,13 @@ internal fun HtmlSegmentedButtons(
                             checked(index == props.selectedIndex)
                             if (!canSelect) disabled()
                             props.optionTestTags[index]?.let { attr("data-testid", it) }
+                            onFocus { event ->
+                                if (props.equalWidth) {
+                                    (event.target as? HTMLElement)
+                                        ?.asDynamic()
+                                        ?.scrollIntoView(js("({block:'nearest',inline:'nearest'})"))
+                                }
+                            }
                             onClick {
                                 if (canSelect && props.allowReselect && index == props.selectedIndex) {
                                     props.onSelect(index)
