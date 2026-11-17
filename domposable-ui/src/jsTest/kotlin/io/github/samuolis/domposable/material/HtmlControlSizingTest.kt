@@ -54,6 +54,40 @@ class HtmlControlSizingTest {
         }
 
     @Test
+    fun narrowEqualWidthSegmentsKeepFullLabelsOnOneLineAndScrollHorizontally() {
+        val root = document.createElement("div") as HTMLElement
+        root.style.width = "320px"
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableSegmentedButtons(
+                        labels = listOf("Fiksuotas sezonas", "Paskutiniai 12 mėnesių", "Visas laikotarpis"),
+                        selectedIndex = 0,
+                        onSelect = {},
+                        label = "Įskaitomi rezultatai",
+                        modifier = DomposableModifier.fillMaxWidth(),
+                        equalWidth = true,
+                    )
+                }
+            }
+        try {
+            val group = root.querySelector(".d-segments") as HTMLElement
+            assertEquals("radiogroup", group.getAttribute("role"))
+            assertEquals(3, group.querySelectorAll("input[type=radio]").length)
+            assertTrue(group.scrollWidth > group.clientWidth)
+            assertEquals("auto", kotlinx.browser.window.getComputedStyle(group).overflowX)
+            for (index in 0 until 3) {
+                val surface = group.querySelectorAll(".d-segment-surface").item(index) as HTMLElement
+                assertEquals("nowrap", kotlinx.browser.window.getComputedStyle(surface).whiteSpace)
+            }
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
+
+    @Test
     fun fullWidthSegmentRadiosOwnTheirPointerTarget() {
         for (enabled in listOf(true, false)) {
             var selected = -1
