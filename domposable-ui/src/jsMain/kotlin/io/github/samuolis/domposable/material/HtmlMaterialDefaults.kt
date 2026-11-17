@@ -103,6 +103,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 :root .d-time-number>input[aria-invalid=true]{background:var(--d-error-container);color:var(--d-on-error-container)}
 .d-segments{flex-wrap:nowrap;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}.d-segments-equal{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;width:max-content}
 .d-segment-surface{white-space:nowrap}
+:root .d-segment input:focus-visible+.d-segment-surface{outline-offset:-3px}
 .d-segment{min-height:var(--d-item-min-interactive,48px)}.d-segment-surface{justify-content:center;gap:var(--d-item-gap,8px)}
 .d-segment-checkmark,.d-segment-icon-space{display:inline-flex;flex:none;align-items:center;justify-content:center;width:18px;height:18px}
 .d-segment-icon-space+.d-segment-label{transform:translateX(-13px)}

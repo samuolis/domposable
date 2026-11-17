@@ -9,6 +9,7 @@ import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.testId
 import kotlinx.browser.document
+import kotlinx.browser.window
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
 import kotlin.math.abs
@@ -76,10 +77,10 @@ class HtmlControlSizingTest {
             assertEquals("radiogroup", group.getAttribute("role"))
             assertEquals(3, group.querySelectorAll("input[type=radio]").length)
             assertTrue(group.scrollWidth > group.clientWidth)
-            assertEquals("auto", kotlinx.browser.window.getComputedStyle(group).overflowX)
+            assertEquals("auto", window.getComputedStyle(group).overflowX)
             for (index in 0 until 3) {
                 val surface = group.querySelectorAll(".d-segment-surface").item(index) as HTMLElement
-                assertEquals("nowrap", kotlinx.browser.window.getComputedStyle(surface).whiteSpace)
+                assertEquals("nowrap", window.getComputedStyle(surface).whiteSpace)
             }
         } finally {
             composition.dispose()
