@@ -68,6 +68,7 @@
     "composition"
   ],
   "dom": [
+    "segmented-narrow-long-labels",
     "tasks-phone",
     "tasks-tablet",
     "tasks-wide",
