@@ -19,7 +19,8 @@ class ReviewEvidenceTest(unittest.TestCase):
     def test_catalog_manifest_is_bounded_per_platform(self):
         manifest = {platform: [f'scenario-{i}' for i in range(24)] for platform in ('android', 'desktop', 'ios', 'dom', 'wasm')}
         module.validate_manifest(manifest)
-        for names in ([], ['duplicate', 'duplicate'], [f'scenario-{i}' for i in range(65)]):
+        module.validate_manifest(dict(manifest, dom=[f'scenario-{i}' for i in range(65)]))
+        for names in ([], ['duplicate', 'duplicate'], [f'scenario-{i}' for i in range(81)]):
             with self.assertRaises(ValueError):
                 module.validate_manifest(dict(manifest, dom=names))
         with self.assertRaises(ValueError):

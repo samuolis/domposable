@@ -30,6 +30,10 @@ fun main() {
         renderComposable(rootElementId = "root") { ResponsiveExportFixture() }
         return
     }
+    if (window.location.pathname.startsWith("/fixtures/segmented-narrow")) {
+        renderComposable(rootElementId = "root") { NarrowSegmentedFixture() }
+        return
+    }
     URLSearchParams(window.location.search).get("deepLink")?.let { path ->
         if (base != null && path.startsWith("/") && !path.startsWith("//")) {
             window.history.replaceState(null, "", base.trimEnd('/') + path)

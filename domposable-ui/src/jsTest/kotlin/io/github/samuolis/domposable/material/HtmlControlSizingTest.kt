@@ -9,6 +9,7 @@ import io.github.samuolis.domposable.ui.DomposableSegmentedButtons
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.testId
 import kotlinx.browser.document
+import kotlinx.browser.window
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.HTMLElement
 import kotlin.math.abs
@@ -52,6 +53,53 @@ class HtmlControlSizingTest {
                 equalWidth = true,
             )
         }
+
+    @Test
+    fun narrowEqualWidthSegmentsKeepFullLabelsOnOneLineAndScrollHorizontally() {
+        val root = document.createElement("div") as HTMLElement
+        root.style.width = "320px"
+        document.body!!.appendChild(root)
+        val composition =
+            renderComposable(root) {
+                DomposableMaterialTheme {
+                    DomposableSegmentedButtons(
+                        labels = listOf("Fiksuotas sezonas", "Paskutiniai 12 mėnesių", "Visas laikotarpis"),
+                        selectedIndex = 0,
+                        onSelect = {},
+                        label = "Įskaitomi rezultatai",
+                        modifier = DomposableModifier.fillMaxWidth(),
+                        equalWidth = true,
+                    )
+                }
+            }
+        try {
+            val group = root.querySelector(".d-segments") as HTMLElement
+            assertEquals("radiogroup", group.getAttribute("role"))
+            assertEquals(3, group.querySelectorAll("input[type=radio]").length)
+            assertTrue(group.scrollWidth > group.clientWidth)
+            assertEquals("auto", window.getComputedStyle(group).overflowX)
+            val segments = group.querySelectorAll(".d-segment")
+            val first = (segments.item(0) as HTMLElement).getBoundingClientRect()
+            for (index in 0 until 3) {
+                val segment = segments.item(index) as HTMLElement
+                val surface = segment.querySelector(".d-segment-surface") as HTMLElement
+                val label = segment.querySelector(".d-segment-label") as HTMLElement
+                val bounds = segment.getBoundingClientRect()
+                val surfaceBounds = surface.getBoundingClientRect()
+                val labelBounds = label.getBoundingClientRect()
+                assertEquals("nowrap", window.getComputedStyle(surface).whiteSpace)
+                assertTrue(abs(bounds.width - first.width) <= 1.1)
+                assertTrue(labelBounds.left >= surfaceBounds.left && labelBounds.right <= surfaceBounds.right)
+                if (index > 0) {
+                    val previous = (segments.item(index - 1) as HTMLElement).getBoundingClientRect()
+                    assertTrue(bounds.left >= previous.right - 1.1)
+                }
+            }
+        } finally {
+            composition.dispose()
+            root.parentNode?.removeChild(root)
+        }
+    }
 
     @Test
     fun fullWidthSegmentRadiosOwnTheirPointerTarget() {

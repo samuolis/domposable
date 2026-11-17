@@ -22,6 +22,26 @@ async function pauseMaterialClock(page: Page) {
   await page.clock.pauseAt(new Date(fixedTime.getTime() + 1000));
 }
 
+test('DOM visual narrow segmented controls', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 240 });
+  await page.goto('/fixtures/segmented-narrow/');
+  await expect(page.getByRole('radiogroup', { name: 'Įskaitomi rezultatai' })).toBeVisible();
+  await expect(page.getByRole('radio')).toHaveCount(3);
+  await stableCapture(page, 'dom', 'segmented-narrow-long-labels');
+  const group = page.getByRole('radiogroup', { name: 'Įskaitomi rezultatai' });
+  const radios = group.getByRole('radio');
+  await radios.first().focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(radios.nth(1)).toBeChecked();
+  await expect.poll(() => group.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await expect.poll(() => radios.nth(1).evaluate(element => {
+    const item = element.getBoundingClientRect();
+    const viewport = element.closest('[role=radiogroup]')!.getBoundingClientRect();
+    return item.left >= viewport.left - 1 && item.right <= viewport.right + 1;
+  })).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+});
+
 for (const [name, width, height, route] of [
   ['tasks-phone', 390, 844, 'tasks'], ['tasks-tablet', 768, 900, 'tasks'],
   ['tasks-wide', 1440, 900, 'tasks'], ['catalog-phone', 390, 844, 'catalog'],

@@ -77,7 +77,7 @@ def asset_name(pr: int, run: int, platform: str, scenario: str, data: bytes) -> 
 def validate_manifest(manifest):
     platforms = {'android', 'desktop', 'ios', 'dom', 'wasm'}
     if set(manifest) != platforms or any(
-        not isinstance(names, list) or not 0 < len(names) <= 64 or len(set(names)) != len(names)
+        not isinstance(names, list) or not 0 < len(names) <= 80 or len(set(names)) != len(names)
         for names in manifest.values()
     ):
         raise ValueError('Expected five bounded, unique platform screenshot inventories')
