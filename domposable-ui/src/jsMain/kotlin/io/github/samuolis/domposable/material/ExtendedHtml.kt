@@ -320,67 +320,74 @@ internal fun HtmlSegmentedButtons(
                 constrainedControlWidth(modifier)
             }
         }) {
-            props.labels.forEachIndexed { index, label ->
-                val canSelect = formEnabled && props.enabled && props.optionEnabled[index]
-                Label(attrs = {
-                    classes("d-segment")
-                    if (props.equalWidth) {
-                        style {
-                            property("flex", "1 1 0")
-                            property(
-                                "min-width",
-                                "${appearance.minimumInteractiveSize?.value ?: 0f}px",
-                            )
-                        }
-                    }
-                    if (index > 0) {
-                        style {
-                            property("margin-inline-start", "-${appearance.borderWidth.value}px")
-                        }
-                    }
-                }) {
-                    Input(InputType.Radio, attrs = {
-                        attr("name", group)
-                        checked(index == props.selectedIndex)
-                        if (!canSelect) disabled()
-                        props.optionTestTags[index]?.let { attr("data-testid", it) }
-                        onClick {
-                            if (canSelect && props.allowReselect && index == props.selectedIndex) {
-                                props.onSelect(index)
+            val segments: @Composable () -> Unit = {
+                props.labels.forEachIndexed { index, label ->
+                    val canSelect = formEnabled && props.enabled && props.optionEnabled[index]
+                    Label(attrs = {
+                        classes("d-segment")
+                        if (props.equalWidth) {
+                            style {
+                                property("flex", "1 1 0")
+                                property(
+                                    "min-width",
+                                    "${appearance.minimumInteractiveSize?.value ?: 0f}px",
+                                )
                             }
                         }
-                        onChange {
-                            val selectionChanged = props.allowReselect || index != props.selectedIndex
-                            if (canSelect && it.value && selectionChanged) {
-                                props.onSelect(index)
-                            }
-                        }
-                    })
-                    Span(attrs = {
-                        classes("d-segment-surface")
-                        style {
-                            itemAppearance(appearance, index == props.selectedIndex)
-                            if (props.equalWidth) {
-                                property("flex", "1")
-                                property("justify-content", "center")
+                        if (index > 0) {
+                            style {
+                                property("margin-inline-start", "-${appearance.borderWidth.value}px")
                             }
                         }
                     }) {
-                        val showIcon = props.showSelectedIcon && index == props.selectedIndex
-                        if (showIcon) {
-                            Span(attrs = {
-                                attr("aria-hidden", "true")
-                                classes("d-segment-checkmark")
-                            }) { props.selectedIcon?.invoke() }
-                        } else {
-                            Span(attrs = {
-                                attr("aria-hidden", "true")
-                                classes("d-segment-icon-space")
-                            }) {}
+                        Input(InputType.Radio, attrs = {
+                            attr("name", group)
+                            checked(index == props.selectedIndex)
+                            if (!canSelect) disabled()
+                            props.optionTestTags[index]?.let { attr("data-testid", it) }
+                            onClick {
+                                if (canSelect && props.allowReselect && index == props.selectedIndex) {
+                                    props.onSelect(index)
+                                }
+                            }
+                            onChange {
+                                val selectionChanged = props.allowReselect || index != props.selectedIndex
+                                if (canSelect && it.value && selectionChanged) {
+                                    props.onSelect(index)
+                                }
+                            }
+                        })
+                        Span(attrs = {
+                            classes("d-segment-surface")
+                            style {
+                                itemAppearance(appearance, index == props.selectedIndex)
+                                if (props.equalWidth) {
+                                    property("flex", "1")
+                                    property("justify-content", "center")
+                                }
+                            }
+                        }) {
+                            val showIcon = props.showSelectedIcon && index == props.selectedIndex
+                            if (showIcon) {
+                                Span(attrs = {
+                                    attr("aria-hidden", "true")
+                                    classes("d-segment-checkmark")
+                                }) { props.selectedIcon?.invoke() }
+                            } else {
+                                Span(attrs = {
+                                    attr("aria-hidden", "true")
+                                    classes("d-segment-icon-space")
+                                }) {}
+                            }
+                            Span(attrs = { classes("d-segment-label") }) { Text(label) }
                         }
-                        Span(attrs = { classes("d-segment-label") }) { Text(label) }
                     }
                 }
+            }
+            if (props.equalWidth) {
+                Div(attrs = { classes("d-segments-track") }) { segments() }
+            } else {
+                segments()
             }
         }
     }

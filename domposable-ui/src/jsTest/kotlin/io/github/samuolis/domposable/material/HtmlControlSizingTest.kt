@@ -78,9 +78,22 @@ class HtmlControlSizingTest {
             assertEquals(3, group.querySelectorAll("input[type=radio]").length)
             assertTrue(group.scrollWidth > group.clientWidth)
             assertEquals("auto", window.getComputedStyle(group).overflowX)
+            val segments = group.querySelectorAll(".d-segment")
+            val first = (segments.item(0) as HTMLElement).getBoundingClientRect()
             for (index in 0 until 3) {
-                val surface = group.querySelectorAll(".d-segment-surface").item(index) as HTMLElement
+                val segment = segments.item(index) as HTMLElement
+                val surface = segment.querySelector(".d-segment-surface") as HTMLElement
+                val label = segment.querySelector(".d-segment-label") as HTMLElement
+                val bounds = segment.getBoundingClientRect()
+                val surfaceBounds = surface.getBoundingClientRect()
+                val labelBounds = label.getBoundingClientRect()
                 assertEquals("nowrap", window.getComputedStyle(surface).whiteSpace)
+                assertTrue(abs(bounds.width - first.width) <= 1.1)
+                assertTrue(labelBounds.left >= surfaceBounds.left && labelBounds.right <= surfaceBounds.right)
+                if (index > 0) {
+                    val previous = (segments.item(index - 1) as HTMLElement).getBoundingClientRect()
+                    assertTrue(bounds.left >= previous.right - 1.1)
+                }
             }
         } finally {
             composition.dispose()

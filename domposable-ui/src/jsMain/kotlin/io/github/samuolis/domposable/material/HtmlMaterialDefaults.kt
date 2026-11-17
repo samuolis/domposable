@@ -101,7 +101,7 @@ internal const val MATERIAL_DEFAULTS_CSS = """
 .d-button-hit-target{height:max-content;display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px}
 .d-button-hit-target>.d-button{flex:1}.d-button-hit-target>.d-button::after{content:"";position:absolute;inset-inline:0;top:50%;height:100%;min-height:48px;transform:translateY(-50%)}
 :root .d-time-number>input[aria-invalid=true]{background:var(--d-error-container);color:var(--d-on-error-container)}
-.d-segments{flex-wrap:nowrap;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}.d-segments-equal{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;width:max-content}
+.d-segments{flex-wrap:nowrap;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}.d-segments-track{display:grid;flex:none;grid-auto-flow:column;grid-auto-columns:1fr;width:max-content;min-width:100%}
 .d-segment-surface{white-space:nowrap}
 :root .d-segment input:focus-visible+.d-segment-surface{outline-offset:-3px}
 .d-segment{min-height:var(--d-item-min-interactive,48px)}.d-segment-surface{justify-content:center;gap:var(--d-item-gap,8px)}

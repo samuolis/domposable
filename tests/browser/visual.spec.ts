@@ -28,6 +28,13 @@ test('DOM visual narrow segmented controls', async ({ page }) => {
   await expect(page.getByRole('radiogroup', { name: 'Įskaitomi rezultatai' })).toBeVisible();
   await expect(page.getByRole('radio')).toHaveCount(3);
   await stableCapture(page, 'dom', 'segmented-narrow-long-labels');
+  const group = page.getByRole('radiogroup', { name: 'Įskaitomi rezultatai' });
+  const radios = group.getByRole('radio');
+  await radios.first().focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(radios.nth(1)).toBeChecked();
+  await expect.poll(() => group.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
 for (const [name, width, height, route] of [
