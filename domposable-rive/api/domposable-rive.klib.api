@@ -1,0 +1,64 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Alias: ios => [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.samuolis.domposable:domposable-rive>
+final class io.github.samuolis.domposable.rive/DomposableRiveProps { // io.github.samuolis.domposable.rive/DomposableRiveProps|null[0]
+    constructor <init>(kotlin/ByteArray, kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Long = ..., kotlin/String? = ...) // io.github.samuolis.domposable.rive/DomposableRiveProps.<init>|<init>(kotlin.ByteArray;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Boolean;kotlin.Long;kotlin.String?){}[0]
+
+    final val animationName // io.github.samuolis.domposable.rive/DomposableRiveProps.animationName|{}animationName[0]
+        final fun <get-animationName>(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.animationName.<get-animationName>|<get-animationName>(){}[0]
+    final val artboardName // io.github.samuolis.domposable.rive/DomposableRiveProps.artboardName|{}artboardName[0]
+        final fun <get-artboardName>(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.artboardName.<get-artboardName>|<get-artboardName>(){}[0]
+    final val autoplay // io.github.samuolis.domposable.rive/DomposableRiveProps.autoplay|{}autoplay[0]
+        final fun <get-autoplay>(): kotlin/Boolean // io.github.samuolis.domposable.rive/DomposableRiveProps.autoplay.<get-autoplay>|<get-autoplay>(){}[0]
+    final val contentDescription // io.github.samuolis.domposable.rive/DomposableRiveProps.contentDescription|{}contentDescription[0]
+        final fun <get-contentDescription>(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.contentDescription.<get-contentDescription>|<get-contentDescription>(){}[0]
+    final val file // io.github.samuolis.domposable.rive/DomposableRiveProps.file|{}file[0]
+        final fun <get-file>(): kotlin/ByteArray // io.github.samuolis.domposable.rive/DomposableRiveProps.file.<get-file>|<get-file>(){}[0]
+    final val playbackKey // io.github.samuolis.domposable.rive/DomposableRiveProps.playbackKey|{}playbackKey[0]
+        final fun <get-playbackKey>(): kotlin/Long // io.github.samuolis.domposable.rive/DomposableRiveProps.playbackKey.<get-playbackKey>|<get-playbackKey>(){}[0]
+    final val stateMachineName // io.github.samuolis.domposable.rive/DomposableRiveProps.stateMachineName|{}stateMachineName[0]
+        final fun <get-stateMachineName>(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.stateMachineName.<get-stateMachineName>|<get-stateMachineName>(){}[0]
+
+    final fun component1(): kotlin/ByteArray // io.github.samuolis.domposable.rive/DomposableRiveProps.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // io.github.samuolis.domposable.rive/DomposableRiveProps.component5|component5(){}[0]
+    final fun component6(): kotlin/Long // io.github.samuolis.domposable.rive/DomposableRiveProps.component6|component6(){}[0]
+    final fun component7(): kotlin/String? // io.github.samuolis.domposable.rive/DomposableRiveProps.component7|component7(){}[0]
+    final fun copy(kotlin/ByteArray = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Long = ..., kotlin/String? = ...): io.github.samuolis.domposable.rive/DomposableRiveProps // io.github.samuolis.domposable.rive/DomposableRiveProps.copy|copy(kotlin.ByteArray;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Boolean;kotlin.Long;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.samuolis.domposable.rive/DomposableRiveProps.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.samuolis.domposable.rive/DomposableRiveProps.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.samuolis.domposable.rive/DomposableRiveProps.toString|toString(){}[0]
+}
+
+final val io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveProps$stableprop // io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveProps$stableprop|#static{}io_github_samuolis_domposable_rive_DomposableRiveProps$stableprop[0]
+
+final fun io.github.samuolis.domposable.rive/DomposableRive(io.github.samuolis.domposable.rive/DomposableRiveProps, io.github.samuolis.domposable.ui/DomposableModifier?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.samuolis.domposable.rive/DomposableRive|DomposableRive(io.github.samuolis.domposable.rive.DomposableRiveProps;io.github.samuolis.domposable.ui.DomposableModifier?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+final fun io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveProps$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveProps$stableprop_getter|io_github_samuolis_domposable_rive_DomposableRiveProps$stableprop_getter(){}[0]
+
+// Targets: [ios]
+abstract interface io.github.samuolis.domposable.rive/DomposableRiveIosRenderer { // io.github.samuolis.domposable.rive/DomposableRiveIosRenderer|null[0]
+    abstract fun createView(io.github.samuolis.domposable.rive/DomposableRiveProps): platform.UIKit/UIView // io.github.samuolis.domposable.rive/DomposableRiveIosRenderer.createView|createView(io.github.samuolis.domposable.rive.DomposableRiveProps){}[0]
+    abstract fun disposeView(platform.UIKit/UIView) // io.github.samuolis.domposable.rive/DomposableRiveIosRenderer.disposeView|disposeView(platform.UIKit.UIView){}[0]
+    abstract fun updateView(platform.UIKit/UIView, io.github.samuolis.domposable.rive/DomposableRiveProps) // io.github.samuolis.domposable.rive/DomposableRiveIosRenderer.updateView|updateView(platform.UIKit.UIView;io.github.samuolis.domposable.rive.DomposableRiveProps){}[0]
+}
+
+// Targets: [ios]
+final object io.github.samuolis.domposable.rive/DomposableRiveIosRuntime { // io.github.samuolis.domposable.rive/DomposableRiveIosRuntime|null[0]
+    final var renderer // io.github.samuolis.domposable.rive/DomposableRiveIosRuntime.renderer|{}renderer[0]
+        final fun <get-renderer>(): io.github.samuolis.domposable.rive/DomposableRiveIosRenderer? // io.github.samuolis.domposable.rive/DomposableRiveIosRuntime.renderer.<get-renderer>|<get-renderer>(){}[0]
+        final fun <set-renderer>(io.github.samuolis.domposable.rive/DomposableRiveIosRenderer?) // io.github.samuolis.domposable.rive/DomposableRiveIosRuntime.renderer.<set-renderer>|<set-renderer>(io.github.samuolis.domposable.rive.DomposableRiveIosRenderer?){}[0]
+}
+
+// Targets: [ios]
+final val io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveIosRuntime$stableprop // io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveIosRuntime$stableprop|#static{}io_github_samuolis_domposable_rive_DomposableRiveIosRuntime$stableprop[0]
+
+// Targets: [ios]
+final fun io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveIosRuntime$stableprop_getter(): kotlin/Int // io.github.samuolis.domposable.rive/io_github_samuolis_domposable_rive_DomposableRiveIosRuntime$stableprop_getter|io_github_samuolis_domposable_rive_DomposableRiveIosRuntime$stableprop_getter(){}[0]

@@ -1,0 +1,29 @@
+public final class io/github/samuolis/domposable/rive/DomposableRiveProps {
+	public static final field $stable I
+	public fun <init> ([BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/String;)V
+	public synthetic fun <init> ([BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()[B
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Z
+	public final fun component6 ()J
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy ([BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/String;)Lio/github/samuolis/domposable/rive/DomposableRiveProps;
+	public static synthetic fun copy$default (Lio/github/samuolis/domposable/rive/DomposableRiveProps;[BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/String;ILjava/lang/Object;)Lio/github/samuolis/domposable/rive/DomposableRiveProps;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnimationName ()Ljava/lang/String;
+	public final fun getArtboardName ()Ljava/lang/String;
+	public final fun getAutoplay ()Z
+	public final fun getContentDescription ()Ljava/lang/String;
+	public final fun getFile ()[B
+	public final fun getPlaybackKey ()J
+	public final fun getStateMachineName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/samuolis/domposable/rive/DomposableRive_jvmKt {
+	public static final fun DomposableRive (Lio/github/samuolis/domposable/rive/DomposableRiveProps;Lio/github/samuolis/domposable/ui/DomposableModifier;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+

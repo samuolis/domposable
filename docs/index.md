@@ -16,7 +16,7 @@ Fieldwork is a familiar shopping app with search, category filters, product page
 
 ![Fieldwork responsive web storefront](assets/examples/shop-web.png)
 
-Follow the [shopping walkthrough](shopping.md), explore [components](components.md), or try the [navigation recipes](recipes.md).
+Follow the [shopping walkthrough](shopping.md), explore [components](components.md), read the [optional Rive component guide](rive.md), or try the [navigation recipes](recipes.md).
 
 ## Keep the API simple
 

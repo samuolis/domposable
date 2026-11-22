@@ -11,7 +11,7 @@ from typing import Iterable
 
 
 ARCHITECTURE_ROOTS = {
-    "domposable-ui", "domposable-screens", "domposable-navigation3", "domposable-adaptive", "domposable-ksp", "domposable-foundation",
+    "domposable-ui", "domposable-rive", "domposable-screens", "domposable-navigation3", "domposable-adaptive", "domposable-ksp", "domposable-foundation",
 }
 ARCHITECTURE_FILENAMES = {"settings.gradle.kts", "settings.gradle"}
 BUILD_FILENAMES = {

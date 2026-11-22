@@ -29,6 +29,7 @@ androidxTestRunner = "1.7.0"
 kotlinpoet = "2.4.0"
 kobweb = "0.25.1"
 koin = "4.2.2"
+riveAndroid = "11.16.0"
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -71,6 +72,7 @@ ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+rive-android = { module = "app.rive:rive-android", version.ref = "riveAndroid" }
 
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 
