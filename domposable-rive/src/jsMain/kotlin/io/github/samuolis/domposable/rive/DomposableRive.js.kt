@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.domposableAttributes
 import kotlinx.browser.document
@@ -69,12 +70,11 @@ actual fun DomposableRive(
             }
         }
     }
-    Div(attrs = {
-        domposableAttributes(modifier)
-        attr("role", "img")
-        props.contentDescription?.let { attr("aria-label", it) }
-    }) {
+    DomposableHtmlModifiers(modifier) {
         Div(attrs = {
+            domposableAttributes(modifier)
+            attr("role", "img")
+            props.contentDescription?.let { attr("aria-label", it) }
             style {
                 property("position", "relative")
                 property("width", "100%")
