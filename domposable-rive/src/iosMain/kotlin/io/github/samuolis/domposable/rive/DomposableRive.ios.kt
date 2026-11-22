@@ -1,22 +1,27 @@
 package io.github.samuolis.domposable.rive
 
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.key
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.UIKitView
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.toComposeModifier
-import platform.UIKit.UIView
 import platform.UIKit.UIColor
+import platform.UIKit.UIView
 
 /** App-provided adapter to Rive's official Swift runtime. Register it during iOS app startup. */
 interface DomposableRiveIosRenderer {
     fun createView(props: DomposableRiveProps): UIView
-    fun updateView(view: UIView, props: DomposableRiveProps)
+
+    fun updateView(
+        view: UIView,
+        props: DomposableRiveProps,
+    )
+
     fun disposeView(view: UIView)
 }
 
@@ -33,9 +38,11 @@ actual fun DomposableRive(
 ) {
     val renderer = DomposableRiveIosRuntime.renderer
     key(props.file, props.artboardName, props.animationName, props.stateMachineName, renderer) {
-        Box(modifier.toComposeModifier().semantics {
-            props.contentDescription?.let { contentDescription = it }
-        }) {
+        Box(
+            modifier.toComposeModifier().semantics {
+                props.contentDescription?.let { contentDescription = it }
+            },
+        ) {
             fallback?.invoke()
             UIKitView(
                 modifier = Modifier.fillMaxSize(),

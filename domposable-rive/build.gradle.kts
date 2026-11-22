@@ -1,5 +1,7 @@
 @file:OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
 
+val publishedConsumerVerification = providers.gradleProperty("domposable.consumer.repository").isPresent
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
@@ -18,8 +20,13 @@ kotlin {
         minSdk = 24
     }
     jvm()
-    js { browser() }
-    wasmJs { browser() }
+    if (!publishedConsumerVerification) {
+        js {
+            outputModuleName = "domposable-rive-js"
+            browser()
+        }
+        wasmJs { browser() }
+    }
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
@@ -27,23 +34,26 @@ kotlin {
             api(project(":domposable-ui"))
             api(libs.compose.runtime)
         }
-        val composeUiMain = create("composeUiMain") {
-            dependsOn(getByName("commonMain"))
-            dependencies {
-                implementation(libs.compose.ui)
-                implementation(libs.compose.foundation)
+        val composeUiMain =
+            create("composeUiMain") {
+                dependsOn(getByName("commonMain"))
+                dependencies {
+                    implementation(libs.compose.ui)
+                    implementation(libs.compose.foundation)
+                }
             }
-        }
         getByName("androidMain").dependsOn(composeUiMain)
         getByName("jvmMain").dependsOn(composeUiMain)
-        getByName("wasmJsMain").dependsOn(composeUiMain)
+        if (!publishedConsumerVerification) getByName("wasmJsMain").dependsOn(composeUiMain)
         val iosMain = create("iosMain") { dependsOn(composeUiMain) }
         getByName("iosArm64Main").dependsOn(iosMain)
         getByName("iosSimulatorArm64Main").dependsOn(iosMain)
-        getByName("androidMain").dependencies { implementation("app.rive:rive-android:11.16.0") }
-        getByName("jsMain").dependencies {
-            implementation(libs.compose.html)
-            implementation(npm("@rive-app/canvas", "2.44.0"))
+        getByName("androidMain").dependencies { implementation(libs.rive.android) }
+        if (!publishedConsumerVerification) {
+            getByName("jsMain").dependencies {
+                implementation(libs.compose.html)
+                implementation(npm("@rive-app/canvas", "2.44.0"))
+            }
         }
     }
 }

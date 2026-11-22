@@ -18,9 +18,11 @@ actual fun DomposableRive(
     modifier: DomposableModifier,
     fallback: (@Composable () -> Unit)?,
 ) {
-    Box(modifier.toComposeModifier().semantics {
-        props.contentDescription?.let { contentDescription = it }
-    }) {
+    Box(
+        modifier.toComposeModifier().semantics {
+            props.contentDescription?.let { contentDescription = it }
+        },
+    ) {
         fallback?.invoke()
         key(
             props.file,
@@ -33,7 +35,8 @@ actual fun DomposableRive(
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
-                    RiveAnimationView.Builder(context)
+                    RiveAnimationView
+                        .Builder(context)
                         .setResource(props.file)
                         .apply { props.artboardName?.let { setArtboardName(it) } }
                         .apply { props.animationName?.let { setAnimationName(it) } }
