@@ -21,6 +21,7 @@ rootProject.name = "domposable"
 include(
     ":domposable-foundation",
     ":domposable-ui",
+    ":domposable-rive",
     ":domposable-design-material",
     ":domposable-adaptive",
     ":domposable-screens",

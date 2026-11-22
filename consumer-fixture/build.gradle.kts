@@ -48,6 +48,7 @@ kotlin {
                     listOf(
                         "foundation",
                         "ui",
+                        "rive",
                         "design-material",
                         "adaptive",
                         "screens",
@@ -58,6 +59,7 @@ kotlin {
                     }
                 } else {
                     implementation(project(":domposable-design-material"))
+                    implementation(project(":domposable-rive"))
                     implementation(project(":domposable-navigation3"))
                     implementation(project(":domposable-adaptive"))
                     implementation(project(":domposable-lifecycle-viewmodel"))

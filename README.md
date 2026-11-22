@@ -239,6 +239,7 @@ Use the pieces your application needs. All artifacts use `io.github.samuolis.dom
 | `domposable-ui` | Shared components, platform implementations and ordered modifiers |
 | `domposable-design-material` | Compatibility alias for `domposable-ui` |
 | `domposable-adaptive` | Content-sized breakpoints, preferences and pane recipes |
+| `domposable-rive` | Optional native and HTML Rive animation component |
 
 ### Optional screen integration
 

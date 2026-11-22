@@ -2,6 +2,7 @@
   "runtime_modules": [
     "domposable-foundation",
     "domposable-ui",
+    "domposable-rive",
     "domposable-design-material",
     "domposable-adaptive",
     "domposable-screens",
