@@ -428,3 +428,17 @@ DomposableTextFieldDecorations(leading = true) {
     )
 }
 ```
+
+### Calendar month controls
+
+A date picker can expose its visible month to application-supplied navigation. The value and callback
+use UTC epoch milliseconds. Requests outside the picker's year range are ignored. The standard calendar
+navigation remains available, and changing the visible month does not select a date.
+
+```kotlin
+DomposableDatePickerMonthHeader(header = { displayedMonth, showMonth ->
+    MonthAndYearChooser(displayedMonth, onMonthSelected = showMonth)
+}) {
+    DomposableDatePicker(selectedDateMillis, onDateChange, yearRange = 1900..2100)
+}
+```

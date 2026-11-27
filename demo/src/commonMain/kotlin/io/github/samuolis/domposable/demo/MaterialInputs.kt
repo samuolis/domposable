@@ -29,6 +29,7 @@ import io.github.samuolis.domposable.ui.DomposableSelectOption
 import io.github.samuolis.domposable.ui.DomposableSwitch
 import io.github.samuolis.domposable.ui.DomposableText
 import io.github.samuolis.domposable.ui.DomposableTextField
+import io.github.samuolis.domposable.ui.DomposableTextFieldDecorations
 import io.github.samuolis.domposable.ui.DomposableTimePicker
 import io.github.samuolis.domposable.ui.DomposableTimePickerMode
 import io.github.samuolis.domposable.ui.DomposableTopAppBar
@@ -67,9 +68,11 @@ internal fun MaterialInputs() {
         value = it
     }, "Filled field", appearance = DomposableTextFieldAppearance(variant = DomposableTextFieldVariant.Filled))
     DomposableTextField(value, { value = it }, "Password", purpose = DomposableInputPurpose.Password)
-    DomposableTextField(value, {
-        value = it
-    }, "Field with supporting text", helperText = "A short hint", leadingIcon = { DomposableText("@") })
+    DomposableTextFieldDecorations(leading = true) {
+        DomposableTextField(value, {
+            value = it
+        }, "Field with supporting text", helperText = "A short hint", leadingIcon = { DomposableText("@") })
+    }
     DomposableTextField(
         value,
         { value = it },

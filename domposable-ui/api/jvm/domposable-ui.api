@@ -382,6 +382,10 @@ public final class io/github/samuolis/domposable/ui/DataDisplaysKt {
 	public static final fun DomposableValueChart (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/ui/DomposableChartSize;Lio/github/samuolis/domposable/foundation/DomposableChartAppearance;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/github/samuolis/domposable/ui/DatePickerMonthHeaderKt {
+	public static final fun DomposableDatePickerMonthHeader (Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class io/github/samuolis/domposable/ui/DocumentComponentsKt {
 	public static final fun DomposableDisclosure (Ljava/lang/String;ZLkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;Ljava/lang/String;Lio/github/samuolis/domposable/foundation/DomposableSurfaceAppearance;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun DomposableForm (Lkotlin/jvm/functions/Function0;Lio/github/samuolis/domposable/ui/DomposableModifier;ZLjava/lang/String;ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
