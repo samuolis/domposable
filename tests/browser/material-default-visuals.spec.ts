@@ -495,6 +495,7 @@ test('decorative selector arrow opens the field and stays inset from its edge', 
   const field = page.getByRole('textbox', { name: 'Sport' });
   const control = page.locator('.d-field-control').filter({ has: field });
   const arrow = control.locator('.d-field-trailing');
+  await expect(async () => field.scrollIntoViewIfNeeded()).toPass();
   const controlBounds = await control.boundingBox();
   const iconBounds = await arrow.locator('svg').boundingBox();
   if (!controlBounds || !iconBounds) throw new Error('The selector and arrow must be visible');

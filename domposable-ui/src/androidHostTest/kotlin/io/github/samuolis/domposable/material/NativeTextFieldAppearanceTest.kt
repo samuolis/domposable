@@ -95,6 +95,7 @@ class NativeTextFieldAppearanceTest {
     }
 
     @Test
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 26)
     fun decorativeTrailingIconStaysInsetAndActivatesTheField() {
         var clicks = 0
         compose.setContent {
