@@ -35,6 +35,12 @@ This is the supported build baseline. Domposable builds against stable Compose c
 
 Applications may select a compatible newer Compose version or install their own component and modifier renderers. The library does not install global dependency-resolution rules in consumer builds. A version outside this baseline needs application-level verification.
 
+The native menu compiled against Material 3 `1.12.0-alpha03` cannot currently run with
+Material 3 `1.13.0-rc01`. Opening a menu item produces `NoSuchMethodError` because the
+upstream selectable color signature changed. Keep the supported Material version when using this
+build. The Android packaged-consumer regression can reproduce the mismatch with
+`-Pdomposable.consumer.material3=1.13.0-rc01` after publishing fixture artifacts.
+
 Domposable 0.7.0 was built against Compose 1.13.0-alpha02. Upgrade the library to a build targeting this stable baseline before downgrading the consumer graph; forcing an older runtime beneath the existing 0.7.0 binaries can cause linkage failures.
 
 These are the versions verified together. Applications adopting older/newer Compose, Kotlin or Kobweb versions must compile and test their own dependency graph. All seven runtime libraries publish six target variants; the optional KSP processor runs on JVM and generates shared declarations. CI compiles both a feature consumer and an app-owned component wrapper against packaged Maven artifacts.

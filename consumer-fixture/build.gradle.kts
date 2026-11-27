@@ -14,7 +14,7 @@ kotlin {
         namespace = "io.github.samuolis.domposable.consumer.fixture"
         compileSdk { version = release(37) { minorApiLevel = 2 } }
         minSdk = 24
-        withHostTest {}
+        withHostTest { isIncludeAndroidResources = true }
     }
     jvm()
     js {
@@ -34,6 +34,18 @@ kotlin {
                 }
             }
         val commonTest = getByName("commonTest") { dependencies { implementation(kotlin("test")) } }
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.robolectric)
+                implementation(libs.junit)
+                implementation(libs.androidx.test.runner)
+                implementation(libs.android.compose.ui.test)
+                implementation(libs.android.compose.ui.test.manifest)
+                providers.gradleProperty("domposable.consumer.material3").orNull?.let {
+                    implementation("org.jetbrains.compose.material3:material3:$it")
+                }
+            }
+        }
         val iosMain = create("iosMain") { dependsOn(commonMain) }
         val composeUiMain = create("composeUiMain") { dependsOn(commonMain) }
         getByName("androidMain").dependsOn(composeUiMain)
@@ -116,4 +128,8 @@ tasks.register("verifyStableComposeBaseline") {
             logger.lifecycle("${target.name}: stable Compose core dependencies verified")
         }
     }
+}
+
+tasks.withType<Test>().matching { it.name == "testAndroidHostTest" }.configureEach {
+    jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
 }
