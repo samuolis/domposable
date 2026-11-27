@@ -9,6 +9,7 @@ from PIL import Image, ImageOps
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--interactions", action="store_true", help="Run focused input and collection interactions")
+parser.add_argument("--starter", action="store_true", help="Run the starter release smoke test")
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[2]
 def output(*command):
@@ -25,17 +26,23 @@ try:
     subprocess.run(["xcrun", "simctl", "boot", identifier], check=True)
     subprocess.run(["xcrun", "simctl", "bootstatus", identifier, "-b"], check=True, timeout=600)
     subprocess.run(["xcrun", "simctl", "status_bar", identifier, "override", "--time", "2026-10-11T09:41:00.000Z", "--batteryState", "charged", "--batteryLevel", "100", "--wifiMode", "active", "--wifiBars", "3"], check=True)
+    project = "koin-starter-ios/Contacts.xcodeproj" if args.starter else "iosApp/DomposableDemo.xcodeproj"
+    scheme = "Contacts" if args.starter else "DomposableDemo"
+    configuration = "Release" if args.starter else "Debug"
+    filters = (
+        ["-only-testing:DomposableDemoUITests/SmokeTests/testSharedFeatureAndNotes",
+         "-only-testing:DomposableDemoUITests/SmokeTests/testCollectionLayoutsAndTableInput"]
+        if args.interactions and not args.starter else []
+    )
     subprocess.run([
-        "xcodebuild", "test", "-project", "iosApp/DomposableDemo.xcodeproj", "-scheme", "DomposableDemo",
-        "-configuration", "Debug", "-destination", f"id={identifier}",
+        "xcodebuild", "test", "-project", project, "-scheme", scheme,
+        "-configuration", configuration, "-destination", f"id={identifier}",
         "-derivedDataPath", f"build/ios-tests/{os.getpid()}", "-resultBundlePath", str(result),
-        *(["-only-testing:DomposableDemoUITests/SmokeTests/testSharedFeatureAndNotes",
-           "-only-testing:DomposableDemoUITests/SmokeTests/testCollectionLayoutsAndTableInput"] if args.interactions else []),
-        "CODE_SIGNING_ALLOWED=NO",
+        *filters, "CODE_SIGNING_ALLOWED=NO",
     ], cwd=root, check=True, timeout=1800)
 finally:
     try:
-        if result.exists():
+        if result.exists() and not args.starter:
             exported = root / f"build/ios-attachments-{os.getpid()}"
             subprocess.run(["xcrun", "xcresulttool", "export", "attachments", "--path", str(result), "--output-path", str(exported)], check=True)
             destination = root / "build/screenshots/ios"

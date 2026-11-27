@@ -21,6 +21,9 @@ import io.github.samuolis.domposable.ui.DomposableDatePicker
 import io.github.samuolis.domposable.ui.DomposableDatePickerMode
 import io.github.samuolis.domposable.ui.DomposableDateRangePicker
 import io.github.samuolis.domposable.ui.DomposableFloatingActionButton
+import io.github.samuolis.domposable.ui.DomposableIcon
+import io.github.samuolis.domposable.ui.DomposableMenu
+import io.github.samuolis.domposable.ui.DomposableMenuItem
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableScreenScaffold
 import io.github.samuolis.domposable.ui.DomposableScrollField
@@ -33,6 +36,7 @@ import io.github.samuolis.domposable.ui.DomposableTextFieldDecorations
 import io.github.samuolis.domposable.ui.DomposableTimePicker
 import io.github.samuolis.domposable.ui.DomposableTimePickerMode
 import io.github.samuolis.domposable.ui.DomposableTopAppBar
+import io.github.samuolis.domposable.ui.DomposableVectorIcon
 import io.github.samuolis.domposable.ui.fillMaxWidth
 import io.github.samuolis.domposable.ui.height
 import io.github.samuolis.domposable.ui.testId
@@ -43,6 +47,8 @@ internal fun MaterialInputs() {
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     var value by rememberSaveable { mutableStateOf("") }
     var dropdownExpanded by rememberSaveable { mutableStateOf(false) }
+    var sportExpanded by rememberSaveable { mutableStateOf(false) }
+    var sport by rememberSaveable { mutableStateOf("Tennis") }
     var date by remember { mutableStateOf<Long?>(0L) }
     var start by remember { mutableStateOf<Long?>(0L) }
     var end by remember { mutableStateOf<Long?>(86_400_000L) }
@@ -73,6 +79,39 @@ internal fun MaterialInputs() {
             value = it
         }, "Field with supporting text", helperText = "A short hint", leadingIcon = { DomposableText("@") })
     }
+    DomposableMenu(
+        expanded = sportExpanded,
+        onDismiss = { sportExpanded = false },
+        anchor = {
+            DomposableTextFieldDecorations(trailing = true) {
+                DomposableTextField(
+                    value = sport,
+                    onValueChange = {},
+                    label = "Sport",
+                    readOnly = true,
+                    onClick = { sportExpanded = true },
+                    trailingIcon = {
+                        DomposableIcon(
+                            vector =
+                                DomposableVectorIcon(
+                                    if (sportExpanded) {
+                                        "M7.41 15.41 12 10.83 16.59 15.41 18 14 12 8 6 14z"
+                                    } else {
+                                        "M7.41 8.59 12 13.17 16.59 8.59 18 10 12 16 6 10z"
+                                    },
+                                ),
+                            description = null,
+                        )
+                    },
+                )
+            }
+        },
+        items =
+            listOf(
+                DomposableMenuItem("Tennis", { sport = "Tennis" }),
+                DomposableMenuItem("Basketball", { sport = "Basketball" }),
+            ),
+    )
     DomposableTextField(
         value,
         { value = it },

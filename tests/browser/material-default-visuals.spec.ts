@@ -489,3 +489,20 @@ test('input defaults and filled cards use their native Material roles', async ({
   await page.goto('/?comparison=dark-surfaces#/material/compare/dark/surfaces');
   await expect(page.locator('.d-card-filled').first()).toHaveCSS('background-color', 'rgb(54, 52, 59)');
 });
+
+test('decorative selector arrow opens the field and stays inset from its edge', async ({ page }) => {
+  await page.goto('/#/material/inputs');
+  const field = page.getByRole('textbox', { name: 'Sport' });
+  const control = page.locator('.d-field-control').filter({ has: field });
+  const arrow = control.locator('.d-field-trailing');
+  const controlBounds = await control.boundingBox();
+  const iconBounds = await arrow.locator('svg').boundingBox();
+  if (!controlBounds || !iconBounds) throw new Error('The selector and arrow must be visible');
+  const inset = controlBounds.x + controlBounds.width - iconBounds.x - iconBounds.width;
+  expect(inset).toBeGreaterThanOrEqual(8);
+  expect(inset).toBeLessThanOrEqual(16);
+  expect(Math.abs((iconBounds.y + iconBounds.height / 2) - (controlBounds.y + controlBounds.height / 2))).toBeLessThan(1);
+  await page.mouse.click(iconBounds.x + iconBounds.width / 2, iconBounds.y + iconBounds.height / 2);
+  await page.getByRole('menuitem', { name: 'Basketball' }).click();
+  await expect(field).toHaveValue('Basketball');
+});

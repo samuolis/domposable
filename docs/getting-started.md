@@ -90,3 +90,19 @@ fun App(dependencies: AppDependencies) {
 ```
 
 `AppDependencies` and `ContactsModel` belong to your app. For a model tied to navigation rather than the whole app, use [entry ownership](screens.md). For a compiled dependency graph, see [Metro integration](integrations.md). A ViewModel is optional and a screen returns `Unit`.
+
+## Create a small application
+
+From a Domposable checkout, create an independent Koin starter using the checkout's released version:
+
+```sh
+python3 scripts/create-starter.py ../contacts
+cd ../contacts
+./gradlew :koinStarterAndroid:assembleDebug
+./gradlew :koin-example:jsBrowserDevelopmentRun
+```
+
+The browser route `#/contact/sam` opens Sam directly. To run iOS, build the simulator framework with
+`./gradlew :koin-example:linkDebugFrameworkIosSimulatorArm64` and open
+`koin-starter-ios/Contacts.xcodeproj`. The generated README includes the release build commands.
+The version can be changed with `--version` or in the generated `gradle.properties`.
