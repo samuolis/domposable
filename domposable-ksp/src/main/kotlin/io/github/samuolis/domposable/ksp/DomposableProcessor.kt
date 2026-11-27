@@ -1,10 +1,12 @@
 package io.github.samuolis.domposable.ksp
 
+import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -27,6 +29,7 @@ import com.squareup.kotlinpoet.UNIT
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 
+private const val DOMPOSABLE_MVI_DESTINATION = "io.github.samuolis.domposable.foundation.DomposableMviDestination"
 private const val DOMPOSABLE_SCREEN = "io.github.samuolis.domposable.foundation.DomposableScreen"
 
 class DomposableProcessorProvider : SymbolProcessorProvider {
@@ -40,7 +43,10 @@ class DomposableProcessor(
     private val screenProcessor =
         DomposableFunctionProcessor(
             environment,
-            mapOf(DOMPOSABLE_SCREEN to DomposableFunctionGenerator(::generateScreen)),
+            mapOf(
+                DOMPOSABLE_SCREEN to DomposableFunctionGenerator(::generateScreen),
+                DOMPOSABLE_MVI_DESTINATION to DomposableFunctionGenerator(::generateMviScreen),
+            ),
         )
 
     // KSP symbols cannot be retained into finish(): later rounds invalidate their analysis tokens.
@@ -81,6 +87,85 @@ class DomposableProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         componentGenerator.process(resolver)
         return screenProcessor.process(resolver)
+    }
+
+    private fun generateMviScreen(
+        screen: KSFunctionDeclaration,
+        resolver: Resolver,
+    ): List<DomposableGeneratedSource> {
+        if (!validateScreenDeclaration(screen)) return emptyList()
+        if (screen.parameters.size != 2) {
+            environment.logger.error("@DomposableMviDestination requires state and action parameters", screen)
+            return emptyList()
+        }
+        if (resolver.getClassDeclarationByName(
+                resolver.getKSNameFromString("io.github.samuolis.domposable.lifecycle.DomposableViewModelOwner"),
+            ) == null
+        ) {
+            environment.logger.error("@DomposableMviDestination requires domposable-lifecycle-viewmodel", screen)
+            return emptyList()
+        }
+        val annotation = screen.annotations.first { it.shortName.asString() == "DomposableMviDestination" }
+        val route = annotation.arguments.first { it.name?.asString() == "route" }.value as KSType
+        val binding = annotation.arguments.first { it.name?.asString() == "binding" }.value as KSType
+        val bindingDeclaration = binding.declaration as? com.google.devtools.ksp.symbol.KSClassDeclaration
+        if (bindingDeclaration?.classKind != ClassKind.OBJECT) {
+            environment.logger.error("@DomposableMviDestination binding must be an object", screen)
+            return emptyList()
+        }
+        val bindingFunction =
+            bindingDeclaration.getDeclaredFunctions().firstOrNull { function ->
+                function.simpleName.asString() == "model" && function.parameters.size == 1 &&
+                    function.parameters
+                        .single()
+                        .type
+                        .resolve() == route &&
+                    function.annotations.any { it.shortName.asString() == "Composable" }
+            }
+        if (bindingFunction == null) {
+            environment.logger.error("MVI binding must provide @Composable fun model(route: Route)", screen)
+            return emptyList()
+        }
+        val packageName = screen.packageName.asString() + ".generated"
+        val entryName = screen.simpleName.asString().replaceFirstChar(Char::lowercase) + "Entry"
+        val file =
+            FileSpec
+                .builder(packageName, entryName)
+                .addFunction(mviEntry(screen, route, binding, entryName))
+                .build()
+        screens +=
+            ScreenGroupMember(packageName, entryName, Modifier.INTERNAL in screen.modifiers, emptyList(), emptySet())
+        return listOf(DomposableGeneratedSource(file.packageName, file.name, file.toString()))
+    }
+
+    private fun mviEntry(
+        screen: KSFunctionDeclaration,
+        route: KSType,
+        binding: KSType,
+        entryName: String,
+    ): FunSpec {
+        val routeType = route.toTypeName()
+        val function =
+            FunSpec
+                .builder(entryName)
+                .returns(
+                    ClassName(
+                        "io.github.samuolis.domposable.screens",
+                        "DomposableDestination",
+                    ).parameterizedBy(routeType),
+                )
+        if (Modifier.INTERNAL in screen.modifiers) function.addModifiers(KModifier.INTERNAL)
+        function.addCode(
+            "return %T(%T::class) {\n  %M(this) {\n" +
+                "    %M(%T.model(route)) { state, action -> %M(state, action) }\n  }\n}\n",
+            ClassName("io.github.samuolis.domposable.screens", "DomposableDestination"),
+            routeType,
+            MemberName("io.github.samuolis.domposable.lifecycle", "DomposableViewModelEntry"),
+            MemberName("io.github.samuolis.domposable.lifecycle", "DomposableMviScreen"),
+            binding.toTypeName(),
+            MemberName(screen.packageName.asString(), screen.simpleName.asString()),
+        )
+        return function.build()
     }
 
     private fun generateScreen(

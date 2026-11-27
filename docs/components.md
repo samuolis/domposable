@@ -411,3 +411,20 @@ DomposableText(
 
 Use `DomposableRichHtml` for already-authored formatted documents, rather than generating HTML
 strings for ordinary UI labels.
+
+### Decorative field icons
+
+Wrap a field in `DomposableTextFieldDecorations` when an icon is decoration rather than a separate action.
+A decorative slot uses compact spacing, while an action in the other slot keeps its interactive size.
+
+```kotlin
+DomposableTextFieldDecorations(leading = true) {
+    DomposableTextField(
+        value = query,
+        onValueChange = { query = it },
+        label = "Search",
+        leadingIcon = { SearchIcon() },
+        trailingIcon = { ClearButton() },
+    )
+}
+```

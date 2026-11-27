@@ -52,37 +52,31 @@ The graph owns repositories and the cart for the whole shopping flow. A reload c
 
 MetroX's `metroViewModel()` reads **one application-wide** `LocalMetroViewModelFactory`; ViewModels contribute to its maps with `@ViewModelKey` and `@ContributesIntoMap`. The app graph extends `ViewModelGraph`. The factory implementation in `ShopViewModelFactory.kt` is Metro's standard map-based factory, shared by all features.
 
-Product needs the current route's ID, so it uses Metro's manual assisted injection:
+Product needs the route ID. Its binding uses Metro's assisted injection and the generated entry
+resolves it inside the entry's ViewModel owner:
 
 ```kotlin
+object ProductBinding {
+    @Composable
+    fun model(route: CatalogRoute.Product): ProductViewModel =
+        assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> { create(route.id) }
+}
+
 @Composable
-@DomposableScreen(CatalogRoute.Product::class, viewModel = true)
-fun ProductScreen(
-    route: CatalogRoute.Product,
-    model: ProductViewModel = assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> {
-        create(route.id)
-    },
-) {
-    val navigator = LocalShopNavigator.current
-    val artwork = LocalShopArtwork.current
-    DomposableMviScreen(model) { state, onAction ->
-        ProductContent(
-            state, artwork,
-            onAdd = { onAction(ProductAction.Add) },
-            onBrowse = { navigator.navigate(CatalogRoute.Collection) },
-            onCart = { navigator.navigate(CheckoutRoute.Cart) },
-        )
-    }
+@DomposableMviDestination(CatalogRoute.Product::class, ProductBinding::class)
+fun ProductScreen(state: ProductState, onAction: (ProductAction) -> Unit) {
+    ProductContent(state, onAction)
 }
 ```
 
-Its `@AssistedFactory` extends `ManualViewModelAssistedFactory` and contributes with `@ManualViewModelAssistedFactoryKey`. The application never passes this factory to a screen or generated entry list. Metro resolves it through its factory map when a new entry creates a model.
-
-Injection happens **inside** the entry's ViewModel owner. Recomposition reuses the same model, a covered entry keeps it, and popping the entry clears it. Discover and Collection have separate ViewModels while sharing the graph-scoped cart. Another DI container can use its own Compose injection default, such as `koinViewModel()`; KSP never reads or copies that expression.
+The actual screen also receives navigation and artwork from application composition locals. Its
+`@AssistedFactory` contributes to Metro's factory map. Recomposition reuses the entry model, a
+covered entry retains it, and popping the entry clears it. The screen can be previewed with sample
+state and an action callback.
 
 ## 4. KSP removes registration and respects injection defaults
 
-For every annotated screen, KSP supplies the current route and generates an entry factory. The full overload accepts explicit dependencies; a second overload omits default parameters and lets the **original composable** evaluate them under its entry owner.
+KSP generates an entry factory for each screen. `DomposableScreen` supports explicit dependencies and injection defaults. `DomposableMviDestination` resolves its binding and passes state and actions to the screen.
 
 For this sample, generated `domposableEntries()` needs **no arguments**. Each implementation exposes it through the small feature API:
 

@@ -1,10 +1,15 @@
 package io.github.samuolis.domposable.material
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.runtime.saveable.SaveableStateRegistry
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -29,6 +34,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextFieldColors
 import io.github.samuolis.domposable.foundation.DomposableTextFieldVariant
 import io.github.samuolis.domposable.foundation.dp
 import io.github.samuolis.domposable.ui.DomposableTextField
+import io.github.samuolis.domposable.ui.DomposableTextFieldDecorations
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
 import org.junit.Rule
 import org.junit.Test
@@ -44,6 +50,42 @@ import kotlin.test.assertFalse
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class NativeTextFieldAppearanceTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun decorativeIconKeepsOppositeActionSizeAndClick() {
+        var clicks = 0
+        compose.setContent {
+            DomposableMaterialTheme {
+                Column {
+                    listOf(false, true).forEach { decorative ->
+                        DomposableTextFieldDecorations(leading = decorative) {
+                            DomposableTextField(
+                                value = "Alice",
+                                onValueChange = {},
+                                label = "Search",
+                                leadingIcon = { Text("Search") },
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = { clicks++ },
+                                        modifier = Modifier.testTag("clear-$decorative"),
+                                    ) {
+                                        Text("Clear")
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        val normal = compose.onNodeWithTag("clear-false").fetchSemanticsNode().boundsInRoot
+        val decorated = compose.onNodeWithTag("clear-true")
+        val bounds = decorated.fetchSemanticsNode().boundsInRoot
+        assertEquals(normal.width, bounds.width)
+        assertEquals(normal.height, bounds.height)
+        decorated.performClick()
+        compose.runOnIdle { assertEquals(1, clicks) }
+    }
 
     @Test
     fun copiedMultilineFieldAcceptsNewlines() {

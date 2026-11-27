@@ -12,6 +12,8 @@ import io.github.samuolis.domposable.ui.DomposableHtmlModifiers
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
+import io.github.samuolis.domposable.ui.LocalTextFieldDecorations
+import io.github.samuolis.domposable.ui.TextFieldDecorations
 import io.github.samuolis.domposable.ui.domposableAttributes
 import io.github.samuolis.domposable.ui.effectiveSingleLine
 import org.jetbrains.compose.web.attributes.AttrsScope
@@ -30,6 +32,7 @@ internal fun HtmlTextField(
     modifier: DomposableModifier,
 ) {
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.textField
+    val decorations = LocalTextFieldDecorations.current
     val id = props.id ?: remember { nextMaterialInputId() }
     val supportingText = props.error ?: props.helperText
     var focused by remember { mutableStateOf(false) }
@@ -54,7 +57,15 @@ internal fun HtmlTextField(
             }) {
                 if (props.showLabel) {
                     Span(
-                        attrs = { fieldLabelStyle(appearance, props, focused, floating = false) },
+                        attrs = {
+                            fieldLabelStyle(
+                                appearance,
+                                props,
+                                focused,
+                                floating = false,
+                                decorations = decorations,
+                            )
+                        },
                     ) { Text(props.label) }
                 }
                 fieldControl(props, modifier, id, appearance, focused, autoSizeBinding, labelFloated) { focused = it }
@@ -89,6 +100,7 @@ private fun fieldControl(
     onFocusChange: (Boolean) -> Unit,
 ) {
     val floating = appearance.floatingLabel
+    val decorations = LocalTextFieldDecorations.current
     val needsControl = floating || props.leadingIcon != null || props.prefix != null || props.trailingIcon != null
     if (!needsControl) {
         fieldInput(
@@ -99,6 +111,7 @@ private fun fieldControl(
             focused,
             autoSizeBinding,
             floating = false,
+            decorations = decorations,
             onFocusChange = onFocusChange,
         )
         return
@@ -110,14 +123,14 @@ private fun fieldControl(
         if (floating && props.showLabel) {
             Label(attrs = {
                 attr("for", id)
-                fieldLabelStyle(appearance, props, focused, floating = labelFloated)
+                fieldLabelStyle(appearance, props, focused, floating = labelFloated, decorations = decorations)
             }) { Text(props.label) }
         }
         if (floating) {
             props.leadingIcon?.let { icon ->
                 Span(attrs = {
                     classes("d-field-leading")
-                    floatingSlotStyle(leading = true)
+                    floatingSlotStyle(leading = true, decorative = decorations.leading)
                 }) { fieldIcon(appearance, props, focused, leading = true, icon) }
             }
             props.prefix?.let { prefix ->
@@ -134,12 +147,13 @@ private fun fieldControl(
                 focused,
                 autoSizeBinding,
                 floating = true,
+                decorations = decorations,
                 onFocusChange = onFocusChange,
             )
             props.trailingIcon?.let { icon ->
                 Span(attrs = {
                     classes("d-field-trailing")
-                    floatingSlotStyle(leading = false)
+                    floatingSlotStyle(leading = false, decorative = decorations.trailing)
                 }) { fieldIcon(appearance, props, focused, leading = false, icon) }
             }
         } else {
@@ -153,6 +167,7 @@ private fun fieldControl(
                 focused,
                 autoSizeBinding,
                 floating = false,
+                decorations = decorations,
                 onFocusChange = onFocusChange,
             )
             props.trailingIcon?.let { icon -> fieldIcon(appearance, props, focused, leading = false, icon) }
@@ -198,6 +213,7 @@ private fun fieldInput(
     focused: Boolean,
     autoSizeBinding: HtmlTextAreaAutoSizeBinding,
     floating: Boolean,
+    decorations: TextFieldDecorations,
     onFocusChange: (Boolean) -> Unit,
 ) {
     fun <T : HTMLElement> AttrsScope<T>.applyInputAttributes() {
@@ -205,7 +221,7 @@ private fun fieldInput(
         domposableAttributes(modifier)
         inputSemantics(props, id, appearance)
         inputEvents(props, onFocusChange)
-        inputAppearance(appearance, props, focused, floating)
+        inputAppearance(appearance, props, focused, floating, decorations)
         if (appearance.autoSize && !props.effectiveSingleLine) {
             ref { element ->
                 val cleanup = installHtmlTextAreaAutoSize(element, autoSizeBinding)

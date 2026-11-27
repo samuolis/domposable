@@ -3914,6 +3914,10 @@ public final class io/github/samuolis/domposable/ui/TableKt {
 	public static final fun DomposableTable (Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lio/github/samuolis/domposable/ui/DomposableModifier;Lio/github/samuolis/domposable/ui/DomposableListWindow;Lio/github/samuolis/domposable/foundation/DomposableTableAppearance;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/github/samuolis/domposable/ui/TextFieldDecorationsKt {
+	public static final fun DomposableTextFieldDecorations (ZZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/github/samuolis/domposable/ui/ViewportModifierKt {
 	public static final fun maxViewportHeight-zXje4X4 (Lio/github/samuolis/domposable/ui/DomposableModifier;FFLio/github/samuolis/domposable/ui/DomposableViewportUnit;)Lio/github/samuolis/domposable/ui/DomposableModifier;
 	public static synthetic fun maxViewportHeight-zXje4X4$default (Lio/github/samuolis/domposable/ui/DomposableModifier;FFLio/github/samuolis/domposable/ui/DomposableViewportUnit;ILjava/lang/Object;)Lio/github/samuolis/domposable/ui/DomposableModifier;

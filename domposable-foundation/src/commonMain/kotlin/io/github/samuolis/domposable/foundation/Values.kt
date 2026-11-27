@@ -206,6 +206,14 @@ annotation class DomposableScreen(
     val viewModel: Boolean = false,
 )
 
+/** Generates an entry that obtains an MVI model from the binding inside the entry's ViewModel owner. */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class DomposableMviDestination(
+    val route: KClass<*>,
+    val binding: KClass<*>,
+)
+
 /** Generates a typed renderer contract and forwarding API for this props declaration. */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
