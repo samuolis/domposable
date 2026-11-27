@@ -6,6 +6,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldAppearance
 import io.github.samuolis.domposable.foundation.DomposableTextFieldVariant
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
+import io.github.samuolis.domposable.ui.TextFieldDecorations
 import io.github.samuolis.domposable.ui.effectiveSingleLine
 import org.jetbrains.compose.web.attributes.AttrsScope
 import org.jetbrains.compose.web.css.StyleScope
@@ -19,6 +20,7 @@ internal fun <T : HTMLElement> AttrsScope<T>.inputAppearance(
     props: DomposableTextFieldProps,
     focused: Boolean,
     insideFloatingControl: Boolean,
+    decorations: TextFieldDecorations,
 ) {
     val colors = appearance.colors
     val stateText = colors.text.color(props.enabled, props.isError, focused)
@@ -51,7 +53,7 @@ internal fun <T : HTMLElement> AttrsScope<T>.inputAppearance(
             placeholder.letterSpacing?.let { property("--d-field-placeholder-spacing", "${it}px") }
         }
         if (insideFloatingControl) {
-            floatingInputGeometry(appearance, props, focused)
+            floatingInputGeometry(appearance, props, focused, decorations)
         } else {
             standaloneInputGeometry(appearance, focused)
         }
@@ -124,7 +126,10 @@ internal fun <T : HTMLElement> AttrsScope<T>.floatingControlStyle(
     }
 }
 
-internal fun <T : HTMLElement> AttrsScope<T>.floatingSlotStyle(leading: Boolean) {
+internal fun <T : HTMLElement> AttrsScope<T>.floatingSlotStyle(
+    leading: Boolean,
+    decorative: Boolean,
+) {
     style {
         property("position", "absolute")
         property("top", "2px")
@@ -133,12 +138,13 @@ internal fun <T : HTMLElement> AttrsScope<T>.floatingSlotStyle(leading: Boolean)
         property("display", "flex")
         property("align-items", "center")
         property("justify-content", "center")
+        if (decorative) property("pointer-events", "none")
         if (leading) {
             property("inset-inline-start", "2px")
-            property("width", "48px")
+            property("width", if (decorative) "40px" else "48px")
         } else {
             property("inset-inline-end", "2px")
-            property("width", "48px")
+            property("width", if (decorative) "40px" else "48px")
         }
     }
 }
@@ -159,6 +165,7 @@ internal fun <T : HTMLElement> AttrsScope<T>.fieldLabelStyle(
     props: DomposableTextFieldProps,
     focused: Boolean,
     floating: Boolean,
+    decorations: TextFieldDecorations,
 ) {
     val textAppearance =
         if (floating) {
@@ -171,7 +178,7 @@ internal fun <T : HTMLElement> AttrsScope<T>.fieldLabelStyle(
             ?: if (focused) 2f else 1f
     val labelStart =
         if (props.leadingIcon != null && !floating) {
-            64f - borderWidth
+            (if (decorations.leading) 48f else 64f) - borderWidth
         } else {
             (appearance.contentPadding?.start?.value ?: MATERIAL_FIELD_PADDING) - borderWidth
         }
@@ -187,7 +194,7 @@ internal fun <T : HTMLElement> AttrsScope<T>.fieldLabelStyle(
                 if (props.leadingIcon != null &&
                     !floating
                 ) {
-                    "calc(100% - 80px)"
+                    if (decorations.leading) "calc(100% - 64px)" else "calc(100% - 80px)"
                 } else {
                     "calc(100% - 32px)"
                 },
@@ -270,6 +277,7 @@ private fun StyleScope.floatingInputGeometry(
     appearance: DomposableTextFieldAppearance,
     props: DomposableTextFieldProps,
     focused: Boolean,
+    decorations: TextFieldDecorations,
 ) {
     val activeWidth = if (focused) appearance.focusedOutlineWidth else appearance.outlineWidth
     val borderWidth = activeWidth?.value ?: if (focused) 2f else 1f
@@ -291,12 +299,12 @@ private fun StyleScope.floatingInputGeometry(
     val startPadding =
         when {
             props.prefix != null -> 8f
-            props.leadingIcon != null -> 64f - borderDelta
+            props.leadingIcon != null -> (if (decorations.leading) 48f else 64f) - borderDelta
             else -> (padding?.start?.value ?: MATERIAL_FIELD_PADDING) - borderDelta
         }
     val endPadding =
         if (props.trailingIcon != null) {
-            52f - borderDelta
+            (if (decorations.trailing) 44f else 52f) - borderDelta
         } else {
             (padding?.end?.value ?: MATERIAL_FIELD_PADDING) - borderDelta
         }

@@ -11,9 +11,11 @@ import example.shop.catalog.api.LocalShopArtwork
 import example.shop.catalog.api.LocalShopArtworkLoaded
 import example.shop.catalog.api.LocalShopNavigator
 import example.shop.catalog.api.ProductAction
+import example.shop.catalog.api.ProductState
 import example.shop.catalog.api.ShopScope
 import example.shop.catalog.impl.generated.domposableEntries
 import example.shop.checkout.api.CheckoutRoute
+import io.github.samuolis.domposable.foundation.DomposableMviDestination
 import io.github.samuolis.domposable.foundation.DomposableScreen
 import io.github.samuolis.domposable.lifecycle.DomposableMviScreen
 import io.github.samuolis.domposable.screens.DomposableDestination
@@ -60,21 +62,25 @@ fun CollectionScreen(model: CatalogViewModel = metroViewModel()) {
     }
 }
 
+object ProductBinding {
+    @Composable
+    fun model(route: CatalogRoute.Product): ProductViewModel =
+        assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> { create(route.id) }
+}
+
 @Composable
-@DomposableScreen(CatalogRoute.Product::class, viewModel = true)
+@DomposableMviDestination(CatalogRoute.Product::class, ProductBinding::class)
 fun ProductScreen(
-    route: CatalogRoute.Product,
-    model: ProductViewModel = assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> { create(route.id) },
+    state: ProductState,
+    onAction: (ProductAction) -> Unit,
 ) {
     val navigator = LocalShopNavigator.current
     val artwork = LocalShopArtwork.current
-    DomposableMviScreen(model) { state, onAction ->
-        ProductContent(
-            state,
-            artwork,
-            { onAction(ProductAction.Add) },
-            { navigator.navigate(CatalogRoute.Collection) },
-            { navigator.navigate(CheckoutRoute.Cart) },
-        )
-    }
+    ProductContent(
+        state,
+        artwork,
+        { onAction(ProductAction.Add) },
+        { navigator.navigate(CatalogRoute.Collection) },
+        { navigator.navigate(CheckoutRoute.Cart) },
+    )
 }

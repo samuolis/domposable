@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
@@ -23,6 +24,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +60,7 @@ import io.github.samuolis.domposable.foundation.DomposableTextFieldVariant
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTextFieldProps
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
+import io.github.samuolis.domposable.ui.LocalTextFieldDecorations
 import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.effectiveSingleLine
 import io.github.samuolis.domposable.ui.rememberDomposableFormSubmitOrNull
@@ -70,6 +73,23 @@ internal fun NativeTextField(
     props: DomposableTextFieldProps,
     modifier: DomposableModifier,
     nativeOptions: DomposableNativeTextFieldOptions? = null,
+) {
+    val decorations = LocalTextFieldDecorations.current
+    val interactiveSize = LocalMinimumInteractiveComponentSize.current
+    CompositionLocalProvider(
+        LocalMinimumInteractiveComponentSize provides
+            if (decorations.leading || decorations.trailing) 40.dp else interactiveSize,
+    ) {
+        NativeTextFieldContent(props, modifier, nativeOptions, interactiveSize)
+    }
+}
+
+@Composable
+private fun NativeTextFieldContent(
+    props: DomposableTextFieldProps,
+    modifier: DomposableModifier,
+    nativeOptions: DomposableNativeTextFieldOptions?,
+    interactiveSize: androidx.compose.ui.unit.Dp,
 ) {
     if (props.purpose == DomposableInputPurpose.Password) {
         DisposableEffect(Unit) { onDispose(protectPasswordBackingInput()) }
@@ -168,8 +188,18 @@ internal fun NativeTextField(
                 if (style == null) Text(value) else Text(value, style = style.materialTextStyle(LocalTextStyle.current))
             }
         }
-    val leadingIcon = props.leadingIcon
-    val trailingIcon = props.trailingIcon
+    val leadingIcon =
+        props.leadingIcon?.let { icon ->
+            @Composable {
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides interactiveSize) { icon() }
+            }
+        }
+    val trailingIcon =
+        props.trailingIcon?.let { icon ->
+            @Composable {
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides interactiveSize) { icon() }
+            }
+        }
     val supportingText: (@Composable () -> Unit)? =
         supporting?.let { message ->
             {

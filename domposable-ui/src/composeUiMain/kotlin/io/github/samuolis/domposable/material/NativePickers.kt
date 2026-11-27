@@ -4,6 +4,7 @@ package io.github.samuolis.domposable.material
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerState
@@ -47,6 +48,7 @@ import io.github.samuolis.domposable.ui.DomposableDateRangePickerProps
 import io.github.samuolis.domposable.ui.DomposableModifier
 import io.github.samuolis.domposable.ui.DomposableTimePickerMode
 import io.github.samuolis.domposable.ui.DomposableTimePickerProps
+import io.github.samuolis.domposable.ui.LocalDatePickerMonthHeader
 import io.github.samuolis.domposable.ui.LocalDomposableTokens
 import io.github.samuolis.domposable.ui.domposableFormEnabled
 import io.github.samuolis.domposable.ui.toComposeModifier
@@ -131,8 +133,22 @@ internal fun NativeDatePicker(
     val state = remember(base) { controlledDateState(base, current) { enabled.value } }
     LaunchedEffect(base, props.mode) { base.displayMode = props.mode.nativeDisplayMode() }
     val appearance = props.appearance ?: LocalDomposableTokens.current.components.datePicker
+    val monthHeader = LocalDatePickerMonthHeader.current
     NativePickerSurface(appearance, modifier, "Date picker") {
-        DatePicker(state, showModeToggle = props.showModeToggle, colors = appearance.datePickerColors())
+        Column {
+            if (state.displayMode == DisplayMode.Picker) {
+                monthHeader?.invoke(state.displayedMonthMillis) { month ->
+                    if (enabled.value) {
+                        try {
+                            state.displayedMonthMillis = month
+                        } catch (_: IllegalArgumentException) {
+                            // The requested month is outside the picker's year range.
+                        }
+                    }
+                }
+            }
+            DatePicker(state, showModeToggle = props.showModeToggle, colors = appearance.datePickerColors())
+        }
     }
 }
 

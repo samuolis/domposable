@@ -1,11 +1,12 @@
 package example.koin
 
 import androidx.compose.ui.graphics.asSkiaBitmap
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
-import example.koin.generated.contactsScreenEntry
+import androidx.compose.ui.test.performTextInput
 import io.github.samuolis.domposable.lifecycle.DomposableViewModelEntry
 import io.github.samuolis.domposable.material.DomposableMaterialTheme
 import io.github.samuolis.domposable.navigation3.DomposableNavHost
@@ -35,6 +36,7 @@ class InjectionTest {
         val navigator = DomposableNavigator(ContactsRoute("alex"))
         compose.setContent { ContactsApp(navigator) }
         compose.onNodeWithText("Alex").assertExists()
+        compose.onNodeWithText("Note").performTextInput("Meet at noon")
         val image = Image.makeFromBitmap(compose.onRoot().captureToImage().asSkiaBitmap())
         File(System.getProperty("domposable.integrationCaptures"), "koin-desktop.png").apply {
             parentFile.mkdirs()
@@ -44,16 +46,13 @@ class InjectionTest {
         compose.onNodeWithText("Sam").assertExists()
         compose.runOnIdle { navigator.goBack() }
         compose.onNodeWithText("Alex").assertExists()
+        compose.onNodeWithText("Note").assertTextContains("Meet at noon")
     }
 
     @Test
-    fun generatedEntryAcceptsAnExplicitModelWithoutStartingKoin() {
-        val navigator = DomposableNavigator(ContactsRoute("alex"))
-        val model = ContactsViewModel("alex", ContactsRepository())
+    fun contentCanRenderWithoutStartingKoin() {
         compose.setContent {
-            DomposableMaterialTheme {
-                DomposableNavHost(navigator, listOf(contactsScreenEntry(model)))
-            }
+            DomposableMaterialTheme { ContactsScreen(ContactsState("Alex")) {} }
         }
         compose.onNodeWithText("Alex").assertExists()
     }

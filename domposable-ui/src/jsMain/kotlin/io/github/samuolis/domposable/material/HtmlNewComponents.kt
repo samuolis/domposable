@@ -1105,6 +1105,7 @@ internal fun HtmlDatePicker(
             if (change == null) localMode = next else change(next)
         }
         val formEnabled = domposableFormEnabled()
+        val monthHeader = io.github.samuolis.domposable.ui.LocalDatePickerMonthHeader.current
         var visibleMonth by remember(props.selectedDateMillis) {
             mutableStateOf(
                 monthStart(props.selectedDateMillis ?: currentDayMillis()),
@@ -1161,6 +1162,9 @@ internal fun HtmlDatePicker(
                     }
                 })
             } else {
+                monthHeader?.invoke(visibleMonth) { month ->
+                    if (formEnabled && utcYear(month) in props.yearRange) visibleMonth = monthStart(month)
+                }
                 HtmlCalendar(
                     month = visibleMonth,
                     selected = props.selectedDateMillis,

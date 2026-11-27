@@ -77,7 +77,9 @@ jobs:
         run: |
           python scripts/ci/kobweb_export.py
           npx playwright test --config playwright.integrations.config.ts
-      - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution --console=plain
+      - run: ./gradlew :demo:jsBrowserDistribution :demo:wasmJsBrowserDistribution :koin-example:jsBrowserDistribution :koinStarterAndroid:assembleRelease --console=plain
+      - name: Verify the production starter deep link and navigation
+        run: npx playwright test --config playwright.koin-starter.config.ts
       - run: python scripts/ci/build_site.py
       - name: Verify fingerprinted production HTML and Wasm distributions
         run: npx playwright test --config playwright.production.config.ts
@@ -274,6 +276,8 @@ jobs:
           python scripts/ci/generate_xcode_project.py
           ./gradlew :demo:linkDebugFrameworkIosSimulatorArm64 --console=plain
           python scripts/ci/ios_test.py --interactions
+          ./gradlew :koin-example:linkReleaseFrameworkIosSimulatorArm64 --console=plain
+          python scripts/ci/ios_test.py --starter
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
@@ -327,6 +331,11 @@ jobs:
       - run: python scripts/ci/package_publications.py --unsigned
       - name: Resolve and compile published artifacts on all six targets
         run: ./gradlew :consumer-fixture:compileKotlinJvm :consumer-fixture:compileKotlinJs :consumer-fixture:compileKotlinWasmJs :consumer-fixture:compileAndroidMain :consumer-fixture:compileKotlinIosArm64 :consumer-fixture:compileKotlinIosSimulatorArm64 :component-wrapper-fixture:compileKotlinJvm :component-wrapper-fixture:compileKotlinJs :component-wrapper-fixture:compileKotlinWasmJs :component-wrapper-fixture:compileAndroidMain :component-wrapper-fixture:compileKotlinIosArm64 :component-wrapper-fixture:compileKotlinIosSimulatorArm64 :koin-example:compileKotlinJvm :koin-example:compileKotlinJs :koin-example:compileKotlinWasmJs :koin-example:compileAndroidMain :koin-example:compileKotlinIosArm64 :koin-example:compileKotlinIosSimulatorArm64 -Pdomposable.consumer.repository="$PWD/build/repository" --refresh-dependencies --console=plain
+      - name: Build an independent starter against packaged artifacts
+        run: |
+          python3 scripts/create-starter.py "$RUNNER_TEMP/contacts-starter"
+          cd "$RUNNER_TEMP/contacts-starter"
+          GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx5g -Dorg.gradle.workers.max=1" ./gradlew :koinStarterAndroid:assembleRelease :koin-example:jsBrowserDistribution :koin-example:linkReleaseFrameworkIosSimulatorArm64 -Pdomposable.consumer.repository="$GITHUB_WORKSPACE/build/repository" --console=plain
       - name: Check minimal published consumer bundle size
         run: |
           ./gradlew :consumer-fixture:jsBrowserDistribution -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain

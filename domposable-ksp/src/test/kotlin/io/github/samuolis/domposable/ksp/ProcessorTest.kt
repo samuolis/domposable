@@ -119,6 +119,7 @@ class ProcessorTest {
             package io.github.samuolis.domposable.foundation
             import kotlin.reflect.KClass
             annotation class DomposableScreen(val route: KClass<*>, val viewModel: Boolean = false)
+            annotation class DomposableMviDestination(val route: KClass<*>, val binding: KClass<*>)
             annotation class DomposableComponent(val name: String)
             @Target(AnnotationTarget.FUNCTION) annotation class TestGenerateDependency
             @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION) annotation class TestFunction
@@ -153,6 +154,7 @@ class ProcessorTest {
             package feature
             import androidx.compose.runtime.Composable
             import io.github.samuolis.domposable.foundation.DomposableScreen
+            import io.github.samuolis.domposable.foundation.DomposableMviDestination
             import io.github.samuolis.domposable.foundation.DomposableComponent
             import io.github.samuolis.domposable.screens.DomposableEntryScope
             data class Route(val id: String)
@@ -197,6 +199,55 @@ class ProcessorTest {
         assertEquals(1, Regex("model = model").findAll(entry).count())
         assertFalse("injected()" in entry)
         assertContains(result.files.getValue("DomposableEntries.kt"), "internal fun domposableEntries():")
+    }
+
+    @Test
+    fun mviEntryResolvesBindingWithinTheEntryOwner() {
+        val result =
+            process(
+                """
+                object DetailBinding { @Composable fun model(route: Route): Model = Model() }
+                @Composable @DomposableMviDestination(Route::class, DetailBinding::class)
+                fun Detail(state: String, onAction: (String) -> Unit) {}
+                """.trimIndent(),
+                lifecycle = true,
+            )
+        assertTrue(result.success, result.errors.toString())
+        val entry = result.files.getValue("detailEntry.kt")
+        assertContains(entry, "DomposableViewModelEntry(this)")
+        assertContains(entry, "DomposableMviScreen(DetailBinding.model(route))")
+        assertContains(entry, "Detail(state, action)")
+        assertContains(result.files.getValue("DomposableEntries.kt"), "detailEntry(")
+    }
+
+    @Test
+    fun mviEntryRejectsNonObjectBindings() {
+        val result =
+            process(
+                """
+                class DetailBinding
+                @Composable @DomposableMviDestination(Route::class, DetailBinding::class)
+                fun Detail(state: String, onAction: (String) -> Unit) {}
+                """.trimIndent(),
+                lifecycle = true,
+            )
+        assertFalse(result.success)
+        assertTrue(result.errors.any { "binding must be an object" in it })
+    }
+
+    @Test
+    fun mviEntryReportsMissingRouteBinding() {
+        val result =
+            process(
+                """
+                object DetailBinding
+                @Composable @DomposableMviDestination(Route::class, DetailBinding::class)
+                fun Detail(state: String, onAction: (String) -> Unit) {}
+                """.trimIndent(),
+                lifecycle = true,
+            )
+        assertFalse(result.success)
+        assertTrue(result.errors.any { "must provide @Composable fun model(route: Route)" in it })
     }
 
     @Test

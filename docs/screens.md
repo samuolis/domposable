@@ -55,34 +55,35 @@ The default annotation does **not** install AndroidX ViewModel ownership. `viewM
 
 For injected screens, provide your DI environment at the application root. [The modular sample](modular-demo.md) demonstrates MetroX's standard factory and composition local. With Koin, provide the Koin application and use `model: YourViewModel = koinViewModel()` instead. Manual constructors, callbacks and explicit models remain supported.
 
-### One entry API for Koin and Metro
+### Generate an MVI entry with Koin or Metro
 
-The generated entry does not know which container creates your model. Both integrations use an
-ordinary default parameter, evaluated inside the current entry's owner:
+Use `DomposableMviDestination` when the screen receives state and an action callback. A binding object
+resolves the route-specific model from the application's DI container inside the entry owner. The model
+implements `DomposableMvi<State, Action>` and exposes a `StateFlow` and `dispatch`.
 
 ```kotlin
-// Koin
-@Composable
-@DomposableScreen(ProductRoute::class, viewModel = true)
-fun ProductScreen(
-    route: ProductRoute,
-    model: ProductViewModel = koinViewModel(parameters = { parametersOf(route.id) }),
-) {
-    ProductContent(model)
+object ProductBinding {
+    @Composable
+    fun model(route: ProductRoute): ProductViewModel =
+        koinViewModel(parameters = { parametersOf(route.id) })
 }
 
-// MetroX: use the same declaration with your Metro injection default.
-model: ProductViewModel = assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> {
-    create(route.id)
+@Composable
+@DomposableMviDestination(ProductRoute::class, ProductBinding::class)
+fun ProductScreen(state: ProductState, onAction: (ProductAction) -> Unit) {
+    ProductContent(state, onAction)
 }
 ```
 
-With either container, call `productScreenEntry()` or combine `domposableEntries()` at the app root.
-Tests and previews can pass `productScreenEntry(model)` explicitly without starting a container.
-The [Koin example](https://github.com/samuolis/domposable/tree/main/koin-example) compiles from
-published artifacts on all six targets and tests parameter injection, retained entry models,
-Back navigation, disposal and explicit-model overrides. Koin dependencies stay in that optional
-application integration; the UI and screen core do not depend on Koin or Metro.
+For MetroX, the binding's model function can call
+`assistedMetroViewModel<ProductViewModel, ProductViewModel.Factory> { create(route.id) }`.
+KSP generates `productScreenEntry()` and includes it in `domposableEntries()`. The entry installs the
+ViewModel owner, calls the binding, collects state with lifecycle awareness and forwards actions. A
+preview can call `ProductScreen(sampleState) {}` without starting DI. Provide the Koin application or
+MetroX factory once at the app root. The binding must be an object with a composable `model` function
+accepting the declared route. Model, state and action type mismatches are reported by Kotlin when the
+generated entry compiles. The [Koin example](https://github.com/samuolis/domposable/tree/main/koin-example)
+and [Metro storefront](modular-demo.md) show both bindings.
 
 ### Existing annotations and application hosts
 

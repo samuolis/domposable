@@ -13,6 +13,15 @@ open annotation class io.github.samuolis.domposable.foundation/DomposableCompone
         final fun <get-name>(): kotlin/String // io.github.samuolis.domposable.foundation/DomposableComponent.name.<get-name>|<get-name>(){}[0]
 }
 
+open annotation class io.github.samuolis.domposable.foundation/DomposableMviDestination : kotlin/Annotation { // io.github.samuolis.domposable.foundation/DomposableMviDestination|null[0]
+    constructor <init>(kotlin.reflect/KClass<*>, kotlin.reflect/KClass<*>) // io.github.samuolis.domposable.foundation/DomposableMviDestination.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.reflect.KClass<*>){}[0]
+
+    final val binding // io.github.samuolis.domposable.foundation/DomposableMviDestination.binding|{}binding[0]
+        final fun <get-binding>(): kotlin.reflect/KClass<*> // io.github.samuolis.domposable.foundation/DomposableMviDestination.binding.<get-binding>|<get-binding>(){}[0]
+    final val route // io.github.samuolis.domposable.foundation/DomposableMviDestination.route|{}route[0]
+        final fun <get-route>(): kotlin.reflect/KClass<*> // io.github.samuolis.domposable.foundation/DomposableMviDestination.route.<get-route>|<get-route>(){}[0]
+}
+
 open annotation class io.github.samuolis.domposable.foundation/DomposableScreen : kotlin/Annotation { // io.github.samuolis.domposable.foundation/DomposableScreen|null[0]
     constructor <init>(kotlin.reflect/KClass<*>, kotlin/Boolean = ...) // io.github.samuolis.domposable.foundation/DomposableScreen.<init>|<init>(kotlin.reflect.KClass<*>;kotlin.Boolean){}[0]
 

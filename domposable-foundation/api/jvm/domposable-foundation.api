@@ -767,6 +767,11 @@ public final class io/github/samuolis/domposable/foundation/DomposableLiveRegion
 	public static fun values ()[Lio/github/samuolis/domposable/foundation/DomposableLiveRegion;
 }
 
+public abstract interface annotation class io/github/samuolis/domposable/foundation/DomposableMviDestination : java/lang/annotation/Annotation {
+	public abstract fun binding ()Ljava/lang/Class;
+	public abstract fun route ()Ljava/lang/Class;
+}
+
 public final class io/github/samuolis/domposable/foundation/DomposableOffset {
 	public static final field $stable I
 	public fun <init> ()V
