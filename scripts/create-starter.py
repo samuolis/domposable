@@ -50,7 +50,7 @@ allprojects { version = providers.gradleProperty("domposable.starter.version").g
 ''')
 (destination / 'gradle.properties').write_text(
     f'domposable.starter.version={version}\nkotlin.mpp.applyDefaultHierarchyTemplate=false\n'
-    'org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m\nandroid.useAndroidX=true\n'
+    'org.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m\nandroid.useAndroidX=true\n'
 )
 (destination / 'README.md').write_text('''# Contacts starter
 

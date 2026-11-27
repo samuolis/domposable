@@ -335,7 +335,7 @@ jobs:
         run: |
           python3 scripts/create-starter.py "$RUNNER_TEMP/contacts-starter"
           cd "$RUNNER_TEMP/contacts-starter"
-          ./gradlew :koinStarterAndroid:assembleRelease :koin-example:jsBrowserDistribution :koin-example:linkReleaseFrameworkIosSimulatorArm64 -Pdomposable.consumer.repository="$GITHUB_WORKSPACE/build/repository" --console=plain
+          GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx5g -Dorg.gradle.workers.max=1" ./gradlew :koinStarterAndroid:assembleRelease :koin-example:jsBrowserDistribution :koin-example:linkReleaseFrameworkIosSimulatorArm64 -Pdomposable.consumer.repository="$GITHUB_WORKSPACE/build/repository" --console=plain
       - name: Check minimal published consumer bundle size
         run: |
           ./gradlew :consumer-fixture:jsBrowserDistribution -Pdomposable.consumer.repository="$PWD/build/repository" --console=plain
