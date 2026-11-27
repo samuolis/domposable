@@ -53,7 +53,7 @@ jobs:
           missing = [key for key in required if not os.environ.get(key)]
           if missing: raise SystemExit('Missing release configuration: ' + ', '.join(missing))
           PY
-      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: app
         with:
           app-id: ${{ vars.RELEASE_APP_ID }}
@@ -133,7 +133,7 @@ jobs:
           args=()
           if [ "$RETRY_FAILED" = true ]; then args+=(--retry-failed); fi
           python "$RUNNER_TEMP/domposable-release/publish_central.py" validate --deployment-id "$RECOVERY_ID" "${args[@]}"
-      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: refreshed-app
         with:
           app-id: ${{ vars.RELEASE_APP_ID }}
