@@ -63,8 +63,12 @@ class HtmlPagedCarouselTest {
                 selected = 1
                 settle()
                 val slide = track.children.item(1) as HTMLElement
-                val inset = window.getComputedStyle(track).getPropertyValue("scroll-padding-right")
-                    .removeSuffix("px").toDouble()
+                val inset =
+                    window
+                        .getComputedStyle(track)
+                        .getPropertyValue("scroll-padding-right")
+                        .removeSuffix("px")
+                        .toDouble()
                 val alignment = slide.getBoundingClientRect().right - track.getBoundingClientRect().right + inset
                 assertTrue(kotlin.math.abs(alignment) < 2.0, "RTL selection aligns at the inline start")
                 assertEquals(1000.0, window.scrollY, "RTL alignment must not scroll its page")

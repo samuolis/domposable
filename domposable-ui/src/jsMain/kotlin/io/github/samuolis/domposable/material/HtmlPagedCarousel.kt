@@ -348,8 +348,11 @@ private fun scrollPagedCarouselItem(
     val target = item.getBoundingClientRect()
     val style = window.getComputedStyle(track)
     val rtl = style.direction == "rtl"
-    val padding = style.getPropertyValue(if (rtl) "scroll-padding-right" else "scroll-padding-left")
-        .removeSuffix("px").toDoubleOrNull() ?: 0.0
+    val padding =
+        style
+            .getPropertyValue(if (rtl) "scroll-padding-right" else "scroll-padding-left")
+            .removeSuffix("px")
+            .toDoubleOrNull() ?: 0.0
     val delta = if (rtl) target.right - bounds.right + padding else target.left - bounds.left - padding
     if (delta != 0.0) track.scrollLeft += delta
 }
