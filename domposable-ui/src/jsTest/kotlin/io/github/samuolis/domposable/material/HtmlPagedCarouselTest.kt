@@ -27,6 +27,56 @@ import kotlin.test.assertTrue
 
 class HtmlPagedCarouselTest {
     @Test
+    fun aligningAnOffscreenCarouselDoesNotScrollTheDocument() =
+        CoroutineScope(Dispatchers.Unconfined).promise {
+            val root = document.createElement("div") as HTMLElement
+            val spacer = document.createElement("div") as HTMLElement
+            root.style.position = "absolute"
+            root.style.top = "0px"
+            spacer.style.height = "3000px"
+            document.body!!.appendChild(root)
+            document.body!!.appendChild(spacer)
+            window.scrollTo(0.0, 1000.0)
+            var selected by mutableStateOf(1)
+            val composition =
+                renderComposable(root) {
+                    DomposableMaterialTheme {
+                        DomposableCarousel(
+                            items = items(),
+                            label = "Featured cards",
+                            modifier = DomposableModifier.width(360.dp),
+                            currentItem = selected,
+                            pagedLayout = layout(compactHeight = 120, wideHeight = 180),
+                        )
+                    }
+                }
+            try {
+                settle()
+                assertEquals(1000.0, window.scrollY, "Mounting a carousel must not scroll its page")
+                val track = root.querySelector(".d-paged-carousel-track") as HTMLElement
+                track.style.setProperty("scroll-behavior", "auto")
+                selected = 2
+                settle()
+                assertEquals(1000.0, window.scrollY, "Changing a slide must not scroll its page")
+                assertTrue(track.scrollLeft > 0, "The carousel still aligns the selected slide horizontally")
+                track.style.direction = "rtl"
+                selected = 1
+                settle()
+                val slide = track.children.item(1) as HTMLElement
+                val inset = window.getComputedStyle(track).getPropertyValue("scroll-padding-right")
+                    .removeSuffix("px").toDouble()
+                val alignment = slide.getBoundingClientRect().right - track.getBoundingClientRect().right + inset
+                assertTrue(kotlin.math.abs(alignment) < 2.0, "RTL selection aligns at the inline start")
+                assertEquals(1000.0, window.scrollY, "RTL alignment must not scroll its page")
+            } finally {
+                composition.dispose()
+                root.parentNode?.removeChild(root)
+                spacer.parentNode?.removeChild(spacer)
+                window.scrollTo(0.0, 0.0)
+            }
+        }
+
+    @Test
     fun keyboardRtlControlledSelectionAndStableKeysStaySynchronized() =
         CoroutineScope(Dispatchers.Unconfined).promise {
             val root = document.createElement("div")

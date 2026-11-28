@@ -342,9 +342,16 @@ private fun scrollPagedCarouselItem(
     id: String,
     index: Int,
 ) {
-    val track = document.getElementById("$id-track") ?: return
+    val track = document.getElementById("$id-track") as? HTMLElement ?: return
     val item = track.children.item(index) as? HTMLElement ?: return
-    item.asDynamic().scrollIntoView(js("({block:'nearest',inline:'start'})"))
+    val bounds = track.getBoundingClientRect()
+    val target = item.getBoundingClientRect()
+    val style = window.getComputedStyle(track)
+    val rtl = style.direction == "rtl"
+    val padding = style.getPropertyValue(if (rtl) "scroll-padding-right" else "scroll-padding-left")
+        .removeSuffix("px").toDoubleOrNull() ?: 0.0
+    val delta = if (rtl) target.right - bounds.right + padding else target.left - bounds.left - padding
+    if (delta != 0.0) track.scrollLeft += delta
 }
 
 @Composable
